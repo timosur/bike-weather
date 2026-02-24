@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    container_name: bikeweather-db-dev
     environment:
       POSTGRES_USER: bike
       POSTGRES_PASSWORD: bike
@@ -8,35 +9,84 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_dev:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bike -d bikeweather"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
+  authentik-db:
+    image: postgres:16-alpine
+    container_name: bikeweather-authentik-db
     environment:
-      DATABASE_URL: postgresql+asyncpg://bike:bike@db:5432/bikeweather
-      CORS_ORIGINS: '["http://localhost:5173"]'
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD: authentik
+      POSTGRES_DB: authentik
     volumes:
-      - ./backend:/app
+      - authentik_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U authentik -d authentik"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  authentik-redis:
+    image: redis:7-alpine
+    container_name: bikeweather-authentik-redis
+    volumes:
+      - authentik_redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2025.12.3
+    container_name: bikeweather-authentik-server
+    command: server
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-change-me-to-a-long-random-string}
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-db
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+    ports:
+      - "9000:9000"
+    volumes:
+      - authentik_media:/media
+      - authentik_templates:/templates
     depends_on:
-      db:
+      authentik-db:
+        condition: service_healthy
+      authentik-redis:
         condition: service_healthy
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:5173"
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2025.12.3
+    container_name: bikeweather-authentik-worker
+    command: worker
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-change-me-to-a-long-random-string}
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-db
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - authentik_media:/media
+      - authentik_templates:/templates
     depends_on:
-      - backend
+      authentik-db:
+        condition: service_healthy
+      authentik-redis:
+        condition: service_healthy
 
 volumes:
-  pgdata:
+  pgdata_dev:
+  authentik_pgdata:
+  authentik_redis:
+  authentik_media:
+  authentik_templates:

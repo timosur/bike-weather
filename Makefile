@@ -2,7 +2,7 @@
 -include .env
 export
 
-COMPOSE_DEV := docker compose -f docker-compose.dev.yml
+COMPOSE_DEV := docker compose -f docker-compose.yml
 
 .PHONY: help setup dev dev-stop db-up db-stop db-migrate db-reset db-shell test-backend build-frontend clean
 
@@ -19,11 +19,14 @@ dev: db-up db-migrate ## Start PostgreSQL, run migrations, seed, launch backend 
 
 dev-stop: db-stop ## Stop the PostgreSQL dev container
 
-db-up: ## Start PostgreSQL container
+db-up: ## Start PostgreSQL + Authentik containers
 	$(COMPOSE_DEV) up -d --wait
 
-db-stop: ## Stop PostgreSQL container
+db-stop: ## Stop all dev containers
 	$(COMPOSE_DEV) down
+
+auth-setup: db-up ## Provision Authentik OAuth2 app (idempotent)
+	python3 scripts/setup_authentik.py
 
 db-migrate: ## Run alembic migrations
 	cd backend && uv run alembic upgrade head

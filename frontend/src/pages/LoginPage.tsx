@@ -1,63 +1,53 @@
-import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { AuthPage } from '../components/auth'
 import type { LoginFormData, RegisterFormData } from '../components/auth/types'
 
-const USER_STORAGE_KEY = 'bike-weather:user'
-
-export interface LoginPageProps {
-  onAuthSuccess: (user: { name: string }) => void
-}
-
-export default function LoginPage({ onAuthSuccess }: LoginPageProps) {
+export default function LoginPage() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const [isLoading, setIsLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string>()
+  const { isAuthenticated, isLoading: authLoading, login, register } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string>()
 
-  // Where to redirect after login — default to /planner
-  const from = (location.state as { from?: string })?.from ?? '/planner'
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/planner', { replace: true })
+    }
+  }, [isAuthenticated, authLoading, navigate])
 
-  function simulateAuth(name: string) {
-    setIsLoading(true)
-    setErrorMessage(undefined)
-    // Simulate a short network delay
-    setTimeout(() => {
-      const user = { name }
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user))
-      onAuthSuccess(user)
-      setIsLoading(false)
-      navigate(from, { replace: true })
-    }, 600)
+  const handleLogin = async (data: LoginFormData) => {
+    setError(undefined)
+    setIsSubmitting(true)
+    try {
+      await login(data.email, data.password)
+      navigate('/planner', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleLogin = (data: LoginFormData) => {
-    // Extract display name from email
-    const name = data.email.split('@')[0]
-    simulateAuth(name)
-  }
-
-  const handleRegister = (data: RegisterFormData) => {
-    const name = data.email.split('@')[0]
-    simulateAuth(name)
-  }
-
-  const handleGoogleLogin = () => {
-    simulateAuth('Google User')
-  }
-
-  const handleForgotPassword = () => {
-    setErrorMessage('Password reset is not yet available.')
+  const handleRegister = async (data: RegisterFormData) => {
+    setError(undefined)
+    setIsSubmitting(true)
+    try {
+      await register(data.email, data.password)
+      navigate('/planner', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <AuthPage
-      isLoading={isLoading}
-      errorMessage={errorMessage}
+      isLoading={isSubmitting}
+      errorMessage={error}
       onLogin={handleLogin}
       onRegister={handleRegister}
-      onGoogleLogin={handleGoogleLogin}
-      onForgotPassword={handleForgotPassword}
     />
   )
 }

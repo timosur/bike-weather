@@ -1,6 +1,6 @@
 import json
 
-from pydantic import field_validator
+from pydantic import computed_field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -8,9 +8,20 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://bike:bike@localhost:5432/bikeweather"
     AUTHENTIK_ISSUER_URL: str = ""
     AUTHENTIK_AUDIENCE: str = ""
+    AUTHENTIK_BASE_URL: str = "http://localhost:9000"
+    AUTHENTIK_API_TOKEN: str = ""
+    AUTHENTIK_CLIENT_ID: str = "bike-weather"
+    AUTHENTIK_AUTH_FLOW_SLUG: str = "default-authentication-flow"
+    FRONTEND_URL: str = "http://localhost:5173"
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def AUTHENTIK_OIDC_CONFIG_URL(self) -> str:
+        issuer = self.AUTHENTIK_ISSUER_URL.rstrip("/")
+        return f"{issuer}/.well-known/openid-configuration" if issuer else ""
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
