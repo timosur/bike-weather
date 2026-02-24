@@ -6,6 +6,7 @@ import type { RideInput } from '../components/ride-planner/types'
 import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import { fetchReport } from '../api/rides'
 import { createRoute } from '../api/routes'
+import { useToast } from '../hooks/useToast'
 
 export default function ReportPage() {
   const location = useLocation()
@@ -14,10 +15,12 @@ export default function ReportPage() {
   const rideInput = state?.rideInput
   const routeId = state?.routeId
 
+  const { addToast } = useToast()
   const [report, setReport] = useState<RideReportType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     if (!rideInput) {
@@ -100,14 +103,14 @@ export default function ReportPage() {
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({ title: report.rideName, url: window.location.href }).catch(() => {})
+      navigator.share({ title: report.rideName, url: window.location.href }).catch(() => { })
     } else {
-      navigator.clipboard.writeText(window.location.href).catch(() => {})
+      navigator.clipboard.writeText(window.location.href).catch(() => { })
     }
   }
 
   const handleSaveRoute = () => {
-    if (!report || saving) return
+    if (!report || saving || saved) return
     setSaving(true)
     createRoute({
       name: report.rideName,
@@ -117,10 +120,11 @@ export default function ReportPage() {
       riding_style: report.ridingStyle,
     })
       .then(() => {
-        // Optionally navigate to routes page after saving
+        setSaved(true)
+        addToast('Route gespeichert', 'success')
       })
       .catch(() => {
-        // Silently fail — user can try again
+        addToast('Route konnte nicht gespeichert werden', 'error')
       })
       .finally(() => setSaving(false))
   }
@@ -141,6 +145,8 @@ export default function ReportPage() {
       report={report}
       onShare={handleShare}
       onSaveRoute={handleSaveRoute}
+      routeSaving={saving}
+      routeSaved={saved}
       onSwapClothingItem={handleSwapClothingItem}
       products={sampleProducts}
       shops={shops}

@@ -9,6 +9,7 @@ import { MyRoutesSkeleton } from './components/my-routes'
 import { AuthPageSkeleton } from './components/auth'
 import { ContentPageSkeleton } from './components/skeleton'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ToastProvider } from './hooks/useToast'
 import { setAccessTokenProvider } from './api/client'
 
 const PlannerPage = lazy(() => import('./pages/PlannerPage'))
@@ -162,7 +163,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   )
 }

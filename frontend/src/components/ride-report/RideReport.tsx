@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Share2, Bookmark, MapPin, Gauge, Route } from 'lucide-react'
+import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route } from 'lucide-react'
 import type { RideReportProps } from './types'
 import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
@@ -9,7 +9,7 @@ import { ClothingItemCard } from './ClothingItemCard'
 import { EquipmentList } from './EquipmentList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
-export function RideReport({ report, onShare, onSaveRoute, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
+export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
   const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
 
   const activeDay = report.days.find((d) => d.id === activeDayId) ?? report.days[0]
@@ -73,10 +73,22 @@ export function RideReport({ report, onShare, onSaveRoute, onDaySelect, onSwapCl
           </button>
           <button
             onClick={() => onSaveRoute?.()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 transition-colors"
+            disabled={routeSaving || routeSaved}
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
+                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
+                : routeSaving
+                  ? 'text-white bg-emerald-600/70 cursor-wait'
+                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+              }`}
           >
-            <Bookmark className="w-4 h-4" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Speichern</span>
+            {routeSaved ? (
+              <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
+            ) : (
+              <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+            )}
+            <span className="hidden sm:inline">
+              {routeSaved ? 'Gespeichert' : routeSaving ? 'Speichern…' : 'Speichern'}
+            </span>
           </button>
         </div>
       </div>

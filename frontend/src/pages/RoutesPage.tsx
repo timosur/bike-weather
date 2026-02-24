@@ -21,14 +21,24 @@ export default function RoutesPage() {
       const route = routes.find((r) => r.id === routeId)
       if (!route) return
 
+      const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+      const now = new Date()
+      const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
       // Navigate to report with route params as ride input
       navigate('/report', {
         state: {
           routeId: route.id,
           rideInput: {
-            location: route.startLocation,
+            location: { address: route.startLocation },
+            startDate: today,
+            startTime,
+            endDate: null,
+            isMultiDay: false,
+            bikeType: 'rennrad',
+            intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
             distanceKm: route.totalDistance,
-            ridingStyle: route.ridingStyle,
+            dayStops: [],
           },
         },
       })
@@ -48,7 +58,7 @@ export default function RoutesPage() {
 
       apiUpdateRoute(routeId, apiUpdates)
         .then(() => fetchRoutes().then(setRoutes))
-        .catch(() => {/* ignore */})
+        .catch(() => {/* ignore */ })
     },
     [],
   )
@@ -57,7 +67,7 @@ export default function RoutesPage() {
     (routeId: string) => {
       apiDeleteRoute(routeId)
         .then(() => setRoutes((prev) => prev.filter((r) => r.id !== routeId)))
-        .catch(() => {/* ignore */})
+        .catch(() => {/* ignore */ })
     },
     [],
   )

@@ -2,7 +2,14 @@
 export type ConditionRating = "ideal" | "good" | "caution" | "not-recommended";
 
 /** Weather icon identifier */
-export type WeatherIconType = "sun" | "cloud-sun" | "cloud" | "rain" | "snow" | "thunderstorm" | "fog";
+export type WeatherIconType =
+  | "sun"
+  | "cloud-sun"
+  | "cloud"
+  | "rain"
+  | "snow"
+  | "thunderstorm"
+  | "fog";
 
 /** Icon identifier for clothing items */
 export type ClothingIcon =
@@ -93,14 +100,18 @@ export interface RideReportProps {
   report: RideReport;
   onShare?: () => void;
   onSaveRoute?: () => void;
+  /** Whether the route is currently being saved */
+  routeSaving?: boolean;
+  /** Whether the route has been saved successfully */
+  routeSaved?: boolean;
   onDaySelect?: (dayId: string) => void;
   onSwapClothingItem?: (dayId: string, itemId: string, alternativeId: string) => void;
   /** Available affiliate products to show inline */
-  products?: import('../product-recommendations/types').Product[];
+  products?: import("../product-recommendations/types").Product[];
   /** Shop list for looking up shop names/logos */
-  shops?: import('../product-recommendations/types').Shop[];
+  shops?: import("../product-recommendations/types").Shop[];
   /** Affiliate disclosure label and disclaimer text */
-  disclosure?: import('../product-recommendations/types').AffiliateDisclosure;
+  disclosure?: import("../product-recommendations/types").AffiliateDisclosure;
   /** Called when the user clicks an affiliate product link */
   onProductClick?: (productId: string) => void;
 }
