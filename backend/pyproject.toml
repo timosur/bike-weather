@@ -21,6 +21,7 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "aiosqlite>=0.20.0",
     "coverage>=7.6.0",
+    "honcho>=2.0.0",
 ]
 
 [build-system]

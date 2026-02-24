@@ -6,6 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bike Weather is a React/TypeScript web app that gives cyclists personalized clothing and gear recommendations based on weather data. Currently frontend-only with mock data; a Python FastAPI backend is planned but not yet implemented.
 
+## Local Development
+
+### Prerequisites
+
+- Docker (for PostgreSQL)
+- Node.js 20+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+
+### Daily Workflow
+
+```bash
+make setup   # first time: creates .env, installs Python + Node deps
+make dev     # starts PostgreSQL, runs migrations, launches backend + frontend
+```
+
+Backend runs at `http://localhost:8000`, frontend at `http://localhost:5173`. Both hot-reload on file changes. Press Ctrl+C to stop the app processes; PostgreSQL keeps running. Use `make dev-stop` to stop PostgreSQL.
+
+Run `make help` to see all available targets.
+
 ## Commands
 
 All frontend commands run from `frontend/`:

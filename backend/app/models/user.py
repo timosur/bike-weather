@@ -11,4 +11,4 @@ class User(SQLModel, table=True):
     email: str = Field(unique=True, index=True)
     name: str
     is_admin: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

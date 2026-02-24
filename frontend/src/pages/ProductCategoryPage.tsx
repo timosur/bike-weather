@@ -1,15 +1,36 @@
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ProductCategoryDetail } from '../components/product-recommendations'
-import { categories, products, shops, disclosure } from '../data/sample-products'
+import { ProductCategoryDetail, ProductCategoryDetailSkeleton } from '../components/product-recommendations'
+import { fetchCategoryDetail } from '../api/products'
+import type { ProductCategory, Product, Shop, AffiliateDisclosure } from '../components/product-recommendations/types'
 
 export default function ProductCategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>()
   const navigate = useNavigate()
+  const [category, setCategory] = useState<ProductCategory | null>(null)
+  const [products, setProducts] = useState<Product[]>([])
+  const [shops, setShops] = useState<Shop[]>([])
+  const [disclosure, setDisclosure] = useState<AffiliateDisclosure | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
-  const category = categories.find((c) => c.id === categoryId)
-  const categoryProducts = products.filter((p) => p.categoryId === categoryId)
+  useEffect(() => {
+    if (!categoryId) return
+    setLoading(true)
+    fetchCategoryDetail(categoryId)
+      .then((data) => {
+        setCategory(data.category)
+        setProducts(data.products)
+        setShops(data.shops)
+        setDisclosure(data.disclosure ?? undefined)
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false))
+  }, [categoryId])
 
-  if (!category) {
+  if (loading) return <ProductCategoryDetailSkeleton />
+
+  if (notFound || !category) {
     return (
       <div className="text-center py-20">
         <h1
@@ -38,9 +59,9 @@ export default function ProductCategoryPage() {
   return (
     <ProductCategoryDetail
       category={category}
-      products={categoryProducts}
+      products={products}
       shops={shops}
-      disclosure={disclosure}
+      disclosure={disclosure!}
       onProductClick={handleProductClick}
       onBack={() => navigate('/products')}
     />

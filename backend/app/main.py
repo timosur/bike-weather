@@ -1,22 +1,26 @@
+import logging
 from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import api_router
 from app.config import settings
 from app.database import async_session, engine
 from app.seed import run_seed
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    # Seed on startup — wrapped in try/except so tests with SQLite don't crash
     try:
         async with async_session() as session:
             await run_seed(session)
+            logger.info("Seed data loaded successfully.")
     except Exception:
-        pass
+        logger.exception("Failed to run seed on startup — database may not be ready.")
     yield
     await engine.dispose()
 
@@ -30,6 +34,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(api_router)
 
 
 @app.get("/health")

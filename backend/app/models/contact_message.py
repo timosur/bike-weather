@@ -11,4 +11,4 @@ class ContactMessage(SQLModel, table=True):
     name: str
     email: str
     message: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

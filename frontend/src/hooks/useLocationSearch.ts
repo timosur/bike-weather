@@ -1,33 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import type { LocationSuggestion, RideLocation } from '../components/ride-planner/types'
-
-const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org'
-
-interface NominatimResult {
-  place_id: number
-  display_name: string
-  lat: string
-  lon: string
-  address?: {
-    city?: string
-    town?: string
-    village?: string
-    state?: string
-    country?: string
-  }
-}
-
-function toSuggestion(r: NominatimResult): LocationSuggestion {
-  const parts = r.display_name.split(',')
-  const shortText = parts.slice(0, 2).map(s => s.trim()).join(', ')
-  return {
-    id: String(r.place_id),
-    displayText: r.display_name,
-    shortText,
-    lat: parseFloat(r.lat),
-    lon: parseFloat(r.lon),
-  }
-}
+import { searchLocations, reverseGeocode } from '../api/geocoding'
 
 export function useLocationSearch() {
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([])
@@ -45,17 +18,8 @@ export function useLocationSearch() {
     }
     debounceRef.current = setTimeout(async () => {
       try {
-        const params = new URLSearchParams({
-          q: query,
-          format: 'json',
-          addressdetails: '1',
-          limit: '5',
-        })
-        const res = await fetch(`${NOMINATIM_BASE}/search?${params}`, {
-          headers: { 'Accept-Language': 'en' },
-        })
-        const data: NominatimResult[] = await res.json()
-        setSuggestions(data.map(toSuggestion))
+        const data = await searchLocations(query)
+        setSuggestions(data)
       } catch {
         setSuggestions([])
       }
@@ -70,17 +34,8 @@ export function useLocationSearch() {
     }
     dayStopDebounceRef.current = setTimeout(async () => {
       try {
-        const params = new URLSearchParams({
-          q: query,
-          format: 'json',
-          addressdetails: '1',
-          limit: '5',
-        })
-        const res = await fetch(`${NOMINATIM_BASE}/search?${params}`, {
-          headers: { 'Accept-Language': 'en' },
-        })
-        const data: NominatimResult[] = await res.json()
-        setDayStopSuggestions(data.map(toSuggestion))
+        const data = await searchLocations(query)
+        setDayStopSuggestions(data)
       } catch {
         setDayStopSuggestions([])
       }
@@ -94,19 +49,14 @@ export function useLocationSearch() {
       async (pos) => {
         const { latitude, longitude } = pos.coords
         try {
-          const params = new URLSearchParams({
-            lat: String(latitude),
-            lon: String(longitude),
-            format: 'json',
-            addressdetails: '1',
-          })
-          const res = await fetch(`${NOMINATIM_BASE}/reverse?${params}`, {
-            headers: { 'Accept-Language': 'en' },
-          })
-          const data: NominatimResult = await res.json()
-          const parts = data.display_name.split(',')
-          const address = parts.slice(0, 2).map(s => s.trim()).join(', ')
-          setDetectedLocation({ address, lat: latitude, lon: longitude })
+          const result = await reverseGeocode(latitude, longitude)
+          if (result) {
+            const parts = result.displayText.split(',')
+            const address = parts.slice(0, 2).map(s => s.trim()).join(', ')
+            setDetectedLocation({ address, lat: latitude, lon: longitude })
+          } else {
+            setDetectedLocation({ address: 'Current location', lat: latitude, lon: longitude })
+          }
         } catch {
           setDetectedLocation({ address: 'Current location', lat: latitude, lon: longitude })
         } finally {

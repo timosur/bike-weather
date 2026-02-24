@@ -1,0 +1,59 @@
+from app.rules.condition import compute_condition
+from app.services.weather import WeatherForecast
+
+
+def _make_weather(**overrides) -> WeatherForecast:
+    defaults = dict(
+        temp_min=12, temp_max=20, temp_feels_like=16,
+        precipitation_probability=10, wind_speed=10,
+        wind_direction="SW", humidity=55, uv_index=3,
+        sunrise="06:30", sunset="18:30", weather_code=0,
+        icon="sun", description="Clear sky",
+    )
+    defaults.update(overrides)
+    return WeatherForecast(**defaults)
+
+
+def test_ideal_conditions() -> None:
+    weather = _make_weather(temp_feels_like=16, precipitation_probability=10, wind_speed=10)
+    assert compute_condition(weather) == "ideal"
+
+
+def test_good_conditions() -> None:
+    weather = _make_weather(temp_min=8, temp_feels_like=10, precipitation_probability=15, wind_speed=20)
+    assert compute_condition(weather) == "good"
+
+
+def test_caution_high_precip() -> None:
+    weather = _make_weather(precipitation_probability=60)
+    assert compute_condition(weather) == "caution"
+
+
+def test_caution_cold() -> None:
+    weather = _make_weather(temp_min=3)
+    assert compute_condition(weather) == "caution"
+
+
+def test_caution_strong_wind() -> None:
+    weather = _make_weather(wind_speed=35)
+    assert compute_condition(weather) == "caution"
+
+
+def test_not_recommended_thunderstorm() -> None:
+    weather = _make_weather(weather_code=95)
+    assert compute_condition(weather) == "not-recommended"
+
+
+def test_not_recommended_extreme_cold() -> None:
+    weather = _make_weather(temp_min=-8)
+    assert compute_condition(weather) == "not-recommended"
+
+
+def test_not_recommended_snow() -> None:
+    weather = _make_weather(weather_code=75)
+    assert compute_condition(weather) == "not-recommended"
+
+
+def test_not_recommended_extreme_wind() -> None:
+    weather = _make_weather(wind_speed=55)
+    assert compute_condition(weather) == "not-recommended"

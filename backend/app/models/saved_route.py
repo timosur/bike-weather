@@ -15,4 +15,4 @@ class SavedRoute(SQLModel, table=True):
     riding_style: str
     last_condition: str = Field(default="")
     last_used: datetime | None = Field(default=None)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
