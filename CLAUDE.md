@@ -20,6 +20,16 @@ npm run preview   # preview production build locally
 
 No test framework is configured yet. No linter is configured.
 
+## Commit Conventions
+
+All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+<type>(<optional scope>): <description>
+```
+
+Common types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`, `ci`, `build`.
+
 ## Architecture
 
 ### Frontend (`frontend/`)
@@ -37,12 +47,14 @@ No test framework is configured yet. No linter is configured.
 - `data/` — Hardcoded sample data (`sample-products.ts`, `sample-routes.ts`, `sample-faq.ts`)
 
 **Component patterns:**
+
 - Pages manage state and pass data/callbacks to feature components
 - Feature components are presentational with callback props
 - Each feature domain has its own `types.ts` for data shapes
 - Auth is mock-only via localStorage (`bike-weather:user` key), with a `RequireAuth` wrapper for protected routes
 
 **Styling:**
+
 - Tailwind with class-based dark mode
 - Design tokens: emerald (primary), amber (secondary), stone (neutral)
 - Fonts: Outfit (headings), Inter (body), IBM Plex Mono (mono)
@@ -50,6 +62,7 @@ No test framework is configured yet. No linter is configured.
 ### Planned Backend (`product-plan/backend/`)
 
 Detailed 10-milestone implementation plan in `product-plan/backend/`. Key decisions:
+
 - Python FastAPI + SQLModel + asyncpg + Alembic
 - Authentik (self-hosted OIDC) for auth with Google OAuth
 - Docker Compose for PostgreSQL + Backend + Frontend
