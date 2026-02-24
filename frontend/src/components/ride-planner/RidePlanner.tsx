@@ -11,6 +11,7 @@ import {
   Building2,
   ArrowUpRight,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type {
   RidePlannerProps,
   RideInput,
@@ -52,6 +53,7 @@ export function RidePlanner({
   onSubmit,
 }: RidePlannerProps) {
   const today = new Date().toISOString().split('T')[0]
+  const { t, i18n } = useTranslation()
 
   const [form, setForm] = useState<RideInput>({
     location: initialValues?.location ?? null,
@@ -104,9 +106,9 @@ export function RidePlanner({
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (!form.location) errs.location = 'Please enter a start location'
-    if (!form.startDate) errs.startDate = 'Date required'
-    if (!form.startTime) errs.startTime = 'Time required'
+    if (!form.location) errs.location = t('planner.validation.locationRequired')
+    if (!form.startDate) errs.startDate = t('planner.validation.dateRequired')
+    if (!form.startTime) errs.startTime = t('planner.validation.timeRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -140,10 +142,10 @@ export function RidePlanner({
             className="text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            What should I wear?
+            {t('planner.heading')}
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm">
-            Enter your ride details — we'll tell you what you need.
+            {t('planner.subheading')}
           </p>
         </div>
 
@@ -174,7 +176,7 @@ export function RidePlanner({
             {/* Location */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                Start location
+                {t('planner.label.startLocation')}
               </label>
               <LocationPicker
                 value={form.location}
@@ -183,7 +185,7 @@ export function RidePlanner({
                 onSelect={handleSelectSuggestion}
                 onUseCurrentLocation={onUseCurrentLocation}
                 onClear={() => setForm(f => ({ ...f, location: null }))}
-                placeholder="Enter city or address…"
+                placeholder={t('planner.placeholder.cityOrAddress')}
                 error={errors.location}
               />
             </div>
@@ -191,7 +193,7 @@ export function RidePlanner({
             {/* Date + Time */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                Departure
+                {t('planner.label.departure')}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative">
@@ -225,7 +227,7 @@ export function RidePlanner({
             {/* Bike Type */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                Bike type
+                {t('planner.label.bikeType')}
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {bikeTypeOptions.map(option => {
@@ -268,7 +270,7 @@ export function RidePlanner({
             {/* Riding Intensity */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                Intensity
+                {t('planner.label.intensity')}
               </label>
               <div className="grid grid-cols-3 gap-0 rounded-xl border-2 border-stone-200 dark:border-stone-700 overflow-hidden">
                 {intensityOptions.map((option, i) => {
@@ -318,14 +320,14 @@ export function RidePlanner({
                   className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
                   strokeWidth={2}
                 />
-                Advanced options
+                {t('planner.label.advancedOptions')}
               </button>
 
               {showAdvanced && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      Distance
+                      {t('planner.label.distance')}
                     </label>
                     <div className="relative">
                       <input
@@ -336,7 +338,7 @@ export function RidePlanner({
                         onChange={e =>
                           setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
                         }
-                        placeholder="z.B. 35"
+                        placeholder={t('planner.placeholder.egDistance')}
                         className={`${inputBase} pl-4 pr-12 ${inputNormal}`}
                       />
                       <span
@@ -350,7 +352,7 @@ export function RidePlanner({
 
                   <div className="space-y-1">
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      Elevation
+                      {t('planner.label.elevation')}
                     </label>
                     <div className="relative">
                       <input
@@ -361,7 +363,7 @@ export function RidePlanner({
                         onChange={e =>
                           setForm(f => ({ ...f, elevationMeters: e.target.value ? Number(e.target.value) : null }))
                         }
-                        placeholder="z.B. 800"
+                        placeholder={t('planner.placeholder.egElevation')}
                         className={`${inputBase} pl-4 pr-10 ${inputNormal}`}
                       />
                       <span
@@ -404,7 +406,7 @@ export function RidePlanner({
                     }`}
                   />
                 </div>
-                Multi-day tour
+                {t('planner.label.multiDayTour')}
               </button>
 
               {form.isMultiDay && (
@@ -413,14 +415,14 @@ export function RidePlanner({
                     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
                       <Calendar className="w-3.5 h-3.5 text-emerald-500" strokeWidth={1.5} />
                       <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                        End date: {new Date(form.endDate).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {t('planner.label.endDate', { date: new Date(form.endDate).toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }) })}
                       </span>
                     </div>
                   )}
 
                   <div className="space-y-1.5">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      Overnight locations
+                      {t('planner.label.overnightLocations')}
                     </label>
                     <DayLocationList
                       startLocation={form.location}
@@ -445,11 +447,11 @@ export function RidePlanner({
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                  Fetching weather…
+                  {t('planner.button.fetchingWeather')}
                 </>
               ) : (
                 <>
-                  Get weather
+                  {t('planner.button.getWeather')}
                   <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
                 </>
               )}
@@ -460,47 +462,33 @@ export function RidePlanner({
         {/* SEO description */}
         <section className="space-y-4 text-xs text-stone-400 dark:text-stone-500 leading-relaxed">
           <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400">
-            How the Bike Weather Planner works
+            {t('planner.seo.heading')}
           </h2>
-          <p>
-            Fahrrad Wetter helps you find the right clothing and gear for your next ride — based on real-time weather at your start location. Simply enter your tour details and receive a personalized recommendation.
-          </p>
+          <p>{t('planner.seo.intro')}</p>
           <dl className="space-y-3">
             <div>
-              <dt className="font-semibold text-stone-500 dark:text-stone-400">Start location</dt>
-              <dd>
-                The location determines which weather data is retrieved. You can search for an address or use your current GPS location. For multi-day tours, weather is fetched for each day at the respective overnight location.
-              </dd>
+              <dt className="font-semibold text-stone-500 dark:text-stone-400">{t('planner.seo.startLocationTitle')}</dt>
+              <dd>{t('planner.seo.startLocationDesc')}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-stone-500 dark:text-stone-400">Date &amp; Time</dt>
-              <dd>
-                Weather changes significantly throughout the day. The start time determines when the forecast is evaluated — so you get recommendations that match temperature, wind, and precipitation during your ride.
-              </dd>
+              <dt className="font-semibold text-stone-500 dark:text-stone-400">{t('planner.seo.dateTimeTitle')}</dt>
+              <dd>{t('planner.seo.dateTimeDesc')}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-stone-500 dark:text-stone-400">Bike type</dt>
-              <dd>
-                Road bike, gravel, MTB, or city — each bike type brings different clothing and protection requirements. Road cyclists need tighter, aerodynamic clothing, while MTB riders tend to prefer rugged, weather-resistant gear.
-              </dd>
+              <dt className="font-semibold text-stone-500 dark:text-stone-400">{t('planner.seo.bikeTypeTitle')}</dt>
+              <dd>{t('planner.seo.bikeTypeDesc')}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-stone-500 dark:text-stone-400">Intensity</dt>
-              <dd>
-                Your planned effort affects how warm you'll get while riding. At a relaxed pace you cool down faster and need more insulation; at high intensity a lighter layer is often enough.
-              </dd>
+              <dt className="font-semibold text-stone-500 dark:text-stone-400">{t('planner.seo.intensityTitle')}</dt>
+              <dd>{t('planner.seo.intensityDesc')}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-stone-500 dark:text-stone-400">Distance &amp; Elevation</dt>
-              <dd>
-                Optional inputs that trigger additional recommendations for longer tours or significant elevation gain — such as provisions, spare clothing, or protection for alpine conditions.
-              </dd>
+              <dt className="font-semibold text-stone-500 dark:text-stone-400">{t('planner.seo.distanceTitle')}</dt>
+              <dd>{t('planner.seo.distanceDesc')}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-stone-500 dark:text-stone-400">Multi-day tours</dt>
-              <dd>
-                Planning a tour over several days? You can specify a location for each overnight stop. Weather is then calculated separately per stage, so you have the right gear for every day.
-              </dd>
+              <dt className="font-semibold text-stone-500 dark:text-stone-400">{t('planner.seo.multiDayTitle')}</dt>
+              <dd>{t('planner.seo.multiDayDesc')}</dd>
             </div>
           </dl>
         </section>

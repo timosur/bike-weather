@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, Navigation, MapPin, X, Loader2 } from 'lucide-react'
 import type { RideLocation, LocationSuggestion } from './types'
 
@@ -30,6 +31,7 @@ export function LocationPicker({
   compact = false,
   hideLocate = false,
 }: LocationPickerProps) {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<'idle' | 'search'>('idle')
   const [query, setQuery] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -185,7 +187,7 @@ export function LocationPicker({
           className={`flex items-center justify-center gap-2 ${py} px-3 rounded-xl ${textSize} font-medium border-2 border-dashed border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-emerald-400 dark:hover:border-emerald-600 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all`}
         >
           <Search className="w-4 h-4" strokeWidth={1.5} />
-          Search location
+          {t('location.searchLocation')}
         </button>
         {!hideLocate && (
           <button
@@ -199,7 +201,7 @@ export function LocationPicker({
             ) : (
               <Navigation className="w-4 h-4" strokeWidth={1.5} />
             )}
-            {isLocating ? 'Detecting…' : 'Detect location'}
+            {isLocating ? t('location.detecting') : t('location.detectLocation')}
           </button>
         )}
       </div>

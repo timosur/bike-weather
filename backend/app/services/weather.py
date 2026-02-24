@@ -51,8 +51,9 @@ def wmo_to_icon(code: int) -> str:
     return WMO_CODE_MAP.get(code, ("cloud", "Unknown"))[0]
 
 
-def wmo_to_description(code: int) -> str:
-    return WMO_CODE_MAP.get(code, ("cloud", "Unknown"))[1]
+def wmo_to_description(code: int, locale: str = "de") -> str:
+    from app.rules.translations import get_wmo_description
+    return get_wmo_description(code, locale)
 
 
 def _wind_direction_label(degrees: float) -> str:

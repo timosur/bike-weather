@@ -1,4 +1,5 @@
 import { CircleCheck } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { EquipmentItem } from './types'
 
 interface EquipmentListProps {
@@ -6,6 +7,8 @@ interface EquipmentListProps {
 }
 
 export function EquipmentList({ items }: EquipmentListProps) {
+  const { t } = useTranslation()
+
   if (items.length === 0) return null
 
   return (
@@ -15,7 +18,7 @@ export function EquipmentList({ items }: EquipmentListProps) {
           className="text-sm font-semibold text-stone-900 dark:text-stone-100"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          Equipment
+          {t('report.equipment.heading')}
         </h3>
       </div>
       <ul className="divide-y divide-stone-100 dark:divide-stone-800">

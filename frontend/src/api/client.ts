@@ -1,3 +1,5 @@
+import i18n from '../i18n'
+
 const API_BASE = "/api";
 
 type AccessTokenProvider = () => Promise<string | null>;
@@ -14,6 +16,7 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    "Accept-Language": i18n.language,
   };
 
   if (_getAccessToken) {

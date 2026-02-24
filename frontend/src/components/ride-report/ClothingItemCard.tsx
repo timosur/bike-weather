@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowLeftRight,
   Glasses,
@@ -98,6 +99,7 @@ interface ClothingItemCardProps {
 }
 
 export function ClothingItemCard({ item, productLink, onSwap }: ClothingItemCardProps) {
+  const { t } = useTranslation()
   const [showAlts, setShowAlts] = useState(false)
   const hasAlternatives = item.alternatives && item.alternatives.length > 0
 
@@ -130,7 +132,7 @@ export function ClothingItemCard({ item, productLink, onSwap }: ClothingItemCard
           className="self-start ml-13 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border-2 border-dashed border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 hover:border-amber-400 dark:hover:border-amber-500 transition-all"
         >
           <ArrowLeftRight className="w-3.5 h-3.5" strokeWidth={2} />
-          Alternative available
+          {t('report.clothing.alternativeAvailable')}
         </button>
       )}
 
@@ -138,7 +140,7 @@ export function ClothingItemCard({ item, productLink, onSwap }: ClothingItemCard
       {showAlts && hasAlternatives && (
         <div className="ml-13 space-y-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-            Swap for
+            {t('report.clothing.swapFor')}
           </p>
           {item.alternatives!.map((alt) => (
             <button
@@ -161,7 +163,7 @@ export function ClothingItemCard({ item, productLink, onSwap }: ClothingItemCard
             onClick={() => setShowAlts(false)}
             className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
           >
-            Cancel
+            {t('report.clothing.cancel')}
           </button>
         </div>
       )}

@@ -1,0 +1,355 @@
+{
+  "shell": {
+    "brand": "Fahrrad Wetter",
+    "footer": {
+      "tagline": "Wetterbasierte Kleidungsempfehlungen für Radfahrer.",
+      "copyright": "© {{year}} Fahrrad Wetter. Ein Projekt von Timo.",
+      "imprint": "Impressum",
+      "privacy": "Datenschutz"
+    },
+    "nav": {
+      "planner": "Routenplaner",
+      "rideReport": "Fahrtbericht",
+      "products": "Produkte",
+      "myRoutes": "Meine Routen",
+      "aboutMe": "Über mich"
+    },
+    "footerSection": {
+      "product": "Produkt",
+      "contact": "Kontakt",
+      "legal": "Rechtliches"
+    },
+    "footerLinks": {
+      "ridePlanner": "Routenplaner",
+      "faq": "FAQ",
+      "aboutMe": "Über mich",
+      "giveFeedback": "Feedback geben",
+      "signIn": "Anmelden",
+      "imprint": "Impressum",
+      "privacyPolicy": "Datenschutz"
+    },
+    "langSwitch": {
+      "toEn": "Switch to English",
+      "toDe": "Auf Deutsch wechseln"
+    }
+  },
+  "planner": {
+    "heading": "Was soll ich anziehen?",
+    "subheading": "Gib deine Fahrtdetails ein — wir sagen dir, was du brauchst.",
+    "label": {
+      "startLocation": "Startort",
+      "departure": "Abfahrt",
+      "bikeType": "Fahrradtyp",
+      "intensity": "Intensität",
+      "distance": "Distanz",
+      "elevation": "Höhenmeter",
+      "advancedOptions": "Erweiterte Optionen",
+      "multiDayTour": "Mehrtägige Tour",
+      "overnightLocations": "Übernachtungsorte",
+      "endDate": "Enddatum: {{date}}"
+    },
+    "bikeType": {
+      "rennrad": "Rennrad",
+      "rennradDesc": "Schnell auf Asphalt — leichte Kleidung, aerodynamisch.",
+      "gravel": "Gravel",
+      "gravelDesc": "Mix aus Straße und Schotter — vielseitiges Fahren.",
+      "mtb": "MTB",
+      "mtbDesc": "Offroad auf Trails — robuste Ausrüstung nötig.",
+      "city": "City",
+      "cityDesc": "Stadtverkehr und kurze Strecken — alltagstauglich."
+    },
+    "intensity": {
+      "gemuetlich": "Entspannt",
+      "gemuetlichDesc": "Gemütliches Tempo, kaum Schwitzen — Genussfahrt.",
+      "moderat": "Moderat",
+      "moderatDesc": "Mittleres Tempo, leichtes Schwitzen — aktive Tour.",
+      "sportlich": "Sportlich",
+      "sportlichDesc": "Hohes Tempo, starkes Schwitzen — Trainingsfahrt."
+    },
+    "preset": {
+      "commute": "Pendeln",
+      "commuteDesc": "Kurze tägliche Fahrt zur Arbeit",
+      "weekendTour": "Wochenendtour",
+      "weekendTourDesc": "Entspannte Runde durchs Grüne",
+      "roadBikeRide": "Rennradfahrt",
+      "roadBikeRideDesc": "Sportliche Fahrt mit hohem Tempo",
+      "multiDayTrip": "Mehrtagesfahrt",
+      "multiDayTripDesc": "Radreise über mehrere Tage"
+    },
+    "button": {
+      "getWeather": "Wetter abrufen",
+      "fetchingWeather": "Wetter wird abgerufen…"
+    },
+    "validation": {
+      "locationRequired": "Bitte gib einen Startort ein",
+      "dateRequired": "Datum erforderlich",
+      "timeRequired": "Uhrzeit erforderlich"
+    },
+    "placeholder": {
+      "cityOrAddress": "Stadt oder Adresse eingeben…",
+      "egDistance": "z.B. 35",
+      "egElevation": "z.B. 800"
+    },
+    "seo": {
+      "heading": "So funktioniert der Fahrrad Wetter Planer",
+      "intro": "Fahrrad Wetter hilft dir, die richtige Kleidung und Ausrüstung für deine nächste Fahrt zu finden — basierend auf Echtzeit-Wetterdaten an deinem Startort. Gib einfach deine Tourdetails ein und erhalte eine persönliche Empfehlung.",
+      "startLocationTitle": "Startort",
+      "startLocationDesc": "Der Standort bestimmt, welche Wetterdaten abgerufen werden. Du kannst eine Adresse suchen oder deinen aktuellen GPS-Standort verwenden. Bei Mehrtagestouren wird das Wetter für jeden Tag am jeweiligen Übernachtungsort abgefragt.",
+      "dateTimeTitle": "Datum & Uhrzeit",
+      "dateTimeDesc": "Das Wetter ändert sich im Tagesverlauf erheblich. Die Startzeit bestimmt, wann die Vorhersage ausgewertet wird — so erhältst du Empfehlungen, die zu Temperatur, Wind und Niederschlag während deiner Fahrt passen.",
+      "bikeTypeTitle": "Fahrradtyp",
+      "bikeTypeDesc": "Rennrad, Gravel, MTB oder City — jeder Fahrradtyp bringt unterschiedliche Kleidungs- und Schutzanforderungen mit sich. Rennradfahrer brauchen engere, aerodynamische Kleidung, während MTB-Fahrer eher robuste, wetterfeste Ausrüstung bevorzugen.",
+      "intensityTitle": "Intensität",
+      "intensityDesc": "Deine geplante Anstrengung beeinflusst, wie warm dir beim Fahren wird. Bei entspanntem Tempo kühlst du schneller aus und brauchst mehr Isolierung; bei hoher Intensität reicht oft eine leichtere Schicht.",
+      "distanceTitle": "Distanz & Höhenmeter",
+      "distanceDesc": "Optionale Eingaben, die bei längeren Touren oder großem Höhengewinn zusätzliche Empfehlungen auslösen — etwa Verpflegung, Ersatzkleidung oder Schutz für alpine Bedingungen.",
+      "multiDayTitle": "Mehrtagestouren",
+      "multiDayDesc": "Du planst eine Tour über mehrere Tage? Du kannst für jeden Übernachtungsstopp einen Ort angeben. Das Wetter wird dann pro Etappe separat berechnet, damit du für jeden Tag die richtige Ausrüstung hast."
+    }
+  },
+  "location": {
+    "searchLocation": "Ort suchen",
+    "detectLocation": "Standort erkennen",
+    "detecting": "Erkennung…"
+  },
+  "dayList": {
+    "overnightStop": "Übernachtungsstopp {{n}}…",
+    "addStop": "Übernachtungsstopp hinzufügen",
+    "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen"
+  },
+  "report": {
+    "share": "Teilen",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "saved": "Gespeichert",
+    "days": "{{count}} Tage",
+    "section": {
+      "weather": "Wetter",
+      "clothing": "Kleidungsempfehlung",
+      "equipment": "Checkliste"
+    },
+    "noData": {
+      "heading": "Keine Fahrtdaten",
+      "text": "Plane zuerst eine Fahrt, um deinen Wetterbericht zu sehen.",
+      "goToPlanner": "Zum Planer"
+    },
+    "error": {
+      "heading": "Bericht konnte nicht geladen werden",
+      "fallback": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "tryAgain": "Erneut versuchen",
+      "backToPlanner": "Zurück zum Planer"
+    },
+    "condition": {
+      "ideal": "Ideal",
+      "good": "Gut",
+      "caution": "Vorsicht",
+      "notRecommended": "Nicht empfohlen"
+    },
+    "weather": {
+      "feelsLike": "Gefühlt {{temp}}{{unit}}",
+      "precipitation": "Niederschlag",
+      "wind": "Wind",
+      "windFrom": "aus {{direction}}",
+      "humidity": "Luftfeuchtigkeit",
+      "uvIndex": "UV-Index",
+      "uvHigh": "Hoch",
+      "uvMedium": "Mittel",
+      "uvLow": "Niedrig",
+      "sunrise": "Sonnenaufgang",
+      "sunset": "Sonnenuntergang"
+    },
+    "clothing": {
+      "alternativeAvailable": "Alternative verfügbar",
+      "swapFor": "Tauschen gegen",
+      "cancel": "Abbrechen"
+    },
+    "equipment": {
+      "heading": "Ausrüstung"
+    },
+    "routeSaved": "Route gespeichert",
+    "routeSaveError": "Route konnte nicht gespeichert werden"
+  },
+  "products": {
+    "heading": "Produkte",
+    "subheading": "Empfohlene Ausrüstung und Kleidung für jede Wetterlage.",
+    "productCount": "Produkte",
+    "productCountOne": "Produkt",
+    "allCategories": "Alle Kategorien",
+    "noProducts": "Keine Produkte für dieses Wetter in dieser Kategorie.",
+    "categoryNotFound": "Kategorie nicht gefunden",
+    "backToProducts": "Zurück zu Produkten"
+  },
+  "routes": {
+    "heading": "Meine Routen",
+    "empty": {
+      "heading": "Noch keine Routen gespeichert",
+      "text": "Plane deine erste Tour und speichere sie, um sie jederzeit schnell wieder aufzurufen.",
+      "cta": "Erste Route planen"
+    },
+    "card": {
+      "notYetChecked": "Noch nicht geprüft",
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "daysAgo": "Vor {{count}} Tagen",
+      "weeksAgo": "Vor {{count}} Wochen"
+    },
+    "edit": {
+      "heading": "Route bearbeiten",
+      "routeName": "Routenname",
+      "startLocation": "Startort",
+      "distance": "Distanz ({{unit}})",
+      "ridingStyle": "Fahrstil"
+    },
+    "delete": {
+      "heading": "Route wirklich löschen?",
+      "text": "wird dauerhaft gelöscht und kann nicht wiederhergestellt werden."
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
+    }
+  },
+  "auth": {
+    "login": {
+      "heading": "Willkommen zurück",
+      "subheading": "Melde dich an, um deine gespeicherten Routen zu sehen.",
+      "tab": "Anmelden",
+      "submit": "Anmelden",
+      "forgotPassword": "Passwort vergessen?"
+    },
+    "register": {
+      "heading": "Konto erstellen",
+      "subheading": "Erstelle ein Konto, um Routen zu speichern.",
+      "tab": "Registrieren",
+      "submit": "Registrieren",
+      "passwordPlaceholder": "Passwort (mind. 8 Zeichen)",
+      "confirmPassword": "Passwort bestätigen"
+    },
+    "googleLogin": "Mit Google anmelden",
+    "or": "oder",
+    "noAccountNeeded": "Kein Konto nötig — du kannst Fahrrad Wetter ohne Anmeldung nutzen.",
+    "validation": {
+      "emailRequired": "Gültige E-Mail-Adresse erforderlich",
+      "passwordRequired": "Passwort erforderlich",
+      "passwordMin": "Mindestens 8 Zeichen",
+      "passwordMismatch": "Passwörter stimmen nicht überein"
+    }
+  },
+  "contact": {
+    "heading": "Kontakt & Feedback",
+    "subheading": "Fahrrad Wetter lebt von deinem Feedback. Ob Vorschlag, Fehlermeldung oder Feature-Wunsch — ich freue mich über jede Nachricht.",
+    "category": {
+      "label": "Kategorie",
+      "feedback": "Feedback",
+      "bug": "Fehler melden",
+      "feature": "Feature-Wunsch",
+      "other": "Sonstiges"
+    },
+    "name": "Name",
+    "nameOptional": "(optional)",
+    "namePlaceholder": "Dein Name",
+    "email": "E-Mail",
+    "emailPlaceholder": "deine@email.de",
+    "message": "Nachricht",
+    "messagePlaceholder": "Was möchtest du mitteilen?",
+    "submit": "Absenden",
+    "personalNote": "Ich lese jede Nachricht persönlich und antworte so schnell wie möglich.",
+    "success": {
+      "heading": "Nachricht gesendet",
+      "text": "Vielen Dank für dein Feedback! Ich lese jede Nachricht und melde mich so schnell wie möglich zurück."
+    },
+    "validation": {
+      "emailRequired": "Gültige E-Mail-Adresse erforderlich",
+      "messageRequired": "Bitte gib eine Nachricht ein"
+    }
+  },
+  "faq": {
+    "heading": "Häufig gestellte Fragen",
+    "subheading": "Alles, was du über Fahrrad Wetter wissen musst.",
+    "questionNotListed": "Frage nicht dabei?",
+    "contactHint": {
+      "before": "Schreib mir auf der",
+      "link": "Kontaktseite",
+      "after": "— ich antworte so schnell wie möglich."
+    }
+  },
+  "about": {
+    "badge": "Bei Regen oder Sonnenschein auf dem Rad",
+    "heading": "Hi, ich bin Timo",
+    "intro": "Jahrgang '92, leidenschaftlicher Softwareentwickler und Radfahrer. Ich habe Fahrrad Wetter gebaut, weil ich selbst eine Lösung brauchte.",
+    "giveFeedback": "Feedback geben"
+  },
+  "imprint": {
+    "heading": "Impressum",
+    "infoHeading": "Angaben gemäß § 5 TMG",
+    "contact": "Kontakt",
+    "liability": "Haftung für Inhalte",
+    "liabilityText": "Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
+    "linksHeading": "Haftung für Links",
+    "linksText": "Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.",
+    "copyright": "Urheberrecht",
+    "copyrightText": "Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers."
+  },
+  "privacy": {
+    "heading": "Datenschutzerklärung",
+    "contents": "Inhalt",
+    "section": {
+      "responsible": {
+        "title": "1. Verantwortlicher",
+        "navTitle": "Verantwortlicher"
+      },
+      "dataCollected": {
+        "title": "2. Erhobene Daten",
+        "navTitle": "Erhobene Daten",
+        "locationData": "Standortdaten",
+        "locationDataText": "Bei Nutzung der GPS-Funktion wird dein Standort bestimmt, um Wetterdaten abzurufen. Der Standort wird nicht gespeichert und nur für die aktuelle Anfrage verwendet.",
+        "usageData": "Nutzungsdaten",
+        "usageDataText": "Beim Besuch der Website werden automatisch technische Daten erfasst (IP-Adresse, Browsertyp, Zugriffszeit). Diese Daten werden zur Sicherstellung des Betriebs genutzt und nicht personenbezogen ausgewertet.",
+        "accountData": "Kontodaten",
+        "accountDataText": "Bei der Registrierung speichern wir deine E-Mail-Adresse und ein verschlüsseltes Passwort. Bei der Google-Anmeldung erhalten wir deinen Namen und deine E-Mail-Adresse von Google."
+      },
+      "legalBasis": {
+        "title": "3. Rechtsgrundlagen",
+        "navTitle": "Rechtsgrundlagen",
+        "text": "Die Verarbeitung personenbezogener Daten erfolgt auf Grundlage von Art. 6 Abs. 1 DSGVO: Einwilligung (lit. a) für Standortdaten und Cookies, Vertragserfüllung (lit. b) für Kontodaten und berechtigtes Interesse (lit. f) für Nutzungsdaten zur Sicherstellung des Betriebs."
+      },
+      "cookies": {
+        "title": "4. Cookies & Tracking",
+        "navTitle": "Cookies & Tracking",
+        "text1": "Diese Website verwendet technisch notwendige Cookies für die Sitzungsverwaltung und optionale Analyse-Cookies (Google Analytics) zur Verbesserung des Dienstes.",
+        "text2before": "Google-Anzeigen werden geschaltet, um die App kostenlos zu halten. Google kann Cookies setzen und Daten sammeln. Weitere Informationen findest du in der",
+        "text2link": "Datenschutzerklärung von Google"
+      },
+      "thirdParties": {
+        "title": "5. Drittanbieter",
+        "navTitle": "Drittanbieter",
+        "weatherApi": "Wetter-API:",
+        "weatherApiText": "Zum Abruf von Wetterdaten wird dein gewählter Standort an einen externen Wetterdienst übermittelt.",
+        "googleLogin": "Google-Anmeldung:",
+        "googleLoginText": "Bei Nutzung der Google-Anmeldung werden Daten gemäß deren Datenschutzerklärung mit Google ausgetauscht.",
+        "affiliateLinks": "Affiliate-Links:",
+        "affiliateLinksText": "Produktlinks führen zu externen Shops. Beim Klicken können Cookies gesetzt werden."
+      },
+      "rights": {
+        "title": "6. Deine Rechte",
+        "navTitle": "Deine Rechte",
+        "text": "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung deiner personenbezogenen Daten. Du kannst deine Einwilligung jederzeit widerrufen und hast ein Recht auf Datenübertragbarkeit. Bei Beschwerden kannst du dich an die zuständige Aufsichtsbehörde wenden."
+      },
+      "contactPrivacy": {
+        "title": "7. Kontakt",
+        "navTitle": "Kontakt",
+        "text": "Bei datenschutzbezogenen Fragen erreichst du mich unter [deine@email.de]."
+      }
+    }
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "remove": "Entfernen",
+    "loading": "Laden…",
+    "logout": "Abmelden",
+    "signedInAs": "Angemeldet als",
+    "admin": "Admin"
+  }
+}

@@ -1,31 +1,13 @@
 import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { RidePlanner } from '../components/ride-planner'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import type { BikeTypeOption, RidingIntensityOption, QuickPreset, RideInput } from '../components/ride-planner/types'
 
-const bikeTypeOptions: BikeTypeOption[] = [
-  { value: 'rennrad', label: 'Road bike', description: 'Fast on tarmac — light clothing, aerodynamic.', icon: 'gauge' },
-  { value: 'gravel', label: 'Gravel', description: 'Mix of road and gravel — versatile riding.', icon: 'mountain' },
-  { value: 'mtb', label: 'MTB', description: 'Off-road on trails — rugged gear required.', icon: 'trees' },
-  { value: 'city', label: 'City', description: 'Urban traffic and short distances — everyday practical.', icon: 'building-2' },
-]
-
-const intensityOptions: RidingIntensityOption[] = [
-  { value: 'gemuetlich', label: 'Relaxed', description: 'Relaxed pace, minimal sweating — pleasure ride.' },
-  { value: 'moderat', label: 'Moderate', description: 'Medium pace, light sweating — active tour.' },
-  { value: 'sportlich', label: 'Sporty', description: 'High pace, heavy sweating — training ride.' },
-]
-
-const quickPresets: QuickPreset[] = [
-  { id: 'p1', label: 'Commute', description: 'Short daily ride to work', bikeType: 'city', intensity: 'gemuetlich', distanceKm: 12, isMultiDay: false },
-  { id: 'p2', label: 'Weekend tour', description: 'Relaxed loop through the countryside', bikeType: 'gravel', intensity: 'moderat', distanceKm: 50, isMultiDay: false },
-  { id: 'p3', label: 'Road bike ride', description: 'Sporty ride at high pace', bikeType: 'rennrad', intensity: 'sportlich', distanceKm: 80, isMultiDay: false },
-  { id: 'p4', label: 'Multi-day trip', description: 'Bike tour over several days', bikeType: 'gravel', intensity: 'gemuetlich', isMultiDay: true },
-]
-
 export default function PlannerPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const {
     suggestions,
     dayStopSuggestions,
@@ -35,6 +17,26 @@ export default function PlannerPage() {
     searchDayStopLocation,
     useCurrentLocation,
   } = useLocationSearch()
+
+  const bikeTypeOptions: BikeTypeOption[] = [
+    { value: 'rennrad', label: t('planner.bikeType.rennrad'), description: t('planner.bikeType.rennradDesc'), icon: 'gauge' },
+    { value: 'gravel', label: t('planner.bikeType.gravel'), description: t('planner.bikeType.gravelDesc'), icon: 'mountain' },
+    { value: 'mtb', label: t('planner.bikeType.mtb'), description: t('planner.bikeType.mtbDesc'), icon: 'trees' },
+    { value: 'city', label: t('planner.bikeType.city'), description: t('planner.bikeType.cityDesc'), icon: 'building-2' },
+  ]
+
+  const intensityOptions: RidingIntensityOption[] = [
+    { value: 'gemuetlich', label: t('planner.intensity.gemuetlich'), description: t('planner.intensity.gemuetlichDesc') },
+    { value: 'moderat', label: t('planner.intensity.moderat'), description: t('planner.intensity.moderatDesc') },
+    { value: 'sportlich', label: t('planner.intensity.sportlich'), description: t('planner.intensity.sportlichDesc') },
+  ]
+
+  const quickPresets: QuickPreset[] = [
+    { id: 'p1', label: t('planner.preset.commute'), description: t('planner.preset.commuteDesc'), bikeType: 'city', intensity: 'gemuetlich', distanceKm: 12, isMultiDay: false },
+    { id: 'p2', label: t('planner.preset.weekendTour'), description: t('planner.preset.weekendTourDesc'), bikeType: 'gravel', intensity: 'moderat', distanceKm: 50, isMultiDay: false },
+    { id: 'p3', label: t('planner.preset.roadBikeRide'), description: t('planner.preset.roadBikeRideDesc'), bikeType: 'rennrad', intensity: 'sportlich', distanceKm: 80, isMultiDay: false },
+    { id: 'p4', label: t('planner.preset.multiDayTrip'), description: t('planner.preset.multiDayTripDesc'), bikeType: 'gravel', intensity: 'gemuetlich', isMultiDay: true },
+  ]
 
   const handleSubmit = (input: RideInput) => {
     navigate('/report', { state: { rideInput: input } })

@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_locale
 from app.database import get_session
 from app.models import AffiliateDisclosure, Product, ProductCategory, Shop
+from app.services.translation import get_translations
 from app.schemas.product import (
     AffiliateDisclosureResponse,
     CategoryDetailResponse,
@@ -42,7 +44,11 @@ def _product_to_response(p: Product) -> ProductResponse:
 
 
 @router.get("", response_model=list[ProductCategoryResponse])
-async def list_categories(session: AsyncSession = Depends(get_session)) -> list[ProductCategoryResponse]:
+async def list_categories(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+) -> list[ProductCategoryResponse]:
+    locale = get_locale(request)
     stmt = (
         select(
             ProductCategory.id,
@@ -58,16 +64,27 @@ async def list_categories(session: AsyncSession = Depends(get_session)) -> list[
         .order_by(ProductCategory.display_order)
     )
     result = await session.execute(stmt)
+    rows = result.all()
+    cat_ids = [row.id for row in rows]
+    trans = await get_translations(session, "product_category", cat_ids, locale, ["name"])
     return [
-        ProductCategoryResponse(id=row.id, name=row.name, icon=row.icon, productCount=row.product_count)
-        for row in result.all()
+        ProductCategoryResponse(
+            id=row.id,
+            name=trans.get(row.id, {}).get("name", row.name),
+            icon=row.icon,
+            productCount=row.product_count,
+        )
+        for row in rows
     ]
 
 
 @router.get("/{category_id}", response_model=CategoryDetailResponse)
 async def get_category_detail(
-    category_id: str, session: AsyncSession = Depends(get_session)
+    category_id: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
 ) -> CategoryDetailResponse:
+    locale = get_locale(request)
     category = await session.get(ProductCategory, category_id)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -90,16 +107,40 @@ async def get_category_detail(
 
     product_count = len(products)
 
+    # Fetch translations for category, products, and disclosure
+    cat_trans = await get_translations(session, "product_category", [category.id], locale, ["name"])
+    prod_ids = [p.id for p in products]
+    prod_trans = await get_translations(session, "product", prod_ids, locale, ["matches_label", "weather_summary"])
+    disc_trans = {}
+    if disclosure:
+        disc_trans_map = await get_translations(session, "affiliate_disclosure", ["default"], locale, ["badge_label", "disclaimer_text"])
+        disc_trans = disc_trans_map.get("default", {})
+
+    def _translated_product(p: Product) -> ProductResponse:
+        resp = _product_to_response(p)
+        pt = prod_trans.get(p.id, {})
+        if "matches_label" in pt:
+            resp.matchesLabel = pt["matches_label"]
+        if "weather_summary" in pt and resp.weather:
+            resp.weather.summary = pt["weather_summary"]
+        return resp
+
     return CategoryDetailResponse(
         category=ProductCategoryResponse(
-            id=category.id, name=category.name, icon=category.icon, productCount=product_count
+            id=category.id,
+            name=cat_trans.get(category.id, {}).get("name", category.name),
+            icon=category.icon,
+            productCount=product_count,
         ),
-        products=[_product_to_response(p) for p in products],
+        products=[_translated_product(p) for p in products],
         shops=[
             ShopResponse(id=s.id, name=s.name, logoUrl=s.logo_url, affiliateTag=s.affiliate_tag) for s in shops
         ],
         disclosure=(
-            AffiliateDisclosureResponse(badgeLabel=disclosure.badge_label, disclaimerText=disclosure.disclaimer_text)
+            AffiliateDisclosureResponse(
+                badgeLabel=disc_trans.get("badge_label", disclosure.badge_label),
+                disclaimerText=disc_trans.get("disclaimer_text", disclosure.disclaimer_text),
+            )
             if disclosure
             else None
         ),

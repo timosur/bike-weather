@@ -3,6 +3,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
+def get_locale(request: Request) -> str:
+    """Extract locale from request state (set by LocaleMiddleware)."""
+    return getattr(request.state, "locale", "de")
+
 from app.config import settings
 from app.database import get_session
 from app.models.user import User

@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_optional_user
+from app.api.dependencies import get_locale, get_optional_user
 from app.database import get_session
 from app.models.saved_route import SavedRoute
 from app.models.user import User
@@ -19,12 +19,14 @@ router = APIRouter(prefix="/rides", tags=["rides"])
 @router.post("/report", response_model=RideReportSchema)
 async def create_report(
     ride_input: RideInputSchema,
+    request: Request,
     route_id: str | None = Query(None),
     user: User | None = Depends(get_optional_user),
     session: AsyncSession = Depends(get_session),
 ) -> RideReportSchema:
+    locale = get_locale(request)
     try:
-        report = await build_report(ride_input)
+        report = await build_report(ride_input, locale=locale)
     except WeatherServiceError:
         raise HTTPException(
             status_code=503,

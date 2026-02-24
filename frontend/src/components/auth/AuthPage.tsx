@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import type { AuthPageProps, AuthTab, LoginFormData, RegisterFormData } from './types'
 
@@ -16,20 +17,21 @@ export function AuthPage({
   const [loginForm, setLoginForm] = useState<LoginFormData>({ email: '', password: '' })
   const [registerForm, setRegisterForm] = useState<RegisterFormData>({ email: '', password: '', passwordConfirm: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { t } = useTranslation()
 
   const validateLogin = () => {
     const errs: Record<string, string> = {}
-    if (!loginForm.email || !/\S+@\S+\.\S+/.test(loginForm.email)) errs.email = 'Valid email required'
-    if (!loginForm.password) errs.password = 'Password required'
+    if (!loginForm.email || !/\S+@\S+\.\S+/.test(loginForm.email)) errs.email = t('auth.validation.emailRequired')
+    if (!loginForm.password) errs.password = t('auth.validation.passwordRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
 
   const validateRegister = () => {
     const errs: Record<string, string> = {}
-    if (!registerForm.email || !/\S+@\S+\.\S+/.test(registerForm.email)) errs.email = 'Valid email required'
-    if (!registerForm.password || registerForm.password.length < 8) errs.password = 'At least 8 characters'
-    if (registerForm.password !== registerForm.passwordConfirm) errs.passwordConfirm = 'Passwords do not match'
+    if (!registerForm.email || !/\S+@\S+\.\S+/.test(registerForm.email)) errs.email = t('auth.validation.emailRequired')
+    if (!registerForm.password || registerForm.password.length < 8) errs.password = t('auth.validation.passwordMin')
+    if (registerForm.password !== registerForm.passwordConfirm) errs.passwordConfirm = t('auth.validation.passwordMismatch')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -56,12 +58,12 @@ export function AuthPage({
             className="text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            {tab === 'login' ? 'Welcome back' : 'Create account'}
+            {tab === 'login' ? t('auth.login.heading') : t('auth.register.heading')}
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm">
             {tab === 'login'
-              ? 'Sign in to see your saved routes.'
-              : 'Create an account to save routes.'}
+              ? t('auth.login.subheading')
+              : t('auth.register.subheading')}
           </p>
         </div>
 
@@ -69,18 +71,18 @@ export function AuthPage({
         <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
           {/* Tab toggle */}
           <div className="flex border-b border-stone-100 dark:border-stone-800">
-            {(['login', 'register'] as const).map(t => (
+            {(['login', 'register'] as const).map(tabKey => (
               <button
-                key={t}
+                key={tabKey}
                 type="button"
-                onClick={() => { setTab(t); setErrors({}) }}
+                onClick={() => { setTab(tabKey); setErrors({}) }}
                 className={`flex-1 py-3 text-sm font-semibold transition-colors ${
-                  tab === t
+                  tab === tabKey
                     ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500'
                     : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
                 }`}
               >
-                {t === 'login' ? 'Sign in' : 'Register'}
+                {tabKey === 'login' ? t('auth.login.tab') : t('auth.register.tab')}
               </button>
             ))}
           </div>
@@ -105,13 +107,13 @@ export function AuthPage({
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Sign in with Google
+              {t('auth.googleLogin')}
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
-              <span className="text-xs text-stone-400 dark:text-stone-500">or</span>
+              <span className="text-xs text-stone-400 dark:text-stone-500">{t('auth.or')}</span>
               <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
             </div>
 
@@ -151,7 +153,7 @@ export function AuthPage({
 
                 <div className="flex justify-end">
                   <button type="button" onClick={onForgotPassword} className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline">
-                    Forgot password?
+                    {t('auth.login.forgotPassword')}
                   </button>
                 </div>
 
@@ -161,7 +163,7 @@ export function AuthPage({
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm text-sm"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  Sign in
+                  {t('auth.login.submit')}
                 </button>
               </form>
             )}
@@ -190,7 +192,7 @@ export function AuthPage({
                       type={showPassword ? 'text' : 'password'}
                       value={registerForm.password}
                       onChange={e => setRegisterForm(f => ({ ...f, password: e.target.value }))}
-                      placeholder="Password (min. 8 characters)"
+                      placeholder={t('auth.register.passwordPlaceholder')}
                       className={`${inputBase} pl-9 pr-10 ${errors.password ? 'border-red-400 dark:border-red-500' : 'border-stone-200 dark:border-stone-700'}`}
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300">
@@ -207,7 +209,7 @@ export function AuthPage({
                       type="password"
                       value={registerForm.passwordConfirm}
                       onChange={e => setRegisterForm(f => ({ ...f, passwordConfirm: e.target.value }))}
-                      placeholder="Confirm password"
+                      placeholder={t('auth.register.confirmPassword')}
                       className={`${inputBase} pl-9 pr-4 ${errors.passwordConfirm ? 'border-red-400 dark:border-red-500' : 'border-stone-200 dark:border-stone-700'}`}
                     />
                   </div>
@@ -220,7 +222,7 @@ export function AuthPage({
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm text-sm"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  Register
+                  {t('auth.register.submit')}
                 </button>
               </form>
             )}
@@ -229,7 +231,7 @@ export function AuthPage({
 
         {/* Optional hint */}
         <p className="text-center text-xs text-stone-400 dark:text-stone-500">
-          No account needed — you can use Fahrrad Wetter without signing up.
+          {t('auth.noAccountNeeded')}
         </p>
       </div>
     </div>

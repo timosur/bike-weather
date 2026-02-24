@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import type { SavedRoute, RidingStyle } from './types'
 
@@ -15,6 +16,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
   const [startLocation, setStartLocation] = useState(route.startLocation)
   const [totalDistance, setTotalDistance] = useState(route.totalDistance)
   const [ridingStyle, setRidingStyle] = useState<RidingStyle>(route.ridingStyle)
+  const { t } = useTranslation()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,7 +36,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
             className="text-lg font-semibold text-stone-900 dark:text-stone-100"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            Edit route
+            {t('routes.edit.heading')}
           </h2>
           <button
             onClick={onClose}
@@ -48,7 +50,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
-              Route name
+              {t('routes.edit.routeName')}
             </label>
             <input
               type="text"
@@ -60,7 +62,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
 
           <div>
             <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
-              Start location
+              {t('routes.edit.startLocation')}
             </label>
             <input
               type="text"
@@ -72,7 +74,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
 
           <div>
             <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
-              Distance ({route.distanceUnit})
+              {t('routes.edit.distance', { unit: route.distanceUnit })}
             </label>
             <input
               type="number"
@@ -85,7 +87,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
 
           <div>
             <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
-              Riding style
+              {t('routes.edit.ridingStyle')}
             </label>
             <div className="flex gap-2">
               {ridingStyles.map((style) => (
@@ -112,13 +114,13 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
               onClick={onClose}
               className="px-4 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 transition-colors"
             >
-              Save
+              {t('common.save')}
             </button>
           </div>
         </form>

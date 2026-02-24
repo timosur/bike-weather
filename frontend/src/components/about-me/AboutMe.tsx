@@ -1,4 +1,5 @@
 import { Heart, MessageCircle, Bike, Code, ArrowRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { AboutSection } from '../../api/about'
 
@@ -27,6 +28,8 @@ export interface AboutMeProps {
 }
 
 export function AboutMe({ sections }: AboutMeProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-12 px-4">
       <div className="w-full max-w-[640px] space-y-10">
@@ -34,16 +37,16 @@ export function AboutMe({ sections }: AboutMeProps) {
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
             <Bike className="w-4 h-4 text-emerald-500" strokeWidth={1.5} />
-            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Rain or shine on the bike</span>
+            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">{t('about.badge')}</span>
           </div>
           <h1
             className="text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            Hi, I'm Timo
+            {t('about.heading')}
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm max-w-md mx-auto leading-relaxed">
-            Born in '92, passionate software developer and cyclist. I built Fahrrad Wetter because I needed a solution myself.
+            {t('about.intro')}
           </p>
         </div>
 
@@ -75,7 +78,7 @@ export function AboutMe({ sections }: AboutMeProps) {
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors"
             >
               <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
-              Give feedback
+              {t('about.giveFeedback')}
               <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
             </Link>
           </div>

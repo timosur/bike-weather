@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { DayForecast } from './types'
 import { WeatherIcon } from './WeatherIcon'
 import { ConditionBadge } from './ConditionBadge'
@@ -8,12 +9,15 @@ interface DayTabsProps {
   onDaySelect?: (dayId: string) => void
 }
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })
-}
-
 export function DayTabs({ days, activeDayId, onDaySelect }: DayTabsProps) {
+  const { i18n } = useTranslation()
+  const locale = i18n.language === 'de' ? 'de-DE' : 'en-US'
+
+  function formatDate(dateStr: string): string {
+    const date = new Date(dateStr + 'T00:00:00')
+    return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })
+  }
+
   if (days.length <= 1) return null
 
   return (

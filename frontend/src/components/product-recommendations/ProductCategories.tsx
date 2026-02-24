@@ -1,8 +1,11 @@
 import { ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { ProductCategoriesProps } from './types'
 import { CategoryIcon } from './CategoryIcon'
 
 export function ProductCategories({ categories, onCategorySelect }: ProductCategoriesProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
@@ -10,10 +13,10 @@ export function ProductCategories({ categories, onCategorySelect }: ProductCateg
           className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          Products
+          {t('products.heading')}
         </h1>
         <p className="mt-1.5 text-sm text-stone-500 dark:text-stone-400">
-          Recommended gear and clothing for every weather condition.
+          {t('products.subheading')}
         </p>
       </div>
 
@@ -35,7 +38,7 @@ export function ProductCategories({ categories, onCategorySelect }: ProductCateg
                 {category.name}
               </h3>
               <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
-                {category.productCount} {category.productCount === 1 ? 'Product' : 'Products'}
+                {category.productCount} {category.productCount === 1 ? t('products.productCountOne') : t('products.productCount')}
               </p>
             </div>
             <ChevronRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors shrink-0" strokeWidth={2} />

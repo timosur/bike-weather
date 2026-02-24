@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import api_router
 from app.config import settings
 from app.database import async_session, engine
+from app.middleware.locale import LocaleMiddleware
 from app.seed import run_seed
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Bike Weather API", version="0.1.0", lifespan=lifespan)
+
+app.add_middleware(LocaleMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

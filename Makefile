@@ -4,7 +4,7 @@ export
 
 COMPOSE_DEV := docker compose -f docker-compose.yml
 
-.PHONY: help setup dev dev-stop db-up db-stop db-migrate db-reset db-shell test-backend build-frontend clean
+.PHONY: help setup dev dev-stop db-up db-stop db-migrate db-reset db-shell test-backend test-agent build-frontend clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -12,6 +12,7 @@ help: ## Show this help
 setup: ## Create .env from template and install all dependencies
 	@test -f .env || (cp .env.example .env && echo "Created .env from .env.example")
 	cd backend && uv sync --all-extras
+	cd agent && uv sync --all-extras
 	cd frontend && npm install
 
 dev: db-up db-migrate ## Start PostgreSQL, run migrations, seed, launch backend + frontend
@@ -42,10 +43,14 @@ db-shell: ## Open psql shell in the database container
 test-backend: ## Run backend tests with pytest
 	cd backend && uv run pytest
 
+test-agent: ## Run agent tests with pytest
+	cd agent && uv run pytest
+
 build-frontend: ## Build frontend for production
 	cd frontend && npm run build
 
 clean: ## Remove venv, node_modules, and dist
 	rm -rf backend/.venv
+	rm -rf agent/.venv
 	rm -rf frontend/node_modules
 	rm -rf frontend/dist

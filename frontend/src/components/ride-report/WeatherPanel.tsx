@@ -6,6 +6,7 @@ import {
   Sunrise,
   Sunset,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { WeatherData } from './types'
 import { WeatherIcon } from './WeatherIcon'
 
@@ -38,6 +39,8 @@ function WeatherStat({ icon, label, value, subValue }: WeatherStatProps) {
 }
 
 export function WeatherPanel({ weather }: WeatherPanelProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
       {/* Hero section */}
@@ -56,7 +59,7 @@ export function WeatherPanel({ weather }: WeatherPanelProps) {
               </span>
             </div>
             <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-              Feels like {weather.tempFeelsLike}{weather.tempUnit}
+              {t('report.weather.feelsLike', { temp: weather.tempFeelsLike, unit: weather.tempUnit })}
             </p>
             <p className="text-sm text-stone-600 dark:text-stone-300 mt-2 font-medium">
               {weather.description}
@@ -72,34 +75,34 @@ export function WeatherPanel({ weather }: WeatherPanelProps) {
       <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
         <WeatherStat
           icon={<Droplets className="w-4 h-4" />}
-          label="Precipitation"
+          label={t('report.weather.precipitation')}
           value={`${weather.precipitation}${weather.precipitationUnit}`}
         />
         <WeatherStat
           icon={<Wind className="w-4 h-4" />}
-          label="Wind"
+          label={t('report.weather.wind')}
           value={`${weather.windSpeed} ${weather.windUnit}`}
-          subValue={`from ${weather.windDirection}`}
+          subValue={t('report.weather.windFrom', { direction: weather.windDirection })}
         />
         <WeatherStat
           icon={<Thermometer className="w-4 h-4" />}
-          label="Humidity"
+          label={t('report.weather.humidity')}
           value={`${weather.humidity}%`}
         />
         <WeatherStat
           icon={<Eye className="w-4 h-4" />}
-          label="UV-Index"
+          label={t('report.weather.uvIndex')}
           value={`${weather.uvIndex}`}
-          subValue={weather.uvIndex >= 6 ? 'High' : weather.uvIndex >= 3 ? 'Medium' : 'Low'}
+          subValue={weather.uvIndex >= 6 ? t('report.weather.uvHigh') : weather.uvIndex >= 3 ? t('report.weather.uvMedium') : t('report.weather.uvLow')}
         />
         <WeatherStat
           icon={<Sunrise className="w-4 h-4" />}
-          label="Sunrise"
+          label={t('report.weather.sunrise')}
           value={weather.sunrise}
         />
         <WeatherStat
           icon={<Sunset className="w-4 h-4" />}
-          label="Sunset"
+          label={t('report.weather.sunset')}
           value={weather.sunset}
         />
       </div>

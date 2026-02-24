@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { RideLocation, DayStop, LocationSuggestion } from './types'
 import { LocationPicker } from './LocationPicker'
 
@@ -17,6 +18,8 @@ export function DayLocationList({
   onStopSearch,
   onChange,
 }: DayLocationListProps) {
+  const { t } = useTranslation()
+
   const handleAdd = () => {
     onChange([...dayStops, { location: { address: '' }, plannedKm: null }])
   }
@@ -58,7 +61,7 @@ export function DayLocationList({
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         </div>
         <span className="font-medium text-stone-600 dark:text-stone-400">
-          Day 1: {startLocation?.address || 'Start location'}
+          Day 1: {startLocation?.address || t('planner.label.startLocation')}
         </span>
       </div>
 
@@ -78,7 +81,7 @@ export function DayLocationList({
                   onSearch={q => onStopSearch?.(index, q)}
                   onSelect={s => handleSelectSuggestion(index, s)}
                   onClear={() => handleClearLocation(index)}
-                  placeholder={`Overnight stop ${index + 1}…`}
+                  placeholder={t('dayList.overnightStop', { n: index + 1 })}
                   compact
                   hideLocate
                 />
@@ -89,7 +92,7 @@ export function DayLocationList({
                   onClick={() => handleRemove(index)}
                   className="mt-1.5 p-1.5 rounded-lg text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-xs font-medium shrink-0"
                 >
-                  Remove
+                  {t('common.remove')}
                 </button>
               )}
             </div>
@@ -120,12 +123,12 @@ export function DayLocationList({
         className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors ml-7"
       >
         <Plus className="w-3 h-3" strokeWidth={2.5} />
-        Add overnight stop
+        {t('dayList.addStop')}
       </button>
 
       {dayStops.length > 0 && (
         <p className="text-[11px] text-stone-400 dark:text-stone-500 ml-7">
-          {totalDays} riding days · Weather fetched per day at each start location
+          {t('dayList.ridingDays', { count: totalDays })}
         </p>
       )}
     </div>

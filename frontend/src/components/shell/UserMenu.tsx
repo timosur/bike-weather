@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { LogOut, ChevronDown, Shield } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface UserMenuProps {
   user: { name: string; avatarUrl?: string }
@@ -11,6 +12,7 @@ interface UserMenuProps {
 export function UserMenu({ user, isAdmin, onNavigate, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   const initials = user.name
     .split(' ')
@@ -58,7 +60,7 @@ export function UserMenu({ user, isAdmin, onNavigate, onLogout }: UserMenuProps)
       {open && (
         <div className="absolute right-0 mt-1 w-44 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg py-1 z-50">
           <div className="px-3 py-2 border-b border-stone-100 dark:border-stone-800">
-            <p className="text-xs text-stone-500 dark:text-stone-400">Signed in as</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400">{t('common.signedInAs')}</p>
             <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{user.name}</p>
           </div>
           {isAdmin && (
@@ -70,7 +72,7 @@ export function UserMenu({ user, isAdmin, onNavigate, onLogout }: UserMenuProps)
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Admin
+              {t('common.admin')}
             </button>
           )}
           <button
@@ -81,7 +83,7 @@ export function UserMenu({ user, isAdmin, onNavigate, onLogout }: UserMenuProps)
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-600 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
-            Logout
+            {t('common.logout')}
           </button>
         </div>
       )}

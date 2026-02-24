@@ -1,12 +1,13 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Send, Loader2, CheckCircle2 } from 'lucide-react'
 import type { ContactPageProps, ContactCategory, ContactFormData } from './types'
 
-const categories: { value: ContactCategory; label: string }[] = [
-  { value: 'feedback', label: 'Feedback' },
-  { value: 'bug', label: 'Report bug' },
-  { value: 'feature', label: 'Feature request' },
-  { value: 'sonstiges', label: 'Other' },
+const categoryKeys: { value: ContactCategory; key: string }[] = [
+  { value: 'feedback', key: 'contact.category.feedback' },
+  { value: 'bug', key: 'contact.category.bug' },
+  { value: 'feature', key: 'contact.category.feature' },
+  { value: 'sonstiges', key: 'contact.category.other' },
 ]
 
 export function ContactPage({
@@ -22,11 +23,12 @@ export function ContactPage({
     message: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { t } = useTranslation()
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Valid email required'
-    if (!form.message.trim()) errs.message = 'Please enter a message'
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) errs.email = t('contact.validation.emailRequired')
+    if (!form.message.trim()) errs.message = t('contact.validation.messageRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -52,10 +54,10 @@ export function ContactPage({
             className="text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            Message sent
+            {t('contact.success.heading')}
           </h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 max-w-sm mx-auto">
-            Thank you for your feedback! I read every message and will get back to you as soon as possible.
+            {t('contact.success.text')}
           </p>
         </div>
       </div>
@@ -71,10 +73,10 @@ export function ContactPage({
             className="text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            Contact &amp; Feedback
+            {t('contact.heading')}
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">
-            Fahrrad Wetter thrives on your feedback. Whether it's a suggestion, bug report, or feature request — I appreciate every message.
+            {t('contact.subheading')}
           </p>
         </div>
 
@@ -92,10 +94,10 @@ export function ContactPage({
           {/* Category */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-              Category
+              {t('contact.category.label')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {categories.map(c => (
+              {categoryKeys.map(c => (
                 <button
                   key={c.value}
                   type="button"
@@ -106,7 +108,7 @@ export function ContactPage({
                       : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
                   }`}
                 >
-                  {c.label}
+                  {t(c.key)}
                 </button>
               ))}
             </div>
@@ -115,13 +117,13 @@ export function ContactPage({
           {/* Name */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-              Name <span className="normal-case font-normal">(optional)</span>
+              {t('contact.name')} <span className="normal-case font-normal">{t('contact.nameOptional')}</span>
             </label>
             <input
               type="text"
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-              placeholder="Your name"
+              placeholder={t('contact.namePlaceholder')}
               className={`${inputBase} ${inputNormal}`}
             />
           </div>
@@ -129,13 +131,13 @@ export function ContactPage({
           {/* Email */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-              E-Mail
+              {t('contact.email')}
             </label>
             <input
               type="email"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              placeholder="your@email.com"
+              placeholder={t('contact.emailPlaceholder')}
               className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
             />
             {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
@@ -144,12 +146,12 @@ export function ContactPage({
           {/* Message */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-              Message
+              {t('contact.message')}
             </label>
             <textarea
               value={form.message}
               onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-              placeholder="What would you like to share?"
+              placeholder={t('contact.messagePlaceholder')}
               rows={5}
               className={`${inputBase} resize-none ${errors.message ? inputError : inputNormal}`}
             />
@@ -167,13 +169,13 @@ export function ContactPage({
             ) : (
               <Send className="w-4 h-4" strokeWidth={2} />
             )}
-            Submit
+            {t('contact.submit')}
           </button>
         </form>
 
         {/* Personal note */}
         <p className="text-center text-xs text-stone-400 dark:text-stone-500 leading-relaxed">
-          I read every message personally and respond as soon as possible.
+          {t('contact.personalNote')}
         </p>
       </div>
     </div>

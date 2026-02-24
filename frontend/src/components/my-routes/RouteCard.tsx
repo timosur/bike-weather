@@ -1,45 +1,35 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MapPin, Route, Gauge, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { SavedRoute, ConditionRating } from './types'
 
-const conditionConfig: Record<ConditionRating, { label: string; bg: string; text: string; dot: string }> = {
-  ideal: {
-    label: 'Ideal',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-    text: 'text-emerald-700 dark:text-emerald-400',
-    dot: 'bg-emerald-500',
-  },
-  good: {
-    label: 'Good',
-    bg: 'bg-amber-50 dark:bg-amber-950/40',
-    text: 'text-amber-700 dark:text-amber-400',
-    dot: 'bg-amber-500',
-  },
-  caution: {
-    label: 'Caution',
-    bg: 'bg-orange-50 dark:bg-orange-950/40',
-    text: 'text-orange-700 dark:text-orange-400',
-    dot: 'bg-orange-500',
-  },
-  'not-recommended': {
-    label: 'Not recommended',
-    bg: 'bg-red-50 dark:bg-red-950/40',
-    text: 'text-red-700 dark:text-red-400',
-    dot: 'bg-red-500',
-  },
-}
-
-function formatRelativeDate(iso: string): string {
-  const date = new Date(iso)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
-  if (diffDays < 7) return `${diffDays} days ago`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+function getConditionConfig(t: (key: string) => string): Record<ConditionRating, { label: string; bg: string; text: string; dot: string }> {
+  return {
+    ideal: {
+      label: t('report.condition.ideal'),
+      bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+      text: 'text-emerald-700 dark:text-emerald-400',
+      dot: 'bg-emerald-500',
+    },
+    good: {
+      label: t('report.condition.good'),
+      bg: 'bg-amber-50 dark:bg-amber-950/40',
+      text: 'text-amber-700 dark:text-amber-400',
+      dot: 'bg-amber-500',
+    },
+    caution: {
+      label: t('report.condition.caution'),
+      bg: 'bg-orange-50 dark:bg-orange-950/40',
+      text: 'text-orange-700 dark:text-orange-400',
+      dot: 'bg-orange-500',
+    },
+    'not-recommended': {
+      label: t('report.condition.notRecommended'),
+      bg: 'bg-red-50 dark:bg-red-950/40',
+      text: 'text-red-700 dark:text-red-400',
+      dot: 'bg-red-500',
+    },
+  }
 }
 
 interface RouteCardProps {
@@ -50,8 +40,23 @@ interface RouteCardProps {
 }
 
 export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps) {
+  const { t, i18n } = useTranslation()
+  const conditionConfig = getConditionConfig(t)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  function formatRelativeDate(iso: string): string {
+    const date = new Date(iso)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return t('routes.card.today')
+    if (diffDays === 1) return t('routes.card.yesterday')
+    if (diffDays < 7) return t('routes.card.daysAgo', { count: diffDays })
+    if (diffDays < 30) return t('routes.card.weeksAgo', { count: Math.floor(diffDays / 7) })
+    return date.toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -105,7 +110,7 @@ export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps)
                   className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
                 >
                   <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
-                  Edit
+                  {t('routes.actions.edit')}
                 </button>
                 <button
                   onClick={(e) => {
@@ -116,7 +121,7 @@ export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps)
                   className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
-                  Delete
+                  {t('routes.actions.delete')}
                 </button>
               </div>
             )}
@@ -152,7 +157,7 @@ export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps)
             </span>
           ) : (
             <span className="text-xs text-stone-400 dark:text-stone-500 italic">
-              Not yet checked
+              {t('routes.card.notYetChecked')}
             </span>
           )}
 

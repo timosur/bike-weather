@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { MyRoutesProps, SavedRoute } from './types'
 import { RouteCard } from './RouteCard'
 import { EditRouteModal } from './EditRouteModal'
@@ -6,6 +7,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { EmptyRoutes } from './EmptyRoutes'
 
 export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, onNavigateToPlanner }: MyRoutesProps) {
+  const { t } = useTranslation()
   const [editingRoute, setEditingRoute] = useState<SavedRoute | null>(null)
   const [deletingRoute, setDeletingRoute] = useState<SavedRoute | null>(null)
 
@@ -33,7 +35,7 @@ export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, on
           className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          Meine Routen
+          {t('routes.heading')}
         </h1>
         <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] px-2 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
           {routes.length}

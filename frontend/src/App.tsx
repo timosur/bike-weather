@@ -1,5 +1,6 @@
 import { useCallback, useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AppShell } from './components/shell'
 import type { NavigationItem, FooterSection } from './components/shell'
 import { RidePlannerSkeleton } from './components/ride-planner'
@@ -34,38 +35,44 @@ const AdminFaqPage = lazy(() => import('./pages/admin/AdminFaqPage'))
 const AdminAboutPage = lazy(() => import('./pages/admin/AdminAboutPage'))
 const AdminContactsPage = lazy(() => import('./pages/admin/AdminContactsPage'))
 
-const navigationItems: NavigationItem[] = [
-  { label: 'Planner', href: '/planner' },
-  { label: 'Ride Report', href: '/report' },
-  { label: 'Products', href: '/products' },
-  { label: 'My Routes', href: '/routes', requiresAuth: true },
-  { label: 'About Me', href: '/about-me' },
-]
+function useNavigationItems(): NavigationItem[] {
+  const { t } = useTranslation()
+  return [
+    { label: t('shell.nav.planner'), href: '/planner' },
+    { label: t('shell.nav.rideReport'), href: '/report' },
+    { label: t('shell.nav.products'), href: '/products' },
+    { label: t('shell.nav.myRoutes'), href: '/routes', requiresAuth: true },
+    { label: t('shell.nav.aboutMe'), href: '/about-me' },
+  ]
+}
 
-const footerSections: FooterSection[] = [
-  {
-    title: 'Product',
-    links: [
-      { label: 'Ride Planner', href: '/planner' },
-      { label: 'FAQ', href: '/faq' },
-      { label: 'About Me', href: '/about-me' },
-    ],
-  },
-  {
-    title: 'Contact',
-    links: [
-      { label: 'Give Feedback', href: '/contact' },
-      { label: 'Sign In', href: '/login' },
-    ],
-  },
-  {
-    title: 'Legal',
-    links: [
-      { label: 'Imprint', href: '/imprint' },
-      { label: 'Privacy Policy', href: '/privacy-policy' },
-    ],
-  },
-]
+function useFooterSections(): FooterSection[] {
+  const { t } = useTranslation()
+  return [
+    {
+      title: t('shell.footerSection.product'),
+      links: [
+        { label: t('shell.footerLinks.ridePlanner'), href: '/planner' },
+        { label: t('shell.footerLinks.faq'), href: '/faq' },
+        { label: t('shell.footerLinks.aboutMe'), href: '/about-me' },
+      ],
+    },
+    {
+      title: t('shell.footerSection.contact'),
+      links: [
+        { label: t('shell.footerLinks.giveFeedback'), href: '/contact' },
+        { label: t('shell.footerLinks.signIn'), href: '/login' },
+      ],
+    },
+    {
+      title: t('shell.footerSection.legal'),
+      links: [
+        { label: t('shell.footerLinks.imprint'), href: '/imprint' },
+        { label: t('shell.footerLinks.privacyPolicy'), href: '/privacy-policy' },
+      ],
+    },
+  ]
+}
 
 /** Redirects to /login if user is not authenticated */
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -98,6 +105,9 @@ function AppContent() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, isAdmin, user, logout, getAccessToken } = useAuth()
+  const { i18n } = useTranslation()
+  const navigationItems = useNavigationItems()
+  const footerSections = useFooterSections()
 
   useEffect(() => {
     setAccessTokenProvider(getAccessToken)
@@ -127,8 +137,10 @@ function AppContent() {
       footerSections={footerSections}
       user={appUser}
       isAdmin={isAdmin}
+      language={i18n.language === 'en' ? 'en' : 'de'}
       onNavigate={handleNavigate}
       onLogout={handleLogout}
+      onLanguageChange={(lang) => i18n.changeLanguage(lang)}
     >
       <Routes>
         <Route path="/" element={<Navigate to="/planner" replace />} />

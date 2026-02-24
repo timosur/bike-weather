@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { SavedRoute } from './types'
 
 interface DeleteConfirmDialogProps {
@@ -8,6 +9,8 @@ interface DeleteConfirmDialogProps {
 }
 
 export function DeleteConfirmDialog({ route, onConfirm, onCancel }: DeleteConfirmDialogProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -23,12 +26,11 @@ export function DeleteConfirmDialog({ route, onConfirm, onCancel }: DeleteConfir
           className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          Really delete route?
+          {t('routes.delete.heading')}
         </h3>
 
         <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
-          <span className="font-medium text-stone-700 dark:text-stone-300">{route.name}</span> will be
-          permanently deleted and cannot be recovered.
+          <span className="font-medium text-stone-700 dark:text-stone-300">{route.name}</span> {t('routes.delete.text')}
         </p>
 
         <div className="flex items-center justify-center gap-3">
@@ -36,13 +38,13 @@ export function DeleteConfirmDialog({ route, onConfirm, onCancel }: DeleteConfir
             onClick={onCancel}
             className="px-4 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 transition-colors"
           >
-            Delete
+            {t('common.delete')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Info, Thermometer, CloudRain, Wind } from 'lucide-react'
 import type { ProductCategoryDetailProps, Product } from './types'
 import { CategoryIcon } from './CategoryIcon'
@@ -42,6 +43,7 @@ export function ProductCategoryDetail({
   onBack,
 }: ProductCategoryDetailProps) {
   const [activeFilter, setActiveFilter] = useState<WeatherFilter>('all')
+  const { t } = useTranslation()
 
   const filteredProducts = products.filter((p) => matchesFilter(p, activeFilter))
 
@@ -57,7 +59,7 @@ export function ProductCategoryDetail({
           className="inline-flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
-          All categories
+          {t('products.allCategories')}
         </button>
 
         <div className="flex items-center gap-3">
@@ -72,7 +74,7 @@ export function ProductCategoryDetail({
               {category.name}
             </h1>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
-              {products.length} {products.length === 1 ? 'Product' : 'Products'}
+              {products.length} {products.length === 1 ? t('products.productCountOne') : t('products.productCount')}
             </p>
           </div>
         </div>
@@ -119,7 +121,7 @@ export function ProductCategoryDetail({
       ) : (
         <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-10 text-center">
           <p className="text-sm text-stone-400 dark:text-stone-500">
-            No products for this weather in this category.
+            {t('products.noProducts')}
           </p>
         </div>
       )}

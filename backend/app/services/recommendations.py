@@ -6,6 +6,14 @@ from datetime import datetime, timedelta
 from app.rules.clothing_rules import get_clothing_items
 from app.rules.condition import compute_condition
 from app.rules.equipment_rules import get_equipment_items
+from app.rules.translations import (
+    BIKE_LABELS,
+    DAY_LABELS,
+    INTENSITY_LABELS,
+    RIDE_NAME_TEMPLATE,
+    RIDING_STYLE_TEMPLATE,
+    get_wmo_description,
+)
 from app.schemas.report import (
     ClothingAlternativeSchema,
     ClothingItemSchema,
@@ -18,13 +26,6 @@ from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
 from app.services.weather import WeatherForecast, WeatherService, weather_service
 
-BIKE_LABELS = {"rennrad": "Road bike", "gravel": "Gravel", "mtb": "MTB", "city": "City"}
-INTENSITY_LABELS = {
-    "gemuetlich": "Relaxed",
-    "moderat": "Moderate",
-    "sportlich": "Sporty",
-}
-
 # Condition severity ordering for "worst of" calculation
 _CONDITION_ORDER = {"ideal": 0, "good": 1, "caution": 2, "not-recommended": 3}
 
@@ -35,7 +36,7 @@ def _worst_condition(conditions: list[str]) -> str:
     return max(conditions, key=lambda c: _CONDITION_ORDER.get(c, 1))
 
 
-def _forecast_to_weather_schema(f: WeatherForecast) -> WeatherDataSchema:
+def _forecast_to_weather_schema(f: WeatherForecast, locale: str = "de") -> WeatherDataSchema:
     return WeatherDataSchema(
         tempMin=f.temp_min,
         tempMax=f.temp_max,
@@ -48,7 +49,7 @@ def _forecast_to_weather_schema(f: WeatherForecast) -> WeatherDataSchema:
         sunrise=f.sunrise,
         sunset=f.sunset,
         icon=f.icon,
-        description=f.description,
+        description=get_wmo_description(f.weather_code, locale),
     )
 
 
@@ -75,6 +76,7 @@ def _equipment_dicts_to_schemas(items: list[dict]) -> list[EquipmentItemSchema]:
 async def build_report(
     ride_input: RideInputSchema,
     ws: WeatherService | None = None,
+    locale: str = "de",
 ) -> RideReportSchema:
     """Build a complete ride report from input."""
     ws = ws or weather_service
@@ -141,35 +143,42 @@ async def build_report(
         conditions.append(condition)
 
         clothing = get_clothing_items(
-            forecast, ride_input.bikeType, ride_input.intensity
+            forecast, ride_input.bikeType, ride_input.intensity, locale=locale
         )
         equipment = get_equipment_items(
             forecast,
             distance_km=ride_input.distanceKm,
             ride_start_time=ride_input.startTime,
+            locale=locale,
         )
+
+        day_label: str
+        if len(day_locations) == 1:
+            day_label = DAY_LABELS["today"][locale]
+        else:
+            day_label = DAY_LABELS["day"][locale].format(n=day_idx + 1)
 
         day_forecasts.append(
             DayForecastSchema(
                 id=f"day-{day_idx + 1:03d}",
                 date=date_str,
-                dayLabel=f"Day {day_idx + 1}" if len(day_locations) > 1 else "Today",
+                dayLabel=day_label,
                 location=location_name,
                 condition=condition,
-                weather=_forecast_to_weather_schema(forecast),
+                weather=_forecast_to_weather_schema(forecast, locale),
                 clothingItems=_clothing_dicts_to_schemas(clothing),
                 equipment=_equipment_dicts_to_schemas(equipment),
             )
         )
 
-    bike_label = BIKE_LABELS.get(ride_input.bikeType, ride_input.bikeType)
-    intensity_label = INTENSITY_LABELS.get(ride_input.intensity, ride_input.intensity)
+    bike_label = BIKE_LABELS.get((ride_input.bikeType, locale), ride_input.bikeType)
+    intensity_label = INTENSITY_LABELS.get((ride_input.intensity, locale), ride_input.intensity)
 
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",
-        rideName=f"{ride_input.location.address} Ride",
+        rideName=RIDE_NAME_TEMPLATE[locale].format(location=ride_input.location.address),
         startLocation=ride_input.location.address,
-        ridingStyle=f"{bike_label} \u00b7 {intensity_label}",
+        ridingStyle=RIDING_STYLE_TEMPLATE[locale].format(bike=bike_label, intensity=intensity_label),
         totalDistance=ride_input.distanceKm or 0,
         overallCondition=_worst_condition(conditions),
         days=day_forecasts,

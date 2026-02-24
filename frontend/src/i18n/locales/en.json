@@ -1,0 +1,355 @@
+{
+  "shell": {
+    "brand": "Fahrrad Wetter",
+    "footer": {
+      "tagline": "Weather-based clothing recommendations for cyclists.",
+      "copyright": "© {{year}} Fahrrad Wetter. A project by Timo.",
+      "imprint": "Imprint",
+      "privacy": "Privacy"
+    },
+    "nav": {
+      "planner": "Planner",
+      "rideReport": "Ride Report",
+      "products": "Products",
+      "myRoutes": "My Routes",
+      "aboutMe": "About Me"
+    },
+    "footerSection": {
+      "product": "Product",
+      "contact": "Contact",
+      "legal": "Legal"
+    },
+    "footerLinks": {
+      "ridePlanner": "Ride Planner",
+      "faq": "FAQ",
+      "aboutMe": "About Me",
+      "giveFeedback": "Give Feedback",
+      "signIn": "Sign In",
+      "imprint": "Imprint",
+      "privacyPolicy": "Privacy Policy"
+    },
+    "langSwitch": {
+      "toEn": "Switch to English",
+      "toDe": "Auf Deutsch wechseln"
+    }
+  },
+  "planner": {
+    "heading": "What should I wear?",
+    "subheading": "Enter your ride details — we'll tell you what you need.",
+    "label": {
+      "startLocation": "Start location",
+      "departure": "Departure",
+      "bikeType": "Bike type",
+      "intensity": "Intensity",
+      "distance": "Distance",
+      "elevation": "Elevation",
+      "advancedOptions": "Advanced options",
+      "multiDayTour": "Multi-day tour",
+      "overnightLocations": "Overnight locations",
+      "endDate": "End date: {{date}}"
+    },
+    "bikeType": {
+      "rennrad": "Road bike",
+      "rennradDesc": "Fast on tarmac — light clothing, aerodynamic.",
+      "gravel": "Gravel",
+      "gravelDesc": "Mix of road and gravel — versatile riding.",
+      "mtb": "MTB",
+      "mtbDesc": "Off-road on trails — rugged gear required.",
+      "city": "City",
+      "cityDesc": "Urban traffic and short distances — everyday practical."
+    },
+    "intensity": {
+      "gemuetlich": "Relaxed",
+      "gemuetlichDesc": "Relaxed pace, minimal sweating — pleasure ride.",
+      "moderat": "Moderate",
+      "moderatDesc": "Medium pace, light sweating — active tour.",
+      "sportlich": "Sporty",
+      "sportlichDesc": "High pace, heavy sweating — training ride."
+    },
+    "preset": {
+      "commute": "Commute",
+      "commuteDesc": "Short daily ride to work",
+      "weekendTour": "Weekend tour",
+      "weekendTourDesc": "Relaxed loop through the countryside",
+      "roadBikeRide": "Road bike ride",
+      "roadBikeRideDesc": "Sporty ride at high pace",
+      "multiDayTrip": "Multi-day trip",
+      "multiDayTripDesc": "Bike tour over several days"
+    },
+    "button": {
+      "getWeather": "Get weather",
+      "fetchingWeather": "Fetching weather…"
+    },
+    "validation": {
+      "locationRequired": "Please enter a start location",
+      "dateRequired": "Date required",
+      "timeRequired": "Time required"
+    },
+    "placeholder": {
+      "cityOrAddress": "Enter city or address…",
+      "egDistance": "e.g. 35",
+      "egElevation": "e.g. 800"
+    },
+    "seo": {
+      "heading": "How the Bike Weather Planner works",
+      "intro": "Fahrrad Wetter helps you find the right clothing and gear for your next ride — based on real-time weather at your start location. Simply enter your tour details and receive a personalized recommendation.",
+      "startLocationTitle": "Start location",
+      "startLocationDesc": "The location determines which weather data is retrieved. You can search for an address or use your current GPS location. For multi-day tours, weather is fetched for each day at the respective overnight location.",
+      "dateTimeTitle": "Date & Time",
+      "dateTimeDesc": "Weather changes significantly throughout the day. The start time determines when the forecast is evaluated — so you get recommendations that match temperature, wind, and precipitation during your ride.",
+      "bikeTypeTitle": "Bike type",
+      "bikeTypeDesc": "Road bike, gravel, MTB, or city — each bike type brings different clothing and protection requirements. Road cyclists need tighter, aerodynamic clothing, while MTB riders tend to prefer rugged, weather-resistant gear.",
+      "intensityTitle": "Intensity",
+      "intensityDesc": "Your planned effort affects how warm you'll get while riding. At a relaxed pace you cool down faster and need more insulation; at high intensity a lighter layer is often enough.",
+      "distanceTitle": "Distance & Elevation",
+      "distanceDesc": "Optional inputs that trigger additional recommendations for longer tours or significant elevation gain — such as provisions, spare clothing, or protection for alpine conditions.",
+      "multiDayTitle": "Multi-day tours",
+      "multiDayDesc": "Planning a tour over several days? You can specify a location for each overnight stop. Weather is then calculated separately per stage, so you have the right gear for every day."
+    }
+  },
+  "location": {
+    "searchLocation": "Search location",
+    "detectLocation": "Detect location",
+    "detecting": "Detecting…"
+  },
+  "dayList": {
+    "overnightStop": "Overnight stop {{n}}…",
+    "addStop": "Add overnight stop",
+    "ridingDays": "{{count}} riding days · Weather fetched per day at each start location"
+  },
+  "report": {
+    "share": "Share",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "days": "{{count}} days",
+    "section": {
+      "weather": "Weather",
+      "clothing": "Clothing Recommendation",
+      "equipment": "Checklist"
+    },
+    "noData": {
+      "heading": "No ride data",
+      "text": "Plan a ride first to see your weather report.",
+      "goToPlanner": "Go to Planner"
+    },
+    "error": {
+      "heading": "Could not load report",
+      "fallback": "Something went wrong. Please try again.",
+      "tryAgain": "Try again",
+      "backToPlanner": "Back to Planner"
+    },
+    "condition": {
+      "ideal": "Ideal",
+      "good": "Good",
+      "caution": "Caution",
+      "notRecommended": "Not recommended"
+    },
+    "weather": {
+      "feelsLike": "Feels like {{temp}}{{unit}}",
+      "precipitation": "Precipitation",
+      "wind": "Wind",
+      "windFrom": "from {{direction}}",
+      "humidity": "Humidity",
+      "uvIndex": "UV Index",
+      "uvHigh": "High",
+      "uvMedium": "Medium",
+      "uvLow": "Low",
+      "sunrise": "Sunrise",
+      "sunset": "Sunset"
+    },
+    "clothing": {
+      "alternativeAvailable": "Alternative available",
+      "swapFor": "Swap for",
+      "cancel": "Cancel"
+    },
+    "equipment": {
+      "heading": "Equipment"
+    },
+    "routeSaved": "Route saved",
+    "routeSaveError": "Could not save route"
+  },
+  "products": {
+    "heading": "Products",
+    "subheading": "Recommended gear and clothing for every weather condition.",
+    "productCount": "Products",
+    "productCountOne": "Product",
+    "allCategories": "All categories",
+    "noProducts": "No products for this weather in this category.",
+    "categoryNotFound": "Category not found",
+    "backToProducts": "Back to Products"
+  },
+  "routes": {
+    "heading": "My Routes",
+    "empty": {
+      "heading": "No saved routes yet",
+      "text": "Plan your first ride and save it to quickly access it anytime.",
+      "cta": "Plan first route"
+    },
+    "card": {
+      "notYetChecked": "Not yet checked",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago",
+      "weeksAgo": "{{count}} weeks ago"
+    },
+    "edit": {
+      "heading": "Edit route",
+      "routeName": "Route name",
+      "startLocation": "Start location",
+      "distance": "Distance ({{unit}})",
+      "ridingStyle": "Riding style"
+    },
+    "delete": {
+      "heading": "Really delete route?",
+      "text": "will be permanently deleted and cannot be recovered."
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "auth": {
+    "login": {
+      "heading": "Welcome back",
+      "subheading": "Sign in to see your saved routes.",
+      "tab": "Sign in",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot password?"
+    },
+    "register": {
+      "heading": "Create account",
+      "subheading": "Create an account to save routes.",
+      "tab": "Register",
+      "submit": "Register",
+      "passwordPlaceholder": "Password (min. 8 characters)",
+      "confirmPassword": "Confirm password"
+    },
+    "googleLogin": "Sign in with Google",
+    "or": "or",
+    "noAccountNeeded": "No account needed — you can use Fahrrad Wetter without signing up.",
+    "validation": {
+      "emailRequired": "Valid email required",
+      "passwordRequired": "Password required",
+      "passwordMin": "At least 8 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "contact": {
+    "heading": "Contact & Feedback",
+    "subheading": "Fahrrad Wetter thrives on your feedback. Whether it's a suggestion, bug report, or feature request — I appreciate every message.",
+    "category": {
+      "label": "Category",
+      "feedback": "Feedback",
+      "bug": "Report bug",
+      "feature": "Feature request",
+      "other": "Other"
+    },
+    "name": "Name",
+    "nameOptional": "(optional)",
+    "namePlaceholder": "Your name",
+    "email": "E-Mail",
+    "emailPlaceholder": "your@email.com",
+    "message": "Message",
+    "messagePlaceholder": "What would you like to share?",
+    "submit": "Submit",
+    "personalNote": "I read every message personally and respond as soon as possible.",
+    "success": {
+      "heading": "Message sent",
+      "text": "Thank you for your feedback! I read every message and will get back to you as soon as possible."
+    },
+    "validation": {
+      "emailRequired": "Valid email required",
+      "messageRequired": "Please enter a message"
+    }
+  },
+  "faq": {
+    "heading": "Frequently Asked Questions",
+    "subheading": "Everything you need to know about Fahrrad Wetter.",
+    "questionNotListed": "Question not listed?",
+    "contactHint": {
+      "before": "Write to me on the",
+      "link": "contact page",
+      "after": "— I'll respond as soon as possible."
+    }
+  },
+  "about": {
+    "badge": "Rain or shine on the bike",
+    "heading": "Hi, I'm Timo",
+    "intro": "Born in '92, passionate software developer and cyclist. I built Fahrrad Wetter because I needed a solution myself.",
+    "giveFeedback": "Give feedback"
+  },
+  "imprint": {
+    "heading": "Imprint",
+    "infoHeading": "Information according to § 5 TMG",
+    "contact": "Contact",
+    "liability": "Liability for content",
+    "liabilityText": "As a service provider, we are responsible for our own content on these pages in accordance with § 7 (1) TMG under general law. According to §§ 8 to 10 TMG, however, we as a service provider are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.",
+    "linksHeading": "Liability for links",
+    "linksText": "Our website contains links to external third-party websites, over whose content we have no influence. Therefore, we cannot assume any liability for this third-party content. The respective provider or operator of the linked pages is always responsible for their content.",
+    "copyright": "Copyright",
+    "copyrightText": "The content and works created by the site operator on these pages are subject to German copyright law. Reproduction, editing, distribution, and any kind of use beyond the limits of copyright law require the written consent of the respective author or creator."
+  },
+  "privacy": {
+    "heading": "Privacy Policy",
+    "contents": "Contents",
+    "section": {
+      "responsible": {
+        "title": "1. Responsible party",
+        "navTitle": "Responsible party"
+      },
+      "dataCollected": {
+        "title": "2. Data collected",
+        "navTitle": "Data collected",
+        "locationData": "Location data",
+        "locationDataText": "When using the GPS feature, your location is determined to retrieve weather data. The location is not stored and is only used for the current request.",
+        "usageData": "Usage data",
+        "usageDataText": "When visiting the website, technical data is automatically collected (IP address, browser type, access time). This data is used to ensure operation and is not evaluated on a personal basis.",
+        "accountData": "Account data",
+        "accountDataText": "Upon registration, we store your email address and an encrypted password. With Google login, we receive your name and email address from Google."
+      },
+      "legalBasis": {
+        "title": "3. Legal basis",
+        "navTitle": "Legal basis",
+        "text": "The processing of personal data is based on Art. 6 Abs. 1 DSGVO: consent (lit. a) for location data and cookies, contract fulfillment (lit. b) for account data, and legitimate interest (lit. f) for usage data to ensure operation."
+      },
+      "cookies": {
+        "title": "4. Cookies & Tracking",
+        "navTitle": "Cookies & Tracking",
+        "text1": "This website uses technically necessary cookies for session management and optional analytics cookies (Google Analytics) to improve the service.",
+        "text2before": "Google Ads are displayed to keep the app free. Google may set cookies and collect data. For more information, see",
+        "text2link": "Google's Privacy Policy"
+      },
+      "thirdParties": {
+        "title": "5. Third parties",
+        "navTitle": "Third parties",
+        "weatherApi": "Weather API:",
+        "weatherApiText": "To retrieve weather data, your selected location is transmitted to an external weather service.",
+        "googleLogin": "Google Login:",
+        "googleLoginText": "When using Google login, data is exchanged with Google in accordance with their privacy policy.",
+        "affiliateLinks": "Affiliate links:",
+        "affiliateLinksText": "Product links lead to external shops. Cookies may be set when clicking."
+      },
+      "rights": {
+        "title": "6. Your rights",
+        "navTitle": "Your rights",
+        "text": "You have the right to access, rectification, deletion, and restriction of processing of your personal data. You can revoke your consent at any time and have a right to data portability. In case of complaints, you can contact the relevant supervisory authority."
+      },
+      "contactPrivacy": {
+        "title": "7. Contact",
+        "navTitle": "Contact",
+        "text": "For privacy-related questions, you can reach me at [deine@email.de]."
+      }
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "remove": "Remove",
+    "loading": "Loading…",
+    "logout": "Logout",
+    "signedInAs": "Signed in as",
+    "admin": "Admin"
+  }
+}

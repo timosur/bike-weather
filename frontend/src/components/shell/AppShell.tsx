@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { Menu, X, Bike } from 'lucide-react'
+import { Menu, X, Bike, LogIn } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { MainNav } from './MainNav'
 import { UserMenu } from './UserMenu'
+import { ThemeToggle } from './ThemeToggle'
+import { useTheme } from '@/hooks/useTheme'
 
 export interface NavigationItem {
   label: string
@@ -44,6 +47,8 @@ export function AppShell({
   onLanguageChange,
 }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, toggle: toggleTheme } = useTheme()
+  const { t } = useTranslation()
 
   const visibleItems = navigationItems.filter(item => !item.requiresAuth || user)
 
@@ -78,14 +83,43 @@ export function AppShell({
 
             {/* Right side */}
             <div className="hidden md:flex items-center gap-2 ml-auto">
-              <button
-                onClick={() => onLanguageChange?.(language === 'de' ? 'en' : 'de')}
-                className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors px-2 py-1.5 rounded hover:bg-stone-100 dark:hover:bg-stone-800"
-              >
-                {language === 'de' ? 'EN' : 'DE'}
-              </button>
-              {user && (
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={() => onLanguageChange?.('de')}
+                  className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
+                    language === 'de'
+                      ? 'bg-stone-100 dark:bg-stone-800'
+                      : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  }`}
+                  aria-label="Deutsch"
+                  title="Deutsch"
+                >
+                  🇩🇪
+                </button>
+                <button
+                  onClick={() => onLanguageChange?.('en')}
+                  className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
+                    language === 'en'
+                      ? 'bg-stone-100 dark:bg-stone-800'
+                      : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  }`}
+                  aria-label="English"
+                  title="English"
+                >
+                  🇬🇧
+                </button>
+              </div>
+              {user ? (
                 <UserMenu user={user} isAdmin={isAdmin} onNavigate={onNavigate} onLogout={onLogout} />
+              ) : (
+                <button
+                  onClick={() => onNavigate?.('/login')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
+                >
+                  <LogIn className="w-3.5 h-3.5" strokeWidth={2} />
+                  {t('common.signIn')}
+                </button>
               )}
             </div>
 
@@ -125,13 +159,34 @@ export function AppShell({
               ))}
             </div>
             <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
-              <button
-                onClick={() => onLanguageChange?.(language === 'de' ? 'en' : 'de')}
-                className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 px-3 py-2 rounded transition-colors"
-              >
-                {language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
-              </button>
-              {user && (
+              <div className="flex items-center gap-2">
+                <ThemeToggle theme={theme} onToggle={toggleTheme} />
+                <div className="flex items-center gap-0.5">
+                  <button
+                    onClick={() => onLanguageChange?.('de')}
+                    className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
+                      language === 'de'
+                        ? 'bg-stone-100 dark:bg-stone-800'
+                        : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
+                    }`}
+                    aria-label="Deutsch"
+                  >
+                    🇩🇪
+                  </button>
+                  <button
+                    onClick={() => onLanguageChange?.('en')}
+                    className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
+                      language === 'en'
+                        ? 'bg-stone-100 dark:bg-stone-800'
+                        : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
+                    }`}
+                    aria-label="English"
+                  >
+                    🇬🇧
+                  </button>
+                </div>
+              </div>
+              {user ? (
                 <button
                   onClick={() => {
                     onLogout?.()
@@ -139,7 +194,18 @@ export function AppShell({
                   }}
                   className="text-xs text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded transition-colors"
                 >
-                  Logout
+                  {t('common.logout')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onNavigate?.('/login')
+                    setMobileMenuOpen(false)
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 px-3 py-2 rounded transition-colors"
+                >
+                  <LogIn className="w-3.5 h-3.5" strokeWidth={2} />
+                  {t('common.signIn')}
                 </button>
               )}
             </div>
@@ -174,7 +240,7 @@ export function AppShell({
                   </span>
                 </button>
                 <p className="text-xs text-stone-400 dark:text-stone-500 leading-relaxed">
-                  Weather-based clothing recommendations for cyclists.
+                  {t('shell.footer.tagline')}
                 </p>
               </div>
 
@@ -203,20 +269,20 @@ export function AppShell({
             {/* Bottom bar */}
             <div className="mt-8 pt-6 border-t border-stone-100 dark:border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-stone-400 dark:text-stone-500">
-                &copy; {new Date().getFullYear()} Fahrrad Wetter. A project by Timo.
+                {t('shell.footer.copyright', { year: new Date().getFullYear() })}
               </p>
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => onNavigate?.('/imprint')}
                   className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 >
-                  Imprint
+                  {t('shell.footer.imprint')}
                 </button>
                 <button
                   onClick={() => onNavigate?.('/privacy-policy')}
                   className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 >
-                  Privacy
+                  {t('shell.footer.privacy')}
                 </button>
               </div>
             </div>

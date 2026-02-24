@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { FaqPageProps } from './types'
 
 export function FaqPage({ items }: FaqPageProps) {
   const [openId, setOpenId] = useState<string | null>(null)
+  const { t } = useTranslation()
 
   const categories = [...new Set(items.map(i => i.category))]
 
@@ -21,10 +23,10 @@ export function FaqPage({ items }: FaqPageProps) {
             className="text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
           >
-            Frequently Asked Questions
+            {t('faq.heading')}
           </h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm">
-            Everything you need to know about Fahrrad Wetter.
+            {t('faq.subheading')}
           </p>
         </div>
 
@@ -80,13 +82,13 @@ export function FaqPage({ items }: FaqPageProps) {
             <MessageCircle className="w-5 h-5 text-emerald-500" strokeWidth={1.5} />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-stone-800 dark:text-stone-200">Question not listed?</p>
+            <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{t('faq.questionNotListed')}</p>
             <p className="text-xs text-stone-400 dark:text-stone-500">
-              Write to me on the{' '}
+              {t('faq.contactHint.before')}{' '}
               <Link to="/contact" className="text-emerald-600 dark:text-emerald-400 hover:underline">
-                contact page
+                {t('faq.contactHint.link')}
               </Link>{' '}
-              — I'll respond as soon as possible.
+              {t('faq.contactHint.after')}
             </p>
           </div>
         </div>

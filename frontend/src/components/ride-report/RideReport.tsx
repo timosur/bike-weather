@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route } from 'lucide-react'
 import type { RideReportProps } from './types'
 import type { Product } from '../product-recommendations/types'
@@ -10,6 +11,7 @@ import { EquipmentList } from './EquipmentList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
 export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
+  const { t } = useTranslation()
   const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
 
   const activeDay = report.days.find((d) => d.id === activeDayId) ?? report.days[0]
@@ -54,7 +56,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             </span>
             {report.days.length > 1 && (
               <span className="text-stone-400 dark:text-stone-500">
-                {report.days.length} Tage
+                {t('report.days', { count: report.days.length })}
               </span>
             )}
           </div>
@@ -69,7 +71,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
           >
             <Share2 className="w-4 h-4" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Teilen</span>
+            <span className="hidden sm:inline">{t('report.share')}</span>
           </button>
           <button
             onClick={() => onSaveRoute?.()}
@@ -87,7 +89,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
               <Bookmark className="w-4 h-4" strokeWidth={1.5} />
             )}
             <span className="hidden sm:inline">
-              {routeSaved ? 'Gespeichert' : routeSaving ? 'Speichern…' : 'Speichern'}
+              {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
             </span>
           </button>
         </div>
@@ -105,7 +107,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
               className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
               style={{ fontFamily: 'Outfit, sans-serif' }}
             >
-              Weather
+              {t('report.section.weather')}
             </h2>
             <WeatherPanel weather={activeDay.weather} />
           </section>
@@ -116,7 +118,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
               className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
               style={{ fontFamily: 'Outfit, sans-serif' }}
             >
-              Clothing Recommendation
+              {t('report.section.clothing')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               {activeDay.clothingItems.map((item) => {
@@ -149,7 +151,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
               className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
               style={{ fontFamily: 'Outfit, sans-serif' }}
             >
-              Checkliste
+              {t('report.section.equipment')}
             </h2>
             <EquipmentList items={activeDay.equipment} />
           </section>

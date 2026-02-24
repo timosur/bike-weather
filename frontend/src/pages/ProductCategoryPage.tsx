@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ProductCategoryDetail, ProductCategoryDetailSkeleton } from '../components/product-recommendations'
 import { fetchCategoryDetail } from '../api/products'
 import type { ProductCategory, Product, Shop, AffiliateDisclosure } from '../components/product-recommendations/types'
 
 export default function ProductCategoryPage() {
+  const { t, i18n } = useTranslation()
   const { categoryId } = useParams<{ categoryId: string }>()
   const navigate = useNavigate()
   const [category, setCategory] = useState<ProductCategory | null>(null)
@@ -26,7 +28,7 @@ export default function ProductCategoryPage() {
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
-  }, [categoryId])
+  }, [categoryId, i18n.language])
 
   if (loading) return <ProductCategoryDetailSkeleton />
 
@@ -37,13 +39,13 @@ export default function ProductCategoryPage() {
           className="text-2xl font-semibold text-stone-800 dark:text-stone-200"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          Category not found
+          {t('products.categoryNotFound')}
         </h1>
         <button
           onClick={() => navigate('/products')}
           className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
         >
-          Back to Products
+          {t('products.backToProducts')}
         </button>
       </div>
     )

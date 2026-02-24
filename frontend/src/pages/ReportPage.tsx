@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
@@ -9,6 +10,7 @@ import { createRoute } from '../api/routes'
 import { useToast } from '../hooks/useToast'
 
 export default function ReportPage() {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const state = location.state as { rideInput?: RideInput; routeId?: string } | null
@@ -31,7 +33,7 @@ export default function ReportPage() {
     setError(null)
     fetchReport(rideInput, routeId)
       .then(setReport)
-      .catch((err) => setError(err.message || 'Failed to load weather report'))
+      .catch((err) => setError(err.message || t('report.error.fallback')))
       .finally(() => setLoading(false))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -43,16 +45,16 @@ export default function ReportPage() {
           className="text-2xl font-semibold text-stone-800 dark:text-stone-200"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          No ride data
+          {t('report.noData.heading')}
         </h1>
         <p className="mt-2 text-stone-500 dark:text-stone-400">
-          Plan a ride first to see your weather report.
+          {t('report.noData.text')}
         </p>
         <button
           onClick={() => navigate('/planner')}
           className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
         >
-          Go to Planner
+          {t('report.noData.goToPlanner')}
         </button>
       </div>
     )
@@ -71,10 +73,10 @@ export default function ReportPage() {
           className="text-2xl font-semibold text-stone-800 dark:text-stone-200"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          Could not load report
+          {t('report.error.heading')}
         </h1>
         <p className="mt-2 text-stone-500 dark:text-stone-400">
-          {error || 'Something went wrong. Please try again.'}
+          {error || t('report.error.fallback')}
         </p>
         <div className="mt-4 flex gap-3 justify-center">
           <button
@@ -83,18 +85,18 @@ export default function ReportPage() {
               setError(null)
               fetchReport(rideInput, routeId)
                 .then(setReport)
-                .catch((err) => setError(err.message || 'Failed to load weather report'))
+                .catch((err) => setError(err.message || t('report.error.fallback')))
                 .finally(() => setLoading(false))
             }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
           >
-            Try again
+            {t('report.error.tryAgain')}
           </button>
           <button
             onClick={() => navigate('/planner')}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
           >
-            Back to Planner
+            {t('report.error.backToPlanner')}
           </button>
         </div>
       </div>
@@ -121,10 +123,10 @@ export default function ReportPage() {
     })
       .then(() => {
         setSaved(true)
-        addToast('Route gespeichert', 'success')
+        addToast(t('report.routeSaved'), 'success')
       })
       .catch(() => {
-        addToast('Route konnte nicht gespeichert werden', 'error')
+        addToast(t('report.routeSaveError'), 'error')
       })
       .finally(() => setSaving(false))
   }
