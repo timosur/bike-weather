@@ -4,7 +4,7 @@ export
 
 COMPOSE_DEV := docker compose -f docker-compose.dev.yml
 
-.PHONY: help setup dev dev-stop db-up db-stop db-migrate db-seed db-reset db-shell test-backend build-frontend clean
+.PHONY: help setup dev dev-stop db-up db-stop db-migrate db-reset db-shell test-backend build-frontend clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -14,7 +14,7 @@ setup: ## Create .env from template and install all dependencies
 	cd backend && uv sync --all-extras
 	cd frontend && npm install
 
-dev: db-up db-migrate db-seed ## Start PostgreSQL, run migrations, seed, launch backend + frontend
+dev: db-up db-migrate ## Start PostgreSQL, run migrations, seed, launch backend + frontend
 	cd backend && uv run honcho start -f ../Procfile.dev -e ../.env
 
 dev-stop: db-stop ## Stop the PostgreSQL dev container
@@ -28,22 +28,10 @@ db-stop: ## Stop PostgreSQL container
 db-migrate: ## Run alembic migrations
 	cd backend && uv run alembic upgrade head
 
-db-seed: ## Run the seed script
-	cd backend && uv run python -c "\
-import asyncio;\
-from app.seed import run_seed;\
-from app.database import async_session;\
-async def _main():\
-    async with async_session() as s:\
-        await run_seed(s);\
-        print('Seed complete.');\
-asyncio.run(_main())"
-
-db-reset: ## Destroy volume, recreate database, migrate, and seed
+db-reset: ## Destroy volume, recreate database, migrate
 	$(COMPOSE_DEV) down -v
 	$(COMPOSE_DEV) up -d --wait
 	cd backend && uv run alembic upgrade head
-	$(MAKE) db-seed
 
 db-shell: ## Open psql shell in the database container
 	docker exec -it bikeweather-db-dev psql -U bike -d bikeweather
