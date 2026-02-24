@@ -25,6 +25,7 @@ export interface AppShellProps {
   navigationItems: NavigationItem[]
   footerSections?: FooterSection[]
   user?: { name: string; avatarUrl?: string }
+  isAdmin?: boolean
   language?: 'de' | 'en'
   onNavigate?: (href: string) => void
   onLogout?: () => void
@@ -36,6 +37,7 @@ export function AppShell({
   navigationItems,
   footerSections = [],
   user,
+  isAdmin,
   language = 'de',
   onNavigate,
   onLogout,
@@ -83,7 +85,7 @@ export function AppShell({
                 {language === 'de' ? 'EN' : 'DE'}
               </button>
               {user && (
-                <UserMenu user={user} onLogout={onLogout} />
+                <UserMenu user={user} isAdmin={isAdmin} onNavigate={onNavigate} onLogout={onLogout} />
               )}
             </div>
 
@@ -113,11 +115,10 @@ export function AppShell({
                     onNavigate?.(item.href)
                     setMobileMenuOpen(false)
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    item.isActive
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${item.isActive
                       ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
                       : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>

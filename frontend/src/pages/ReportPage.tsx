@@ -5,15 +5,19 @@ import type { RideReport as RideReportType } from '../components/ride-report/typ
 import type { RideInput } from '../components/ride-planner/types'
 import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import { fetchReport } from '../api/rides'
+import { createRoute } from '../api/routes'
 
 export default function ReportPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const rideInput = (location.state as { rideInput?: RideInput } | null)?.rideInput
+  const state = location.state as { rideInput?: RideInput; routeId?: string } | null
+  const rideInput = state?.rideInput
+  const routeId = state?.routeId
 
   const [report, setReport] = useState<RideReportType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!rideInput) {
@@ -22,7 +26,7 @@ export default function ReportPage() {
     }
     setLoading(true)
     setError(null)
-    fetchReport(rideInput)
+    fetchReport(rideInput, routeId)
       .then(setReport)
       .catch((err) => setError(err.message || 'Failed to load weather report'))
       .finally(() => setLoading(false))
@@ -74,7 +78,7 @@ export default function ReportPage() {
             onClick={() => {
               setLoading(true)
               setError(null)
-              fetchReport(rideInput)
+              fetchReport(rideInput, routeId)
                 .then(setReport)
                 .catch((err) => setError(err.message || 'Failed to load weather report'))
                 .finally(() => setLoading(false))
@@ -103,7 +107,22 @@ export default function ReportPage() {
   }
 
   const handleSaveRoute = () => {
-    // TODO: Implement save route (requires auth / My Routes)
+    if (!report || saving) return
+    setSaving(true)
+    createRoute({
+      name: report.rideName,
+      start_location: report.startLocation,
+      total_distance: report.totalDistance,
+      distance_unit: report.distanceUnit,
+      riding_style: report.ridingStyle,
+    })
+      .then(() => {
+        // Optionally navigate to routes page after saving
+      })
+      .catch(() => {
+        // Silently fail — user can try again
+      })
+      .finally(() => setSaving(false))
   }
 
   const handleSwapClothingItem = (_dayId: string, _itemId: string, _alternativeId: string) => {

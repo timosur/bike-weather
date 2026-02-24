@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 from dataclasses import dataclass
@@ -8,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 CACHE_TTL_SECONDS = 1800  # 30 minutes
+MAX_RETRIES = 3
+RETRY_BACKOFF_BASE = 1.0  # seconds
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
 # WMO Weather interpretation codes → frontend WeatherIconType
@@ -94,7 +98,9 @@ class WeatherService:
             del self._cache[key]
         return None
 
-    async def fetch_forecast(self, lat: float, lon: float, date: str) -> WeatherForecast:
+    async def fetch_forecast(
+        self, lat: float, lon: float, date: str
+    ) -> WeatherForecast:
         cache_key = self._cache_key(lat, lon, date)
         cached = self._get_cached(cache_key)
         if cached is not None:
@@ -103,39 +109,90 @@ class WeatherService:
         client = self._client
         owns_client = False
         if client is None:
-            client = httpx.AsyncClient(timeout=httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=5.0))
+            client = httpx.AsyncClient(
+                timeout=httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=5.0)
+            )
             owns_client = True
 
+        params = {
+            "latitude": str(lat),
+            "longitude": str(lon),
+            "daily": ",".join(
+                [
+                    "temperature_2m_max",
+                    "temperature_2m_min",
+                    "apparent_temperature_max",
+                    "apparent_temperature_min",
+                    "precipitation_probability_max",
+                    "windspeed_10m_max",
+                    "winddirection_10m_dominant",
+                    "relative_humidity_2m_mean",
+                    "uv_index_max",
+                    "sunrise",
+                    "sunset",
+                    "weathercode",
+                ]
+            ),
+            "start_date": date,
+            "end_date": date,
+            "timezone": "auto",
+        }
+
+        last_exc: Exception | None = None
         try:
-            response = await client.get(
-                OPEN_METEO_URL,
-                params={
-                    "latitude": str(lat),
-                    "longitude": str(lon),
-                    "daily": ",".join([
-                        "temperature_2m_max",
-                        "temperature_2m_min",
-                        "apparent_temperature_max",
-                        "apparent_temperature_min",
-                        "precipitation_probability_max",
-                        "windspeed_10m_max",
-                        "winddirection_10m_dominant",
-                        "relative_humidity_2m_mean",
-                        "uv_index_max",
-                        "sunrise",
-                        "sunset",
-                        "weathercode",
-                    ]),
-                    "start_date": date,
-                    "end_date": date,
-                    "timezone": "auto",
-                },
-            )
-            response.raise_for_status()
-            data = response.json()
-        except httpx.HTTPStatusError as e:
-            logger.error("Open-Meteo HTTP error: %s", e)
-            raise WeatherServiceError(f"Weather API returned {e.response.status_code}") from e
+            for attempt in range(MAX_RETRIES):
+                try:
+                    response = await client.get(OPEN_METEO_URL, params=params)
+                    response.raise_for_status()
+                    data = response.json()
+                    break
+                except httpx.HTTPStatusError as e:
+                    last_exc = e
+                    if (
+                        e.response.status_code in RETRYABLE_STATUS_CODES
+                        and attempt < MAX_RETRIES - 1
+                    ):
+                        delay = RETRY_BACKOFF_BASE * (2**attempt)
+                        logger.warning(
+                            "Open-Meteo returned %s, retrying in %.1fs (attempt %d/%d)",
+                            e.response.status_code,
+                            delay,
+                            attempt + 1,
+                            MAX_RETRIES,
+                        )
+                        await asyncio.sleep(delay)
+                        continue
+                    logger.error("Open-Meteo HTTP error: %s", e)
+                    raise WeatherServiceError(
+                        f"Weather API returned {e.response.status_code}"
+                    ) from e
+                except (httpx.ConnectError, httpx.ReadTimeout) as e:
+                    last_exc = e
+                    if attempt < MAX_RETRIES - 1:
+                        delay = RETRY_BACKOFF_BASE * (2**attempt)
+                        logger.warning(
+                            "Open-Meteo request failed (%s), retrying in %.1fs (attempt %d/%d)",
+                            type(e).__name__,
+                            delay,
+                            attempt + 1,
+                            MAX_RETRIES,
+                        )
+                        await asyncio.sleep(delay)
+                        continue
+                    logger.error("Open-Meteo request failed: %s", e)
+                    raise WeatherServiceError("Weather API unavailable") from e
+            else:
+                # All retries exhausted
+                logger.error(
+                    "Open-Meteo request failed after %d attempts: %s",
+                    MAX_RETRIES,
+                    last_exc,
+                )
+                raise WeatherServiceError(
+                    "Weather API unavailable after retries"
+                ) from last_exc
+        except WeatherServiceError:
+            raise
         except Exception as e:
             logger.error("Open-Meteo request failed: %s", e)
             raise WeatherServiceError("Weather API unavailable") from e
@@ -163,7 +220,9 @@ class WeatherService:
             # Parse sunrise/sunset to HH:MM
             sunrise_raw = daily["sunrise"][idx]  # e.g. "2026-03-15T06:42"
             sunset_raw = daily["sunset"][idx]
-            sunrise = sunrise_raw.split("T")[1][:5] if "T" in sunrise_raw else sunrise_raw
+            sunrise = (
+                sunrise_raw.split("T")[1][:5] if "T" in sunrise_raw else sunrise_raw
+            )
             sunset = sunset_raw.split("T")[1][:5] if "T" in sunset_raw else sunset_raw
 
             forecast = WeatherForecast(

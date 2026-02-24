@@ -14,7 +14,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_optional_user
 from app.database import get_session
 from app.main import app
 from app.models.user import User
@@ -129,8 +129,12 @@ async def authenticated_client(
     async def override_get_current_user() -> User:
         return create_test_user
 
+    async def override_get_optional_user() -> User:
+        return create_test_user
+
     app.dependency_overrides[get_session] = override_get_session
     app.dependency_overrides[get_current_user] = override_get_current_user
+    app.dependency_overrides[get_optional_user] = override_get_optional_user
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client

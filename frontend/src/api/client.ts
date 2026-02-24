@@ -38,5 +38,11 @@ export async function apiFetch<T>(
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText}`);
   }
+
+  // 204 No Content — nothing to parse
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
 }

@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import { LogOut, ChevronDown } from 'lucide-react'
+import { LogOut, ChevronDown, Shield } from 'lucide-react'
 
 interface UserMenuProps {
   user: { name: string; avatarUrl?: string }
+  isAdmin?: boolean
+  onNavigate?: (href: string) => void
   onLogout?: () => void
 }
 
-export function UserMenu({ user, onLogout }: UserMenuProps) {
+export function UserMenu({ user, isAdmin, onNavigate, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -59,6 +61,18 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
             <p className="text-xs text-stone-500 dark:text-stone-400">Signed in as</p>
             <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{user.name}</p>
           </div>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                onNavigate?.('/admin')
+                setOpen(false)
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
+              Admin
+            </button>
+          )}
           <button
             onClick={() => {
               onLogout?.()

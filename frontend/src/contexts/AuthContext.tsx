@@ -14,12 +14,14 @@ export interface UserProfile {
   sub: string
   email: string
   name: string
+  isAdmin: boolean
 }
 
 interface AuthContextValue {
   user: UserProfile | null
   isLoading: boolean
   isAuthenticated: boolean
+  isAdmin: boolean
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, name?: string) => Promise<void>
   logout: () => void
@@ -39,6 +41,7 @@ function profileFromIdToken(idToken: string): UserProfile {
     sub: (claims.sub as string) ?? '',
     email: (claims.email as string) ?? '',
     name: (claims.name as string) ?? (claims.preferred_username as string) ?? '',
+    isAdmin: (claims.is_admin as boolean) ?? false,
   }
 }
 
@@ -110,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        isAdmin: user?.isAdmin ?? false,
         login,
         register,
         logout,
@@ -127,4 +131,10 @@ export function useAuth(): AuthContextValue {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
+}
+
+/** Stub for OIDC callback – will be implemented when Authentik integration is wired up. */
+export async function handleOidcCallback(): Promise<void> {
+  // TODO: exchange authorization code for tokens via backend
+  throw new Error('OIDC callback not yet implemented')
 }

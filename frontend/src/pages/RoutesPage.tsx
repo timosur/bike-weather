@@ -1,46 +1,30 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MyRoutes } from '../components/my-routes'
 import type { SavedRoute } from '../components/my-routes/types'
-import { sampleRoutes } from '../data/sample-routes'
-
-const STORAGE_KEY = 'bike-weather:saved-routes'
-
-function loadRoutes(): SavedRoute[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) return JSON.parse(stored)
-  } catch {
-    // Corrupted storage — fall through to seed data
-  }
-  // Seed with sample data on first visit
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleRoutes))
-  return sampleRoutes
-}
-
-function persistRoutes(routes: SavedRoute[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(routes))
-}
+import { fetchRoutes, updateRoute as apiUpdateRoute, deleteRoute as apiDeleteRoute } from '../api/routes'
 
 export default function RoutesPage() {
   const navigate = useNavigate()
-  const [routes, setRoutes] = useState<SavedRoute[]>(loadRoutes)
+  const [routes, setRoutes] = useState<SavedRoute[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchRoutes()
+      .then(setRoutes)
+      .catch(() => setRoutes([]))
+      .finally(() => setLoading(false))
+  }, [])
 
   const handleRouteSelect = useCallback(
     (routeId: string) => {
       const route = routes.find((r) => r.id === routeId)
       if (!route) return
 
-      // Update lastUsed timestamp
-      const updated = routes.map((r) =>
-        r.id === routeId ? { ...r, lastUsed: new Date().toISOString() } : r,
-      )
-      setRoutes(updated)
-      persistRoutes(updated)
-
       // Navigate to report with route params as ride input
       navigate('/report', {
         state: {
+          routeId: route.id,
           rideInput: {
             location: route.startLocation,
             distanceKm: route.totalDistance,
@@ -54,27 +38,41 @@ export default function RoutesPage() {
 
   const handleRouteEdit = useCallback(
     (routeId: string, updates: Partial<Pick<SavedRoute, 'name' | 'startLocation' | 'totalDistance' | 'ridingStyle'>>) => {
-      const updated = routes.map((r) =>
-        r.id === routeId ? { ...r, ...updates } : r,
-      )
-      setRoutes(updated)
-      persistRoutes(updated)
+      // Map camelCase frontend keys to snake_case API keys
+      const apiUpdates: Record<string, unknown> = {}
+      if (updates.name !== undefined) apiUpdates.start_location = updates.name
+      if (updates.startLocation !== undefined) apiUpdates.start_location = updates.startLocation
+      if (updates.totalDistance !== undefined) apiUpdates.total_distance = updates.totalDistance
+      if (updates.ridingStyle !== undefined) apiUpdates.riding_style = updates.ridingStyle
+      if (updates.name !== undefined) apiUpdates.name = updates.name
+
+      apiUpdateRoute(routeId, apiUpdates)
+        .then(() => fetchRoutes().then(setRoutes))
+        .catch(() => {/* ignore */})
     },
-    [routes],
+    [],
   )
 
   const handleRouteDelete = useCallback(
     (routeId: string) => {
-      const updated = routes.filter((r) => r.id !== routeId)
-      setRoutes(updated)
-      persistRoutes(updated)
+      apiDeleteRoute(routeId)
+        .then(() => setRoutes((prev) => prev.filter((r) => r.id !== routeId)))
+        .catch(() => {/* ignore */})
     },
-    [routes],
+    [],
   )
 
   const handleNavigateToPlanner = useCallback(() => {
     navigate('/planner')
   }, [navigate])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+      </div>
+    )
+  }
 
   return (
     <MyRoutes

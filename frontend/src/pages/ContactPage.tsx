@@ -1,21 +1,24 @@
 import { useState, useCallback } from 'react'
 import { ContactPage as ContactPageComponent } from '../components/contact'
 import type { ContactFormData } from '../components/contact/types'
+import { submitContactForm } from '../api/contact'
 
 export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string>()
 
-  const handleSubmit = useCallback((data: ContactFormData) => {
+  const handleSubmit = useCallback(async (data: ContactFormData) => {
     setIsLoading(true)
     setErrorMessage(undefined)
-    // Simulate sending the message
-    setTimeout(() => {
-      console.log('Contact form submitted:', data)
-      setIsLoading(false)
+    try {
+      await submitContactForm(data)
       setIsSuccess(true)
-    }, 800)
+    } catch {
+      setErrorMessage('Nachricht konnte nicht gesendet werden. Bitte versuche es später erneut.')
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   return (

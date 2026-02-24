@@ -23,6 +23,16 @@ const ContactPage = lazy(() => import('./pages/ContactPage'))
 const ImprintPage = lazy(() => import('./pages/ImprintPage'))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'))
 
+// Admin pages
+const AdminLayout = lazy(() => import('./components/admin/layout/AdminLayout'))
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'))
+const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'))
+const AdminShopsPage = lazy(() => import('./pages/admin/AdminShopsPage'))
+const AdminFaqPage = lazy(() => import('./pages/admin/AdminFaqPage'))
+const AdminAboutPage = lazy(() => import('./pages/admin/AdminAboutPage'))
+const AdminContactsPage = lazy(() => import('./pages/admin/AdminContactsPage'))
+
 const navigationItems: NavigationItem[] = [
   { label: 'Planner', href: '/planner' },
   { label: 'Ride Report', href: '/report' },
@@ -68,10 +78,25 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+/** Redirects to /planner if user is not an admin */
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth()
+  const location = useLocation()
+
+  if (isLoading) return null
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  }
+  if (!isAdmin) {
+    return <Navigate to="/planner" replace />
+  }
+  return <>{children}</>
+}
+
 function AppContent() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated, user, logout, getAccessToken } = useAuth()
+  const { isAuthenticated, isAdmin, user, logout, getAccessToken } = useAuth()
 
   useEffect(() => {
     setAccessTokenProvider(getAccessToken)
@@ -100,6 +125,7 @@ function AppContent() {
       navigationItems={itemsWithActive}
       footerSections={footerSections}
       user={appUser}
+      isAdmin={isAdmin}
       onNavigate={handleNavigate}
       onLogout={handleLogout}
     >
@@ -117,6 +143,17 @@ function AppContent() {
         <Route path="/contact" element={<Suspense fallback={<ContentPageSkeleton sections={4} maxWidth="max-w-[480px]" />}><ContactPage /></Suspense>} />
         <Route path="/imprint" element={<Suspense fallback={<ContentPageSkeleton sections={4} />}><ImprintPage /></Suspense>} />
         <Route path="/privacy-policy" element={<Suspense fallback={<ContentPageSkeleton sections={7} />}><PrivacyPolicyPage /></Suspense>} />
+
+        {/* Admin routes */}
+        <Route path="/admin" element={<Suspense fallback={<ContentPageSkeleton sections={3} />}><RequireAdmin><AdminLayout /></RequireAdmin></Suspense>}>
+          <Route index element={<Suspense fallback={null}><AdminDashboardPage /></Suspense>} />
+          <Route path="products" element={<Suspense fallback={null}><AdminProductsPage /></Suspense>} />
+          <Route path="categories" element={<Suspense fallback={null}><AdminCategoriesPage /></Suspense>} />
+          <Route path="shops" element={<Suspense fallback={null}><AdminShopsPage /></Suspense>} />
+          <Route path="faq" element={<Suspense fallback={null}><AdminFaqPage /></Suspense>} />
+          <Route path="about" element={<Suspense fallback={null}><AdminAboutPage /></Suspense>} />
+          <Route path="contacts" element={<Suspense fallback={null}><AdminContactsPage /></Suspense>} />
+        </Route>
       </Routes>
     </AppShell>
   )

@@ -1,9 +1,11 @@
 import time
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 
 from app.services.weather import (
+    MAX_RETRIES,
     WMO_CODE_MAP,
     WeatherForecast,
     WeatherService,
@@ -95,18 +97,83 @@ async def test_fetch_forecast_cache_expires() -> None:
     assert call_count == 2
 
 
-async def test_fetch_forecast_api_error_raises() -> None:
-    client = httpx.AsyncClient(transport=_mock_transport(status_code=500, response_data={"error": "fail"}))
+@patch("app.services.weather.asyncio.sleep", new_callable=AsyncMock)
+async def test_fetch_forecast_api_error_raises(mock_sleep) -> None:
+    client = httpx.AsyncClient(
+        transport=_mock_transport(status_code=500, response_data={"error": "fail"})
+    )
     service = WeatherService(client=client)
 
     with pytest.raises(WeatherServiceError):
+        await service.fetch_forecast(47.66, 9.17, "2026-03-15")
+    # Should have retried MAX_RETRIES - 1 times before raising
+    assert mock_sleep.call_count == MAX_RETRIES - 1
+
+
+@patch("app.services.weather.asyncio.sleep", new_callable=AsyncMock)
+async def test_fetch_forecast_retries_on_504_then_succeeds(mock_sleep) -> None:
+    call_count = 0
+
+    async def flaky_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        if call_count < 3:
+            return httpx.Response(504, json={"error": "timeout"})
+        return httpx.Response(200, json=MOCK_OPEN_METEO_RESPONSE)
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(flaky_handler))
+    service = WeatherService(client=client)
+
+    forecast = await service.fetch_forecast(47.66, 9.17, "2026-03-15")
+    assert isinstance(forecast, WeatherForecast)
+    assert call_count == 3
+    assert mock_sleep.call_count == 2
+
+
+async def test_fetch_forecast_non_retryable_error_raises_immediately() -> None:
+    client = httpx.AsyncClient(
+        transport=_mock_transport(
+            status_code=400, response_data={"error": "bad request"}
+        )
+    )
+    service = WeatherService(client=client)
+
+    with pytest.raises(WeatherServiceError, match="400"):
         await service.fetch_forecast(47.66, 9.17, "2026-03-15")
 
 
 def test_wmo_code_mapping_covers_all_codes() -> None:
     # All codes that Open-Meteo can return
-    expected_codes = {0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67,
-                      71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99}
+    expected_codes = {
+        0,
+        1,
+        2,
+        3,
+        45,
+        48,
+        51,
+        53,
+        55,
+        56,
+        57,
+        61,
+        63,
+        65,
+        66,
+        67,
+        71,
+        73,
+        75,
+        77,
+        80,
+        81,
+        82,
+        85,
+        86,
+        95,
+        96,
+        99,
+    }
     valid_icons = {"sun", "cloud-sun", "cloud", "rain", "snow", "thunderstorm", "fog"}
     for code in expected_codes:
         icon = wmo_to_icon(code)

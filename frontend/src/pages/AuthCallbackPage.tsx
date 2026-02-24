@@ -9,7 +9,7 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     handleOidcCallback()
       .then(() => navigate('/planner', { replace: true }))
-      .catch((err) => setError(err instanceof Error ? err.message : 'Authentication failed'))
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Authentication failed'))
   }, [navigate])
 
   if (error) {
