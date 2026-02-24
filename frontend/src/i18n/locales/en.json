@@ -348,6 +348,7 @@
     "delete": "Delete",
     "remove": "Remove",
     "loading": "Loading…",
+    "signIn": "Login",
     "logout": "Logout",
     "signedInAs": "Signed in as",
     "admin": "Admin"

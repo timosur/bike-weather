@@ -52,16 +52,13 @@ function useFooterSections(): FooterSection[] {
     {
       title: t('shell.footerSection.product'),
       links: [
-        { label: t('shell.footerLinks.ridePlanner'), href: '/planner' },
         { label: t('shell.footerLinks.faq'), href: '/faq' },
-        { label: t('shell.footerLinks.aboutMe'), href: '/about-me' },
       ],
     },
     {
       title: t('shell.footerSection.contact'),
       links: [
         { label: t('shell.footerLinks.giveFeedback'), href: '/contact' },
-        { label: t('shell.footerLinks.signIn'), href: '/login' },
       ],
     },
     {
