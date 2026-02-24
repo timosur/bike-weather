@@ -1,0 +1,18 @@
+from datetime import datetime, timezone
+
+from sqlmodel import Field, SQLModel
+
+
+class SavedRoute(SQLModel, table=True):
+    __tablename__ = "saved_routes"
+
+    id: str = Field(primary_key=True)
+    user_id: int = Field(foreign_key="users.id", index=True)
+    name: str
+    start_location: str
+    total_distance: float
+    distance_unit: str = Field(default="km")
+    riding_style: str
+    last_condition: str = Field(default="")
+    last_used: datetime | None = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

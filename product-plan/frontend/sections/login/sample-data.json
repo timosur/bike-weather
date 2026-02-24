@@ -1,0 +1,17 @@
+{
+  "loginState": {
+    "activeTab": "login",
+    "isLoading": false,
+    "errorMessage": null
+  },
+  "registerState": {
+    "activeTab": "register",
+    "isLoading": false,
+    "errorMessage": null
+  },
+  "errorState": {
+    "activeTab": "login",
+    "isLoading": false,
+    "errorMessage": "Email or password is incorrect."
+  }
+}

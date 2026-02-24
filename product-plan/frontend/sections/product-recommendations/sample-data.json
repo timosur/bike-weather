@@ -1,0 +1,258 @@
+{
+  "_meta": {
+    "models": {
+      "ProductCategory": "A product category such as jackets, gloves, or lights, used as navigation structure on the Products page.",
+      "Product": "An affiliate product with name, image, price, shop assignment, and affiliate link. Assigned to a category and optionally linked to a clothing or equipment recommendation.",
+      "Shop": "An external retailer (e.g. Amazon) through which affiliate links run."
+    },
+    "relationships": [
+      "ProductCategory contains many Products",
+      "Product belongs to one Shop",
+      "Product is linked to a ClothingZone or EquipmentItem from the Ride Report"
+    ]
+  },
+  "disclosure": {
+    "badgeLabel": "Ad",
+    "disclaimerText": "Links marked with * are affiliate links. If you purchase through these links we receive a small commission — the price for you stays the same."
+  },
+  "shops": [
+    {
+      "id": "shop-amazon",
+      "name": "Amazon",
+      "logoUrl": "/logos/amazon.svg",
+      "affiliateTag": "bikeweather-21"
+    },
+    {
+      "id": "shop-bike24",
+      "name": "Bike24",
+      "logoUrl": "/logos/bike24.svg",
+      "affiliateTag": null
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-jackets",
+      "name": "Cycling Jackets",
+      "icon": "jacket",
+      "productCount": 8
+    },
+    {
+      "id": "cat-gloves",
+      "name": "Cycling Gloves",
+      "icon": "gloves",
+      "productCount": 6
+    },
+    {
+      "id": "cat-pants",
+      "name": "Cycling Tights",
+      "icon": "pants",
+      "productCount": 5
+    },
+    {
+      "id": "cat-headwear",
+      "name": "Headwear",
+      "icon": "headwear",
+      "productCount": 4
+    },
+    {
+      "id": "cat-shoes",
+      "name": "Cycling Shoes & Overshoes",
+      "icon": "shoes",
+      "productCount": 5
+    },
+    {
+      "id": "cat-lights",
+      "name": "Bike Lights",
+      "icon": "light",
+      "productCount": 4
+    },
+    {
+      "id": "cat-accessories",
+      "name": "Accessories & Gear",
+      "icon": "accessories",
+      "productCount": 7
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-001",
+      "name": "Gore Wear C5 Gore-Tex Shakedry Jacket",
+      "categoryId": "cat-jackets",
+      "imageUrl": "/products/gore-shakedry.jpg",
+      "price": 179.99,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B07XYZ1234?tag=bikeweather-21",
+      "matchesZone": "upperBody",
+      "matchesLabel": "Waterproof Cycling Jacket",
+      "weather": {
+        "tempRange": { "min": -5, "max": 15, "unit": "°C" },
+        "precipitation": "heavy-rain",
+        "wind": "strong-wind",
+        "summary": "-5–15 °C, waterproof, windproof"
+      }
+    },
+    {
+      "id": "prod-002",
+      "name": "Castelli Perfetto RoS 2 Long-sleeve Jersey",
+      "categoryId": "cat-jackets",
+      "imageUrl": "/products/castelli-perfetto.jpg",
+      "price": 219.95,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B09ABC5678?tag=bikeweather-21",
+      "matchesZone": "upperBody",
+      "matchesLabel": "Long-sleeve Cycling Jersey",
+      "weather": {
+        "tempRange": { "min": 8, "max": 18, "unit": "°C" },
+        "precipitation": "light-rain",
+        "wind": "strong-wind",
+        "summary": "8–18 °C, water-resistant, windproof"
+      }
+    },
+    {
+      "id": "prod-003",
+      "name": "GripGrab Ride Windproof Winter Gloves",
+      "categoryId": "cat-gloves",
+      "imageUrl": "/products/gripgrab-winter.jpg",
+      "price": 54.95,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B08DEF9012?tag=bikeweather-21",
+      "matchesZone": "hands",
+      "matchesLabel": "Waterproof Winter Gloves",
+      "weather": {
+        "tempRange": { "min": -10, "max": 5, "unit": "°C" },
+        "precipitation": "heavy-rain",
+        "wind": "strong-wind",
+        "summary": "-10–5 °C, waterproof, windproof"
+      }
+    },
+    {
+      "id": "prod-004",
+      "name": "Roeckl Illano Summer Gloves",
+      "categoryId": "cat-gloves",
+      "imageUrl": "/products/roeckl-illano.jpg",
+      "price": 34.90,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B07GHI3456?tag=bikeweather-21",
+      "matchesZone": "hands",
+      "matchesLabel": "Light Cycling Gloves",
+      "weather": {
+        "tempRange": { "min": 15, "max": 35, "unit": "°C" },
+        "precipitation": "none",
+        "wind": "none",
+        "summary": "15–35 °C, dry, padding & grip"
+      }
+    },
+    {
+      "id": "prod-005",
+      "name": "Assos Mille GT Thermo Cycling Tights",
+      "categoryId": "cat-pants",
+      "imageUrl": "/products/assos-mille-thermo.jpg",
+      "price": 189.00,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B09JKL7890?tag=bikeweather-21",
+      "matchesZone": "lowerBody",
+      "matchesLabel": "Thermal Cycling Tights",
+      "weather": {
+        "tempRange": { "min": -5, "max": 10, "unit": "°C" },
+        "precipitation": "light-rain",
+        "wind": "light-wind",
+        "summary": "-5–10 °C, light water-resistance, thermal lining"
+      }
+    },
+    {
+      "id": "prod-006",
+      "name": "Sigma Aura 80 / Blaze Light Set",
+      "categoryId": "cat-lights",
+      "imageUrl": "/products/sigma-aura80.jpg",
+      "price": 59.99,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B08MNO1234?tag=bikeweather-21",
+      "matchesZone": null,
+      "matchesLabel": "Bike Lights (front + rear)",
+      "weather": {
+        "tempRange": null,
+        "precipitation": "heavy-rain",
+        "wind": "none",
+        "summary": "All temperatures, weatherproof, IPX4"
+      }
+    },
+    {
+      "id": "prod-007",
+      "name": "Buff Merino Lightweight Headband",
+      "categoryId": "cat-headwear",
+      "imageUrl": "/products/buff-merino.jpg",
+      "price": 24.95,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B06PQR5678?tag=bikeweather-21",
+      "matchesZone": "head",
+      "matchesLabel": "Light Headband",
+      "weather": {
+        "tempRange": { "min": 5, "max": 18, "unit": "°C" },
+        "precipitation": "none",
+        "wind": "light-wind",
+        "summary": "5–18 °C, light wind protection, breathable"
+      }
+    },
+    {
+      "id": "prod-008",
+      "name": "Vaude Luminum Rain Pants",
+      "categoryId": "cat-pants",
+      "imageUrl": "/products/vaude-luminum.jpg",
+      "price": 99.95,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B07STU9012?tag=bikeweather-21",
+      "matchesZone": "lowerBody",
+      "matchesLabel": "Waterproof Overpants",
+      "weather": {
+        "tempRange": { "min": 0, "max": 20, "unit": "°C" },
+        "precipitation": "heavy-rain",
+        "wind": "strong-wind",
+        "summary": "0–20 °C, waterproof, windproof, reflective"
+      }
+    },
+    {
+      "id": "prod-009",
+      "name": "Shimano S-Phyre Tall Overshoes",
+      "categoryId": "cat-shoes",
+      "imageUrl": "/products/shimano-overshoes.jpg",
+      "price": 69.95,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B08VWX3456?tag=bikeweather-21",
+      "matchesZone": "feet",
+      "matchesLabel": "Waterproof Overshoes",
+      "weather": {
+        "tempRange": { "min": -5, "max": 10, "unit": "°C" },
+        "precipitation": "heavy-rain",
+        "wind": "strong-wind",
+        "summary": "-5–10 °C, waterproof, windproof"
+      }
+    },
+    {
+      "id": "prod-010",
+      "name": "Ortlieb Dry Bag PS10 1.5L",
+      "categoryId": "cat-accessories",
+      "imageUrl": "/products/ortlieb-drybag.jpg",
+      "price": 14.95,
+      "currency": "EUR",
+      "shopId": "shop-amazon",
+      "affiliateUrl": "https://www.amazon.de/dp/B01YZA7890?tag=bikeweather-21",
+      "matchesZone": null,
+      "matchesLabel": "Dry Bag for Valuables",
+      "weather": {
+        "tempRange": null,
+        "precipitation": "heavy-rain",
+        "wind": "none",
+        "summary": "All temperatures, 100% waterproof (IP67)"
+      }
+    }
+  ]
+}

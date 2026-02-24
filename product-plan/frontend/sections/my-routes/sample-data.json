@@ -1,0 +1,86 @@
+{
+  "_meta": {
+    "models": {
+      "SavedRoute": "A saved route configuration for a logged-in user. Contains all parameters needed to re-run a Ride Report, plus metadata like last used date and condition.",
+      "UserProfile": "The user profile with name and saved routes. In this section relevant only as a container for the route list."
+    },
+    "relationships": [
+      "UserProfile has many SavedRoutes",
+      "SavedRoute references a startLocation and ridingStyle from the Ride Planner",
+      "SavedRoute stores the lastCondition from the most recent Ride Report"
+    ]
+  },
+  "userProfile": {
+    "id": "user-001",
+    "displayName": "Markus"
+  },
+  "savedRoutes": [
+    {
+      "id": "route-001",
+      "name": "Lake Constance Loop",
+      "startLocation": "Konstanz",
+      "totalDistance": 180,
+      "distanceUnit": "km",
+      "ridingStyle": "Touring",
+      "lastCondition": "good",
+      "lastUsed": "2026-02-20T08:30:00Z",
+      "createdAt": "2026-01-15T10:00:00Z"
+    },
+    {
+      "id": "route-002",
+      "name": "Office Commute",
+      "startLocation": "Munich, Schwabing",
+      "totalDistance": 12,
+      "distanceUnit": "km",
+      "ridingStyle": "Easy",
+      "lastCondition": "ideal",
+      "lastUsed": "2026-02-22T07:15:00Z",
+
+      "createdAt": "2025-11-03T09:20:00Z"
+    },
+    {
+      "id": "route-003",
+      "name": "Black Forest Crossing",
+      "startLocation": "Freiburg im Breisgau",
+      "totalDistance": 95,
+      "distanceUnit": "km",
+      "ridingStyle": "Sporty",
+      "lastCondition": "caution",
+      "lastUsed": "2026-02-10T06:45:00Z",
+      "createdAt": "2026-01-28T14:10:00Z"
+    },
+    {
+      "id": "route-004",
+      "name": "Moselle Cycle Path Trier–Koblenz",
+      "startLocation": "Trier",
+      "totalDistance": 245,
+      "distanceUnit": "km",
+      "ridingStyle": "Touring",
+      "lastCondition": "not-recommended",
+      "lastUsed": "2026-01-05T09:00:00Z",
+      "createdAt": "2025-12-20T16:30:00Z"
+    },
+    {
+      "id": "route-005",
+      "name": "Alster Loop",
+      "startLocation": "Hamburg, Winterhude",
+      "totalDistance": 18,
+      "distanceUnit": "km",
+      "ridingStyle": "Easy",
+      "lastCondition": "good",
+      "lastUsed": "2026-02-18T17:00:00Z",
+      "createdAt": "2026-02-01T11:45:00Z"
+    },
+    {
+      "id": "route-006",
+      "name": "Spreewald Tour",
+      "startLocation": "Lübbenau",
+      "totalDistance": 62,
+      "distanceUnit": "km",
+      "ridingStyle": "Easy",
+      "lastCondition": null,
+      "lastUsed": null,
+      "createdAt": "2026-02-22T20:00:00Z"
+    }
+  ]
+}
