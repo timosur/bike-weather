@@ -11,11 +11,11 @@ help: ## Show this help
 
 setup: ## Create .env from template and install all dependencies
 	@test -f .env || (cp .env.example .env && echo "Created .env from .env.example")
-	cd backend && uv pip install -e ".[dev]"
+	cd backend && uv sync --all-extras
 	cd frontend && npm install
 
-dev: db-up db-migrate ## Start PostgreSQL, run migrations, launch backend + frontend
-	uv run honcho start -f Procfile.dev -e .env
+dev: db-up db-migrate db-seed ## Start PostgreSQL, run migrations, seed, launch backend + frontend
+	cd backend && uv run honcho start -f ../Procfile.dev -e ../.env
 
 dev-stop: db-stop ## Stop the PostgreSQL dev container
 
@@ -43,7 +43,7 @@ db-reset: ## Destroy volume, recreate database, migrate, and seed
 	$(COMPOSE_DEV) down -v
 	$(COMPOSE_DEV) up -d --wait
 	cd backend && uv run alembic upgrade head
-	@echo "Database reset complete. Seed data will load on next backend startup."
+	$(MAKE) db-seed
 
 db-shell: ## Open psql shell in the database container
 	docker exec -it bikeweather-db-dev psql -U bike -d bikeweather
