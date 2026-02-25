@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { HourlyWeather } from './types'
 
@@ -95,6 +95,35 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
     }
   }, [hourlyForecast, rideStartHour, rideEndHour])
 
+  // Hover state
+  const svgRef = useRef<SVGSVGElement>(null)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<SVGSVGElement>) => {
+      if (!data || !svgRef.current) return
+      const svg = svgRef.current
+      const rect = svg.getBoundingClientRect()
+      // Convert mouse position to SVG coordinate space
+      const svgX = ((e.clientX - rect.left) / rect.width) * CHART_WIDTH
+      // Find nearest hour index
+      let closest = 0
+      let closestDist = Infinity
+      for (let i = 0; i < data.hours.length; i++) {
+        const px = data.xScale(data.hours[i])
+        const dist = Math.abs(svgX - px)
+        if (dist < closestDist) {
+          closestDist = dist
+          closest = i
+        }
+      }
+      setHoverIdx(closest)
+    },
+    [data],
+  )
+
+  const handleMouseLeave = useCallback(() => setHoverIdx(null), [])
+
   if (!data) return null
 
   const { rideX0, rideX1, tempPoints, feelsPoints, windPoints, tempTicks, xTicks, xScale, tempScale } = data
@@ -111,10 +140,14 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
       </div>
       <div className="px-2 pb-3 overflow-x-auto">
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
           className="w-full h-auto min-w-[480px]"
           role="img"
           aria-label={t('report.weather.dailyForecast')}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ cursor: hoverIdx != null ? 'crosshair' : undefined }}
         >
           <defs>
             <linearGradient id="rideWindowGrad" x1="0" x2="0" y1="0" y2="1">
@@ -293,6 +326,77 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
           >
             0%
           </text>
+
+          {/* Hover crosshair + tooltip */}
+          {hoverIdx != null && (() => {
+            const hx = data.xScale(data.hours[hoverIdx])
+            const hour = data.hours[hoverIdx]
+            const displayHour = hour >= 24 ? `${hour - 24}:00` : `${hour}:00`
+            const temp = data.temps[hoverIdx]
+            const feels = data.feelsLike[hoverIdx]
+            const prec = data.precip[hoverIdx]
+            const wnd = data.wind[hoverIdx]
+            // Tooltip dimensions
+            const tw = 130
+            const th = 80
+            const tp = 8
+            // Position tooltip to left or right of crosshair depending on space
+            const tooltipX = hx + tw + tp > CHART_WIDTH - PADDING.right
+              ? hx - tw - tp
+              : hx + tp
+            const tooltipY = PADDING.top + 4
+            return (
+              <>
+                {/* Vertical crosshair line */}
+                <line
+                  x1={hx} x2={hx}
+                  y1={PADDING.top} y2={PADDING.top + PLOT_H}
+                  className="stroke-stone-400 dark:stroke-stone-500"
+                  strokeWidth={0.75}
+                  strokeDasharray="2,2"
+                  pointerEvents="none"
+                />
+                {/* Dots on each line at hovered point */}
+                <circle cx={hx} cy={data.tempPoints[hoverIdx].y} r={3.5}
+                  className="fill-amber-500 dark:fill-amber-400 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                <circle cx={hx} cy={data.feelsPoints[hoverIdx].y} r={3}
+                  className="fill-blue-400 dark:fill-blue-500 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                <circle cx={hx} cy={data.windPoints[hoverIdx].y} r={3}
+                  className="fill-stone-400 dark:fill-stone-500 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                {/* Tooltip background */}
+                <rect
+                  x={tooltipX} y={tooltipY}
+                  width={tw} height={th}
+                  rx={6}
+                  className="fill-white dark:fill-stone-800 stroke-stone-200 dark:stroke-stone-700"
+                  strokeWidth={0.5}
+                  style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.1))' }}
+                  pointerEvents="none"
+                />
+                {/* Tooltip text */}
+                <text x={tooltipX + 8} y={tooltipY + 15} style={{ fontSize: 10, fontWeight: 600, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-stone-700 dark:fill-stone-200" pointerEvents="none">
+                  {displayHour}
+                </text>
+                <text x={tooltipX + 8} y={tooltipY + 30} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-amber-600 dark:fill-amber-400" pointerEvents="none">
+                  {t('report.weather.legend.temp')}: {temp.toFixed(1)}°
+                </text>
+                <text x={tooltipX + 8} y={tooltipY + 43} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-blue-500 dark:fill-blue-400" pointerEvents="none">
+                  {t('report.weather.legend.feelsLike')}: {feels.toFixed(1)}°
+                </text>
+                <text x={tooltipX + 8} y={tooltipY + 56} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-blue-400 dark:fill-blue-500" pointerEvents="none">
+                  {t('report.weather.legend.precip')}: {prec.toFixed(0)}%
+                </text>
+                <text x={tooltipX + 8} y={tooltipY + 69} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-stone-500 dark:fill-stone-400" pointerEvents="none">
+                  {t('report.weather.legend.wind')}: {wnd.toFixed(1)} km/h
+                </text>
+              </>
+            )
+          })()}
         </svg>
 
         {/* Legend */}

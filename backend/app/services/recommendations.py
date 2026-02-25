@@ -2,6 +2,7 @@
 
 import math
 import uuid
+from dataclasses import replace as dc_replace
 from datetime import datetime, timedelta
 
 from app.rules.clothing_rules import get_clothing_items
@@ -250,11 +251,13 @@ async def build_report(
                     day_lat, day_lon, next_date, 0, next_day_end, locale=locale
                 )
                 # Re-label next-day hours as 24:00, 25:00, … so the chart
-                # x-axis stays monotonically increasing
-                for h in next_day_window.hours:
-                    real_h = int(h.hour.split(":")[0])
-                    h.hour = f"{real_h + 24}:00"
-                chart_hours.extend(next_day_window.hours)
+                # x-axis stays monotonically increasing (copy to avoid
+                # mutating cached objects)
+                relabeled = [
+                    dc_replace(h, hour=f"{int(h.hour.split(':')[0]) + 24}:00")
+                    for h in next_day_window.hours
+                ]
+                chart_hours.extend(relabeled)
             except Exception:
                 pass  # gracefully degrade — just show current day
         # Build worst-case summary from ride window hours for rules
