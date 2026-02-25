@@ -2,8 +2,7 @@
 
 from dataclasses import dataclass
 
-from agent.shops.amazon import AmazonShop
-from agent.shops.bike24 import Bike24Shop
+from agent.shops.bike_components import BikeComponentsShop
 
 
 @dataclass
@@ -20,8 +19,7 @@ SHOPS: dict[str, "ShopBase"] = {}
 
 
 def _register_shops() -> None:
-    SHOPS["amazon"] = AmazonShop()
-    SHOPS["bike24"] = Bike24Shop()
+    SHOPS["bike-components"] = BikeComponentsShop()
 
 
 _register_shops()

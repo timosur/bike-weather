@@ -96,7 +96,7 @@ SAMPLE_LLM_RESPONSE = json.dumps(
             "price": 179.99,
             "currency": "EUR",
             "image_url": "https://example.com/gore.jpg",
-            "affiliate_url": "https://www.amazon.de/dp/B08XYZ123",
+            "affiliate_url": "https://www.bike-components.de/en/Product/12345",
         },
         {
             "name": "Castelli Perfetto RoS 2 Jacket",
@@ -104,7 +104,7 @@ SAMPLE_LLM_RESPONSE = json.dumps(
             "price": 229.99,
             "currency": "EUR",
             "image_url": "https://example.com/castelli.jpg",
-            "affiliate_url": "https://www.amazon.de/dp/B08ABC456",
+            "affiliate_url": "https://www.bike-components.de/en/Product/67890",
         },
     ]
 )
@@ -120,7 +120,7 @@ class TestExtractProducts:
             products = await extract_products(
                 "Some product listing text...",
                 "cycling-jackets",
-                "Amazon",
+                "bike-components.de",
             )
 
             assert len(products) == 2
@@ -139,7 +139,7 @@ class TestExtractProducts:
                 "Still not JSON...",
             ]
 
-            products = await extract_products("text", "jackets", "Amazon")
+            products = await extract_products("text", "jackets", "bike-components.de")
             assert products == []
             assert mock_llm.call_count == 2
 
@@ -152,7 +152,7 @@ class TestExtractProducts:
                 SAMPLE_LLM_RESPONSE,
             ]
 
-            products = await extract_products("text", "jackets", "Amazon")
+            products = await extract_products("text", "jackets", "bike-components.de")
             assert len(products) == 2
             assert mock_llm.call_count == 2
 
@@ -169,7 +169,7 @@ class TestExtractProducts:
         with patch("agent.extractor._call_llm", new_callable=AsyncMock) as mock_llm:
             mock_llm.return_value = incomplete_response
 
-            products = await extract_products("text", "jackets", "Amazon")
+            products = await extract_products("text", "jackets", "bike-components.de")
             assert len(products) == 1
             assert products[0].name == "Valid Product"
 
@@ -179,5 +179,5 @@ class TestExtractProducts:
         with patch("agent.extractor._call_llm", new_callable=AsyncMock) as mock_llm:
             mock_llm.return_value = json.dumps({"name": "Single product"})
 
-            products = await extract_products("text", "jackets", "Amazon")
+            products = await extract_products("text", "jackets", "bike-components.de")
             assert products == []

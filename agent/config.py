@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     # Backend admin API
     admin_api_url: str = "http://localhost:8000/api/admin"
     admin_token: str = ""
+    admin_dev_email: str = ""  # For local dev: set to an admin user's email (uses X-Dev-User-Email bypass when backend DEBUG=True)
 
     # LLM settings
     llm_provider: str = "openai"  # "openai" or "anthropic"

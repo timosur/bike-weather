@@ -9,7 +9,7 @@ class ShopBase(ABC):
     @property
     @abstractmethod
     def shop_id(self) -> str:
-        """The shop ID matching the backend shops table (e.g. 'shop-amazon')."""
+        """The shop ID matching the backend shops table (e.g. 'shop-bike-components')."""
         ...
 
     @property

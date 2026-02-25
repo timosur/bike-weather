@@ -10,20 +10,30 @@ from app.models import (
     Shop,
 )
 from app.models.content_translation import ContentTranslation
+from app.models.user import User
+
+
+async def _seed_admin_user(session: AsyncSession) -> None:
+    """Create a default admin user for local development."""
+    email = "admin@bike-weather.local"
+    existing = await session.execute(select(User).where(User.email == email))
+    if not existing.scalars().first():
+        session.add(
+            User(
+                external_id="local-admin",
+                email=email,
+                name="Admin",
+                is_admin=True,
+            )
+        )
 
 
 async def _seed_shops(session: AsyncSession) -> None:
     shops = [
         Shop(
-            id="shop-amazon",
-            name="Amazon",
-            logo_url="/logos/amazon.svg",
-            affiliate_tag="bikeweather-21",
-        ),
-        Shop(
-            id="shop-bike24",
-            name="Bike24",
-            logo_url="/logos/bike24.svg",
+            id="shop-bike-components",
+            name="bike-components.de",
+            logo_url="/logos/bike-components.svg",
             affiliate_tag=None,
         ),
     ]
@@ -100,7 +110,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/gore-shakedry.jpg",
             price=179.99,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B07XYZ1234?tag=bikeweather-21",
             matches_zone="upperBody",
             matches_label="Wasserdichte Radjacke",
@@ -117,7 +127,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/castelli-perfetto.jpg",
             price=219.95,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B09ABC5678?tag=bikeweather-21",
             matches_zone="upperBody",
             matches_label="Langarm-Radtrikot",
@@ -134,7 +144,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/gripgrab-winter.jpg",
             price=54.95,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B08DEF9012?tag=bikeweather-21",
             matches_zone="hands",
             matches_label="Wasserdichte Winterhandschuhe",
@@ -151,7 +161,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/roeckl-illano.jpg",
             price=34.90,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B07GHI3456?tag=bikeweather-21",
             matches_zone="hands",
             matches_label="Leichte Radhandschuhe",
@@ -168,7 +178,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/assos-mille-thermo.jpg",
             price=189.00,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B09JKL7890?tag=bikeweather-21",
             matches_zone="lowerBody",
             matches_label="Thermo-Radhose",
@@ -185,7 +195,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/sigma-aura80.jpg",
             price=59.99,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B08MNO1234?tag=bikeweather-21",
             matches_zone=None,
             matches_label="Fahrradlichter (vorne + hinten)",
@@ -202,7 +212,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/buff-merino.jpg",
             price=24.95,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B06PQR5678?tag=bikeweather-21",
             matches_zone="head",
             matches_label="Leichtes Stirnband",
@@ -219,7 +229,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/vaude-luminum.jpg",
             price=99.95,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B07STU9012?tag=bikeweather-21",
             matches_zone="lowerBody",
             matches_label="Wasserdichte Überhose",
@@ -236,7 +246,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/shimano-overshoes.jpg",
             price=69.95,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B08VWX3456?tag=bikeweather-21",
             matches_zone="feet",
             matches_label="Wasserdichte Überschuhe",
@@ -253,7 +263,7 @@ async def _seed_products(session: AsyncSession) -> None:
             image_url="/products/ortlieb-drybag.jpg",
             price=14.95,
             currency="EUR",
-            shop_id="shop-amazon",
+            shop_id="shop-bike-components",
             affiliate_url="https://www.amazon.de/dp/B01YZA7890?tag=bikeweather-21",
             matches_zone=None,
             matches_label="Dry Bag für Wertsachen",
@@ -926,12 +936,12 @@ async def _seed_translations(session: AsyncSession) -> None:
 
 
 async def run_seed(session: AsyncSession) -> None:
-    async with session.no_autoflush:
-        await _seed_shops(session)
-        await _seed_categories(session)
-        await _seed_products(session)
-        await _seed_disclosure(session)
-        await _seed_faq(session)
-        await _seed_about(session)
-        await _seed_translations(session)
+    await _seed_admin_user(session)
+    await _seed_shops(session)
+    await _seed_categories(session)
+    await _seed_products(session)
+    await _seed_disclosure(session)
+    await _seed_faq(session)
+    await _seed_about(session)
+    await _seed_translations(session)
     await session.commit()

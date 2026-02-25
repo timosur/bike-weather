@@ -10,7 +10,7 @@ from rich.logging import RichHandler
 
 from agent.config import settings
 from agent.extractor import extract_products
-from agent.publisher import publish_products, publish_with_review
+from agent.publisher import BulkResult, publish_products, publish_with_review
 from agent.scraper import extract_text, fetch_page
 from agent.shops import get_shop, list_shops
 
@@ -36,6 +36,19 @@ CATEGORY_MAP: dict[str, str] = {
     "rain-gear": "cat-jackets",  # rain gear defaults to jackets category
 }
 
+# Canonical list: one slug per unique backend category (used by --all)
+ALL_CATEGORIES: list[str] = [
+    "cycling-jackets",
+    "cycling-gloves",
+    "cycling-tights",
+    "headwear",
+    "cycling-shoes-overshoes",
+    "bike-lights",
+    "accessories-gear",
+]
+
+DEFAULT_MAX_PRODUCTS = 3
+
 
 def _resolve_category_id(category: str) -> str:
     """Resolve a category name/slug to a backend category ID."""
@@ -52,7 +65,11 @@ def _resolve_category_id(category: str) -> str:
 def _build_search_query(category: str) -> str:
     """Build a search query string from the category."""
     # Turn slug-style into natural language
-    return f"cycling {category.replace('-', ' ')}"
+    query = category.replace("-", " ")
+    # Avoid "cycling cycling jackets" when slug already starts with "cycling"
+    if not query.lower().startswith("cycling"):
+        query = f"cycling {query}"
+    return query
 
 
 def _setup_logging(verbose: bool) -> None:
@@ -64,16 +81,26 @@ def _setup_logging(verbose: bool) -> None:
     )
 
 
-async def run(args: argparse.Namespace) -> None:
-    """Main async workflow."""
-    shop = get_shop(args.shop)
-    category_id = _resolve_category_id(args.category)
-    search_query = _build_search_query(args.category)
+async def run_category(
+    category: str,
+    shop_name: str,
+    *,
+    max_products: int = DEFAULT_MAX_PRODUCTS,
+    review: bool = False,
+) -> BulkResult:
+    """Run the full scrape → extract → publish pipeline for a single category.
+
+    Returns a BulkResult with created/updated/error counts.
+    """
+    shop = get_shop(shop_name)
+    category_id = _resolve_category_id(category)
+    search_query = _build_search_query(category)
     search_url = shop.search_url(search_query)
 
     console.print(f"[bold]Shop:[/bold] {shop.name}")
-    console.print(f"[bold]Category:[/bold] {args.category} → {category_id}")
+    console.print(f"[bold]Category:[/bold] {category} → {category_id}")
     console.print(f"[bold]Search URL:[/bold] {search_url}")
+    console.print(f"[bold]Max products:[/bold] {max_products}")
     console.print()
 
     # 1. Fetch search results page
@@ -82,23 +109,30 @@ async def run(args: argparse.Namespace) -> None:
         html = await fetch_page(search_url)
     except Exception as e:
         console.print(f"[red]Failed to fetch page: {e}[/red]")
-        sys.exit(1)
+        return BulkResult(errors=[f"Fetch failed for {category}: {e}"])
 
     # 2. Extract text from HTML
     console.print("[dim]Extracting text from HTML…[/dim]")
     text = extract_text(html)
     if not text.strip():
-        console.print("[yellow]No text extracted from page. Aborting.[/yellow]")
-        sys.exit(1)
+        console.print("[yellow]No text extracted from page. Skipping.[/yellow]")
+        return BulkResult()
     console.print(f"[dim]Extracted {len(text)} chars of text.[/dim]")
 
     # 3. Send to LLM for product extraction
     console.print("[dim]Sending to LLM for product extraction…[/dim]")
-    products = await extract_products(text, args.category, shop.name)
+    products = await extract_products(text, category, shop.name)
 
     if not products:
-        console.print("[yellow]No products extracted. Aborting.[/yellow]")
-        sys.exit(0)
+        console.print("[yellow]No products extracted. Skipping.[/yellow]")
+        return BulkResult()
+
+    # 4. Limit to max_products
+    if len(products) > max_products:
+        console.print(
+            f"[dim]Trimming {len(products)} products to {max_products}.[/dim]"
+        )
+        products = products[:max_products]
 
     # Inject affiliate tags
     for p in products:
@@ -106,13 +140,77 @@ async def run(args: argparse.Namespace) -> None:
 
     console.print(f"[green]Extracted {len(products)} product(s).[/green]")
 
-    # 4. Publish or review
-    if args.review:
+    # 5. Publish or review
+    if review:
         result = await publish_with_review(products, category_id, shop.shop_id)
     else:
         result = await publish_products(products, category_id, shop.shop_id)
 
-    # 5. Summary
+    return result
+
+
+async def run_all(
+    shop_name: str,
+    *,
+    max_products: int = DEFAULT_MAX_PRODUCTS,
+    delay: float = 2.0,
+) -> None:
+    """Iterate over ALL_CATEGORIES, importing up to *max_products* per category."""
+    total = BulkResult()
+
+    for i, category in enumerate(ALL_CATEGORIES):
+        console.rule(
+            f"[bold cyan]Category {i + 1}/{len(ALL_CATEGORIES)}: {category}[/bold cyan]"
+        )
+
+        result = await run_category(
+            category, shop_name, max_products=max_products, review=False
+        )
+
+        total.created += result.created
+        total.updated += result.updated
+        total.skipped += result.skipped
+        total.errors.extend(result.errors)
+
+        _print_result(result)
+
+        # Polite delay between categories to avoid hammering the shop
+        if i < len(ALL_CATEGORIES) - 1:
+            console.print(f"[dim]Waiting {delay}s before next category…[/dim]\n")
+            await asyncio.sleep(delay)
+
+    # Grand total
+    console.rule("[bold green]All categories complete[/bold green]")
+    console.print(f"[bold]Total created:[/bold] {total.created}")
+    console.print(f"[bold]Total updated:[/bold] {total.updated}")
+    console.print(f"[bold]Total skipped:[/bold] {total.skipped}")
+    if total.errors:
+        console.print(f"[bold red]Total errors:[/bold red] {len(total.errors)}")
+        for err in total.errors:
+            console.print(f"  - {err}")
+
+
+async def run(args: argparse.Namespace) -> None:
+    """Main async workflow — delegates to run_all or run_category."""
+    if args.all:
+        await run_all(
+            args.shop,
+            max_products=args.max_products,
+            delay=settings.request_delay,
+        )
+        return
+
+    result = await run_category(
+        args.category,
+        args.shop,
+        max_products=args.max_products,
+        review=args.review,
+    )
+    _print_result(result)
+
+
+def _print_result(result: BulkResult) -> None:
+    """Pretty-print a single BulkResult."""
     console.print()
     console.print("[bold]Result:[/bold]")
     console.print(f"  Created: {result.created}")
@@ -130,16 +228,30 @@ def main() -> None:
         prog="agent",
         description="LLM-powered product agent for Bike Weather",
     )
-    parser.add_argument(
+
+    cat_group = parser.add_mutually_exclusive_group(required=True)
+    cat_group.add_argument(
         "--category",
-        required=True,
-        help="Product category slug (e.g. 'rain-gear', 'cycling-jackets', 'gloves')",
+        help="Product category slug (e.g. 'cycling-jackets', 'gloves')",
     )
+    cat_group.add_argument(
+        "--all",
+        action="store_true",
+        default=False,
+        help="Run for ALL product categories automatically",
+    )
+
     parser.add_argument(
         "--shop",
         required=True,
         choices=list_shops(),
-        help="Shop to search (e.g. 'amazon', 'bike24')",
+        help="Shop to search (e.g. 'bike-components')",
+    )
+    parser.add_argument(
+        "--max-products",
+        type=int,
+        default=DEFAULT_MAX_PRODUCTS,
+        help=f"Maximum products to import per category (default: {DEFAULT_MAX_PRODUCTS})",
     )
     parser.add_argument(
         "--review",

@@ -26,18 +26,18 @@ def _make_product(**kwargs) -> ProductData:
 class TestBuildBulkPayload:
     def test_builds_correct_structure(self):
         products = [_make_product(name="Jacket A"), _make_product(name="Jacket B")]
-        payload = _build_bulk_payload(products, "cat-jackets", "shop-amazon")
+        payload = _build_bulk_payload(products, "cat-jackets", "shop-bike-components")
 
         assert len(payload) == 2
         item = payload[0]
         assert item["name"] == "Jacket A"
         assert item["categoryId"] == "cat-jackets"
-        assert item["shopId"] == "shop-amazon"
+        assert item["shopId"] == "shop-bike-components"
         assert item["isPublished"] is False  # drafts by default
         assert item["id"].startswith("agent-")
 
     def test_empty_products(self):
-        payload = _build_bulk_payload([], "cat-jackets", "shop-amazon")
+        payload = _build_bulk_payload([], "cat-jackets", "shop-bike-components")
         assert payload == []
 
 
@@ -62,7 +62,7 @@ class TestPublishProducts:
             result = await publish_products(
                 products,
                 "cat-jackets",
-                "shop-amazon",
+                "shop-bike-components",
                 api_url="http://test/api/admin",
                 token="test-token",
             )
@@ -96,7 +96,7 @@ class TestPublishProducts:
             result = await publish_products(
                 products,
                 "cat-jackets",
-                "shop-amazon",
+                "shop-bike-components",
                 api_url="http://test/api/admin",
                 token="test-token",
             )
@@ -127,7 +127,7 @@ class TestPublishProducts:
             result = await publish_products(
                 products,
                 "cat-jackets",
-                "shop-amazon",
+                "shop-bike-components",
                 api_url="http://test/api/admin",
                 token="test-token",
             )
@@ -139,6 +139,6 @@ class TestPublishProducts:
     @pytest.mark.asyncio
     async def test_publish_empty_list(self):
         """Publishing empty list returns immediately."""
-        result = await publish_products([], "cat-jackets", "shop-amazon")
+        result = await publish_products([], "cat-jackets", "shop-bike-components")
         assert result.created == 0
         assert result.updated == 0

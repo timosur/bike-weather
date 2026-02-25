@@ -74,10 +74,20 @@ async def publish_products(
     if not payload:
         return BulkResult(skipped=0)
 
-    headers = {
+    headers: dict[str, str] = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {auth_token}",
     }
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+    elif settings.admin_dev_email:
+        # Local dev bypass: backend must have DEBUG=True
+        headers["X-Dev-User-Email"] = settings.admin_dev_email
+    else:
+        return BulkResult(
+            errors=[
+                "No auth configured. Set AGENT_ADMIN_TOKEN or AGENT_ADMIN_DEV_EMAIL in .env"
+            ]
+        )
 
     try:
         async with httpx.AsyncClient(timeout=settings.request_timeout) as client:
