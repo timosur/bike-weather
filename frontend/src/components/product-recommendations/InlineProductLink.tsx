@@ -16,7 +16,10 @@ export function InlineProductLink({ product, shop, disclosure, onProductClick }:
       className="group mt-3 flex items-center gap-3 rounded-lg bg-stone-50 dark:bg-stone-800/60 ring-1 ring-stone-200/80 dark:ring-stone-700/60 p-2.5 hover:ring-emerald-300 dark:hover:ring-emerald-700 transition-all duration-200"
     >
       <div className="w-10 h-10 rounded-md bg-stone-100 dark:bg-stone-700 flex items-center justify-center shrink-0 overflow-hidden">
-        <Store className="w-5 h-5 text-stone-400 dark:text-stone-500" strokeWidth={1.5} />
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden') }} />
+        ) : null}
+        <Store className={`w-5 h-5 text-stone-400 dark:text-stone-500${product.imageUrl ? ' hidden' : ''}`} strokeWidth={1.5} />
       </div>
 
       <div className="flex-1 min-w-0">

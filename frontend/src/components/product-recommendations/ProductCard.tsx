@@ -42,7 +42,19 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
       </span>
 
       <div className="aspect-[4/3] bg-stone-100 dark:bg-stone-800 flex items-center justify-center overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-400 dark:text-stone-500">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-contain"
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+              e.currentTarget.nextElementSibling?.classList.remove('hidden')
+            }}
+          />
+        ) : null}
+        <div className={`w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-400 dark:text-stone-500${product.imageUrl ? ' hidden' : ''}`}>
           <Store className="w-10 h-10" strokeWidth={1} />
         </div>
       </div>

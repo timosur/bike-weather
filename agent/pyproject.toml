@@ -30,8 +30,9 @@ agent = "agent.main:main"
 requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-include = ["agent*"]
+[tool.setuptools]
+package-dir = { "agent" = "." }
+packages = ["agent", "agent.shops", "agent.tests"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

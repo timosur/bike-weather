@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # LLM settings
     llm_provider: str = "openai"  # "openai" or "anthropic"
-    llm_model: str = "gpt-4o-mini"
+    llm_model: str = "gpt-3.5-turbo"
     llm_api_key: str = ""
 
     # HTTP settings
@@ -24,7 +24,11 @@ class Settings(BaseSettings):
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     )
 
-    model_config = {"env_prefix": "AGENT_", "env_file": ".env", "extra": "ignore"}
+    model_config = {
+        "env_prefix": "AGENT_",
+        "env_file": ".env",
+        "extra": "ignore",
+    }
 
 
 settings = Settings()

@@ -25,6 +25,13 @@ Extract ALL products you can find from the following text. For each product retu
 - currency: Currency code (default "EUR")
 - image_url: Product image URL if available, otherwise empty string
 - affiliate_url: Product page URL / link
+- matches_label: A short human-readable label for what conditions this product suits (e.g. "Cold & Wet", "Mild Weather", "All Conditions", "Winter", "Summer"). Infer from product features.
+- matches_zone: Which body zone this product covers. One of: "head", "upperBody", "lowerBody", "hands", "feet", or null if unclear.
+- temp_min: Minimum temperature (°C) this product is suitable for (integer). Infer from product description/features. null if unknown.
+- temp_max: Maximum temperature (°C) this product is suitable for (integer). Infer from product description/features. null if unknown.
+- precipitation: Rain/weather protection level. One of: "none", "light-rain", "heavy-rain", "snow". Infer from waterproof/water-resistant features.
+- wind: Wind protection level. One of: "none", "light-wind", "strong-wind". Infer from windproof features.
+- weather_summary: A 1-sentence summary of what weather conditions this product is best for.
 
 Return a JSON array of objects. Example:
 [
@@ -34,7 +41,14 @@ Return a JSON array of objects. Example:
     "price": 179.99,
     "currency": "EUR",
     "image_url": "https://example.com/image.jpg",
-    "affiliate_url": "https://example.com/product/123"
+    "affiliate_url": "https://example.com/product/123",
+    "matches_label": "Cold & Wet",
+    "matches_zone": "upperBody",
+    "temp_min": -5,
+    "temp_max": 10,
+    "precipitation": "heavy-rain",
+    "wind": "strong-wind",
+    "weather_summary": "Best for cold, rainy and windy winter rides."
   }}
 ]
 
@@ -42,6 +56,7 @@ IMPORTANT:
 - Return ONLY the JSON array, no other text.
 - If no products are found, return an empty array: []
 - Do not invent products. Only extract what is present in the text.
+- For weather fields, make reasonable inferences from product names, descriptions, and features (e.g. "Gore-Tex" → heavy-rain, "Windproof" → strong-wind, "Thermal" → low temp_min).
 
 Text to extract from:
 ---
@@ -59,6 +74,13 @@ class ProductData(BaseModel):
     currency: str = "EUR"
     image_url: str = ""
     affiliate_url: str = ""
+    matches_label: str = "All Conditions"
+    matches_zone: str | None = None
+    temp_min: float | None = None
+    temp_max: float | None = None
+    precipitation: str = "none"
+    wind: str = "none"
+    weather_summary: str = ""
 
     @field_validator("name")
     @classmethod

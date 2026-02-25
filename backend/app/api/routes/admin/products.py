@@ -179,7 +179,11 @@ async def delete_product(
 @router.post("/products/bulk", response_model=BulkProductResponse)
 async def bulk_import_products(
     items: list[BulkProductItem],
-    replace_category: str | None = Query(None, alias="replaceCategory", description="If set, delete all existing products in this category before importing"),
+    replace_category: str | None = Query(
+        None,
+        alias="replaceCategory",
+        description="If set, delete all existing products in this category before importing",
+    ),
     _admin: User = Depends(require_admin),
     session: AsyncSession = Depends(get_session),
 ) -> BulkProductResponse:
@@ -247,7 +251,9 @@ async def bulk_import_products(
             errors.append(f"Error processing product {item.id}: {e!s}")
 
     await session.commit()
-    return BulkProductResponse(created=created, updated=updated, deleted=deleted, errors=errors)
+    return BulkProductResponse(
+        created=created, updated=updated, deleted=deleted, errors=errors
+    )
 
 
 # --- Categories ---
