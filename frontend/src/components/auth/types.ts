@@ -3,6 +3,7 @@ export type AuthTab = "login" | "register";
 export interface LoginFormData {
   username: string;
   password: string;
+  captchaToken?: string;
 }
 
 export interface RegisterFormData {
@@ -10,6 +11,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   passwordConfirm: string;
+  captchaToken?: string;
 }
 
 export interface AuthPageProps {
@@ -23,8 +25,6 @@ export interface AuthPageProps {
   onLogin?: (data: LoginFormData) => void;
   /** Called when user submits registration */
   onRegister?: (data: RegisterFormData) => void;
-  /** Called when user clicks Google login */
-  onGoogleLogin?: () => void;
   /** Called when user clicks "Forgot password" */
   onForgotPassword?: () => void;
 }

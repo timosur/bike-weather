@@ -19,6 +19,7 @@ class BulkResult(BaseModel):
 
     created: int = 0
     updated: int = 0
+    deleted: int = 0
     skipped: int = 0
     errors: list[str] = []
 
@@ -27,6 +28,8 @@ def _build_bulk_payload(
     products: list[ProductData],
     category_id: str,
     shop_id: str,
+    *,
+    publish: bool = True,
 ) -> list[dict]:
     """Convert ProductData list into the BulkProductItem payload expected by the API."""
     items = []
@@ -49,7 +52,7 @@ def _build_bulk_payload(
                 "weatherPrecipitation": "none",
                 "weatherWind": "none",
                 "weatherSummary": p.description,
-                "isPublished": False,  # land as drafts
+                "isPublished": publish,
             }
         )
     return items
@@ -61,15 +64,18 @@ async def publish_products(
     shop_id: str,
     api_url: str | None = None,
     token: str | None = None,
+    *,
+    publish: bool = True,
 ) -> BulkResult:
     """POST products to /api/admin/products/bulk.
 
-    Returns a BulkResult with created/updated/error counts.
+    Replaces all existing products in the category with the new set.
+    Returns a BulkResult with created/updated/deleted/error counts.
     """
     url = api_url or settings.admin_api_url
     auth_token = token or settings.admin_token
-    endpoint = f"{url.rstrip('/')}/products/bulk"
-    payload = _build_bulk_payload(products, category_id, shop_id)
+    endpoint = f"{url.rstrip('/')}/products/bulk?replaceCategory={category_id}"
+    payload = _build_bulk_payload(products, category_id, shop_id, publish=publish)
 
     if not payload:
         return BulkResult(skipped=0)
@@ -97,6 +103,7 @@ async def publish_products(
             return BulkResult(
                 created=data.get("created", 0),
                 updated=data.get("updated", 0),
+                deleted=data.get("deleted", 0),
                 errors=data.get("errors", []),
             )
     except httpx.HTTPStatusError as e:
@@ -134,6 +141,8 @@ async def publish_with_review(
     products: list[ProductData],
     category_id: str,
     shop_id: str,
+    *,
+    publish: bool = True,
 ) -> BulkResult:
     """Interactive mode: display products, ask for confirmation, then publish.
 
@@ -174,6 +183,6 @@ async def publish_with_review(
         except ValueError:
             console.print("[red]Invalid input. Publishing all.[/red]")
 
-    result = await publish_products(approved, category_id, shop_id)
+    result = await publish_products(approved, category_id, shop_id, publish=publish)
     result.skipped = skipped
     return result

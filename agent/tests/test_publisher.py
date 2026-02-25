@@ -33,7 +33,7 @@ class TestBuildBulkPayload:
         assert item["name"] == "Jacket A"
         assert item["categoryId"] == "cat-jackets"
         assert item["shopId"] == "shop-bike-components"
-        assert item["isPublished"] is False  # drafts by default
+        assert item["isPublished"] is True  # published by default
         assert item["id"].startswith("agent-")
 
     def test_empty_products(self):
@@ -70,6 +70,7 @@ class TestPublishProducts:
             mock_client.post.assert_called_once()
             call_args = mock_client.post.call_args
             assert "products/bulk" in call_args[0][0]
+            assert "replaceCategory=cat-jackets" in call_args[0][0]
             assert call_args[1]["headers"]["Authorization"] == "Bearer test-token"
 
             assert result.created == 1
@@ -113,7 +114,7 @@ class TestPublishProducts:
         ]
         mock_response = httpx.Response(
             200,
-            json={"created": 1, "updated": 1, "errors": []},
+            json={"created": 1, "updated": 1, "deleted": 3, "errors": []},
             request=httpx.Request("POST", "http://test/api/admin/products/bulk"),
         )
 
@@ -134,6 +135,7 @@ class TestPublishProducts:
 
             assert result.created == 1
             assert result.updated == 1
+            assert result.deleted == 3
             assert result.errors == []
 
     @pytest.mark.asyncio

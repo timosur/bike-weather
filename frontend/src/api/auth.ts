@@ -27,8 +27,12 @@ async function authFetch<T>(path: string, body: Record<string, string>): Promise
   return response.json() as Promise<T>;
 }
 
-export function login(username: string, password: string): Promise<TokenResponse> {
-  return authFetch<TokenResponse>("/auth/login", { username, password });
+export function login(username: string, password: string, captchaToken?: string): Promise<TokenResponse> {
+  return authFetch<TokenResponse>("/auth/login", {
+    username,
+    password,
+    ...(captchaToken ? { captcha_token: captchaToken } : {}),
+  });
 }
 
 export interface MeResponse {
@@ -53,11 +57,13 @@ export function register(
   email: string,
   password: string,
   name?: string,
+  captchaToken?: string,
 ): Promise<TokenResponse> {
   return authFetch<TokenResponse>("/auth/register", {
     username,
     email,
     password,
     ...(name ? { name } : {}),
+    ...(captchaToken ? { captcha_token: captchaToken } : {}),
   });
 }

@@ -18,16 +18,6 @@ export function AuthPageSkeleton() {
             <SkeletonBlock className="h-4 w-20" />
           </div>
 
-          {/* Google button */}
-          <SkeletonButton className="h-11 w-full" />
-
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 border-t border-stone-200 dark:border-stone-800" />
-            <SkeletonLine className="h-3 w-6" />
-            <div className="flex-1 border-t border-stone-200 dark:border-stone-800" />
-          </div>
-
           {/* Email field */}
           <div className="space-y-1.5">
             <SkeletonLine className="h-3 w-12" />

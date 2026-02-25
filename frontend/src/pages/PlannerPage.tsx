@@ -10,6 +10,7 @@ import { useToast } from '../hooks/useToast'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchReport } from '../api/rides'
 import { createRoute } from '../api/routes'
+import { TurnstileWidget, useTurnstile } from '../components/common/TurnstileWidget'
 import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { BikeTypeOption, RidingIntensityOption, QuickPreset, RideInput } from '../components/ride-planner/types'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
@@ -51,6 +52,13 @@ export default function PlannerPage() {
 
   // Track form reset key to force remount
   const [resetKey, setResetKey] = useState(0)
+
+  // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
+  const THROTTLE_THRESHOLD = 3
+  const THROTTLE_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
+  const submitTimestamps = useRef<number[]>([])
+  const [showPlannerCaptcha, setShowPlannerCaptcha] = useState(false)
+  const plannerTurnstile = useTurnstile()
 
   const reportRef = useRef<HTMLDivElement>(null)
 
@@ -107,7 +115,27 @@ export default function PlannerPage() {
   }, [addEntry, saveFormState, t])
 
   const handleSubmit = (input: RideInput) => {
-    doSubmit(input)
+    const now = Date.now()
+    // Prune old timestamps outside window
+    submitTimestamps.current = submitTimestamps.current.filter(
+      ts => now - ts < THROTTLE_WINDOW_MS
+    )
+    submitTimestamps.current.push(now)
+
+    // Check if CAPTCHA is needed
+    if (submitTimestamps.current.length > THROTTLE_THRESHOLD) {
+      if (!showPlannerCaptcha) {
+        setShowPlannerCaptcha(true)
+        return // Don't submit yet — wait for CAPTCHA
+      }
+      const token = plannerTurnstile.getToken()
+      if (!token) {
+        return // CAPTCHA shown but not completed
+      }
+      doSubmit({ ...input, captchaToken: token })
+    } else {
+      doSubmit(input)
+    }
   }
 
   // Auto-submit from router state (saved routes or redirected from /report)
@@ -297,6 +325,17 @@ export default function PlannerPage() {
               onClear={clearHistory}
               onNavigateToLogin={handleNavigateToLogin}
             />
+          )}
+          {showPlannerCaptcha && (
+            <div className="mt-4 flex flex-col items-center gap-2">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                {t('planner.captchaHint', 'Please verify you\'re not a bot to continue.')}
+              </p>
+              <TurnstileWidget
+                onVerify={plannerTurnstile.onVerify}
+                onExpire={plannerTurnstile.onExpire}
+              />
+            </div>
           )}
         </RidePlanner>
       )}

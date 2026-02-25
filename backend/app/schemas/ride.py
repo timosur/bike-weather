@@ -25,3 +25,4 @@ class RideInputSchema(BaseModel):
     durationMinutes: float | None = None
     averageSpeedKmh: float | None = None
     dayStops: list[DayStopSchema] = []
+    captcha_token: str | None = None

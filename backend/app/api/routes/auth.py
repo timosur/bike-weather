@@ -1,11 +1,13 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, _find_or_create_user
 from app.database import get_session
 from app.models.user import User
+from app.rate_limit import limiter
 from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
@@ -18,6 +20,7 @@ from app.services.headless_auth import (
     headless_login,
     headless_register,
 )
+from app.services.turnstile import verify_turnstile
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +42,14 @@ async def get_me(user: User = Depends(get_current_user)) -> UserResponse:
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/minute")
 async def login(
     body: LoginRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ) -> TokenResponse:
     """Authenticate with username and password, returning OIDC tokens."""
+    await verify_turnstile(body.captcha_token, get_remote_address(request))
     try:
         tokens = await headless_login(body.username, body.password)
     except HeadlessAuthError as exc:
@@ -62,11 +68,14 @@ async def login(
 
 
 @router.post("/register", response_model=TokenResponse)
+@limiter.limit("5/minute")
 async def register(
     body: RegisterRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ) -> TokenResponse:
     """Create a new account and return OIDC tokens."""
+    await verify_turnstile(body.captcha_token, get_remote_address(request))
     try:
         tokens = await headless_register(
             body.username, body.email, body.password, body.name

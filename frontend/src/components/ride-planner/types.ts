@@ -32,6 +32,8 @@ export interface RideInput {
   averageSpeedKmh?: number | null;
   /** Per-day overnight stops for multi-day tours (one per night) */
   dayStops: DayStop[];
+  /** Turnstile CAPTCHA token (sent when throttle threshold exceeded) */
+  captchaToken?: string;
 }
 
 export interface LocationSuggestion {

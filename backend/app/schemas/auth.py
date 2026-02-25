@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class UserResponse(BaseModel):
@@ -13,6 +13,7 @@ class UserResponse(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+    captcha_token: str | None = None
 
 
 class RegisterRequest(BaseModel):
@@ -20,6 +21,7 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     name: str = ""
+    captcha_token: str | None = None
 
 
 class TokenResponse(BaseModel):

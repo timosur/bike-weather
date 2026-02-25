@@ -87,6 +87,7 @@ async def run_category(
     *,
     max_products: int = DEFAULT_MAX_PRODUCTS,
     review: bool = False,
+    publish: bool = True,
 ) -> BulkResult:
     """Run the full scrape → extract → publish pipeline for a single category.
 
@@ -142,9 +143,13 @@ async def run_category(
 
     # 5. Publish or review
     if review:
-        result = await publish_with_review(products, category_id, shop.shop_id)
+        result = await publish_with_review(
+            products, category_id, shop.shop_id, publish=publish
+        )
     else:
-        result = await publish_products(products, category_id, shop.shop_id)
+        result = await publish_products(
+            products, category_id, shop.shop_id, publish=publish
+        )
 
     return result
 
@@ -154,6 +159,7 @@ async def run_all(
     *,
     max_products: int = DEFAULT_MAX_PRODUCTS,
     delay: float = 2.0,
+    publish: bool = True,
 ) -> None:
     """Iterate over ALL_CATEGORIES, importing up to *max_products* per category."""
     total = BulkResult()
@@ -164,11 +170,16 @@ async def run_all(
         )
 
         result = await run_category(
-            category, shop_name, max_products=max_products, review=False
+            category,
+            shop_name,
+            max_products=max_products,
+            review=False,
+            publish=publish,
         )
 
         total.created += result.created
         total.updated += result.updated
+        total.deleted += result.deleted
         total.skipped += result.skipped
         total.errors.extend(result.errors)
 
@@ -183,6 +194,7 @@ async def run_all(
     console.rule("[bold green]All categories complete[/bold green]")
     console.print(f"[bold]Total created:[/bold] {total.created}")
     console.print(f"[bold]Total updated:[/bold] {total.updated}")
+    console.print(f"[bold]Total deleted:[/bold] {total.deleted}")
     console.print(f"[bold]Total skipped:[/bold] {total.skipped}")
     if total.errors:
         console.print(f"[bold red]Total errors:[/bold red] {len(total.errors)}")
@@ -197,6 +209,7 @@ async def run(args: argparse.Namespace) -> None:
             args.shop,
             max_products=args.max_products,
             delay=settings.request_delay,
+            publish=not args.draft,
         )
         return
 
@@ -205,6 +218,7 @@ async def run(args: argparse.Namespace) -> None:
         args.shop,
         max_products=args.max_products,
         review=args.review,
+        publish=not args.draft,
     )
     _print_result(result)
 
@@ -215,6 +229,7 @@ def _print_result(result: BulkResult) -> None:
     console.print("[bold]Result:[/bold]")
     console.print(f"  Created: {result.created}")
     console.print(f"  Updated: {result.updated}")
+    console.print(f"  Deleted: {result.deleted}")
     console.print(f"  Skipped: {result.skipped}")
     if result.errors:
         console.print(f"  [red]Errors: {len(result.errors)}[/red]")
@@ -258,6 +273,12 @@ def main() -> None:
         action="store_true",
         default=False,
         help="Interactive review mode: display products before publishing",
+    )
+    parser.add_argument(
+        "--draft",
+        action="store_true",
+        default=False,
+        help="Import products as unpublished drafts (default: publish immediately)",
     )
     parser.add_argument(
         "--verbose",

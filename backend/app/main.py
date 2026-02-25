@@ -4,11 +4,14 @@ from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.api import api_router
 from app.config import settings
 from app.database import async_session, engine
 from app.middleware.locale import LocaleMiddleware
+from app.rate_limit import limiter
 from app.seed import run_seed
 
 logger = logging.getLogger(__name__)
@@ -27,6 +30,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Bike Weather API", version="0.1.0", lifespan=lifespan)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(LocaleMiddleware)
 

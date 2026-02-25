@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError(undefined)
     setIsSubmitting(true)
     try {
-      await login(data.username, data.password)
+      await login(data.username, data.password, data.captchaToken)
       navigate('/planner', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
@@ -33,7 +33,7 @@ export default function LoginPage() {
     setError(undefined)
     setIsSubmitting(true)
     try {
-      await register(data.username, data.email, data.password)
+      await register(data.username, data.email, data.password, undefined, data.captchaToken)
       navigate('/planner', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')

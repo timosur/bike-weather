@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send, Loader2, CheckCircle2 } from 'lucide-react'
+import { TurnstileWidget, useTurnstile } from '../common/TurnstileWidget'
 import type { ContactPageProps, ContactCategory, ContactFormData } from './types'
 
 const categoryKeys: { value: ContactCategory; key: string }[] = [
@@ -24,6 +25,7 @@ export function ContactPage({
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { t } = useTranslation()
+  const turnstile = useTurnstile()
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -35,7 +37,7 @@ export function ContactPage({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (validate()) onSubmit?.(form)
+    if (validate()) onSubmit?.({ ...form, captchaToken: turnstile.getToken() ?? undefined })
   }
 
   const inputBase =
@@ -102,11 +104,10 @@ export function ContactPage({
                   key={c.value}
                   type="button"
                   onClick={() => setForm(f => ({ ...f, category: c.value }))}
-                  className={`py-2 px-3 rounded-xl text-xs font-medium border-2 transition-all ${
-                    form.category === c.value
+                  className={`py-2 px-3 rounded-xl text-xs font-medium border-2 transition-all ${form.category === c.value
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
                       : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
-                  }`}
+                    }`}
                 >
                   {t(c.key)}
                 </button>
@@ -157,6 +158,13 @@ export function ContactPage({
             />
             {errors.message && <p className="text-xs text-red-500">{errors.message}</p>}
           </div>
+
+          {/* Turnstile CAPTCHA */}
+          <TurnstileWidget
+            onVerify={turnstile.onVerify}
+            onExpire={turnstile.onExpire}
+            className="flex justify-center"
+          />
 
           {/* Submit */}
           <button

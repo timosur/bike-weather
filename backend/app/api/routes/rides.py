@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,15 +9,18 @@ from app.api.dependencies import get_locale, get_optional_user
 from app.database import get_session
 from app.models.saved_route import SavedRoute
 from app.models.user import User
+from app.rate_limit import limiter
 from app.schemas.report import RideReportSchema
 from app.schemas.ride import RideInputSchema
 from app.services.recommendations import build_report
+from app.services.turnstile import verify_turnstile
 from app.services.weather import WeatherServiceError
 
 router = APIRouter(prefix="/rides", tags=["rides"])
 
 
 @router.post("/report", response_model=RideReportSchema)
+@limiter.limit("20/minute")
 async def create_report(
     ride_input: RideInputSchema,
     request: Request,
@@ -24,6 +28,9 @@ async def create_report(
     user: User | None = Depends(get_optional_user),
     session: AsyncSession = Depends(get_session),
 ) -> RideReportSchema:
+    # Turnstile token is optional for rides — frontend sends it after throttle threshold
+    if ride_input.captcha_token:
+        await verify_turnstile(ride_input.captcha_token, get_remote_address(request))
     locale = get_locale(request)
     try:
         report = await build_report(ride_input, locale=locale)

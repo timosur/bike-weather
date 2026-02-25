@@ -239,4 +239,5 @@ class BulkProductItem(BaseModel):
 class BulkProductResponse(BaseModel):
     created: int
     updated: int
+    deleted: int = 0
     errors: list[str]

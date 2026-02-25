@@ -179,13 +179,24 @@ async def delete_product(
 @router.post("/products/bulk", response_model=BulkProductResponse)
 async def bulk_import_products(
     items: list[BulkProductItem],
+    replace_category: str | None = Query(None, alias="replaceCategory", description="If set, delete all existing products in this category before importing"),
     _admin: User = Depends(require_admin),
     session: AsyncSession = Depends(get_session),
 ) -> BulkProductResponse:
     created = 0
     updated = 0
+    deleted = 0
     errors: list[str] = []
     now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # If replaceCategory is set, delete all existing products in that category first
+    if replace_category:
+        existing_in_cat = await session.execute(
+            select(Product).where(Product.category_id == replace_category)
+        )
+        for old_product in existing_in_cat.scalars().all():
+            await session.delete(old_product)
+            deleted += 1
 
     for item in items:
         try:
@@ -236,7 +247,7 @@ async def bulk_import_products(
             errors.append(f"Error processing product {item.id}: {e!s}")
 
     await session.commit()
-    return BulkProductResponse(created=created, updated=updated, errors=errors)
+    return BulkProductResponse(created=created, updated=updated, deleted=deleted, errors=errors)
 
 
 # --- Categories ---

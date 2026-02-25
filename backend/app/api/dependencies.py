@@ -8,6 +8,7 @@ def get_locale(request: Request) -> str:
     """Extract locale from request state (set by LocaleMiddleware)."""
     return getattr(request.state, "locale", "de")
 
+
 from app.config import settings
 from app.database import get_session
 from app.models.user import User
@@ -18,8 +19,17 @@ _bearer_scheme_optional = HTTPBearer(auto_error=False)
 
 
 async def _find_or_create_user(claims: TokenClaims, session: AsyncSession) -> User:
+    # First try matching by external_id (OIDC sub claim)
     result = await session.execute(select(User).where(User.external_id == claims.sub))
     user = result.scalars().first()
+
+    # Fall back to email match — adopts seeded/placeholder users on first OIDC login
+    if user is None and claims.email:
+        result = await session.execute(select(User).where(User.email == claims.email))
+        user = result.scalars().first()
+        if user is not None:
+            user.external_id = claims.sub  # bind OIDC identity
+
     if user is None:
         user = User(
             external_id=claims.sub,
@@ -31,6 +41,9 @@ async def _find_or_create_user(claims: TokenClaims, session: AsyncSession) -> Us
         await session.refresh(user)
     else:
         changed = False
+        if user.external_id != claims.sub:
+            user.external_id = claims.sub
+            changed = True
         if user.email != claims.email:
             user.email = claims.email
             changed = True

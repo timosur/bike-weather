@@ -22,8 +22,8 @@ interface AuthContextValue {
   isLoading: boolean
   isAuthenticated: boolean
   isAdmin: boolean
-  login: (username: string, password: string) => Promise<void>
-  register: (username: string, email: string, password: string, name?: string) => Promise<void>
+  login: (username: string, password: string, captchaToken?: string) => Promise<void>
+  register: (username: string, email: string, password: string, name?: string, captchaToken?: string) => Promise<void>
   logout: () => void
   getAccessToken: () => Promise<string | null>
 }
@@ -100,8 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = useCallback(async (username: string, password: string) => {
-    const tokens = await apiLogin(username, password)
+  const login = useCallback(async (username: string, password: string, captchaToken?: string) => {
+    const tokens = await apiLogin(username, password, captchaToken)
     const stored = storeTokens(tokens)
     setUser(stored.profile)
     // Fetch authoritative profile from backend (includes is_admin from DB)
@@ -112,8 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* profile from JWT is used as fallback */ }
   }, [])
 
-  const register = useCallback(async (username: string, email: string, password: string, name?: string) => {
-    const tokens = await apiRegister(username, email, password, name)
+  const register = useCallback(async (username: string, email: string, password: string, name?: string, captchaToken?: string) => {
+    const tokens = await apiRegister(username, email, password, name, captchaToken)
     const stored = storeTokens(tokens)
     setUser(stored.profile)
     try {

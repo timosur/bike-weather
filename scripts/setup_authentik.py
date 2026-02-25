@@ -190,14 +190,23 @@ def main():
         print(f"   FAILED: {e.code}")
         sys.exit(1)
 
-    # Set default admin password
-    print("\n8. Setting akadmin password...")
+    # Set default admin password and email
+    print("\n8. Setting akadmin password and email...")
     result = api("GET", "/api/v3/core/users/?username=akadmin")
     if result.get("results"):
         admin_pk = result["results"][0]["pk"]
-        api("POST", f"/api/v3/core/users/{admin_pk}/set_password/",
-            {"password": "test1234"})
+        api(
+            "POST",
+            f"/api/v3/core/users/{admin_pk}/set_password/",
+            {"password": "test1234"},
+        )
+        api(
+            "PATCH",
+            f"/api/v3/core/users/{admin_pk}/",
+            {"email": "admin@bike-weather.local"},
+        )
         print("   Password set to: test1234")
+        print("   Email set to: admin@bike-weather.local")
 
     # Write API token to .env
     print("\n9. Writing AUTHENTIK_API_TOKEN to .env...")
@@ -219,7 +228,9 @@ def main():
             f.writelines(new_lines)
         print(f"   Written to {env_path}")
     else:
-        print(f"   WARNING: {env_path} not found, set AUTHENTIK_API_TOKEN={token} manually")
+        print(
+            f"   WARNING: {env_path} not found, set AUTHENTIK_API_TOKEN={token} manually"
+        )
 
     print("\n=== Done! Login at http://localhost:5173 ===")
     print(f"   Admin: akadmin / test1234")

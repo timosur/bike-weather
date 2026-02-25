@@ -9,9 +9,10 @@ ContactCategory = Literal["feedback", "bug", "feature", "sonstiges"]
 
 class ContactFormSchema(BaseModel):
     category: ContactCategory
-    name: str = Field(min_length=1, max_length=200)
+    name: str = Field(default="", max_length=200)
     email: EmailStr
     message: str = Field(min_length=1, max_length=5000)
+    captcha_token: str | None = None
 
 
 # --- Admin schemas ---

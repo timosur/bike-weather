@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
     DEBUG: bool = False
+    TURNSTILE_SECRET_KEY: str = ""
+    TURNSTILE_ENABLED: bool = True
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

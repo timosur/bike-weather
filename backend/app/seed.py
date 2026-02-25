@@ -14,10 +14,19 @@ from app.models.user import User
 
 
 async def _seed_admin_user(session: AsyncSession) -> None:
-    """Create a default admin user for local development."""
+    """Create or promote the default admin user for local development.
+
+    If the user already exists (e.g. created by OIDC first-login), promote
+    them to admin.  Otherwise create a placeholder row that will be adopted
+    when the Authentik akadmin user logs in for the first time.
+    """
     email = "admin@bike-weather.local"
     existing = await session.execute(select(User).where(User.email == email))
-    if not existing.scalars().first():
+    user = existing.scalars().first()
+    if user:
+        if not user.is_admin:
+            user.is_admin = True
+    else:
         session.add(
             User(
                 external_id="local-admin",
