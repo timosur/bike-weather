@@ -15,7 +15,6 @@ import {
   RotateCcw,
   Info,
   X,
-  Plus,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type {
@@ -43,6 +42,10 @@ function addDays(dateStr: string, days: number): string {
   return d.toISOString().split('T')[0]
 }
 
+function formatTimeHHMM(date: Date): string {
+  return date.toTimeString().slice(0, 5)
+}
+
 export function RidePlanner({
   initialValues,
   locationSuggestions = [],
@@ -50,8 +53,6 @@ export function RidePlanner({
   intensityOptions,
   quickPresets = [],
   isLoading = false,
-  collapsed = false,
-  onToggleCollapse,
   formSource = null,
   onReset,
   onLocationSearch,
@@ -69,7 +70,7 @@ export function RidePlanner({
   const [form, setForm] = useState<RideInput>({
     location: initialValues?.location ?? null,
     startDate: initialValues?.startDate ?? today,
-    startTime: initialValues?.startTime ?? '08:00',
+    startTime: initialValues?.startTime ?? formatTimeHHMM(new Date()),
     endDate: initialValues?.endDate ?? null,
     isMultiDay: initialValues?.isMultiDay ?? false,
     bikeType: initialValues?.bikeType ?? 'gravel',
@@ -166,54 +167,6 @@ export function RidePlanner({
   const inputNormal = 'border-stone-200 dark:border-stone-700'
 
   const [bannerDismissed, setBannerDismissed] = useState(false)
-
-  // Collapsed summary bar
-  if (collapsed) {
-    const bikeLabel = bikeTypeOptions.find(b => b.value === form.bikeType)?.label ?? form.bikeType
-    const intensityLabel = intensityOptions.find(i => i.value === form.intensity)?.label ?? form.intensity
-    const dateFormatted = form.startDate
-      ? new Date(form.startDate + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
-      : ''
-
-    return (
-      <div className="w-full flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="flex-1 min-w-0 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-4 flex items-center justify-between gap-4 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors group"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
-              <Route className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
-            </div>
-            <div className="min-w-0 text-left">
-              <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
-                {form.location?.address || t('planner.placeholder.cityOrAddress')}
-              </p>
-              <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
-                {dateFormatted} · {form.startTime} · {bikeLabel} · {intensityLabel}
-                {form.distanceKm ? ` · ${form.distanceKm} km` : ''}
-              </p>
-            </div>
-          </div>
-          <span className="flex-shrink-0 text-xs font-medium text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 whitespace-nowrap">
-            {t('planner.editRide')}
-          </span>
-        </button>
-        {onReset && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="flex-shrink-0 h-[60px] px-4 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors flex items-center gap-2"
-            title={t('planner.newRide')}
-          >
-            <Plus className="w-4 h-4" strokeWidth={2} />
-            <span className="text-xs font-medium whitespace-nowrap">{t('planner.newRide')}</span>
-          </button>
-        )}
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-10 px-4">

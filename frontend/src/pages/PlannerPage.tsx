@@ -31,6 +31,8 @@ export default function PlannerPage() {
     searchLocation,
     searchDayStopLocation,
     useCurrentLocation,
+    clearSuggestions,
+    clearDetectedLocation,
   } = useLocationSearch()
 
   const { history, addEntry, removeEntry, clearHistory } = useRideHistory()
@@ -46,9 +48,6 @@ export default function PlannerPage() {
   // Save-route state
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-
-  // Planner collapsed state
-  const [plannerCollapsed, setPlannerCollapsed] = useState(false)
 
   // Track form reset key to force remount
   const [resetKey, setResetKey] = useState(0)
@@ -100,7 +99,6 @@ export default function PlannerPage() {
     setSubmittedInput(input)
     setCurrentRouteId(routeId)
     setSaved(false)
-    setPlannerCollapsed(true)
     saveFormState(input)
 
     try {
@@ -240,8 +238,10 @@ export default function PlannerPage() {
     setCurrentRouteId(undefined)
     setSaved(false)
     setSaving(false)
-    setPlannerCollapsed(false)
     clearFormState()
+    // Clear stale location search state so the new planner starts clean
+    clearSuggestions()
+    clearDetectedLocation()
     // Clear router state if any
     window.history.replaceState({}, '')
     // Increment reset key to force RidePlanner remount with fresh defaults
@@ -277,38 +277,7 @@ export default function PlannerPage() {
       )}
 
       {/* Planner section */}
-      {showReport ? (
-        // Collapsed planner when report is visible
-        <div className="max-w-4xl mx-auto px-4 pt-6 pb-4">
-          <RidePlanner
-            key={`collapsed-${detectKeyRef.current}-${resetKey}`}
-            initialValues={submittedInput ?? getInitialValues()}
-            locationSuggestions={suggestions}
-            dayStopLocationSuggestions={dayStopSuggestions}
-            bikeTypeOptions={bikeTypeOptions}
-            intensityOptions={intensityOptions}
-            quickPresets={quickPresets}
-            isLoading={reportLoading}
-            collapsed={plannerCollapsed}
-            onToggleCollapse={() => {
-              setPlannerCollapsed(!plannerCollapsed)
-              if (plannerCollapsed === true) {
-                // Expanding planner → hide the report
-                setReport(null)
-                setReportError(null)
-                setSubmittedInput(null)
-              }
-            }}
-            onReset={handleReset}
-            onLocationSearch={searchLocation}
-            onUseCurrentLocation={useCurrentLocation}
-            onLocationSelect={() => { }}
-            onDayStopLocationSearch={searchDayStopLocation}
-            onPresetSelect={() => { }}
-            onSubmit={handleSubmit}
-          />
-        </div>
-      ) : (
+      {!showReport && (
         // Full planner form with recent rides inside
         <RidePlanner
           key={`form-${detectKeyRef.current}-${resetKey}`}
@@ -382,7 +351,6 @@ export default function PlannerPage() {
                   setReportError(null)
                   setReport(null)
                   setSubmittedInput(null)
-                  setPlannerCollapsed(false)
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
               >
@@ -400,6 +368,12 @@ export default function PlannerPage() {
               onSaveRoute={isAuthenticated ? handleSaveRoute : undefined}
               routeSaving={saving}
               routeSaved={saved}
+              onPlanAgain={() => {
+                setReport(null)
+                setReportError(null)
+                setSubmittedInput(null)
+              }}
+              onNewRide={handleReset}
               onSwapClothingItem={handleSwapClothingItem}
               products={sampleProducts}
               shops={shops}

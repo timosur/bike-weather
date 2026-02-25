@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route } from 'lucide-react'
+import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route, PenLine, Plus } from 'lucide-react'
 import type { RideReportProps } from './types'
 import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
@@ -10,7 +10,7 @@ import { ClothingItemCard } from './ClothingItemCard'
 import { EquipmentList } from './EquipmentList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
-export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
+export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onPlanAgain, onNewRide, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
   const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
 
@@ -66,6 +66,24 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {onPlanAgain && (
+            <button
+              onClick={onPlanAgain}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
+              <PenLine className="w-4 h-4" strokeWidth={1.5} />
+              <span className="hidden sm:inline">{t('report.planAgain')}</span>
+            </button>
+          )}
+          {onNewRide && (
+            <button
+              onClick={onNewRide}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" strokeWidth={1.5} />
+              <span className="hidden sm:inline">{t('report.newRide')}</span>
+            </button>
+          )}
           <button
             onClick={() => onShare?.()}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"

@@ -122,14 +122,14 @@ def _upscale_image_url(url: str) -> str:
 
     # bike-components.de: URLs often contain size like /200x200/ or _200x200
     # Replace small dimensions with larger ones
-    url = re.sub(r"/(\d{2,3})x(\d{2,3})/", "/800x800/", url)
-    url = re.sub(r"_(\d{2,3})x(\d{2,3})", "_800x800", url)
+    url = re.sub(r"/(\d{2,3})x(\d{2,3})/", "/640x480/", url)
+    url = re.sub(r"_(\d{2,3})x(\d{2,3})", "_640x480", url)
 
     # Common CDN patterns: width/height query params
-    url = re.sub(r"([?&])w=\d+", r"\g<1>w=800", url)
-    url = re.sub(r"([?&])h=\d+", r"\g<1>h=800", url)
-    url = re.sub(r"([?&])width=\d+", r"\g<1>width=800", url)
-    url = re.sub(r"([?&])height=\d+", r"\g<1>height=800", url)
+    url = re.sub(r"([?&])w=\d+", r"\g<1>w=640", url)
+    url = re.sub(r"([?&])h=\d+", r"\g<1>h=480", url)
+    url = re.sub(r"([?&])width=\d+", r"\g<1>width=640", url)
+    url = re.sub(r"([?&])height=\d+", r"\g<1>height=480", url)
 
     return url
 

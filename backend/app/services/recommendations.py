@@ -222,6 +222,41 @@ async def build_report(
             if int(h.hour.split(":")[0]) >= ride_start_h
             and int(h.hour.split(":")[0]) <= ride_end_h
         ]
+
+        # Compute a chart display window centered on the ride
+        ride_mid = (ride_start_h + ride_end_h) / 2
+        display_half = 8  # show ~16 hours total
+        chart_start = max(0, int(ride_mid - display_half))
+        chart_end = int(ride_mid + display_half)
+        # Ensure the ride window is always fully visible
+        chart_start = min(chart_start, ride_start_h)
+        chart_end = max(chart_end, ride_end_h)
+
+        # Filter current-day hours within chart window (capped at 23)
+        chart_hours = [
+            h
+            for h in full_day_window.hours
+            if chart_start <= int(h.hour.split(":")[0]) <= min(chart_end, 23)
+        ]
+
+        # If chart extends past midnight, fetch next-day hours
+        if chart_end > 23:
+            next_date = (
+                datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)
+            ).strftime("%Y-%m-%d")
+            next_day_end = chart_end - 24  # e.g. 25 → 1
+            try:
+                next_day_window = await ws.fetch_hourly_forecast(
+                    day_lat, day_lon, next_date, 0, next_day_end, locale=locale
+                )
+                # Re-label next-day hours as 24:00, 25:00, … so the chart
+                # x-axis stays monotonically increasing
+                for h in next_day_window.hours:
+                    real_h = int(h.hour.split(":")[0])
+                    h.hour = f"{real_h + 24}:00"
+                chart_hours.extend(next_day_window.hours)
+            except Exception:
+                pass  # gracefully degrade — just show current day
         # Build worst-case summary from ride window hours for rules
         if ride_hours:
             temps = [h.temp for h in ride_hours]
@@ -280,7 +315,7 @@ async def build_report(
                 location=location_name,
                 condition=condition,
                 weather=_forecast_to_weather_schema(forecast, locale),
-                hourlyForecast=_hourly_to_schemas(full_day_window.hours),
+                hourlyForecast=_hourly_to_schemas(chart_hours),
                 rideStartHour=ride_start_h,
                 rideEndHour=ride_end_h,
                 clothingItems=_clothing_dicts_to_schemas(clothing),

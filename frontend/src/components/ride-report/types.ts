@@ -123,6 +123,10 @@ export interface RideReportProps {
   routeSaving?: boolean;
   /** Whether the route has been saved successfully */
   routeSaved?: boolean;
+  /** Called when the user wants to edit the ride / plan again */
+  onPlanAgain?: () => void;
+  /** Called when the user wants to start a completely new ride */
+  onNewRide?: () => void;
   onDaySelect?: (dayId: string) => void;
   onSwapClothingItem?: (dayId: string, itemId: string, alternativeId: string) => void;
   /** Available affiliate products to show inline */

@@ -147,6 +147,8 @@
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
+    "planAgain": "Plan again",
+    "newRide": "New ride",
     "days": "{{count}} days",
     "section": {
       "weather": "Weather",

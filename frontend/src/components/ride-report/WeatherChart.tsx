@@ -270,7 +270,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
               className="fill-stone-400 dark:fill-stone-500"
               style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
             >
-              {`${h}:00`}
+              {h >= 24 ? `${h - 24}:00` : `${h}:00`}
             </text>
           ))}
 

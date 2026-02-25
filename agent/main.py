@@ -25,7 +25,7 @@ CATEGORY_MAP: dict[str, str] = {
     "cycling-tights": "cat-pants",
     "tights": "cat-pants",
     "pants": "cat-pants",
-    "headwear": "cat-headwear",
+    "hats-caps": "cat-headwear",
     "cycling-shoes-overshoes": "cat-shoes",
     "shoes": "cat-shoes",
     "overshoes": "cat-shoes",
@@ -41,13 +41,13 @@ ALL_CATEGORIES: list[str] = [
     "cycling-jackets",
     "cycling-gloves",
     "cycling-tights",
-    "headwear",
+    "hats-caps",
     "cycling-shoes-overshoes",
     "bike-lights",
     "accessories-gear",
 ]
 
-DEFAULT_MAX_PRODUCTS = 3
+DEFAULT_MAX_PRODUCTS = 10
 
 
 def _resolve_category_id(category: str) -> str:

@@ -90,10 +90,6 @@ export interface RidePlannerProps {
   validationErrors?: ValidationErrors;
   /** Whether the form is currently submitting (shows loading state on button) */
   isLoading?: boolean;
-  /** Whether the planner is collapsed (shows a compact summary bar instead of the full form) */
-  collapsed?: boolean;
-  /** Called when the user toggles the collapsed state */
-  onToggleCollapse?: () => void;
   /** Source of the initial form values — shown as an info banner */
   formSource?: "restored" | "route" | "history" | null;
   /** Called when the user wants to reset the form to defaults */

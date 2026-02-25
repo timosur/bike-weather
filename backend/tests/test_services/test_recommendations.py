@@ -88,10 +88,14 @@ async def test_single_day_report_structure() -> None:
     assert day.weather.tempMin <= day.weather.tempMax
     assert len(day.clothingItems) > 0
     assert len(day.equipment) > 0
-    # Should have full-day hourly forecast data (0-23)
-    assert len(day.hourlyForecast) == 24
-    assert day.hourlyForecast[0].hour == "00:00"
-    assert day.hourlyForecast[-1].hour == "23:00"
+    # Hourly forecast is centered on the ride window (~16h display)
+    assert len(day.hourlyForecast) > 0
+    assert len(day.hourlyForecast) <= 24
+    # First hour should not be 00:00 (centered around ride start)
+    first_hour = int(day.hourlyForecast[0].hour.split(":")[0])
+    last_hour = int(day.hourlyForecast[-1].hour.split(":")[0])
+    assert first_hour <= day.rideStartHour
+    assert last_hour >= day.rideEndHour
     # Ride window should be marked
     assert day.rideStartHour == 9
     assert day.rideEndHour > 9
@@ -122,9 +126,11 @@ async def test_multi_day_report_has_per_day_forecasts() -> None:
     assert report.days[1].location == "\u00dcberlingen"
     assert report.days[0].dayLabel == "Day 1"
     assert report.days[1].dayLabel == "Day 2"
-    # Both days should have full-day hourly data
-    assert len(report.days[0].hourlyForecast) == 24
-    assert len(report.days[1].hourlyForecast) == 24
+    # Both days should have centered hourly data around ride window
+    assert len(report.days[0].hourlyForecast) > 0
+    assert len(report.days[0].hourlyForecast) <= 24
+    assert len(report.days[1].hourlyForecast) > 0
+    assert len(report.days[1].hourlyForecast) <= 24
 
 
 async def test_overall_condition_is_worst() -> None:
@@ -164,8 +170,9 @@ async def test_duration_from_input_controls_window() -> None:
 
     report = await build_report(ride_input, ws=ws)
     day = report.days[0]
-    # Full-day hourly data
-    assert len(day.hourlyForecast) == 24
+    # Hourly data centered on ride window
+    assert len(day.hourlyForecast) > 0
+    assert len(day.hourlyForecast) <= 24
     # Ride window: 08:00 to 11:00 (3 hours = ceil(180/60) = 3h window)
     assert day.rideStartHour == 8
     assert day.rideEndHour == 11
