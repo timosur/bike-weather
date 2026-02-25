@@ -53,6 +53,9 @@ export default function PlannerPage() {
   // Track form reset key to force remount
   const [resetKey, setResetKey] = useState(0)
 
+  // Submission ID to cancel stale doSubmit continuations after reset
+  const submitIdRef = useRef(0)
+
   // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
   const THROTTLE_THRESHOLD = 3
   const THROTTLE_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
@@ -90,6 +93,7 @@ export default function PlannerPage() {
 
   // Core submit handler
   const doSubmit = useCallback(async (input: RideInput, routeId?: string) => {
+    const currentSubmitId = ++submitIdRef.current
     setReportLoading(true)
     setReportError(null)
     setReport(null)
@@ -101,6 +105,8 @@ export default function PlannerPage() {
 
     try {
       const result = await fetchReport(input, routeId)
+      // Bail out if a reset happened while the fetch was in flight
+      if (submitIdRef.current !== currentSubmitId) return
       setReport(result)
       addEntry(input, result)
       // Scroll to report
@@ -108,9 +114,12 @@ export default function PlannerPage() {
         reportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
     } catch (err) {
+      if (submitIdRef.current !== currentSubmitId) return
       setReportError(err instanceof Error ? err.message : t('report.error.fallback'))
     } finally {
-      setReportLoading(false)
+      if (submitIdRef.current === currentSubmitId) {
+        setReportLoading(false)
+      }
     }
   }, [addEntry, saveFormState, t])
 
@@ -222,6 +231,8 @@ export default function PlannerPage() {
 
   // Reset form to fresh defaults
   const handleReset = () => {
+    // Invalidate any in-flight fetchReport so its callbacks are ignored
+    submitIdRef.current++
     setReport(null)
     setReportLoading(false)
     setReportError(null)

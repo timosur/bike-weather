@@ -1,0 +1,94 @@
+name: Frontend — Build & Push
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend.yml"
+    tags:
+      - "frontend/v[0-9]+.[0-9]+.[0-9]+*"
+      - "frontend/v[0-9]+.[0-9]+.[0-9]+-preview.*"
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend.yml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/frontend/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/frontend/v}"
+          else
+            # Find latest frontend tag and append short SHA
+            LATEST_TAG=$(git tag -l 'frontend/v*' --sort=-v:refname | head -n1 || true)
+            if [[ -n "$LATEST_TAG" ]]; then
+              BASE_VERSION="${LATEST_TAG#frontend/v}"
+            else
+              BASE_VERSION="0.0.0"
+            fi
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${BASE_VERSION}-dev.${SHORT_SHA}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "📦 Frontend version: ${VERSION}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # On semver tag: 1.2.3, 1.2, 1, latest
+            type=semver,pattern={{version}},value=v${{ steps.version.outputs.version }},enable=${{ startsWith(github.ref, 'refs/tags/frontend/v') }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.version.outputs.version }},enable=${{ startsWith(github.ref, 'refs/tags/frontend/v') }}
+            type=semver,pattern={{major}},value=v${{ steps.version.outputs.version }},enable=${{ startsWith(github.ref, 'refs/tags/frontend/v') }}
+            # On main branch push: latest + sha
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=sha-,enable=${{ github.ref == 'refs/heads/main' }}
+            # On PR: pr-<number>
+            type=ref,event=pr
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.version }}

@@ -24,6 +24,18 @@ class BulkResult(BaseModel):
     errors: list[str] = []
 
 
+# Category ID → body zone mapping (deterministic, no LLM needed)
+CATEGORY_ZONE_MAP: dict[str, str] = {
+    "cat-jackets": "upperBody",
+    "cat-gloves": "hands",
+    "cat-pants": "lowerBody",
+    "cat-headwear": "head",
+    "cat-shoes": "feet",
+    "cat-lights": None,  # type: ignore[dict-item]
+    "cat-accessories": None,  # type: ignore[dict-item]
+}
+
+
 def _build_bulk_payload(
     products: list[ProductData],
     category_id: str,
@@ -32,6 +44,7 @@ def _build_bulk_payload(
     publish: bool = True,
 ) -> list[dict]:
     """Convert ProductData list into the BulkProductItem payload expected by the API."""
+    matches_zone = CATEGORY_ZONE_MAP.get(category_id)
     items = []
     for p in products:
         product_id = _generate_product_id(p.affiliate_url, p.name)
@@ -45,8 +58,8 @@ def _build_bulk_payload(
                 "currency": p.currency,
                 "shopId": shop_id,
                 "affiliateUrl": p.affiliate_url,
-                "matchesZone": p.matches_zone,
-                "matchesLabel": p.matches_label or "All Conditions",
+                "matchesZone": matches_zone,
+                "matchesLabel": p.matches_label or "Cycling Product",
                 "weatherTempMin": p.temp_min,
                 "weatherTempMax": p.temp_max,
                 "weatherPrecipitation": p.precipitation or "none",

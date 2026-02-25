@@ -1,0 +1,14 @@
+# Agent Docker image
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+bike_weather_agent.egg-info/
+tests/
+uv.lock
+.pytest_cache/
+.coverage
+htmlcov/

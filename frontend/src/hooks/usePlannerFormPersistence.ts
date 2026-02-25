@@ -14,11 +14,12 @@ function loadFormState(): Partial<RideInput> | null {
 }
 
 export function usePlannerFormPersistence() {
-  const [savedFormState] = useState<Partial<RideInput> | null>(loadFormState);
+  const [savedFormState, setSavedFormState] = useState<Partial<RideInput> | null>(loadFormState);
 
   const saveFormState = useCallback((input: RideInput) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(input));
+      setSavedFormState(input);
     } catch {
       // ignore
     }
@@ -26,6 +27,7 @@ export function usePlannerFormPersistence() {
 
   const clearFormState = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
+    setSavedFormState(null);
   }, []);
 
   return { savedFormState, saveFormState, clearFormState };

@@ -80,6 +80,60 @@ def extract_text(html: str) -> str:
     return _extract_generic_markdown(soup)
 
 
+def _best_srcset_url(srcset: str) -> str:
+    """Parse an HTML srcset attribute and return the highest-resolution URL."""
+    candidates: list[tuple[str, int]] = []
+    for entry in srcset.split(","):
+        parts = entry.strip().split()
+        if not parts:
+            continue
+        url = parts[0]
+        width = 0
+        if len(parts) > 1:
+            descriptor = parts[1].lower()
+            if descriptor.endswith("w"):
+                try:
+                    width = int(descriptor[:-1])
+                except ValueError:
+                    pass
+            elif descriptor.endswith("x"):
+                try:
+                    width = int(float(descriptor[:-1]) * 1000)
+                except ValueError:
+                    pass
+        candidates.append((url, width))
+    if not candidates:
+        return ""
+    # Return the URL with the largest width descriptor
+    candidates.sort(key=lambda c: c[1], reverse=True)
+    return candidates[0][0]
+
+
+def _upscale_image_url(url: str) -> str:
+    """Try to request a higher-resolution variant of a product image URL.
+
+    Many shops encode image dimensions in the URL path or query parameters.
+    This function applies common patterns to request larger images.
+    """
+    import re
+
+    if not url:
+        return url
+
+    # bike-components.de: URLs often contain size like /200x200/ or _200x200
+    # Replace small dimensions with larger ones
+    url = re.sub(r"/(\d{2,3})x(\d{2,3})/", "/800x800/", url)
+    url = re.sub(r"_(\d{2,3})x(\d{2,3})", "_800x800", url)
+
+    # Common CDN patterns: width/height query params
+    url = re.sub(r"([?&])w=\d+", r"\g<1>w=800", url)
+    url = re.sub(r"([?&])h=\d+", r"\g<1>h=800", url)
+    url = re.sub(r"([?&])width=\d+", r"\g<1>width=800", url)
+    url = re.sub(r"([?&])height=\d+", r"\g<1>height=800", url)
+
+    return url
+
+
 def _extract_product_tiles(product_links: list) -> str:
     """Build a clean text listing from product tile <a> elements."""
     lines: list[str] = []
@@ -99,13 +153,20 @@ def _extract_product_tiles(product_links: list) -> str:
         if href.startswith("/"):
             href = f"https://www.bike-components.de{href}"
 
-        # Find image URL if present
+        # Find image URL if present — prefer highest resolution available
         img = link.select_one("img")
         img_url = ""
         if img:
-            img_url = img.get("src") or img.get("data-src") or ""
+            # Try srcset first for higher-res images
+            srcset = img.get("srcset") or img.get("data-srcset") or ""
+            if srcset:
+                img_url = _best_srcset_url(srcset)
+            if not img_url:
+                img_url = img.get("src") or img.get("data-src") or ""
             if img_url.startswith("/"):
                 img_url = f"https://www.bike-components.de{img_url}"
+            # Try to upscale thumbnail URLs by replacing size parameters
+            img_url = _upscale_image_url(img_url)
 
         lines.append(f"Product: {text}")
         lines.append(f"URL: {href}")
@@ -163,8 +224,8 @@ def _extract_generic_markdown(soup: BeautifulSoup) -> str:
     for el in soup.find_all(_matches_pattern):
         el.decompose()
 
-    # Convert to markdown
-    md = markdownify(str(soup), strip=["img"])
+    # Convert to markdown (keep images so LLM can extract URLs)
+    md = markdownify(str(soup))
 
     # Clean up excessive whitespace
     lines = []
