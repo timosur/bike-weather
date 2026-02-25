@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { MainNav } from './MainNav'
 import { UserMenu } from './UserMenu'
 import { ThemeToggle } from './ThemeToggle'
+import { SegmentedToggle } from './SegmentedToggle'
 import { useTheme } from '@/hooks/useTheme'
 
 export interface NavigationItem {
@@ -84,32 +85,14 @@ export function AppShell({
             {/* Right side */}
             <div className="hidden md:flex items-center gap-2 ml-auto">
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
-              <div className="flex items-center gap-0.5">
-                <button
-                  onClick={() => onLanguageChange?.('de')}
-                  className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
-                    language === 'de'
-                      ? 'bg-stone-100 dark:bg-stone-800'
-                      : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
-                  }`}
-                  aria-label="Deutsch"
-                  title="Deutsch"
-                >
-                  🇩🇪
-                </button>
-                <button
-                  onClick={() => onLanguageChange?.('en')}
-                  className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
-                    language === 'en'
-                      ? 'bg-stone-100 dark:bg-stone-800'
-                      : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
-                  }`}
-                  aria-label="English"
-                  title="English"
-                >
-                  🇬🇧
-                </button>
-              </div>
+              <SegmentedToggle
+                value={language}
+                onChange={(v) => onLanguageChange?.(v as 'de' | 'en')}
+                options={[
+                  { value: 'de', label: '🇩🇪', ariaLabel: 'Deutsch' },
+                  { value: 'en', label: '🇬🇧', ariaLabel: 'English' },
+                ]}
+              />
               {user ? (
                 <UserMenu user={user} isAdmin={isAdmin} onNavigate={onNavigate} onLogout={onLogout} />
               ) : (
@@ -150,8 +133,8 @@ export function AppShell({
                     setMobileMenuOpen(false)
                   }}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${item.isActive
-                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                      : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                    : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
                     }`}
                 >
                   {item.label}
@@ -161,30 +144,14 @@ export function AppShell({
             <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ThemeToggle theme={theme} onToggle={toggleTheme} />
-                <div className="flex items-center gap-0.5">
-                  <button
-                    onClick={() => onLanguageChange?.('de')}
-                    className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
-                      language === 'de'
-                        ? 'bg-stone-100 dark:bg-stone-800'
-                        : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
-                    }`}
-                    aria-label="Deutsch"
-                  >
-                    🇩🇪
-                  </button>
-                  <button
-                    onClick={() => onLanguageChange?.('en')}
-                    className={`text-sm leading-none px-1.5 py-1.5 rounded-md transition-colors ${
-                      language === 'en'
-                        ? 'bg-stone-100 dark:bg-stone-800'
-                        : 'opacity-40 hover:opacity-70 hover:bg-stone-100 dark:hover:bg-stone-800'
-                    }`}
-                    aria-label="English"
-                  >
-                    🇬🇧
-                  </button>
-                </div>
+                <SegmentedToggle
+                  value={language}
+                  onChange={(v) => onLanguageChange?.(v as 'de' | 'en')}
+                  options={[
+                    { value: 'de', label: '🇩🇪', ariaLabel: 'Deutsch' },
+                    { value: 'en', label: '🇬🇧', ariaLabel: 'English' },
+                  ]}
+                />
               </div>
               {user ? (
                 <button

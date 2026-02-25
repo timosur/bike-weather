@@ -7,6 +7,7 @@ import pytest
 from app.services.weather import (
     MAX_RETRIES,
     WMO_CODE_MAP,
+    HourlyWeatherWindow,
     WeatherForecast,
     WeatherService,
     WeatherServiceError,
@@ -29,6 +30,30 @@ MOCK_OPEN_METEO_RESPONSE = {
         "weathercode": [2],
     }
 }
+
+
+def _make_hourly_response(start_hour: int = 8, end_hour: int = 12) -> dict:
+    """Build a mock Open-Meteo response with both hourly and daily data."""
+    hours = 24
+    return {
+        "hourly": {
+            "temperature_2m": [5 + i * 0.5 for i in range(hours)],
+            "apparent_temperature": [3 + i * 0.4 for i in range(hours)],
+            "precipitation_probability": [10 if i < 12 else 40 for i in range(hours)],
+            "precipitation": [0.0 if i < 12 else 0.5 for i in range(hours)],
+            "weather_code": [1 if i < 12 else 3 for i in range(hours)],
+            "wind_speed_10m": [10 + i * 0.3 for i in range(hours)],
+            "wind_direction_10m": [180 for _ in range(hours)],
+            "wind_gusts_10m": [15 + i * 0.4 for i in range(hours)],
+            "relative_humidity_2m": [60 for _ in range(hours)],
+            "is_day": [0 if i < 6 or i > 20 else 1 for i in range(hours)],
+        },
+        "daily": {
+            "uv_index_max": [5.0],
+            "sunrise": ["2026-03-15T06:42"],
+            "sunset": ["2026-03-15T18:31"],
+        },
+    }
 
 
 def _mock_transport(response_data=None, status_code: int = 200):
@@ -178,3 +203,64 @@ def test_wmo_code_mapping_covers_all_codes() -> None:
     for code in expected_codes:
         icon = wmo_to_icon(code)
         assert icon in valid_icons, f"WMO code {code} maps to invalid icon '{icon}'"
+
+
+async def test_fetch_hourly_forecast_parses_response() -> None:
+    mock_data = _make_hourly_response()
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=mock_data)
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    service = WeatherService(client=client)
+
+    result = await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
+    assert isinstance(result, HourlyWeatherWindow)
+    assert len(result.hours) == 5  # hours 8, 9, 10, 11, 12
+    assert result.hours[0].hour == "08:00"
+    assert result.hours[-1].hour == "12:00"
+
+    # Summary should be aggregated
+    summary = result.summary
+    assert summary.temp_min <= summary.temp_max
+    assert summary.uv_index == 5.0
+    assert summary.sunrise == "06:42"
+    assert summary.sunset == "18:31"
+
+
+async def test_fetch_hourly_forecast_summary_uses_worst_case() -> None:
+    mock_data = _make_hourly_response()
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=mock_data)
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    service = WeatherService(client=client)
+
+    result = await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
+    summary = result.summary
+    hourly_temps = [h.temp for h in result.hours]
+    hourly_winds = [h.wind_speed for h in result.hours]
+
+    # Summary temp_min should be the min across hours
+    assert summary.temp_min == round(min(hourly_temps), 1)
+    assert summary.temp_max == round(max(hourly_temps), 1)
+    # Wind should be the max across hours
+    assert summary.wind_speed == max(hourly_winds)
+
+
+async def test_fetch_hourly_forecast_caches_result() -> None:
+    call_count = 0
+    mock_data = _make_hourly_response()
+
+    async def counting_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        return httpx.Response(200, json=mock_data)
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(counting_handler))
+    service = WeatherService(client=client)
+
+    await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
+    await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
+    assert call_count == 1

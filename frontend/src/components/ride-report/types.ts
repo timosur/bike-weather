@@ -73,6 +73,22 @@ export interface EquipmentItem {
   reason: string;
 }
 
+export interface HourlyWeather {
+  hour: string; // HH:MM
+  temp: number;
+  tempFeelsLike: number;
+  precipitationProbability: number;
+  precipitationMm: number;
+  windSpeed: number;
+  windDirection: string;
+  windGusts: number;
+  humidity: number;
+  weatherCode: number;
+  icon: WeatherIconType;
+  description: string;
+  isDay: boolean;
+}
+
 export interface DayForecast {
   id: string;
   date: string;
@@ -80,6 +96,9 @@ export interface DayForecast {
   location?: string;
   condition: ConditionRating;
   weather: WeatherData;
+  hourlyForecast?: HourlyWeather[];
+  rideStartHour?: number;
+  rideEndHour?: number;
   clothingItems: ClothingItem[];
   equipment: EquipmentItem[];
 }

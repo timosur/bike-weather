@@ -1,7 +1,4 @@
-- Switch to forecast view on weather in report page
-- Add destination and duration plannend for the route to the planner page
 - Restructure footer, remove double imprint/data privacy links
-- Check if i8n really works in for all content now
 - Add deployment to homelab, for now only on preview.bike-weather.de, with password protection
 - Test agent for scraping product data
 - Add also referal links to equipment section in report

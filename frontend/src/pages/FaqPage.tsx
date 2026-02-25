@@ -11,13 +11,13 @@ export default function FaqPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    if (items.length === 0) setLoading(true)
     fetchFaqItems()
       .then(setItems)
       .finally(() => setLoading(false))
   }, [i18n.language])
 
-  if (loading) return <ContentPageSkeleton sections={5} />
+  if (loading && items.length === 0) return <ContentPageSkeleton sections={5} />
 
   return <FaqPageComponent items={items} />
 }

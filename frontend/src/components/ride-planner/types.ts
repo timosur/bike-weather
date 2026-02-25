@@ -1,101 +1,115 @@
-export type BikeType = 'rennrad' | 'gravel' | 'mtb' | 'city'
+export type BikeType = "rennrad" | "gravel" | "mtb" | "city";
 
-export type RidingIntensity = 'gemuetlich' | 'moderat' | 'sportlich'
+export type RidingIntensity = "gemuetlich" | "moderat" | "sportlich";
 
 export interface RideLocation {
-  address: string
-  lat?: number
-  lon?: number
+  address: string;
+  lat?: number;
+  lon?: number;
 }
 
 export interface DayStop {
-  location: RideLocation
+  location: RideLocation;
   /** Planned km for this day (optional) */
-  plannedKm?: number | null
+  plannedKm?: number | null;
 }
 
 export interface RideInput {
-  location: RideLocation | null
-  startDate: string // ISO date string: YYYY-MM-DD
-  startTime: string // HH:MM
-  endDate: string | null // auto-calculated from number of days, null if single-day
-  isMultiDay: boolean
-  bikeType: BikeType
-  intensity: RidingIntensity
+  location: RideLocation | null;
+  startDate: string; // ISO date string: YYYY-MM-DD
+  startTime: string; // HH:MM
+  endDate: string | null; // auto-calculated from number of days, null if single-day
+  isMultiDay: boolean;
+  bikeType: BikeType;
+  intensity: RidingIntensity;
   /** Optional distance in km */
-  distanceKm?: number | null
+  distanceKm?: number | null;
   /** Optional elevation in meters */
-  elevationMeters?: number | null
+  elevationMeters?: number | null;
+  /** Optional planned ride duration in minutes (auto-estimated from distance + speed if not set) */
+  durationMinutes?: number | null;
+  /** Optional average speed in km/h (user override for duration estimation) */
+  averageSpeedKmh?: number | null;
   /** Per-day overnight stops for multi-day tours (one per night) */
-  dayStops: DayStop[]
+  dayStops: DayStop[];
 }
 
 export interface LocationSuggestion {
-  id: string
-  displayText: string
-  shortText: string
-  lat: number
-  lon: number
+  id: string;
+  displayText: string;
+  shortText: string;
+  lat: number;
+  lon: number;
 }
 
 export interface BikeTypeOption {
-  value: BikeType
-  label: string
-  description: string
-  icon: string
+  value: BikeType;
+  label: string;
+  description: string;
+  icon: string;
 }
 
 export interface RidingIntensityOption {
-  value: RidingIntensity
-  label: string
-  description: string
+  value: RidingIntensity;
+  label: string;
+  description: string;
 }
 
 export interface QuickPreset {
-  id: string
-  label: string
-  description: string
-  bikeType: BikeType
-  intensity: RidingIntensity
-  distanceKm?: number
-  isMultiDay: boolean
+  id: string;
+  label: string;
+  description: string;
+  bikeType: BikeType;
+  intensity: RidingIntensity;
+  distanceKm?: number;
+  isMultiDay: boolean;
 }
 
 export interface ValidationErrors {
-  location: string | null
-  startDate: string | null
-  startTime: string | null
-  bikeType: string | null
-  intensity: string | null
+  location: string | null;
+  startDate: string | null;
+  startTime: string | null;
+  bikeType: string | null;
+  intensity: string | null;
 }
 
 export interface RidePlannerProps {
   /** Initial form values, e.g. pre-filled from a saved route */
-  initialValues?: Partial<RideInput>
+  initialValues?: Partial<RideInput>;
   /** Autocomplete suggestions to display as the user types a location */
-  locationSuggestions?: LocationSuggestion[]
+  locationSuggestions?: LocationSuggestion[];
   /** The four bike type options to display */
-  bikeTypeOptions: BikeTypeOption[]
+  bikeTypeOptions: BikeTypeOption[];
   /** The three riding intensity options to display in the segmented control */
-  intensityOptions: RidingIntensityOption[]
+  intensityOptions: RidingIntensityOption[];
   /** Quick-fill presets shown as shortcut buttons above the form */
-  quickPresets?: QuickPreset[]
+  quickPresets?: QuickPreset[];
   /** Active validation errors to display inline */
-  validationErrors?: ValidationErrors
+  validationErrors?: ValidationErrors;
   /** Whether the form is currently submitting (shows loading state on button) */
-  isLoading?: boolean
+  isLoading?: boolean;
+  /** Whether the planner is collapsed (shows a compact summary bar instead of the full form) */
+  collapsed?: boolean;
+  /** Called when the user toggles the collapsed state */
+  onToggleCollapse?: () => void;
+  /** Source of the initial form values — shown as an info banner */
+  formSource?: "restored" | "route" | "history" | null;
+  /** Called when the user wants to reset the form to defaults */
+  onReset?: () => void;
   /** Called when the user types in the location field */
-  onLocationSearch?: (query: string) => void
+  onLocationSearch?: (query: string) => void;
   /** Called when the user requests GPS geolocation */
-  onUseCurrentLocation?: () => void
+  onUseCurrentLocation?: () => void;
   /** Called when the user selects a location suggestion */
-  onLocationSelect?: (suggestion: LocationSuggestion) => void
+  onLocationSelect?: (suggestion: LocationSuggestion) => void;
   /** Called when the user applies a quick preset */
-  onPresetSelect?: (preset: QuickPreset) => void
+  onPresetSelect?: (preset: QuickPreset) => void;
   /** Autocomplete suggestions for day stop location search */
-  dayStopLocationSuggestions?: LocationSuggestion[]
+  dayStopLocationSuggestions?: LocationSuggestion[];
   /** Called when the user types in a day stop location field */
-  onDayStopLocationSearch?: (stopIndex: number, query: string) => void
+  onDayStopLocationSearch?: (stopIndex: number, query: string) => void;
   /** Called when the user submits the form with valid input */
-  onSubmit: (input: RideInput) => void
+  onSubmit: (input: RideInput) => void;
+  /** Optional slot rendered between presets and the form card (e.g. recent rides) */
+  children?: React.ReactNode;
 }

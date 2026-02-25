@@ -17,7 +17,9 @@ async def test_list_about_returns_published_sections(
 async def test_get_about_section_by_key(
     async_client: AsyncClient, seeded_session: AsyncSession
 ) -> None:
-    response = await async_client.get("/api/about/idea")
+    response = await async_client.get(
+        "/api/about/idea", headers={"Accept-Language": "en"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["section_key"] == "idea"

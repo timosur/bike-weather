@@ -34,15 +34,48 @@ VALID_RIDE_INPUT = {
 async def test_report_endpoint_returns_valid_report(
     mock_ws: AsyncMock, async_client: AsyncClient
 ) -> None:
-    from app.services.weather import WeatherForecast
+    from app.services.weather import (
+        HourlyForecast,
+        HourlyWeatherWindow,
+        WeatherForecast,
+    )
 
-    mock_ws.fetch_forecast = AsyncMock(return_value=WeatherForecast(
-        temp_min=8.0, temp_max=16.0, temp_feels_like=10.5,
-        precipitation_probability=10, wind_speed=12.0,
-        wind_direction="S", humidity=55, uv_index=4.0,
-        sunrise="06:42", sunset="18:31", weather_code=1,
-        icon="sun", description="Mainly clear",
-    ))
+    summary = WeatherForecast(
+        temp_min=8.0,
+        temp_max=16.0,
+        temp_feels_like=10.5,
+        precipitation_probability=10,
+        wind_speed=12.0,
+        wind_direction="S",
+        humidity=55,
+        uv_index=4.0,
+        sunrise="06:42",
+        sunset="18:31",
+        weather_code=1,
+        icon="sun",
+        description="Mainly clear",
+    )
+    hours = [
+        HourlyForecast(
+            hour=f"{h:02d}:00",
+            temp=5.0 + h * 0.5,
+            temp_feels_like=3.0 + h * 0.4,
+            precipitation_probability=10,
+            precipitation_mm=0.0,
+            wind_speed=12.0,
+            wind_direction="S",
+            wind_gusts=18.0,
+            humidity=55,
+            weather_code=1,
+            icon="sun",
+            description="Mainly clear",
+            is_day=h >= 6 and h <= 20,
+        )
+        for h in range(24)
+    ]
+    mock_ws.fetch_hourly_forecast = AsyncMock(
+        return_value=HourlyWeatherWindow(hours=hours, summary=summary)
+    )
 
     response = await async_client.post("/api/rides/report", json=VALID_RIDE_INPUT)
     assert response.status_code == 200
@@ -54,11 +87,20 @@ async def test_report_endpoint_returns_valid_report(
     assert "weather" in day
     assert "clothingItems" in day
     assert "equipment" in day
-    assert day["weather"]["tempMin"] == 8.0
+    # Weather aggregated from ride-window hours (start 09:00)
+    assert day["weather"]["tempMin"] > 0
+    assert "hourlyForecast" in day
+    assert len(day["hourlyForecast"]) == 24
+    assert "rideStartHour" in day
+    assert "rideEndHour" in day
 
 
-async def test_report_endpoint_invalid_input_returns_422(async_client: AsyncClient) -> None:
-    response = await async_client.post("/api/rides/report", json={"bikeType": "rennrad"})
+async def test_report_endpoint_invalid_input_returns_422(
+    async_client: AsyncClient,
+) -> None:
+    response = await async_client.post(
+        "/api/rides/report", json={"bikeType": "rennrad"}
+    )
     assert response.status_code == 422
 
 
@@ -68,7 +110,9 @@ async def test_report_endpoint_weather_unavailable_returns_503(
 ) -> None:
     from app.services.weather import WeatherServiceError
 
-    mock_ws.fetch_forecast = AsyncMock(side_effect=WeatherServiceError("API down"))
+    mock_ws.fetch_hourly_forecast = AsyncMock(
+        side_effect=WeatherServiceError("API down")
+    )
 
     response = await async_client.post("/api/rides/report", json=VALID_RIDE_INPUT)
     assert response.status_code == 503

@@ -51,9 +51,7 @@ export function useLocationSearch() {
         try {
           const result = await reverseGeocode(latitude, longitude)
           if (result) {
-            const parts = result.displayText.split(',')
-            const address = parts.slice(0, 2).map(s => s.trim()).join(', ')
-            setDetectedLocation({ address, lat: latitude, lon: longitude })
+            setDetectedLocation({ address: result.shortText, lat: latitude, lon: longitude })
           } else {
             setDetectedLocation({ address: 'Current location', lat: latitude, lon: longitude })
           }

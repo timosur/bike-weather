@@ -95,10 +95,40 @@ class GeocodingService:
                 await client.aclose()
 
 
-def _parse_result(r: dict) -> dict:
+def _format_short_text(r: dict) -> str:
+    """Build a human-friendly short location text from Nominatim address details.
+
+    For addresses with a street and house number the German convention is used:
+    ``Street HouseNumber, City`` (e.g. "Iltisweg 6, Berlin").
+    Falls back to the first two comma-separated parts of ``display_name``.
+    """
+    addr = r.get("address", {})
+    road = addr.get("road", "")
+    house_number = addr.get("house_number", "")
+    city = (
+        addr.get("city")
+        or addr.get("town")
+        or addr.get("village")
+        or addr.get("municipality")
+        or addr.get("state")
+        or ""
+    )
+
+    if road:
+        street_part = f"{road} {house_number}".strip()
+        if city:
+            return f"{street_part}, {city}"
+        return street_part
+
+    # Fallback: use display_name splitting
     display_name = r.get("display_name", "")
     parts = display_name.split(",")
-    short_text = ", ".join(p.strip() for p in parts[:2])
+    return ", ".join(p.strip() for p in parts[:2])
+
+
+def _parse_result(r: dict) -> dict:
+    display_name = r.get("display_name", "")
+    short_text = _format_short_text(r)
     return {
         "id": str(r.get("place_id", "")),
         "displayText": display_name,

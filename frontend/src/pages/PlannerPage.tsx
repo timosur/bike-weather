@@ -1,13 +1,27 @@
-import { useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { RidePlanner } from '../components/ride-planner'
+import { RidePlanner, RecentRides } from '../components/ride-planner'
+import { RideReport, RideReportSkeleton } from '../components/ride-report'
 import { useLocationSearch } from '../hooks/useLocationSearch'
+import { useRideHistory } from '../hooks/useRideHistory'
+import { usePlannerFormPersistence } from '../hooks/usePlannerFormPersistence'
+import { useToast } from '../hooks/useToast'
+import { useAuth } from '../contexts/AuthContext'
+import { fetchReport } from '../api/rides'
+import { createRoute } from '../api/routes'
+import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { BikeTypeOption, RidingIntensityOption, QuickPreset, RideInput } from '../components/ride-planner/types'
+import type { RideReport as RideReportType } from '../components/ride-report/types'
+import type { RideHistoryEntry } from '../hooks/useRideHistory'
 
 export default function PlannerPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation()
+  const { addToast } = useToast()
+  const { isAuthenticated } = useAuth()
+
   const {
     suggestions,
     dayStopSuggestions,
@@ -17,6 +31,34 @@ export default function PlannerPage() {
     searchDayStopLocation,
     useCurrentLocation,
   } = useLocationSearch()
+
+  const { history, addEntry, removeEntry, clearHistory } = useRideHistory()
+  const { savedFormState, saveFormState, clearFormState } = usePlannerFormPersistence()
+
+  // Report state
+  const [report, setReport] = useState<RideReportType | null>(null)
+  const [reportLoading, setReportLoading] = useState(false)
+  const [reportError, setReportError] = useState<string | null>(null)
+  const [submittedInput, setSubmittedInput] = useState<RideInput | null>(null)
+  const [currentRouteId, setCurrentRouteId] = useState<string | undefined>(undefined)
+
+  // Save-route state
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  // Planner collapsed state
+  const [plannerCollapsed, setPlannerCollapsed] = useState(false)
+
+  // Track form reset key to force remount
+  const [resetKey, setResetKey] = useState(0)
+
+  const reportRef = useRef<HTMLDivElement>(null)
+
+  // Check for incoming state from saved routes (RoutesPage)
+  const routerState = location.state as { rideInput?: RideInput; routeId?: string } | null
+  const incomingRideInput = routerState?.rideInput
+  const incomingRouteId = routerState?.routeId
+  const hasAutoSubmitted = useRef(false)
 
   const bikeTypeOptions: BikeTypeOption[] = [
     { value: 'rennrad', label: t('planner.bikeType.rennrad'), description: t('planner.bikeType.rennradDesc'), icon: 'gauge' },
@@ -38,8 +80,133 @@ export default function PlannerPage() {
     { id: 'p4', label: t('planner.preset.multiDayTrip'), description: t('planner.preset.multiDayTripDesc'), bikeType: 'gravel', intensity: 'gemuetlich', isMultiDay: true },
   ]
 
+  // Core submit handler
+  const doSubmit = useCallback(async (input: RideInput, routeId?: string) => {
+    setReportLoading(true)
+    setReportError(null)
+    setReport(null)
+    setSubmittedInput(input)
+    setCurrentRouteId(routeId)
+    setSaved(false)
+    setPlannerCollapsed(true)
+    saveFormState(input)
+
+    try {
+      const result = await fetchReport(input, routeId)
+      setReport(result)
+      addEntry(input, result)
+      // Scroll to report
+      setTimeout(() => {
+        reportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    } catch (err) {
+      setReportError(err instanceof Error ? err.message : t('report.error.fallback'))
+    } finally {
+      setReportLoading(false)
+    }
+  }, [addEntry, saveFormState, t])
+
   const handleSubmit = (input: RideInput) => {
-    navigate('/report', { state: { rideInput: input } })
+    doSubmit(input)
+  }
+
+  // Auto-submit from router state (saved routes or redirected from /report)
+  useEffect(() => {
+    if (incomingRideInput && !hasAutoSubmitted.current) {
+      hasAutoSubmitted.current = true
+      doSubmit(incomingRideInput, incomingRouteId)
+      // Clear the router state so refreshing doesn't re-trigger
+      window.history.replaceState({}, '')
+    }
+  }, [incomingRideInput, incomingRouteId, doSubmit])
+
+  // Report action handlers
+  const handleShare = () => {
+    if (!report) return
+    if (navigator.share) {
+      navigator.share({ title: report.rideName, url: window.location.href }).catch(() => { })
+    } else {
+      navigator.clipboard.writeText(window.location.href).catch(() => { })
+    }
+  }
+
+  const handleSaveRoute = () => {
+    if (!report || saving || saved) return
+    setSaving(true)
+    createRoute({
+      name: report.rideName,
+      start_location: report.startLocation,
+      total_distance: report.totalDistance,
+      distance_unit: report.distanceUnit,
+      riding_style: report.ridingStyle,
+    })
+      .then(() => {
+        setSaved(true)
+        addToast(t('report.routeSaved'), 'success')
+      })
+      .catch(() => {
+        addToast(t('report.routeSaveError'), 'error')
+      })
+      .finally(() => setSaving(false))
+  }
+
+  const handleSwapClothingItem = (_dayId: string, _itemId: string, _alternativeId: string) => {
+    // TODO: Implement swap logic
+  }
+
+  const handleProductClick = (productId: string) => {
+    const product = sampleProducts.find((p) => p.id === productId)
+    if (product) {
+      window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const handleRetry = () => {
+    if (submittedInput) {
+      doSubmit(submittedInput, currentRouteId)
+    }
+  }
+
+  // Recent rides: select an entry → fill planner + auto-submit
+  const handleHistorySelect = (entry: RideHistoryEntry) => {
+    doSubmit(entry.rideInput)
+  }
+
+  const handleNavigateToLogin = () => {
+    navigate('/login', { state: { from: '/planner' } })
+  }
+
+  // Determine initial values for the planner
+  const getInitialValues = (): Partial<RideInput> | undefined => {
+    if (incomingRideInput) return incomingRideInput
+    if (detectedLocation) return { location: detectedLocation }
+    if (savedFormState) return savedFormState
+    return undefined
+  }
+
+  // Determine formSource for the info banner
+  const getFormSource = (): 'restored' | 'route' | 'history' | null => {
+    if (incomingRideInput && incomingRouteId) return 'route'
+    if (incomingRideInput) return 'history'
+    if (savedFormState && !detectedLocation) return 'restored'
+    return null
+  }
+
+  // Reset form to fresh defaults
+  const handleReset = () => {
+    setReport(null)
+    setReportLoading(false)
+    setReportError(null)
+    setSubmittedInput(null)
+    setCurrentRouteId(undefined)
+    setSaved(false)
+    setSaving(false)
+    setPlannerCollapsed(false)
+    clearFormState()
+    // Clear router state if any
+    window.history.replaceState({}, '')
+    // Increment reset key to force RidePlanner remount with fresh defaults
+    setResetKey(k => k + 1)
   }
 
   // Increment a stable key exactly once per successful detection so
@@ -51,22 +218,147 @@ export default function PlannerPage() {
     prevDetectedRef.current = detectedLocation
   }
 
+  // Determine if we should show the report section
+  const showReport = reportLoading || reportError || report
+
   return (
-    <RidePlanner
-      key={detectKeyRef.current}
-      initialValues={detectedLocation ? { location: detectedLocation } : undefined}
-      locationSuggestions={suggestions}
-      dayStopLocationSuggestions={dayStopSuggestions}
-      bikeTypeOptions={bikeTypeOptions}
-      intensityOptions={intensityOptions}
-      quickPresets={quickPresets}
-      isLoading={isLocating}
-      onLocationSearch={searchLocation}
-      onUseCurrentLocation={useCurrentLocation}
-      onLocationSelect={() => {}}
-      onDayStopLocationSearch={searchDayStopLocation}
-      onPresetSelect={() => {}}
-      onSubmit={handleSubmit}
-    />
+    <div className="min-h-[calc(100vh-56px)]">
+      {/* Ambient background */}
+      {!showReport && (
+        <>
+          <div
+            className="fixed inset-0 -z-10"
+            style={{
+              background:
+                'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(16,185,129,0.08) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 90%, rgba(245,158,11,0.06) 0%, transparent 60%)',
+            }}
+          />
+          <div className="fixed inset-0 -z-10 bg-stone-50 dark:bg-stone-950" />
+        </>
+      )}
+
+      {/* Planner section */}
+      {showReport ? (
+        // Collapsed planner when report is visible
+        <div className="max-w-4xl mx-auto px-4 pt-6 pb-4">
+          <RidePlanner
+            key={`collapsed-${detectKeyRef.current}-${resetKey}`}
+            initialValues={submittedInput ?? getInitialValues()}
+            locationSuggestions={suggestions}
+            dayStopLocationSuggestions={dayStopSuggestions}
+            bikeTypeOptions={bikeTypeOptions}
+            intensityOptions={intensityOptions}
+            quickPresets={quickPresets}
+            isLoading={reportLoading}
+            collapsed={plannerCollapsed}
+            onToggleCollapse={() => {
+              setPlannerCollapsed(!plannerCollapsed)
+              if (plannerCollapsed === true) {
+                // Expanding planner → hide the report
+                setReport(null)
+                setReportError(null)
+                setSubmittedInput(null)
+              }
+            }}
+            onReset={handleReset}
+            onLocationSearch={searchLocation}
+            onUseCurrentLocation={useCurrentLocation}
+            onLocationSelect={() => { }}
+            onDayStopLocationSearch={searchDayStopLocation}
+            onPresetSelect={() => { }}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      ) : (
+        // Full planner form with recent rides inside
+        <RidePlanner
+          key={`form-${detectKeyRef.current}-${resetKey}`}
+          initialValues={resetKey > 0 ? undefined : getInitialValues()}
+          locationSuggestions={suggestions}
+          dayStopLocationSuggestions={dayStopSuggestions}
+          bikeTypeOptions={bikeTypeOptions}
+          intensityOptions={intensityOptions}
+          quickPresets={quickPresets}
+          isLoading={isLocating || reportLoading}
+          formSource={resetKey > 0 ? null : getFormSource()}
+          onReset={getFormSource() && resetKey === 0 ? handleReset : undefined}
+          onLocationSearch={searchLocation}
+          onUseCurrentLocation={useCurrentLocation}
+          onLocationSelect={() => { }}
+          onDayStopLocationSearch={searchDayStopLocation}
+          onPresetSelect={() => { }}
+          onSubmit={handleSubmit}
+        >
+          {history.length > 0 && (
+            <RecentRides
+              history={history}
+              onSelect={handleHistorySelect}
+              onRemove={removeEntry}
+              onClear={clearHistory}
+              onNavigateToLogin={handleNavigateToLogin}
+            />
+          )}
+        </RidePlanner>
+      )}
+
+      {/* Report section */}
+      <div ref={reportRef}>
+        {reportLoading && (
+          <div className="max-w-4xl mx-auto px-4 pb-10">
+            <RideReportSkeleton />
+          </div>
+        )}
+
+        {reportError && !reportLoading && (
+          <div className="text-center py-20">
+            <h2
+              className="text-2xl font-semibold text-stone-800 dark:text-stone-200"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              {t('report.error.heading')}
+            </h2>
+            <p className="mt-2 text-stone-500 dark:text-stone-400">
+              {reportError}
+            </p>
+            <div className="mt-4 flex gap-3 justify-center">
+              <button
+                onClick={handleRetry}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
+              >
+                {t('report.error.tryAgain')}
+              </button>
+              <button
+                onClick={() => {
+                  setReportError(null)
+                  setReport(null)
+                  setSubmittedInput(null)
+                  setPlannerCollapsed(false)
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                {t('report.error.backToPlanner')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {report && !reportLoading && (
+          <div className="max-w-4xl mx-auto px-4 pb-10">
+            <RideReport
+              report={report}
+              onShare={handleShare}
+              onSaveRoute={isAuthenticated ? handleSaveRoute : undefined}
+              routeSaving={saving}
+              routeSaved={saved}
+              onSwapClothingItem={handleSwapClothingItem}
+              products={sampleProducts}
+              shops={shops}
+              disclosure={disclosure}
+              onProductClick={handleProductClick}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

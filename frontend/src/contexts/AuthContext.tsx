@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
-import { login as apiLogin, register as apiRegister, type TokenResponse } from '../api/auth'
+import { login as apiLogin, register as apiRegister, fetchMe, type TokenResponse } from '../api/auth'
 
 const STORAGE_KEY = 'bike-weather:auth'
 
@@ -22,8 +22,8 @@ interface AuthContextValue {
   isLoading: boolean
   isAuthenticated: boolean
   isAdmin: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, name?: string) => Promise<void>
+  login: (username: string, password: string) => Promise<void>
+  register: (username: string, email: string, password: string, name?: string) => Promise<void>
   logout: () => void
   getAccessToken: () => Promise<string | null>
 }
@@ -45,8 +45,11 @@ function profileFromIdToken(idToken: string): UserProfile {
   }
 }
 
-function storeTokens(tokens: TokenResponse): StoredAuth {
+function storeTokens(tokens: TokenResponse, adminOverride?: boolean): StoredAuth {
   const profile = profileFromIdToken(tokens.id_token)
+  if (adminOverride !== undefined) {
+    profile.isAdmin = adminOverride
+  }
   const stored: StoredAuth = {
     access_token: tokens.access_token,
     id_token: tokens.id_token,
@@ -81,20 +84,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = loadStoredAuth()
     if (stored) {
       setUser(stored.profile)
+      // Refresh is_admin from backend on app start
+      fetchMe(stored.access_token)
+        .then(me => {
+          if (me.is_admin !== stored.profile.isAdmin) {
+            const updated = storeTokens(
+              { access_token: stored.access_token, id_token: stored.id_token, token_type: 'Bearer', expires_in: Math.round((stored.expires_at - Date.now()) / 1000), scope: '' },
+              me.is_admin,
+            )
+            setUser(updated.profile)
+          }
+        })
+        .catch(() => { /* use cached profile */ })
     }
     setIsLoading(false)
   }, [])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const tokens = await apiLogin(email, password)
+  const login = useCallback(async (username: string, password: string) => {
+    const tokens = await apiLogin(username, password)
     const stored = storeTokens(tokens)
     setUser(stored.profile)
+    // Fetch authoritative profile from backend (includes is_admin from DB)
+    try {
+      const me = await fetchMe(tokens.access_token)
+      const updated = storeTokens(tokens, me.is_admin)
+      setUser(updated.profile)
+    } catch { /* profile from JWT is used as fallback */ }
   }, [])
 
-  const register = useCallback(async (email: string, password: string, name?: string) => {
-    const tokens = await apiRegister(email, password, name)
+  const register = useCallback(async (username: string, email: string, password: string, name?: string) => {
+    const tokens = await apiRegister(username, email, password, name)
     const stored = storeTokens(tokens)
     setUser(stored.profile)
+    try {
+      const me = await fetchMe(tokens.access_token)
+      const updated = storeTokens(tokens, me.is_admin)
+      setUser(updated.profile)
+    } catch { /* profile from JWT is used as fallback */ }
   }, [])
 
   const logout = useCallback(() => {

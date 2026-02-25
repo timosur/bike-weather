@@ -22,4 +22,6 @@ class RideInputSchema(BaseModel):
     intensity: str
     distanceKm: float | None = None
     elevationMeters: float | None = None
+    durationMinutes: float | None = None
+    averageSpeedKmh: float | None = None
     dayStops: list[DayStopSchema] = []

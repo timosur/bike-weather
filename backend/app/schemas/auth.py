@@ -11,11 +11,12 @@ class UserResponse(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: str
+    username: str
     password: str
 
 
 class RegisterRequest(BaseModel):
+    username: str
     email: str
     password: str
     name: str = ""

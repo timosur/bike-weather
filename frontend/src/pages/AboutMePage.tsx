@@ -11,13 +11,14 @@ export default function AboutMePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    // Only show skeleton on initial load, not on language switch
+    if (sections.length === 0) setLoading(true)
     fetchAboutSections()
       .then(setSections)
       .finally(() => setLoading(false))
   }, [i18n.language])
 
-  if (loading) return <ContentPageSkeleton sections={3} />
+  if (loading && sections.length === 0) return <ContentPageSkeleton sections={3} />
 
   return <AboutMe sections={sections} />
 }

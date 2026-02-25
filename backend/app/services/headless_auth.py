@@ -46,9 +46,7 @@ def _pkce_pair() -> tuple[str, str]:
     return verifier, challenge
 
 
-async def _drive_flow(
-    client: httpx.AsyncClient, uid: str, password: str
-) -> None:
+async def _drive_flow(client: httpx.AsyncClient, uid: str, password: str) -> None:
     """Walk through the Authentik authentication flow stages.
 
     After this coroutine returns the *client*'s cookie jar holds an
@@ -95,7 +93,9 @@ async def _drive_flow(
         r.raise_for_status()
         data = r.json()
     else:
-        raise HeadlessAuthError(f"Unexpected stage after identification: {data.get('component')}")
+        raise HeadlessAuthError(
+            f"Unexpected stage after identification: {data.get('component')}"
+        )
 
     # Check for errors in the response
     if data.get("response_errors"):
@@ -130,7 +130,9 @@ async def _exchange_tokens(client: httpx.AsyncClient) -> dict:
         follow_redirects=False,
     )
     if r.status_code not in (302, 303):
-        raise HeadlessAuthError(f"Expected redirect from authorize, got {r.status_code}")
+        raise HeadlessAuthError(
+            f"Expected redirect from authorize, got {r.status_code}"
+        )
 
     location = r.headers.get("location", "")
     qs = parse_qs(urlparse(location).query)
@@ -157,18 +159,20 @@ async def _exchange_tokens(client: httpx.AsyncClient) -> dict:
 # ── public API ────────────────────────────────────────────────────────
 
 
-async def headless_login(email: str, password: str) -> dict:
-    """Authenticate *email* / *password* and return OIDC tokens."""
+async def headless_login(username: str, password: str) -> dict:
+    """Authenticate *username* / *password* and return OIDC tokens."""
     async with httpx.AsyncClient() as client:
         try:
-            await _drive_flow(client, email, password)
+            await _drive_flow(client, username, password)
             return await _exchange_tokens(client)
         except httpx.HTTPStatusError as exc:
             logger.warning("Authentik HTTP error during login: %s", exc)
             raise HeadlessAuthError("Authentication failed") from exc
 
 
-async def headless_register(email: str, password: str, name: str = "") -> dict:
+async def headless_register(
+    username: str, email: str, password: str, name: str = ""
+) -> dict:
     """Create a user in Authentik and return OIDC tokens.
 
     Uses the Authentik Admin API to create the user and set the password,
@@ -198,16 +202,16 @@ async def headless_register(email: str, password: str, name: str = "") -> dict:
 
         # Create user
         user_data = {
-            "username": email,
+            "username": username,
             "email": email,
-            "name": name or email.split("@")[0],
+            "name": name or username,
             "is_active": True,
         }
         r = await client.post(USERS_URL, json=user_data, headers=api_headers)
         if r.status_code == 400:
             detail = r.json()
             if "username" in detail:
-                raise HeadlessAuthError("An account with this email already exists")
+                raise HeadlessAuthError("An account with this username already exists")
             raise HeadlessAuthError(f"Registration failed: {detail}")
         r.raise_for_status()
         user_pk = r.json()["pk"]
@@ -221,4 +225,4 @@ async def headless_register(email: str, password: str, name: str = "") -> dict:
         r.raise_for_status()
 
     # Now login as the new user to get tokens
-    return await headless_login(email, password)
+    return await headless_login(username, password)

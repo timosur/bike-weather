@@ -10,6 +10,12 @@ import {
   Trees,
   Building2,
   ArrowUpRight,
+  Timer,
+  Zap,
+  RotateCcw,
+  Info,
+  X,
+  Plus,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type {
@@ -44,6 +50,10 @@ export function RidePlanner({
   intensityOptions,
   quickPresets = [],
   isLoading = false,
+  collapsed = false,
+  onToggleCollapse,
+  formSource = null,
+  onReset,
   onLocationSearch,
   onUseCurrentLocation,
   onLocationSelect,
@@ -51,6 +61,7 @@ export function RidePlanner({
   dayStopLocationSuggestions = [],
   onDayStopLocationSearch,
   onSubmit,
+  children,
 }: RidePlannerProps) {
   const today = new Date().toISOString().split('T')[0]
   const { t, i18n } = useTranslation()
@@ -65,11 +76,16 @@ export function RidePlanner({
     intensity: initialValues?.intensity ?? 'moderat',
     distanceKm: initialValues?.distanceKm ?? null,
     elevationMeters: initialValues?.elevationMeters ?? null,
+    durationMinutes: initialValues?.durationMinutes ?? null,
+    averageSpeedKmh: initialValues?.averageSpeedKmh ?? null,
     dayStops: initialValues?.dayStops ?? [],
   })
 
+  const [durationManuallySet, setDurationManuallySet] = useState(!!initialValues?.durationMinutes)
+  const [speedManuallySet, setSpeedManuallySet] = useState(!!initialValues?.averageSpeedKmh)
+
   const [showAdvanced, setShowAdvanced] = useState(
-    !!(initialValues?.distanceKm || initialValues?.elevationMeters)
+    !!(initialValues?.distanceKm || initialValues?.elevationMeters || initialValues?.durationMinutes || initialValues?.averageSpeedKmh)
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -81,6 +97,32 @@ export function RidePlanner({
       setForm(f => ({ ...f, endDate: null }))
     }
   }, [form.isMultiDay, form.dayStops.length, form.startDate])
+
+  // Default speed for current bike type + intensity
+  const defaultSpeed = (() => {
+    const speedTable: Record<string, Record<string, number>> = {
+      rennrad: { gemuetlich: 22, moderat: 27, sportlich: 32 },
+      gravel: { gemuetlich: 18, moderat: 23, sportlich: 28 },
+      mtb: { gemuetlich: 12, moderat: 16, sportlich: 20 },
+      city: { gemuetlich: 14, moderat: 18, sportlich: 22 },
+    }
+    return speedTable[form.bikeType]?.[form.intensity] ?? 20
+  })()
+
+  // Auto-estimate duration from distance + speed (explicit or default)
+  const autoEstimatedDuration = (() => {
+    if (!form.distanceKm || form.distanceKm <= 0) return null
+    const speed = form.averageSpeedKmh && form.averageSpeedKmh > 0 ? form.averageSpeedKmh : defaultSpeed
+    const rawMinutes = (form.distanceKm / speed) * 60
+    return Math.max(15, Math.ceil(rawMinutes / 15) * 15)
+  })()
+
+  // When distance/bike/intensity changes, update duration if not manually set
+  useEffect(() => {
+    if (!durationManuallySet && autoEstimatedDuration !== null) {
+      setForm(f => ({ ...f, durationMinutes: autoEstimatedDuration }))
+    }
+  }, [autoEstimatedDuration, durationManuallySet])
 
   const handleSelectSuggestion = (suggestion: LocationSuggestion) => {
     setForm(f => ({
@@ -123,6 +165,56 @@ export function RidePlanner({
   const inputError = 'border-red-400 dark:border-red-500 focus:ring-red-100 dark:focus:ring-red-900/30'
   const inputNormal = 'border-stone-200 dark:border-stone-700'
 
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+
+  // Collapsed summary bar
+  if (collapsed) {
+    const bikeLabel = bikeTypeOptions.find(b => b.value === form.bikeType)?.label ?? form.bikeType
+    const intensityLabel = intensityOptions.find(i => i.value === form.intensity)?.label ?? form.intensity
+    const dateFormatted = form.startDate
+      ? new Date(form.startDate + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
+      : ''
+
+    return (
+      <div className="w-full flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className="flex-1 min-w-0 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-4 flex items-center justify-between gap-4 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors group"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+              <Route className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
+                {form.location?.address || t('planner.placeholder.cityOrAddress')}
+              </p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
+                {dateFormatted} · {form.startTime} · {bikeLabel} · {intensityLabel}
+                {form.distanceKm ? ` · ${form.distanceKm} km` : ''}
+              </p>
+            </div>
+          </div>
+          <span className="flex-shrink-0 text-xs font-medium text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 whitespace-nowrap">
+            {t('planner.editRide')}
+          </span>
+        </button>
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="flex-shrink-0 h-[60px] px-4 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors flex items-center gap-2"
+            title={t('planner.newRide')}
+          >
+            <Plus className="w-4 h-4" strokeWidth={2} />
+            <span className="text-xs font-medium whitespace-nowrap">{t('planner.newRide')}</span>
+          </button>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-10 px-4">
       {/* Ambient background */}
@@ -148,6 +240,33 @@ export function RidePlanner({
             {t('planner.subheading')}
           </p>
         </div>
+
+        {/* Restored from session banner */}
+        {formSource && !bannerDismissed && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-800/40">
+            <Info className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" strokeWidth={2} />
+            <span className="flex-1 text-xs text-sky-700 dark:text-sky-400">
+              {t(`planner.formSource.${formSource}`)}
+            </span>
+            {onReset && (
+              <button
+                type="button"
+                onClick={onReset}
+                className="text-xs font-medium text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 transition-colors whitespace-nowrap flex items-center gap-1"
+              >
+                <RotateCcw className="w-3 h-3" strokeWidth={2} />
+                {t('planner.resetForm')}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setBannerDismissed(true)}
+              className="text-sky-400 dark:text-sky-600 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" strokeWidth={2} />
+            </button>
+          </div>
+        )}
 
         {/* Quick presets */}
         {quickPresets.length > 0 && (
@@ -237,27 +356,24 @@ export function RidePlanner({
                       key={option.value}
                       type="button"
                       onClick={() => setForm(f => ({ ...f, bikeType: option.value as BikeType }))}
-                      className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 text-center transition-all ${
-                        active
-                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-500'
-                          : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-600'
-                      }`}
+                      className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 text-center transition-all ${active
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-500'
+                        : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-600'
+                        }`}
                     >
                       <span
-                        className={`transition-colors ${
-                          active
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-stone-400 dark:text-stone-500'
-                        }`}
+                        className={`transition-colors ${active
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-stone-400 dark:text-stone-500'
+                          }`}
                       >
                         {bikeIconMap[option.icon] ?? <Route className="w-4 h-4" />}
                       </span>
                       <span
-                        className={`text-xs font-semibold leading-tight ${
-                          active
-                            ? 'text-emerald-700 dark:text-emerald-300'
-                            : 'text-stone-600 dark:text-stone-400'
-                        }`}
+                        className={`text-xs font-semibold leading-tight ${active
+                          ? 'text-emerald-700 dark:text-emerald-300'
+                          : 'text-stone-600 dark:text-stone-400'
+                          }`}
                       >
                         {option.label}
                       </span>
@@ -280,20 +396,17 @@ export function RidePlanner({
                       key={option.value}
                       type="button"
                       onClick={() => setForm(f => ({ ...f, intensity: option.value as RidingIntensity }))}
-                      className={`relative flex flex-col items-center gap-0.5 py-3 px-2 text-center transition-all ${
-                        i < intensityOptions.length - 1 ? 'border-r-2 border-stone-200 dark:border-stone-700' : ''
-                      } ${
-                        active
+                      className={`relative flex flex-col items-center gap-0.5 py-3 px-2 text-center transition-all ${i < intensityOptions.length - 1 ? 'border-r-2 border-stone-200 dark:border-stone-700' : ''
+                        } ${active
                           ? 'bg-emerald-50 dark:bg-emerald-950/30'
                           : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-750'
-                      }`}
+                        }`}
                     >
                       <span
-                        className={`text-xs font-semibold ${
-                          active
-                            ? 'text-emerald-700 dark:text-emerald-300'
-                            : 'text-stone-600 dark:text-stone-400'
-                        }`}
+                        className={`text-xs font-semibold ${active
+                          ? 'text-emerald-700 dark:text-emerald-300'
+                          : 'text-stone-600 dark:text-stone-400'
+                          }`}
                       >
                         {option.label}
                       </span>
@@ -324,55 +437,157 @@ export function RidePlanner({
               </button>
 
               {showAdvanced && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                        {t('planner.label.distance')}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="1"
+                          max="999"
+                          value={form.distanceKm ?? ''}
+                          onChange={e =>
+                            setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
+                          }
+                          placeholder={t('planner.placeholder.egDistance')}
+                          className={`${inputBase} pl-4 pr-12 ${inputNormal}`}
+                        />
+                        <span
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                          style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                        >
+                          km
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                        {t('planner.label.elevation')}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="9999"
+                          value={form.elevationMeters ?? ''}
+                          onChange={e =>
+                            setForm(f => ({ ...f, elevationMeters: e.target.value ? Number(e.target.value) : null }))
+                          }
+                          placeholder={t('planner.placeholder.egElevation')}
+                          className={`${inputBase} pl-4 pr-10 ${inputNormal}`}
+                        />
+                        <span
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                          style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                        >
+                          hm
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Average Speed */}
                   <div className="space-y-1">
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      {t('planner.label.distance')}
+                      {t('planner.label.averageSpeed')}
                     </label>
                     <div className="relative">
+                      <Zap
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                        strokeWidth={1.5}
+                      />
                       <input
                         type="number"
-                        min="1"
-                        max="999"
-                        value={form.distanceKm ?? ''}
-                        onChange={e =>
-                          setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
-                        }
-                        placeholder={t('planner.placeholder.egDistance')}
-                        className={`${inputBase} pl-4 pr-12 ${inputNormal}`}
+                        min="5"
+                        max="60"
+                        step="1"
+                        value={form.averageSpeedKmh ?? ''}
+                        onChange={e => {
+                          const val = e.target.value ? Number(e.target.value) : null
+                          setSpeedManuallySet(val !== null)
+                          setForm(f => ({ ...f, averageSpeedKmh: val }))
+                        }}
+                        placeholder={String(defaultSpeed)}
+                        className={`${inputBase} pl-9 pr-16 ${inputNormal}`}
                       />
                       <span
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
                         style={{ fontFamily: 'IBM Plex Mono, monospace' }}
                       >
-                        km
+                        km/h
                       </span>
                     </div>
+                    {!speedManuallySet && (
+                      <p className="text-[10px] text-stone-400 dark:text-stone-500">
+                        {t('planner.speedEstimated')}
+                      </p>
+                    )}
+                    {speedManuallySet && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSpeedManuallySet(false)
+                          setForm(f => ({ ...f, averageSpeedKmh: null }))
+                        }}
+                        className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        {t('planner.speedReset')}
+                      </button>
+                    )}
                   </div>
 
+                  {/* Duration */}
                   <div className="space-y-1">
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      {t('planner.label.elevation')}
+                      {t('planner.label.duration')}
                     </label>
                     <div className="relative">
+                      <Timer
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                        strokeWidth={1.5}
+                      />
                       <input
                         type="number"
-                        min="0"
-                        max="9999"
-                        value={form.elevationMeters ?? ''}
-                        onChange={e =>
-                          setForm(f => ({ ...f, elevationMeters: e.target.value ? Number(e.target.value) : null }))
-                        }
-                        placeholder={t('planner.placeholder.egElevation')}
-                        className={`${inputBase} pl-4 pr-10 ${inputNormal}`}
+                        min="15"
+                        max="1440"
+                        step="15"
+                        value={form.durationMinutes ?? ''}
+                        onChange={e => {
+                          const val = e.target.value ? Number(e.target.value) : null
+                          setDurationManuallySet(val !== null)
+                          setForm(f => ({ ...f, durationMinutes: val }))
+                        }}
+                        placeholder={autoEstimatedDuration ? String(autoEstimatedDuration) : t('planner.placeholder.egDuration')}
+                        className={`${inputBase} pl-9 pr-14 ${inputNormal}`}
                       />
                       <span
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
                         style={{ fontFamily: 'IBM Plex Mono, monospace' }}
                       >
-                        hm
+                        min
                       </span>
                     </div>
+                    {autoEstimatedDuration && !durationManuallySet && (
+                      <p className="text-[10px] text-stone-400 dark:text-stone-500">
+                        {t('planner.durationEstimated')}
+                      </p>
+                    )}
+                    {durationManuallySet && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDurationManuallySet(false)
+                          setForm(f => ({ ...f, durationMinutes: autoEstimatedDuration ?? null }))
+                        }}
+                        className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        {t('planner.durationReset')}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -396,14 +611,12 @@ export function RidePlanner({
                 className="flex items-center gap-2.5 text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
               >
                 <div
-                  className={`relative w-8 h-[18px] rounded-full transition-colors ${
-                    form.isMultiDay ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-700'
-                  }`}
+                  className={`relative w-8 h-[18px] rounded-full transition-colors ${form.isMultiDay ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-700'
+                    }`}
                 >
                   <div
-                    className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-all ${
-                      form.isMultiDay ? 'left-[18px]' : 'left-[2px]'
-                    }`}
+                    className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-all ${form.isMultiDay ? 'left-[18px]' : 'left-[2px]'
+                      }`}
                   />
                 </div>
                 {t('planner.label.multiDayTour')}
@@ -458,6 +671,9 @@ export function RidePlanner({
             </button>
           </div>
         </form>
+
+        {/* Slot for recent rides or other content */}
+        {children}
 
         {/* SEO description */}
         <section className="space-y-4 text-xs text-stone-400 dark:text-stone-500 leading-relaxed">

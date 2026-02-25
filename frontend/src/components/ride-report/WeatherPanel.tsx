@@ -7,11 +7,15 @@ import {
   Sunset,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { WeatherData } from './types'
+import type { WeatherData, HourlyWeather } from './types'
 import { WeatherIcon } from './WeatherIcon'
+import { WeatherChart } from './WeatherChart'
 
 interface WeatherPanelProps {
   weather: WeatherData
+  hourlyForecast?: HourlyWeather[]
+  rideStartHour?: number
+  rideEndHour?: number
 }
 
 interface WeatherStatProps {
@@ -38,7 +42,7 @@ function WeatherStat({ icon, label, value, subValue }: WeatherStatProps) {
   )
 }
 
-export function WeatherPanel({ weather }: WeatherPanelProps) {
+export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHour }: WeatherPanelProps) {
   const { t } = useTranslation()
 
   return (
@@ -70,6 +74,15 @@ export function WeatherPanel({ weather }: WeatherPanelProps) {
           </div>
         </div>
       </div>
+
+      {/* Hourly forecast chart */}
+      {hourlyForecast && hourlyForecast.length > 0 && (
+        <WeatherChart
+          hourlyForecast={hourlyForecast}
+          rideStartHour={rideStartHour}
+          rideEndHour={rideEndHour}
+        />
+      )}
 
       {/* Stats grid */}
       <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-3 gap-4">

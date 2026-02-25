@@ -43,6 +43,8 @@
       "intensity": "Intensity",
       "distance": "Distance",
       "elevation": "Elevation",
+      "duration": "Duration",
+      "averageSpeed": "Avg. speed",
       "advancedOptions": "Advanced options",
       "multiDayTour": "Multi-day tour",
       "overnightLocations": "Overnight locations",
@@ -88,7 +90,30 @@
     "placeholder": {
       "cityOrAddress": "Enter city or address…",
       "egDistance": "e.g. 35",
-      "egElevation": "e.g. 800"
+      "egElevation": "e.g. 800",
+      "egDuration": "e.g. 120"
+    },
+    "durationEstimated": "Auto-estimated from distance and speed",
+    "durationReset": "Reset to estimate",
+    "speedEstimated": "Default for bike type and intensity",
+    "speedReset": "Reset to default",
+    "editRide": "Edit ride",
+    "newRide": "New ride",
+    "resetForm": "Reset",
+    "formSource": {
+      "restored": "Restored from your last session.",
+      "route": "Pre-filled from a saved route.",
+      "history": "Loaded from recent ride history."
+    },
+    "recentRides": {
+      "title": "Recent Rides",
+      "clear": "Clear all",
+      "saveToRoutes": "Save to My Routes",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "loginToSave": "Log in to save",
+      "showMore": "Show {{count}} more",
+      "showLess": "Show less"
     },
     "seo": {
       "heading": "How the Bike Weather Planner works",
@@ -156,7 +181,16 @@
       "uvMedium": "Medium",
       "uvLow": "Low",
       "sunrise": "Sunrise",
-      "sunset": "Sunset"
+      "sunset": "Sunset",
+      "hourlyForecast": "Hourly forecast ({{start}} – {{end}})",
+      "dailyForecast": "Day forecast",
+      "legend": {
+        "temp": "Temperature",
+        "feelsLike": "Feels like",
+        "precip": "Precipitation %",
+        "wind": "Wind",
+        "rideWindow": "Your ride"
+      }
     },
     "clothing": {
       "alternativeAvailable": "Alternative available",
@@ -215,13 +249,15 @@
       "subheading": "Sign in to see your saved routes.",
       "tab": "Sign in",
       "submit": "Sign in",
-      "forgotPassword": "Forgot password?"
+      "forgotPassword": "Forgot password?",
+      "usernamePlaceholder": "Username or email"
     },
     "register": {
       "heading": "Create account",
       "subheading": "Create an account to save routes.",
       "tab": "Register",
       "submit": "Register",
+      "usernamePlaceholder": "Username",
       "passwordPlaceholder": "Password (min. 8 characters)",
       "confirmPassword": "Confirm password"
     },
@@ -229,6 +265,7 @@
     "or": "or",
     "noAccountNeeded": "No account needed — you can use Fahrrad Wetter without signing up.",
     "validation": {
+      "usernameRequired": "Username or email required",
       "emailRequired": "Valid email required",
       "passwordRequired": "Password required",
       "passwordMin": "At least 8 characters",

@@ -25,8 +25,8 @@ export default function RoutesPage() {
       const now = new Date()
       const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 
-      // Navigate to report with route params as ride input
-      navigate('/report', {
+      // Navigate to planner with route params as ride input (auto-submits)
+      navigate('/planner', {
         state: {
           routeId: route.id,
           rideInput: {

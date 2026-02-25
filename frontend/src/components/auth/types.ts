@@ -1,29 +1,30 @@
-export type AuthTab = 'login' | 'register'
+export type AuthTab = "login" | "register";
 
 export interface LoginFormData {
-  email: string
-  password: string
+  username: string;
+  password: string;
 }
 
 export interface RegisterFormData {
-  email: string
-  password: string
-  passwordConfirm: string
+  username: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
 }
 
 export interface AuthPageProps {
   /** Currently active tab */
-  activeTab?: AuthTab
+  activeTab?: AuthTab;
   /** Whether a login/register request is in progress */
-  isLoading?: boolean
+  isLoading?: boolean;
   /** Error message to display */
-  errorMessage?: string
+  errorMessage?: string;
   /** Called when user submits login */
-  onLogin?: (data: LoginFormData) => void
+  onLogin?: (data: LoginFormData) => void;
   /** Called when user submits registration */
-  onRegister?: (data: RegisterFormData) => void
+  onRegister?: (data: RegisterFormData) => void;
   /** Called when user clicks Google login */
-  onGoogleLogin?: () => void
+  onGoogleLogin?: () => void;
   /** Called when user clicks "Forgot password" */
-  onForgotPassword?: () => void
+  onForgotPassword?: () => void;
 }

@@ -12,13 +12,13 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    if (categories.length === 0) setLoading(true)
     fetchCategories()
       .then(setCategories)
       .finally(() => setLoading(false))
   }, [i18n.language])
 
-  if (loading) return <ProductCategoriesSkeleton />
+  if (loading && categories.length === 0) return <ProductCategoriesSkeleton />
 
   return (
     <ProductCategories

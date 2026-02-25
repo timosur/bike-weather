@@ -117,7 +117,9 @@ async def test_create_route(
 async def test_create_route_missing_fields_returns_422(
     authenticated_client: AsyncClient,
 ) -> None:
-    response = await authenticated_client.post("/api/routes", json={"name": "Incomplete"})
+    response = await authenticated_client.post(
+        "/api/routes", json={"name": "Incomplete"}
+    )
     assert response.status_code == 422
 
 
@@ -221,16 +223,47 @@ async def test_report_with_route_id_updates_condition(
     db_session: AsyncSession,
     create_test_user: User,
 ) -> None:
-    from app.services.weather import WeatherForecast
+    from app.services.weather import (
+        HourlyForecast,
+        HourlyWeatherWindow,
+        WeatherForecast,
+    )
 
-    mock_ws.fetch_forecast = AsyncMock(
-        return_value=WeatherForecast(
-            temp_min=8.0, temp_max=16.0, temp_feels_like=10.5,
-            precipitation_probability=10, wind_speed=12.0,
-            wind_direction="S", humidity=55, uv_index=4.0,
-            sunrise="06:42", sunset="18:31", weather_code=1,
-            icon="sun", description="Mainly clear",
+    summary = WeatherForecast(
+        temp_min=8.0,
+        temp_max=16.0,
+        temp_feels_like=10.5,
+        precipitation_probability=10,
+        wind_speed=12.0,
+        wind_direction="S",
+        humidity=55,
+        uv_index=4.0,
+        sunrise="06:42",
+        sunset="18:31",
+        weather_code=1,
+        icon="sun",
+        description="Mainly clear",
+    )
+    hours = [
+        HourlyForecast(
+            hour=f"{h:02d}:00",
+            temp=5.0 + h * 0.5,
+            temp_feels_like=3.0 + h * 0.4,
+            precipitation_probability=10,
+            precipitation_mm=0.0,
+            wind_speed=12.0,
+            wind_direction="S",
+            wind_gusts=18.0,
+            humidity=55,
+            weather_code=1,
+            icon="sun",
+            description="Mainly clear",
+            is_day=h >= 6 and h <= 20,
         )
+        for h in range(24)
+    ]
+    mock_ws.fetch_hourly_forecast = AsyncMock(
+        return_value=HourlyWeatherWindow(hours=hours, summary=summary)
     )
 
     route = _make_route(create_test_user.id)
@@ -253,16 +286,47 @@ async def test_report_with_invalid_route_id_still_returns_report(
     mock_ws: AsyncMock,
     authenticated_client: AsyncClient,
 ) -> None:
-    from app.services.weather import WeatherForecast
+    from app.services.weather import (
+        HourlyForecast,
+        HourlyWeatherWindow,
+        WeatherForecast,
+    )
 
-    mock_ws.fetch_forecast = AsyncMock(
-        return_value=WeatherForecast(
-            temp_min=8.0, temp_max=16.0, temp_feels_like=10.5,
-            precipitation_probability=10, wind_speed=12.0,
-            wind_direction="S", humidity=55, uv_index=4.0,
-            sunrise="06:42", sunset="18:31", weather_code=1,
-            icon="sun", description="Mainly clear",
+    summary = WeatherForecast(
+        temp_min=8.0,
+        temp_max=16.0,
+        temp_feels_like=10.5,
+        precipitation_probability=10,
+        wind_speed=12.0,
+        wind_direction="S",
+        humidity=55,
+        uv_index=4.0,
+        sunrise="06:42",
+        sunset="18:31",
+        weather_code=1,
+        icon="sun",
+        description="Mainly clear",
+    )
+    hours = [
+        HourlyForecast(
+            hour=f"{h:02d}:00",
+            temp=5.0 + h * 0.5,
+            temp_feels_like=3.0 + h * 0.4,
+            precipitation_probability=10,
+            precipitation_mm=0.0,
+            wind_speed=12.0,
+            wind_direction="S",
+            wind_gusts=18.0,
+            humidity=55,
+            weather_code=1,
+            icon="sun",
+            description="Mainly clear",
+            is_day=h >= 6 and h <= 20,
         )
+        for h in range(24)
+    ]
+    mock_ws.fetch_hourly_forecast = AsyncMock(
+        return_value=HourlyWeatherWindow(hours=hours, summary=summary)
     )
 
     response = await authenticated_client.post(

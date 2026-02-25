@@ -18,7 +18,7 @@ export default function ProductCategoryPage() {
 
   useEffect(() => {
     if (!categoryId) return
-    setLoading(true)
+    if (!category) setLoading(true)
     fetchCategoryDetail(categoryId)
       .then((data) => {
         setCategory(data.category)
@@ -30,7 +30,7 @@ export default function ProductCategoryPage() {
       .finally(() => setLoading(false))
   }, [categoryId, i18n.language])
 
-  if (loading) return <ProductCategoryDetailSkeleton />
+  if (loading && !category) return <ProductCategoryDetailSkeleton />
 
   if (notFound || !category) {
     return (

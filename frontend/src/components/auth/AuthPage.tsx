@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { User as UserIcon, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import type { AuthPageProps, AuthTab, LoginFormData, RegisterFormData } from './types'
 
 export function AuthPage({
@@ -14,14 +14,14 @@ export function AuthPage({
 }: AuthPageProps) {
   const [tab, setTab] = useState<AuthTab>(initialTab)
   const [showPassword, setShowPassword] = useState(false)
-  const [loginForm, setLoginForm] = useState<LoginFormData>({ email: '', password: '' })
-  const [registerForm, setRegisterForm] = useState<RegisterFormData>({ email: '', password: '', passwordConfirm: '' })
+  const [loginForm, setLoginForm] = useState<LoginFormData>({ username: '', password: '' })
+  const [registerForm, setRegisterForm] = useState<RegisterFormData>({ username: '', email: '', password: '', passwordConfirm: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { t } = useTranslation()
 
   const validateLogin = () => {
     const errs: Record<string, string> = {}
-    if (!loginForm.email || !/\S+@\S+\.\S+/.test(loginForm.email)) errs.email = t('auth.validation.emailRequired')
+    if (!loginForm.username) errs.username = t('auth.validation.usernameRequired')
     if (!loginForm.password) errs.password = t('auth.validation.passwordRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
@@ -29,6 +29,7 @@ export function AuthPage({
 
   const validateRegister = () => {
     const errs: Record<string, string> = {}
+    if (!registerForm.username) errs.username = t('auth.validation.usernameRequired')
     if (!registerForm.email || !/\S+@\S+\.\S+/.test(registerForm.email)) errs.email = t('auth.validation.emailRequired')
     if (!registerForm.password || registerForm.password.length < 8) errs.password = t('auth.validation.passwordMin')
     if (registerForm.password !== registerForm.passwordConfirm) errs.passwordConfirm = t('auth.validation.passwordMismatch')
@@ -76,11 +77,10 @@ export function AuthPage({
                 key={tabKey}
                 type="button"
                 onClick={() => { setTab(tabKey); setErrors({}) }}
-                className={`flex-1 py-3 text-sm font-semibold transition-colors ${
-                  tab === tabKey
+                className={`flex-1 py-3 text-sm font-semibold transition-colors ${tab === tabKey
                     ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500'
                     : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
-                }`}
+                  }`}
               >
                 {tabKey === 'login' ? t('auth.login.tab') : t('auth.register.tab')}
               </button>
@@ -122,16 +122,16 @@ export function AuthPage({
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div className="space-y-1">
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" strokeWidth={1.5} />
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" strokeWidth={1.5} />
                     <input
-                      type="email"
-                      value={loginForm.email}
-                      onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
-                      placeholder="Email"
-                      className={`${inputBase} pl-9 pr-4 ${errors.email ? 'border-red-400 dark:border-red-500' : 'border-stone-200 dark:border-stone-700'}`}
+                      type="text"
+                      value={loginForm.username}
+                      onChange={e => setLoginForm(f => ({ ...f, username: e.target.value }))}
+                      placeholder={t('auth.login.usernamePlaceholder')}
+                      className={`${inputBase} pl-9 pr-4 ${errors.username ? 'border-red-400 dark:border-red-500' : 'border-stone-200 dark:border-stone-700'}`}
                     />
                   </div>
-                  {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+                  {errors.username && <p className="text-xs text-red-500">{errors.username}</p>}
                 </div>
 
                 <div className="space-y-1">
@@ -171,6 +171,20 @@ export function AuthPage({
             {/* Register form */}
             {tab === 'register' && (
               <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" strokeWidth={1.5} />
+                    <input
+                      type="text"
+                      value={registerForm.username}
+                      onChange={e => setRegisterForm(f => ({ ...f, username: e.target.value }))}
+                      placeholder={t('auth.register.usernamePlaceholder')}
+                      className={`${inputBase} pl-9 pr-4 ${errors.username ? 'border-red-400 dark:border-red-500' : 'border-stone-200 dark:border-stone-700'}`}
+                    />
+                  </div>
+                  {errors.username && <p className="text-xs text-red-500">{errors.username}</p>}
+                </div>
+
                 <div className="space-y-1">
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" strokeWidth={1.5} />

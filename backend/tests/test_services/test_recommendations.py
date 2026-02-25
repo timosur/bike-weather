@@ -4,40 +4,53 @@ from app.schemas.ride import RideInputSchema, RideLocationSchema, DayStopSchema
 from app.services.recommendations import build_report
 from app.services.weather import WeatherService
 
-# Mock weather response
-MOCK_WEATHER_GOOD = {
-    "daily": {
-        "temperature_2m_max": [16.0],
-        "temperature_2m_min": [8.0],
-        "apparent_temperature_max": [15.0],
-        "apparent_temperature_min": [6.0],
-        "precipitation_probability_max": [10],
-        "windspeed_10m_max": [12.0],
-        "winddirection_10m_dominant": [180],
-        "relative_humidity_2m_mean": [55],
-        "uv_index_max": [4.0],
-        "sunrise": ["2026-03-15T06:42"],
-        "sunset": ["2026-03-15T18:31"],
-        "weathercode": [1],
-    }
-}
 
-MOCK_WEATHER_BAD = {
-    "daily": {
-        "temperature_2m_max": [8.0],
-        "temperature_2m_min": [3.0],
-        "apparent_temperature_max": [6.0],
-        "apparent_temperature_min": [0.0],
-        "precipitation_probability_max": [75],
-        "windspeed_10m_max": [35.0],
-        "winddirection_10m_dominant": [315],
-        "relative_humidity_2m_mean": [85],
-        "uv_index_max": [1.0],
-        "sunrise": ["2026-03-16T06:40"],
-        "sunset": ["2026-03-16T18:32"],
-        "weathercode": [63],
+def _make_hourly_response_good() -> dict:
+    """Build a mock Open-Meteo hourly+daily response for good weather."""
+    hours = 24
+    return {
+        "hourly": {
+            "temperature_2m": [8 + i * 0.5 for i in range(hours)],
+            "apparent_temperature": [6 + i * 0.4 for i in range(hours)],
+            "precipitation_probability": [10 for _ in range(hours)],
+            "precipitation": [0.0 for _ in range(hours)],
+            "weather_code": [1 for _ in range(hours)],
+            "wind_speed_10m": [12 for _ in range(hours)],
+            "wind_direction_10m": [180 for _ in range(hours)],
+            "wind_gusts_10m": [18 for _ in range(hours)],
+            "relative_humidity_2m": [55 for _ in range(hours)],
+            "is_day": [0 if i < 6 or i > 20 else 1 for i in range(hours)],
+        },
+        "daily": {
+            "uv_index_max": [4.0],
+            "sunrise": ["2026-03-15T06:42"],
+            "sunset": ["2026-03-15T18:31"],
+        },
     }
-}
+
+
+def _make_hourly_response_bad() -> dict:
+    """Build a mock Open-Meteo hourly+daily response for bad weather."""
+    hours = 24
+    return {
+        "hourly": {
+            "temperature_2m": [3 + i * 0.3 for i in range(hours)],
+            "apparent_temperature": [0 + i * 0.2 for i in range(hours)],
+            "precipitation_probability": [75 for _ in range(hours)],
+            "precipitation": [2.0 for _ in range(hours)],
+            "weather_code": [63 for _ in range(hours)],
+            "wind_speed_10m": [35 for _ in range(hours)],
+            "wind_direction_10m": [315 for _ in range(hours)],
+            "wind_gusts_10m": [50 for _ in range(hours)],
+            "relative_humidity_2m": [85 for _ in range(hours)],
+            "is_day": [0 if i < 6 or i > 20 else 1 for i in range(hours)],
+        },
+        "daily": {
+            "uv_index_max": [1.0],
+            "sunrise": ["2026-03-16T06:40"],
+            "sunset": ["2026-03-16T18:32"],
+        },
+    }
 
 
 def _make_service(responses: list[dict]) -> WeatherService:
@@ -55,7 +68,7 @@ def _make_service(responses: list[dict]) -> WeatherService:
 
 
 async def test_single_day_report_structure() -> None:
-    ws = _make_service([MOCK_WEATHER_GOOD])
+    ws = _make_service([_make_hourly_response_good()])
     ride_input = RideInputSchema(
         location=RideLocationSchema(address="Konstanz", lat=47.66, lon=9.17),
         startDate="2026-03-15",
@@ -65,21 +78,27 @@ async def test_single_day_report_structure() -> None:
         distanceKm=40,
     )
 
-    report = await build_report(ride_input, ws=ws)
+    report = await build_report(ride_input, ws=ws, locale="en")
     assert report.rideName == "Konstanz Ride"
     assert report.startLocation == "Konstanz"
     assert len(report.days) == 1
     day = report.days[0]
     assert day.date == "2026-03-15"
     assert day.dayLabel == "Today"
-    assert day.weather.tempMin == 8.0
-    assert day.weather.tempMax == 16.0
+    assert day.weather.tempMin <= day.weather.tempMax
     assert len(day.clothingItems) > 0
     assert len(day.equipment) > 0
+    # Should have full-day hourly forecast data (0-23)
+    assert len(day.hourlyForecast) == 24
+    assert day.hourlyForecast[0].hour == "00:00"
+    assert day.hourlyForecast[-1].hour == "23:00"
+    # Ride window should be marked
+    assert day.rideStartHour == 9
+    assert day.rideEndHour > 9
 
 
 async def test_multi_day_report_has_per_day_forecasts() -> None:
-    ws = _make_service([MOCK_WEATHER_GOOD, MOCK_WEATHER_BAD])
+    ws = _make_service([_make_hourly_response_good(), _make_hourly_response_bad()])
     ride_input = RideInputSchema(
         location=RideLocationSchema(address="Konstanz", lat=47.66, lon=9.17),
         startDate="2026-03-15",
@@ -89,20 +108,27 @@ async def test_multi_day_report_has_per_day_forecasts() -> None:
         distanceKm=120,
         isMultiDay=True,
         dayStops=[
-            DayStopSchema(location=RideLocationSchema(address="Überlingen", lat=47.77, lon=9.16)),
+            DayStopSchema(
+                location=RideLocationSchema(
+                    address="\u00dcberlingen", lat=47.77, lon=9.16
+                )
+            ),
         ],
     )
 
-    report = await build_report(ride_input, ws=ws)
+    report = await build_report(ride_input, ws=ws, locale="en")
     assert len(report.days) == 2
     assert report.days[0].location == "Konstanz"
-    assert report.days[1].location == "Überlingen"
+    assert report.days[1].location == "\u00dcberlingen"
     assert report.days[0].dayLabel == "Day 1"
     assert report.days[1].dayLabel == "Day 2"
+    # Both days should have full-day hourly data
+    assert len(report.days[0].hourlyForecast) == 24
+    assert len(report.days[1].hourlyForecast) == 24
 
 
 async def test_overall_condition_is_worst() -> None:
-    ws = _make_service([MOCK_WEATHER_GOOD, MOCK_WEATHER_BAD])
+    ws = _make_service([_make_hourly_response_good(), _make_hourly_response_bad()])
     ride_input = RideInputSchema(
         location=RideLocationSchema(address="Konstanz", lat=47.66, lon=9.17),
         startDate="2026-03-15",
@@ -111,11 +137,53 @@ async def test_overall_condition_is_worst() -> None:
         intensity="moderat",
         isMultiDay=True,
         dayStops=[
-            DayStopSchema(location=RideLocationSchema(address="Überlingen", lat=47.77, lon=9.16)),
+            DayStopSchema(
+                location=RideLocationSchema(
+                    address="\u00dcberlingen", lat=47.77, lon=9.16
+                )
+            ),
         ],
     )
 
     report = await build_report(ride_input, ws=ws)
-    # Day 1 good weather → good/ideal, Day 2 bad weather → caution
+    # Day 1 good weather \u2192 good/ideal, Day 2 bad weather \u2192 caution
     # Overall should be caution
     assert report.overallCondition == "caution"
+
+
+async def test_duration_from_input_controls_window() -> None:
+    ws = _make_service([_make_hourly_response_good()])
+    ride_input = RideInputSchema(
+        location=RideLocationSchema(address="Konstanz", lat=47.66, lon=9.17),
+        startDate="2026-03-15",
+        startTime="08:00",
+        bikeType="gravel",
+        intensity="moderat",
+        durationMinutes=180,  # 3 hours
+    )
+
+    report = await build_report(ride_input, ws=ws)
+    day = report.days[0]
+    # Full-day hourly data
+    assert len(day.hourlyForecast) == 24
+    # Ride window: 08:00 to 11:00 (3 hours = ceil(180/60) = 3h window)
+    assert day.rideStartHour == 8
+    assert day.rideEndHour == 11
+
+
+async def test_average_speed_controls_window() -> None:
+    ws = _make_service([_make_hourly_response_good()])
+    ride_input = RideInputSchema(
+        location=RideLocationSchema(address="Konstanz", lat=47.66, lon=9.17),
+        startDate="2026-03-15",
+        startTime="10:00",
+        bikeType="gravel",
+        intensity="moderat",
+        distanceKm=60,
+        averageSpeedKmh=20,  # 60km / 20kmh = 3h
+    )
+
+    report = await build_report(ride_input, ws=ws)
+    day = report.days[0]
+    assert day.rideStartHour == 10
+    assert day.rideEndHour == 13  # 10 + ceil(180/60) = 13

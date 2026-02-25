@@ -43,6 +43,8 @@
       "intensity": "Intensität",
       "distance": "Distanz",
       "elevation": "Höhenmeter",
+      "duration": "Dauer",
+      "averageSpeed": "Ø Geschw.",
       "advancedOptions": "Erweiterte Optionen",
       "multiDayTour": "Mehrtägige Tour",
       "overnightLocations": "Übernachtungsorte",
@@ -88,7 +90,30 @@
     "placeholder": {
       "cityOrAddress": "Stadt oder Adresse eingeben…",
       "egDistance": "z.B. 35",
-      "egElevation": "z.B. 800"
+      "egElevation": "z.B. 800",
+      "egDuration": "z.B. 120"
+    },
+    "durationEstimated": "Automatisch geschätzt aus Distanz und Geschwindigkeit",
+    "durationReset": "Auf Schätzung zurücksetzen",
+    "speedEstimated": "Standard für Fahrradtyp und Intensität",
+    "speedReset": "Auf Standard zurücksetzen",
+    "editRide": "Fahrt bearbeiten",
+    "newRide": "Neue Fahrt",
+    "resetForm": "Zurücksetzen",
+    "formSource": {
+      "restored": "Aus deiner letzten Sitzung wiederhergestellt.",
+      "route": "Aus einer gespeicherten Route vorausgefüllt.",
+      "history": "Aus dem Fahrtverlauf geladen."
+    },
+    "recentRides": {
+      "title": "Letzte Fahrten",
+      "clear": "Alle löschen",
+      "saveToRoutes": "In Meine Routen speichern",
+      "saving": "Speichern…",
+      "saved": "Gespeichert",
+      "loginToSave": "Anmelden zum Speichern",
+      "showMore": "{{count}} weitere anzeigen",
+      "showLess": "Weniger anzeigen"
     },
     "seo": {
       "heading": "So funktioniert der Fahrrad Wetter Planer",
@@ -156,7 +181,16 @@
       "uvMedium": "Mittel",
       "uvLow": "Niedrig",
       "sunrise": "Sonnenaufgang",
-      "sunset": "Sonnenuntergang"
+      "sunset": "Sonnenuntergang",
+      "hourlyForecast": "Stündliche Vorhersage ({{start}} – {{end}})",
+      "dailyForecast": "Tagesvorhersage",
+      "legend": {
+        "temp": "Temperatur",
+        "feelsLike": "Gefühlt",
+        "precip": "Niederschlag %",
+        "wind": "Wind",
+        "rideWindow": "Deine Fahrt"
+      }
     },
     "clothing": {
       "alternativeAvailable": "Alternative verfügbar",
@@ -215,13 +249,15 @@
       "subheading": "Melde dich an, um deine gespeicherten Routen zu sehen.",
       "tab": "Anmelden",
       "submit": "Anmelden",
-      "forgotPassword": "Passwort vergessen?"
+      "forgotPassword": "Passwort vergessen?",
+      "usernamePlaceholder": "Benutzername oder E-Mail"
     },
     "register": {
       "heading": "Konto erstellen",
       "subheading": "Erstelle ein Konto, um Routen zu speichern.",
       "tab": "Registrieren",
       "submit": "Registrieren",
+      "usernamePlaceholder": "Benutzername",
       "passwordPlaceholder": "Passwort (mind. 8 Zeichen)",
       "confirmPassword": "Passwort bestätigen"
     },
@@ -229,6 +265,7 @@
     "or": "oder",
     "noAccountNeeded": "Kein Konto nötig — du kannst Fahrrad Wetter ohne Anmeldung nutzen.",
     "validation": {
+      "usernameRequired": "Benutzername oder E-Mail erforderlich",
       "emailRequired": "Gültige E-Mail-Adresse erforderlich",
       "passwordRequired": "Passwort erforderlich",
       "passwordMin": "Mindestens 8 Zeichen",

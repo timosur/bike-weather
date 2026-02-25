@@ -19,6 +19,22 @@ class WeatherDataSchema(BaseModel):
     description: str
 
 
+class HourlyWeatherSchema(BaseModel):
+    hour: str  # HH:MM
+    temp: float
+    tempFeelsLike: float
+    precipitationProbability: float
+    precipitationMm: float
+    windSpeed: float
+    windDirection: str
+    windGusts: float
+    humidity: float
+    weatherCode: int
+    icon: str
+    description: str
+    isDay: bool
+
+
 class ClothingAlternativeSchema(BaseModel):
     id: str
     name: str
@@ -46,6 +62,9 @@ class DayForecastSchema(BaseModel):
     location: str | None = None
     condition: str
     weather: WeatherDataSchema
+    hourlyForecast: list[HourlyWeatherSchema] = []
+    rideStartHour: int = 8
+    rideEndHour: int = 10
     clothingItems: list[ClothingItemSchema]
     equipment: list[EquipmentItemSchema]
 

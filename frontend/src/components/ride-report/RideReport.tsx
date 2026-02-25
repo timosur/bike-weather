@@ -77,10 +77,10 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             onClick={() => onSaveRoute?.()}
             disabled={routeSaving || routeSaved}
             className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
-                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
-                : routeSaving
-                  ? 'text-white bg-emerald-600/70 cursor-wait'
-                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
+              : routeSaving
+                ? 'text-white bg-emerald-600/70 cursor-wait'
+                : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
               }`}
           >
             {routeSaved ? (
@@ -109,7 +109,12 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             >
               {t('report.section.weather')}
             </h2>
-            <WeatherPanel weather={activeDay.weather} />
+            <WeatherPanel
+              weather={activeDay.weather}
+              hourlyForecast={activeDay.hourlyForecast}
+              rideStartHour={activeDay.rideStartHour}
+              rideEndHour={activeDay.rideEndHour}
+            />
           </section>
 
           {/* Clothing Items */}
