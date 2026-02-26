@@ -1,0 +1,273 @@
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { RideReport, RideReportSkeleton } from '../components/ride-report'
+import { useToast } from '../hooks/useToast'
+import { useAuth } from '../contexts/AuthContext'
+import { useRideHistory } from '../hooks/useRideHistory'
+import { fetchReport } from '../api/rides'
+import { createRoute, fetchRoute } from '../api/routes'
+import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
+import type { RideInput } from '../components/ride-planner/types'
+import type { RideReport as RideReportType } from '../components/ride-report/types'
+
+interface ReportLocationState {
+  input: RideInput
+  routeId?: string
+}
+
+export default function ReportPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { routeId: urlRouteId } = useParams<{ routeId?: string }>()
+  const { t, i18n } = useTranslation()
+  const { addToast } = useToast()
+  const { isAuthenticated } = useAuth()
+  const { addEntry } = useRideHistory()
+
+  // Extract navigation state
+  const locationState = location.state as ReportLocationState | null
+  const inputFromState = locationState?.input
+  const routeIdFromState = locationState?.routeId ?? urlRouteId
+
+  // Report state
+  const [report, setReport] = useState<RideReportType | null>(null)
+  const [reportLoading, setReportLoading] = useState(true)
+  const [reportError, setReportError] = useState<string | null>(null)
+  const [submittedInput, setSubmittedInput] = useState<RideInput | null>(inputFromState ?? null)
+  const [currentRouteId, setCurrentRouteId] = useState<string | undefined>(routeIdFromState)
+
+  // Save-route state
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(!!urlRouteId)
+
+  // Fetch tracking
+  const hasFetched = useRef(false)
+  const fetchIdRef = useRef(0)
+  const routeLoadedRef = useRef(false)
+
+  // Fetch report
+  const doFetch = useCallback(async (input: RideInput, routeId?: string) => {
+    const currentFetchId = ++fetchIdRef.current
+    setReportLoading(true)
+    setReportError(null)
+    setReport(null)
+
+    try {
+      const result = await fetchReport(input, routeId)
+      if (fetchIdRef.current !== currentFetchId) return
+      setReport(result)
+      // Add to history on successful fetch
+      addEntry(input, result)
+    } catch (err) {
+      if (fetchIdRef.current !== currentFetchId) return
+      setReportError(err instanceof Error ? err.message : t('report.error.fallback'))
+    } finally {
+      if (fetchIdRef.current === currentFetchId) {
+        setReportLoading(false)
+      }
+    }
+  }, [t, addEntry])
+
+  // Load route from URL param if no navigation state
+  useEffect(() => {
+    if (urlRouteId && !inputFromState && !routeLoadedRef.current) {
+      routeLoadedRef.current = true
+      setReportLoading(true)
+      fetchRoute(urlRouteId)
+        .then((route) => {
+          const today = new Date().toISOString().slice(0, 10)
+          const now = new Date()
+          const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+          const input: RideInput = {
+            location: { address: route.startLocation },
+            startDate: today,
+            startTime,
+            endDate: null,
+            isMultiDay: false,
+            bikeType: 'rennrad',
+            intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
+            distanceKm: route.totalDistance,
+            dayStops: [],
+          }
+          setSubmittedInput(input)
+          hasFetched.current = true
+          doFetch(input, urlRouteId)
+        })
+        .catch(() => {
+          navigate('/planner', { replace: true })
+        })
+    }
+  }, [urlRouteId, inputFromState, navigate, doFetch])
+
+  // Redirect to planner if no input state and no URL route ID
+  useEffect(() => {
+    if (!inputFromState && !urlRouteId) {
+      navigate('/planner', { replace: true })
+    }
+  }, [inputFromState, urlRouteId, navigate])
+
+  // Fetch from navigation state
+  useEffect(() => {
+    if (inputFromState && !hasFetched.current) {
+      hasFetched.current = true
+      doFetch(inputFromState, routeIdFromState)
+    }
+  }, [inputFromState, routeIdFromState, doFetch])
+
+  // Re-fetch report when language changes
+  useEffect(() => {
+    const handleLanguageChanged = () => {
+      if (submittedInput && report) {
+        doFetch(submittedInput, currentRouteId)
+      }
+    }
+    i18n.on('languageChanged', handleLanguageChanged)
+    return () => { i18n.off('languageChanged', handleLanguageChanged) }
+  }, [i18n, submittedInput, currentRouteId, report, doFetch])
+
+  const handleSaveRoute = () => {
+    if (!report || saving || saved) return
+    setSaving(true)
+    createRoute({
+      name: report.rideName,
+      start_location: report.startLocation,
+      total_distance: report.totalDistance,
+      distance_unit: report.distanceUnit,
+      riding_style: report.ridingStyle,
+    })
+      .then((route) => {
+        setSaved(true)
+        setCurrentRouteId(route.id)
+        // Update URL to include route ID so refresh preserves data
+        navigate(`/report/${route.id}`, { replace: true })
+        addToast(t('report.routeSaved'), 'success')
+      })
+      .catch(() => {
+        addToast(t('report.routeSaveError'), 'error')
+      })
+      .finally(() => setSaving(false))
+  }
+
+  const handleSwapClothingItem = (dayId: string, itemId: string, alternativeId: string) => {
+    if (!report) return
+
+    setReport((prev) => {
+      if (!prev) return prev
+
+      const updatedDays = prev.days.map((day) => {
+        if (day.id !== dayId) return day
+
+        const updatedItems = day.clothingItems.map((item) => {
+          if (item.id !== itemId) return item
+
+          const alt = item.alternatives?.find((a) => a.id === alternativeId)
+          if (!alt) return item
+
+          const originalAsAlt = { id: item.id, name: item.name, icon: item.icon }
+          const remainingAlts = (item.alternatives ?? []).filter((a) => a.id !== alternativeId)
+
+          return {
+            ...item,
+            name: alt.name,
+            icon: alt.icon,
+            alternatives: [originalAsAlt, ...remainingAlts],
+          }
+        })
+
+        return { ...day, clothingItems: updatedItems }
+      })
+
+      return { ...prev, days: updatedDays }
+    })
+  }
+
+  const handleProductClick = (productId: string) => {
+    const product = sampleProducts.find((p) => p.id === productId)
+    if (product) {
+      window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const handleRetry = () => {
+    if (submittedInput) {
+      hasFetched.current = false
+      doFetch(submittedInput, currentRouteId)
+    }
+  }
+
+  // "Plan Again" - go back to planner with same form values
+  const handlePlanAgain = () => {
+    navigate('/planner', { state: { prefillInput: submittedInput } })
+  }
+
+  // "New Ride" - go back to fresh planner
+  const handleNewRide = () => {
+    navigate('/planner', { state: { reset: true } })
+  }
+
+  const handleNavigateToLogin = () => {
+    navigate('/login', { state: { from: '/report' } })
+  }
+
+  // Early return if no input and no URL route ID - will redirect
+  if (!inputFromState && !urlRouteId) {
+    return null
+  }
+
+  return (
+    <div className="">
+      {reportLoading && (
+        <div className="max-w-4xl mx-auto px-4 pb-10">
+          <RideReportSkeleton />
+        </div>
+      )}
+
+      {reportError && !reportLoading && (
+        <div className="text-center py-20">
+          <h2
+            className="text-2xl font-semibold text-stone-800 dark:text-stone-200"
+            style={{ fontFamily: 'Outfit, sans-serif' }}
+          >
+            {t('report.error.heading')}
+          </h2>
+          <p className="mt-2 text-stone-500 dark:text-stone-400">
+            {reportError}
+          </p>
+          <div className="mt-4 flex gap-3 justify-center">
+            <button
+              onClick={handleRetry}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
+            >
+              {t('report.error.tryAgain')}
+            </button>
+            <button
+              onClick={handleNewRide}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
+              {t('report.error.backToPlanner')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {report && !reportLoading && (
+        <div className="max-w-4xl mx-auto px-4 pb-10">
+          <RideReport
+            report={report}
+            onSaveRoute={isAuthenticated && !saved && !currentRouteId ? handleSaveRoute : undefined}
+            routeSaving={saving}
+            routeSaved={saved || !!currentRouteId}
+            onLoginToSave={!isAuthenticated && !currentRouteId ? handleNavigateToLogin : undefined}
+            onNewRide={handleNewRide}
+            onSwapClothingItem={handleSwapClothingItem}
+            products={sampleProducts}
+            shops={shops}
+            disclosure={disclosure}
+            onProductClick={handleProductClick}
+          />
+        </div>
+      )}
+    </div>
+  )
+}

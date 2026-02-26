@@ -21,6 +21,7 @@ class WeatherDataSchema(BaseModel):
 
 class HourlyWeatherSchema(BaseModel):
     hour: str  # HH:MM
+    datetime: str = ""  # ISO timestamp e.g. "2026-02-27T14:00"
     temp: float
     tempFeelsLike: float
     precipitationProbability: float
@@ -79,3 +80,5 @@ class RideReportSchema(BaseModel):
     overallCondition: str
     shareUrl: str = ""
     days: list[DayForecastSchema]
+    mergedClothingItems: list[ClothingItemSchema] = []
+    mergedEquipment: list[EquipmentItemSchema] = []

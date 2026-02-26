@@ -2,28 +2,20 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RidePlanner, RecentRides } from '../components/ride-planner'
-import { RideReport, RideReportSkeleton } from '../components/ride-report'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import { useRideHistory } from '../hooks/useRideHistory'
 import { usePlannerFormPersistence } from '../hooks/usePlannerFormPersistence'
-import { useToast } from '../hooks/useToast'
-import { useAuth } from '../contexts/AuthContext'
-import { fetchReport } from '../api/rides'
-import { createRoute, fetchRoute } from '../api/routes'
+import { fetchRoute } from '../api/routes'
 
 import { TurnstileWidget, useTurnstile } from '../components/common/TurnstileWidget'
-import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { BikeTypeOption, RidingIntensityOption, QuickPreset, RideInput } from '../components/ride-planner/types'
-import type { RideReport as RideReportType } from '../components/ride-report/types'
 import type { RideHistoryEntry } from '../hooks/useRideHistory'
 
 export default function PlannerPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { routeId: urlRouteId } = useParams<{ routeId?: string }>()
-  const { t, i18n } = useTranslation()
-  const { addToast } = useToast()
-  const { isAuthenticated } = useAuth()
+  const { t } = useTranslation()
 
   const {
     suggestions,
@@ -37,25 +29,14 @@ export default function PlannerPage() {
     clearDetectedLocation,
   } = useLocationSearch()
 
-  const { history, addEntry, removeEntry, clearHistory } = useRideHistory()
+  const { history, removeEntry, clearHistory } = useRideHistory()
   const { savedFormState, saveFormState, clearFormState } = usePlannerFormPersistence()
-
-  // Report state
-  const [report, setReport] = useState<RideReportType | null>(null)
-  const [reportLoading, setReportLoading] = useState(false)
-  const [reportError, setReportError] = useState<string | null>(null)
-  const [submittedInput, setSubmittedInput] = useState<RideInput | null>(null)
-  const [currentRouteId, setCurrentRouteId] = useState<string | undefined>(undefined)
-
-  // Save-route state
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   // Track form reset key to force remount
   const [resetKey, setResetKey] = useState(0)
 
-  // Submission ID to cancel stale doSubmit continuations after reset
-  const submitIdRef = useRef(0)
+  // Submission state for loading indicator
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
   const THROTTLE_THRESHOLD = 3
@@ -64,13 +45,20 @@ export default function PlannerPage() {
   const [showPlannerCaptcha, setShowPlannerCaptcha] = useState(false)
   const plannerTurnstile = useTurnstile()
 
-  const reportRef = useRef<HTMLDivElement>(null)
-
-  // Check for incoming state from saved routes (RoutesPage)
-  const routerState = location.state as { rideInput?: RideInput; routeId?: string } | null
-  const incomingRideInput = routerState?.rideInput
-  const incomingRouteId = routerState?.routeId
-  const hasAutoSubmitted = useRef(false)
+  // Check for incoming state from navigation
+  interface PlannerLocationState {
+    prefillInput?: RideInput
+    reset?: boolean
+    rideInput?: RideInput  // legacy: from RoutesPage
+    routeId?: string       // legacy: from RoutesPage
+  }
+  const routerState = location.state as PlannerLocationState | null
+  const incomingPrefillInput = routerState?.prefillInput
+  const incomingRideInput = routerState?.rideInput  // legacy
+  const incomingRouteId = routerState?.routeId       // legacy
+  const shouldReset = routerState?.reset
+  const hasProcessedReset = useRef(false)
+  const hasProcessedAutoSubmit = useRef(false)
 
   // Route loaded from URL param (for reload support)
   const [urlRouteInput, setUrlRouteInput] = useState<RideInput | null>(null)
@@ -96,32 +84,26 @@ export default function PlannerPage() {
     { id: 'p4', label: t('planner.preset.multiDayTrip'), description: t('planner.preset.multiDayTripDesc'), bikeType: 'gravel', intensity: 'gemuetlich', isMultiDay: true },
   ]
 
-  // Core submit handler
-  const doSubmit = useCallback(async (input: RideInput, routeId?: string) => {
-    const currentSubmitId = ++submitIdRef.current
-    setReportLoading(true)
-    setReportError(null)
-    setReport(null)
-    setSubmittedInput(input)
-    setCurrentRouteId(routeId)
-    setSaved(false)
-    saveFormState(input)
-
-    try {
-      const result = await fetchReport(input, routeId)
-      // Bail out if a reset happened while the fetch was in flight
-      if (submitIdRef.current !== currentSubmitId) return
-      setReport(result)
-      addEntry(input, result)
-    } catch (err) {
-      if (submitIdRef.current !== currentSubmitId) return
-      setReportError(err instanceof Error ? err.message : t('report.error.fallback'))
-    } finally {
-      if (submitIdRef.current === currentSubmitId) {
-        setReportLoading(false)
-      }
+  // Handle reset state from navigation
+  useEffect(() => {
+    if (shouldReset && !hasProcessedReset.current) {
+      hasProcessedReset.current = true
+      clearFormState()
+      clearSuggestions()
+      clearDetectedLocation()
+      setResetKey(k => k + 1)
+      // Clear the state so refresh doesn't re-trigger reset
+      window.history.replaceState({}, '')
     }
-  }, [addEntry, saveFormState, t])
+  }, [shouldReset, clearFormState, clearSuggestions, clearDetectedLocation])
+
+  // Submit handler - navigates to /report with input
+  const doSubmit = useCallback((input: RideInput, routeId?: string) => {
+    setIsSubmitting(true)
+    saveFormState(input)
+    // Navigate to report page with the input (history is added there after fetch succeeds)
+    navigate('/report', { state: { input, routeId } })
+  }, [navigate, saveFormState])
 
   const handleSubmit = (input: RideInput) => {
     const now = Date.now()
@@ -147,10 +129,10 @@ export default function PlannerPage() {
     }
   }
 
-  // Auto-submit from router state (saved routes or redirected from /report)
+  // Auto-submit from router state (legacy: saved routes from RoutesPage)
   useEffect(() => {
-    if (incomingRideInput && !hasAutoSubmitted.current) {
-      hasAutoSubmitted.current = true
+    if (incomingRideInput && !hasProcessedAutoSubmit.current) {
+      hasProcessedAutoSubmit.current = true
       doSubmit(incomingRideInput, incomingRouteId)
       // Clear the router state so refreshing doesn't re-trigger
       window.history.replaceState({}, '')
@@ -159,9 +141,8 @@ export default function PlannerPage() {
 
   // Load route from URL param on mount / page reload
   useEffect(() => {
-    if (!urlRouteId || hasAutoSubmitted.current || urlRouteLoading.current) return
+    if (!urlRouteId || urlRouteLoading.current) return
     urlRouteLoading.current = true
-    hasAutoSubmitted.current = true
     fetchRoute(urlRouteId)
       .then((route) => {
         const today = new Date().toISOString().slice(0, 10)
@@ -187,89 +168,7 @@ export default function PlannerPage() {
       })
   }, [urlRouteId, doSubmit, navigate])
 
-  // Re-fetch report when language changes so backend-provided strings update
-  useEffect(() => {
-    const handleLanguageChanged = () => {
-      if (submittedInput && report) {
-        doSubmit(submittedInput, currentRouteId)
-      }
-    }
-    i18n.on('languageChanged', handleLanguageChanged)
-    return () => { i18n.off('languageChanged', handleLanguageChanged) }
-  }, [i18n, submittedInput, currentRouteId, report, doSubmit])
-
-  const handleSaveRoute = () => {
-    if (!report || saving || saved) return
-    setSaving(true)
-    createRoute({
-      name: report.rideName,
-      start_location: report.startLocation,
-      total_distance: report.totalDistance,
-      distance_unit: report.distanceUnit,
-      riding_style: report.ridingStyle,
-    })
-      .then((route) => {
-        setSaved(true)
-        setCurrentRouteId(route.id)
-        // Update URL to include the new route ID
-        navigate(`/planner/${route.id}`, { replace: true })
-        addToast(t('report.routeSaved'), 'success')
-      })
-      .catch(() => {
-        addToast(t('report.routeSaveError'), 'error')
-      })
-      .finally(() => setSaving(false))
-  }
-
-  const handleSwapClothingItem = (dayId: string, itemId: string, alternativeId: string) => {
-    if (!report) return
-
-    setReport((prev) => {
-      if (!prev) return prev
-
-      const updatedDays = prev.days.map((day) => {
-        if (day.id !== dayId) return day
-
-        const updatedItems = day.clothingItems.map((item) => {
-          if (item.id !== itemId) return item
-
-          const alt = item.alternatives?.find((a) => a.id === alternativeId)
-          if (!alt) return item
-
-          // Build the swapped item: take the alternative's name/icon,
-          // move the original into alternatives, remove the chosen alt
-          const originalAsAlt = { id: item.id, name: item.name, icon: item.icon }
-          const remainingAlts = (item.alternatives ?? []).filter((a) => a.id !== alternativeId)
-
-          return {
-            ...item,
-            name: alt.name,
-            icon: alt.icon,
-            alternatives: [originalAsAlt, ...remainingAlts],
-          }
-        })
-
-        return { ...day, clothingItems: updatedItems }
-      })
-
-      return { ...prev, days: updatedDays }
-    })
-  }
-
-  const handleProductClick = (productId: string) => {
-    const product = sampleProducts.find((p) => p.id === productId)
-    if (product) {
-      window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
-    }
-  }
-
-  const handleRetry = () => {
-    if (submittedInput) {
-      doSubmit(submittedInput, currentRouteId)
-    }
-  }
-
-  // Recent rides: select an entry → fill planner + auto-submit
+  // Recent rides: select an entry → navigate to report
   const handleHistorySelect = (entry: RideHistoryEntry) => {
     doSubmit(entry.rideInput)
   }
@@ -280,6 +179,7 @@ export default function PlannerPage() {
 
   // Determine initial values for the planner
   const getInitialValues = (): Partial<RideInput> | undefined => {
+    if (incomingPrefillInput) return incomingPrefillInput
     if (incomingRideInput) return incomingRideInput
     if (urlRouteInput) return urlRouteInput
     if (detectedLocation) return { location: detectedLocation }
@@ -289,6 +189,7 @@ export default function PlannerPage() {
 
   // Determine formSource for the info banner
   const getFormSource = (): 'restored' | 'route' | 'history' | null => {
+    if (incomingPrefillInput) return 'history'
     if (incomingRideInput && incomingRouteId) return 'route'
     if (urlRouteId) return 'route'
     if (incomingRideInput) return 'history'
@@ -298,21 +199,11 @@ export default function PlannerPage() {
 
   // Reset form to fresh defaults
   const handleReset = () => {
-    // Invalidate any in-flight fetchReport so its callbacks are ignored
-    submitIdRef.current++
-    setReport(null)
-    setReportLoading(false)
-    setReportError(null)
-    setSubmittedInput(null)
-    setCurrentRouteId(undefined)
-    setSaved(false)
-    setSaving(false)
     clearFormState()
-    // Clear stale location search state so the new planner starts clean
     clearSuggestions()
     clearDetectedLocation()
     // Navigate to clean planner URL (removes routeId from path)
-    navigate('/planner', { replace: true })
+    navigate('/planner', { replace: true, state: { reset: true } })
     // Increment reset key to force RidePlanner remount with fresh defaults
     setResetKey(k => k + 1)
   }
@@ -326,132 +217,58 @@ export default function PlannerPage() {
     prevDetectedRef.current = detectedLocation
   }
 
-  // Determine if we should show the report section
-  const showReport = reportLoading || reportError || report
-
   return (
     <div className="">
       {/* Ambient background */}
-      {!showReport && (
-        <>
-          <div
-            className="fixed inset-0 -z-10"
-            style={{
-              background:
-                'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(16,185,129,0.08) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 90%, rgba(245,158,11,0.06) 0%, transparent 60%)',
-            }}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(16,185,129,0.08) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 90%, rgba(245,158,11,0.06) 0%, transparent 60%)',
+        }}
+      />
+      <div className="fixed inset-0 -z-10 bg-stone-50 dark:bg-stone-950" />
+
+      {/* Planner form with recent rides inside */}
+      <RidePlanner
+        key={`form-${detectKeyRef.current}-${resetKey}`}
+        initialValues={resetKey > 0 ? (detectedLocation ? { location: detectedLocation } : undefined) : getInitialValues()}
+        locationSuggestions={suggestions}
+        dayStopLocationSuggestions={dayStopSuggestions}
+        bikeTypeOptions={bikeTypeOptions}
+        intensityOptions={intensityOptions}
+        quickPresets={quickPresets}
+        isLoading={isLocating || isSubmitting}
+        formSource={resetKey > 0 ? null : getFormSource()}
+        onReset={getFormSource() && resetKey === 0 ? handleReset : undefined}
+        onLocationSearch={searchLocation}
+        onUseCurrentLocation={useCurrentLocation}
+        onLocationSelect={() => { }}
+        onDayStopLocationSearch={searchDayStopLocation}
+        onPresetSelect={() => { }}
+        onSubmit={handleSubmit}
+      >
+        {history.length > 0 && (
+          <RecentRides
+            history={history}
+            onSelect={handleHistorySelect}
+            onRemove={removeEntry}
+            onClear={clearHistory}
+            onNavigateToLogin={handleNavigateToLogin}
           />
-          <div className="fixed inset-0 -z-10 bg-stone-50 dark:bg-stone-950" />
-        </>
-      )}
-
-      {/* Planner section */}
-      {!showReport && (
-        // Full planner form with recent rides inside
-        <RidePlanner
-          key={`form-${detectKeyRef.current}-${resetKey}`}
-          initialValues={resetKey > 0 ? (detectedLocation ? { location: detectedLocation } : undefined) : getInitialValues()}
-          locationSuggestions={suggestions}
-          dayStopLocationSuggestions={dayStopSuggestions}
-          bikeTypeOptions={bikeTypeOptions}
-          intensityOptions={intensityOptions}
-          quickPresets={quickPresets}
-          isLoading={isLocating || reportLoading}
-          formSource={resetKey > 0 ? null : getFormSource()}
-          onReset={getFormSource() && resetKey === 0 ? handleReset : undefined}
-          onLocationSearch={searchLocation}
-          onUseCurrentLocation={useCurrentLocation}
-          onLocationSelect={() => { }}
-          onDayStopLocationSearch={searchDayStopLocation}
-          onPresetSelect={() => { }}
-          onSubmit={handleSubmit}
-        >
-          {history.length > 0 && (
-            <RecentRides
-              history={history}
-              onSelect={handleHistorySelect}
-              onRemove={removeEntry}
-              onClear={clearHistory}
-              onNavigateToLogin={handleNavigateToLogin}
-            />
-          )}
-          {showPlannerCaptcha && (
-            <div className="mt-4 flex flex-col items-center gap-2">
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                {t('planner.captchaHint', 'Please verify you\'re not a bot to continue.')}
-              </p>
-              <TurnstileWidget
-                onVerify={plannerTurnstile.onVerify}
-                onExpire={plannerTurnstile.onExpire}
-              />
-            </div>
-          )}
-        </RidePlanner>
-      )}
-
-      {/* Report section */}
-      <div ref={reportRef}>
-        {reportLoading && (
-          <div className="max-w-4xl mx-auto px-4 pb-10">
-            <RideReportSkeleton />
-          </div>
         )}
-
-        {reportError && !reportLoading && (
-          <div className="text-center py-20">
-            <h2
-              className="text-2xl font-semibold text-stone-800 dark:text-stone-200"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.error.heading')}
-            </h2>
-            <p className="mt-2 text-stone-500 dark:text-stone-400">
-              {reportError}
+        {showPlannerCaptcha && (
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
+              {t('planner.captchaHint', 'Please verify you\'re not a bot to continue.')}
             </p>
-            <div className="mt-4 flex gap-3 justify-center">
-              <button
-                onClick={handleRetry}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
-              >
-                {t('report.error.tryAgain')}
-              </button>
-              <button
-                onClick={() => {
-                  setReportError(null)
-                  setReport(null)
-                  setSubmittedInput(null)
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-              >
-                {t('report.error.backToPlanner')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {report && !reportLoading && (
-          <div className="max-w-4xl mx-auto px-4 pb-10">
-            <RideReport
-              report={report}
-              onSaveRoute={isAuthenticated ? handleSaveRoute : undefined}
-              routeSaving={saving}
-              routeSaved={saved || !!currentRouteId}
-              onLoginToSave={!isAuthenticated ? handleNavigateToLogin : undefined}
-              onPlanAgain={() => {
-                setReport(null)
-                setReportError(null)
-                setSubmittedInput(null)
-              }}
-              onNewRide={handleReset}
-              onSwapClothingItem={handleSwapClothingItem}
-              products={sampleProducts}
-              shops={shops}
-              disclosure={disclosure}
-              onProductClick={handleProductClick}
+            <TurnstileWidget
+              onVerify={plannerTurnstile.onVerify}
+              onExpire={plannerTurnstile.onExpire}
             />
           </div>
         )}
-      </div>
+      </RidePlanner>
     </div>
   )
 }

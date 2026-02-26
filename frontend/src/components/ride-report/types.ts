@@ -75,6 +75,7 @@ export interface EquipmentItem {
 
 export interface HourlyWeather {
   hour: string; // HH:MM
+  datetime?: string; // ISO timestamp e.g. "2026-02-27T14:00"
   temp: number;
   tempFeelsLike: number;
   precipitationProbability: number;
@@ -113,6 +114,8 @@ export interface RideReport {
   overallCondition: ConditionRating;
   shareUrl: string;
   days: DayForecast[];
+  mergedClothingItems?: ClothingItem[];
+  mergedEquipment?: EquipmentItem[];
 }
 
 export interface RideReportProps {

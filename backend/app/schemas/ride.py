@@ -10,6 +10,8 @@ class RideLocationSchema(BaseModel):
 class DayStopSchema(BaseModel):
     location: RideLocationSchema
     plannedKm: float | None = None
+    startDate: str | None = None  # ISO date YYYY-MM-DD
+    startTime: str | None = None  # HH:MM
 
 
 class RideInputSchema(BaseModel):

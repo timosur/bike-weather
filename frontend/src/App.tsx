@@ -1,4 +1,4 @@
-import { useCallback, useEffect, lazy, Suspense } from 'react'
+import { useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell } from './components/shell'
@@ -14,6 +14,7 @@ import { ToastContainer } from './components/common/ToastContainer'
 import { setAccessTokenProvider } from './api/client'
 
 const PlannerPage = lazy(() => import('./pages/PlannerPage'))
+const ReportPage = lazy(() => import('./pages/ReportPage'))
 const ProductsPage = lazy(() => import('./pages/ProductsPage'))
 const ProductCategoryPage = lazy(() => import('./pages/ProductCategoryPage'))
 const RoutesPage = lazy(() => import('./pages/RoutesPage'))
@@ -98,13 +99,24 @@ function AppContent() {
   const navigationItems = useNavigationItems()
   const footerSections = useFooterSections()
 
+  // Track a reset key for forcing planner remount when clicking nav while already on planner
+  const plannerResetKeyRef = useRef(0)
+
   useEffect(() => {
     setAccessTokenProvider(getAccessToken)
   }, [getAccessToken])
 
   const handleNavigate = useCallback(
-    (href: string) => navigate(href),
-    [navigate],
+    (href: string) => {
+      // If clicking "Routenplaner" while already on /planner or /report, force reset
+      if (href === '/planner' && (location.pathname === '/planner' || location.pathname === '/report' || location.pathname.startsWith('/planner/'))) {
+        plannerResetKeyRef.current += 1
+        navigate('/planner', { state: { reset: true, key: plannerResetKeyRef.current } })
+      } else {
+        navigate(href)
+      }
+    },
+    [navigate, location.pathname],
   )
 
   const handleLogout = useCallback(() => {
@@ -135,7 +147,8 @@ function AppContent() {
         <Route path="/" element={<Navigate to="/planner" replace />} />
         <Route path="/planner/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
         <Route path="/planner" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
-        <Route path="/report" element={<Navigate to="/planner" replace />} />
+        <Route path="/report/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><ReportPage /></Suspense>} />
+        <Route path="/report" element={<Suspense fallback={<RidePlannerSkeleton />}><ReportPage /></Suspense>} />
         <Route path="/shared/:token" element={<Suspense fallback={<RidePlannerSkeleton />}><SharedReportPage /></Suspense>} />
         <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductsPage /></Suspense>} />
         <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} />

@@ -12,6 +12,10 @@ export interface DayStop {
   location: RideLocation;
   /** Planned km for this day (optional) */
   plannedKm?: number | null;
+  /** Start date for this day (ISO YYYY-MM-DD, auto-calculated from main startDate + index) */
+  startDate?: string;
+  /** Start time for this day (HH:MM, defaults to 08:00) */
+  startTime?: string;
 }
 
 export interface RideInput {

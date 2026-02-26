@@ -65,10 +65,13 @@ def _forecast_to_weather_schema(
     )
 
 
-def _hourly_to_schemas(hours: list[HourlyForecast]) -> list[HourlyWeatherSchema]:
+def _hourly_to_schemas(
+    hours: list[HourlyForecast], date_str: str = ""
+) -> list[HourlyWeatherSchema]:
     return [
         HourlyWeatherSchema(
             hour=h.hour,
+            datetime=f"{date_str}T{h.hour}" if date_str else "",
             temp=h.temp,
             tempFeelsLike=h.temp_feels_like,
             precipitationProbability=h.precipitation_probability,
@@ -104,6 +107,95 @@ def _clothing_dicts_to_schemas(items: list[dict]) -> list[ClothingItemSchema]:
 
 def _equipment_dicts_to_schemas(items: list[dict]) -> list[EquipmentItemSchema]:
     return [EquipmentItemSchema(**item) for item in items]
+
+
+# Clothing icon severity: higher = more protection. Used for merging multi-day items.
+_CLOTHING_SEVERITY: dict[str, int] = {
+    "jersey": 0,
+    "jersey-long": 1,
+    "base-layer": 1,
+    "arm-warmers": 1,
+    "pants-short": 0,
+    "pants-long": 1,
+    "leg-warmers": 1,
+    "vest": 1,
+    "jacket": 2,
+    "rain-jacket": 3,
+    "overpants": 2,
+    "gloves-light": 0,
+    "gloves-warm": 1,
+    "gloves-waterproof": 2,
+    "sunglasses": 1,
+    "glasses": 1,
+    "headband": 1,
+    "helmet-cover": 2,
+    "shoes": 1,
+    "shoe-covers": 2,
+    "socks": 1,
+}
+
+
+def _merge_clothing_across_days(
+    per_day_clothing: list[list[ClothingItemSchema]],
+    day_labels: list[str],
+) -> list[ClothingItemSchema]:
+    """Merge clothing recommendations from all days into a single packing list.
+
+    For each body-zone icon, keep the most protective item and collect all
+    unique items across days. If two days recommend different items for the
+    same zone (e.g. light gloves vs warm gloves), both are included.
+    """
+    # Track items by their id → (item, set of day indices)
+    seen: dict[str, tuple[ClothingItemSchema, set[int]]] = {}
+
+    for day_idx, day_items in enumerate(per_day_clothing):
+        for item in day_items:
+            if item.id in seen:
+                seen[item.id][1].add(day_idx)
+            else:
+                seen[item.id] = (item, {day_idx})
+
+    # Build merged list, ordered by first appearance
+    merged: list[ClothingItemSchema] = []
+    for item_id, (item, day_indices) in seen.items():
+        if len(day_indices) == len(per_day_clothing):
+            # Item needed every day — keep original reason
+            merged.append(item)
+        else:
+            # Item only needed on specific days — annotate reason
+            day_names = ", ".join(day_labels[i] for i in sorted(day_indices))
+            merged.append(
+                item.model_copy(update={"reason": f"{item.reason} ({day_names})"})
+            )
+
+    return merged
+
+
+def _merge_equipment_across_days(
+    per_day_equipment: list[list[EquipmentItemSchema]],
+    day_labels: list[str],
+) -> list[EquipmentItemSchema]:
+    """Merge equipment from all days into a union set."""
+    seen: dict[str, tuple[EquipmentItemSchema, set[int]]] = {}
+
+    for day_idx, day_items in enumerate(per_day_equipment):
+        for item in day_items:
+            if item.id in seen:
+                seen[item.id][1].add(day_idx)
+            else:
+                seen[item.id] = (item, {day_idx})
+
+    merged: list[EquipmentItemSchema] = []
+    for item_id, (item, day_indices) in seen.items():
+        if len(day_indices) == len(per_day_equipment):
+            merged.append(item)
+        else:
+            day_names = ", ".join(day_labels[i] for i in sorted(day_indices))
+            merged.append(
+                item.model_copy(update={"reason": f"{item.reason} ({day_names})"})
+            )
+
+    return merged
 
 
 async def build_report(
@@ -159,9 +251,20 @@ async def build_report(
                 end_hour_day1,
             )
         )
-        # Subsequent days: day stops — assume 8:00 start, use per-day km if available
+        # Subsequent days: day stops — use per-stop date/time when provided
         for i, stop in enumerate(ride_input.dayStops):
-            stop_date = (start_date + timedelta(days=i + 1)).strftime("%Y-%m-%d")
+            # Date: use explicit per-stop date, or fallback to start + (i+1) days
+            if stop.startDate:
+                stop_date = stop.startDate
+            else:
+                stop_date = (start_date + timedelta(days=i + 1)).strftime("%Y-%m-%d")
+            # Start hour: use explicit per-stop time, or default 8:00
+            try:
+                day_start_hour = (
+                    int(stop.startTime.split(":")[0]) if stop.startTime else 8
+                )
+            except (ValueError, IndexError):
+                day_start_hour = 8
             stop_lat = stop.location.lat or lat
             stop_lon = stop.location.lon or lon
             # Estimate per-day duration from planned km if available
@@ -175,14 +278,14 @@ async def build_report(
                 )
             else:
                 day_duration = duration_minutes
-            day_end_hour = min(8 + math.ceil(day_duration / 60), 23)
+            day_end_hour = min(day_start_hour + math.ceil(day_duration / 60), 23)
             day_locations.append(
                 (
                     stop.location.address,
                     stop_lat,
                     stop_lon,
                     stop_date,
-                    8,
+                    day_start_hour,
                     day_end_hour,
                 )
             )
@@ -224,14 +327,21 @@ async def build_report(
             and int(h.hour.split(":")[0]) <= ride_end_h
         ]
 
-        # Compute a chart display window centered on the ride
-        ride_mid = (ride_start_h + ride_end_h) / 2
-        display_half = 8  # show ~16 hours total
-        chart_start = max(0, int(ride_mid - display_half))
-        chart_end = int(ride_mid + display_half)
-        # Ensure the ride window is always fully visible
-        chart_start = min(chart_start, ride_start_h)
-        chart_end = max(chart_end, ride_end_h)
+        # Compute chart display window
+        is_multi_day = ride_input.isMultiDay and ride_input.dayStops
+        if is_multi_day:
+            # Multi-day: fixed 6:00–22:00 window for consistent chart width per day
+            chart_start = 6
+            chart_end = 22
+        else:
+            # Single-day: centered on ride
+            ride_mid = (ride_start_h + ride_end_h) / 2
+            display_half = 8  # show ~16 hours total
+            chart_start = max(0, int(ride_mid - display_half))
+            chart_end = int(ride_mid + display_half)
+            # Ensure the ride window is always fully visible
+            chart_start = min(chart_start, ride_start_h)
+            chart_end = max(chart_end, ride_end_h)
 
         # Filter current-day hours within chart window (capped at 23)
         chart_hours = [
@@ -318,7 +428,7 @@ async def build_report(
                 location=location_name,
                 condition=condition,
                 weather=_forecast_to_weather_schema(forecast, locale),
-                hourlyForecast=_hourly_to_schemas(chart_hours),
+                hourlyForecast=_hourly_to_schemas(chart_hours, date_str),
                 rideStartHour=ride_start_h,
                 rideEndHour=ride_end_h,
                 clothingItems=_clothing_dicts_to_schemas(clothing),
@@ -330,6 +440,18 @@ async def build_report(
     intensity_label = INTENSITY_LABELS.get(
         (ride_input.intensity, locale), ride_input.intensity
     )
+
+    # Build merged packing list for multi-day tours
+    merged_clothing: list[ClothingItemSchema] = []
+    merged_equipment: list[EquipmentItemSchema] = []
+    if len(day_forecasts) > 1:
+        per_day_clothing = [d.clothingItems for d in day_forecasts]
+        per_day_equipment = [d.equipment for d in day_forecasts]
+        day_labels_list = [d.dayLabel for d in day_forecasts]
+        merged_clothing = _merge_clothing_across_days(per_day_clothing, day_labels_list)
+        merged_equipment = _merge_equipment_across_days(
+            per_day_equipment, day_labels_list
+        )
 
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",
@@ -343,4 +465,6 @@ async def build_report(
         totalDistance=ride_input.distanceKm or 0,
         overallCondition=_worst_condition(conditions),
         days=day_forecasts,
+        mergedClothingItems=merged_clothing,
+        mergedEquipment=merged_equipment,
     )

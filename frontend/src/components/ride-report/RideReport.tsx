@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route, PenLine, Plus } from 'lucide-react'
 import type { RideReportProps } from './types'
@@ -6,6 +6,8 @@ import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
 import { DayTabs } from './DayTabs'
 import { WeatherPanel } from './WeatherPanel'
+import { MultiDayWeatherChart } from './MultiDayWeatherChart'
+import { MultiDayWeatherSummary } from './MultiDayWeatherSummary'
 import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
@@ -13,6 +15,9 @@ import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onPlanAgain, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
   const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
+  const chartScrollRef = useRef<HTMLDivElement | null>(null)
+
+  const isMultiDay = report.days.length > 1
 
   const activeDay = report.days.find((d) => d.id === activeDayId) ?? report.days[0]
 
@@ -21,13 +26,37 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
     [shops],
   )
 
+  // For multi-day: use merged items; for single-day: use active day items
+  const clothingItems = isMultiDay
+    ? (report.mergedClothingItems ?? activeDay?.clothingItems ?? [])
+    : (activeDay?.clothingItems ?? [])
+  const equipmentItems = isMultiDay
+    ? (report.mergedEquipment ?? activeDay?.equipment ?? [])
+    : (activeDay?.equipment ?? [])
+
   function findItemProduct(itemIcon: string): Product | undefined {
     return products?.find((p) => p.matchesIcon === itemIcon)
   }
 
+  const handleChartRef = useCallback((el: HTMLDivElement | null) => {
+    chartScrollRef.current = el
+  }, [])
+
   function handleDaySelect(dayId: string) {
     setActiveDayId(dayId)
     onDaySelect?.(dayId)
+
+    // Multi-day: scroll chart to the selected day
+    if (isMultiDay && chartScrollRef.current) {
+      const dayMarker = chartScrollRef.current.querySelector(`[data-day-id="${dayId}"]`)
+      if (dayMarker) {
+        const container = chartScrollRef.current
+        const markerRect = dayMarker.getBoundingClientRect()
+        const containerRect = container.getBoundingClientRect()
+        const scrollLeft = container.scrollLeft + (markerRect.left - containerRect.left) - 20
+        container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' })
+      }
+    }
   }
 
   return (
@@ -54,7 +83,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               <Gauge className="w-3.5 h-3.5" strokeWidth={1.5} />
               {report.ridingStyle}
             </span>
-            {report.days.length > 1 && (
+            {isMultiDay && (
               <span className="text-stone-400 dark:text-stone-500">
                 {t('report.days', { count: report.days.length })}
               </span>
@@ -127,11 +156,80 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         </div>
       </div>
 
-      {/* Day Tabs */}
+      {/* Day Tabs — as jump-links for multi-day, tab switch for single-day */}
       <DayTabs days={report.days} activeDayId={activeDayId} onDaySelect={handleDaySelect} />
 
-      {/* Active Day Content */}
-      {activeDay && (
+      {/* --- MULTI-DAY LAYOUT --- */}
+      {isMultiDay && (
+        <div className="space-y-6">
+          {/* Weather summary across all days */}
+          <section>
+            <h2
+              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              {t('report.section.weather')}
+            </h2>
+            <MultiDayWeatherSummary days={report.days} />
+          </section>
+
+          {/* Continuous weather chart across all days */}
+          <section>
+            <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
+              <MultiDayWeatherChart
+                days={report.days}
+                onChartRef={handleChartRef}
+              />
+            </div>
+          </section>
+
+          {/* Merged packing list */}
+          <section>
+            <h2
+              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              {t('report.section.packingList')}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {clothingItems.map((item) => {
+                const itemProduct = disclosure ? findItemProduct(item.icon) : undefined
+                const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
+                return (
+                  <ClothingItemCard
+                    key={item.id}
+                    item={item}
+                    productLink={
+                      itemProduct && shop && disclosure ? (
+                        <InlineProductLink
+                          product={itemProduct}
+                          shop={shop}
+                          disclosure={disclosure}
+                          onProductClick={onProductClick}
+                        />
+                      ) : undefined
+                    }
+                  />
+                )
+              })}
+            </div>
+          </section>
+
+          {/* Merged equipment */}
+          <section>
+            <h2
+              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              {t('report.section.equipment')}
+            </h2>
+            <EquipmentList items={equipmentItems} />
+          </section>
+        </div>
+      )}
+
+      {/* --- SINGLE-DAY LAYOUT (unchanged) --- */}
+      {!isMultiDay && activeDay && (
         <div className="space-y-6">
           {/* Weather */}
           <section>
@@ -149,7 +247,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             />
           </section>
 
-          {/* Clothing — Body Zone Visualizer */}
+          {/* Clothing */}
           <section>
             <h2
               className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
@@ -191,7 +289,6 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             </h2>
             <EquipmentList items={activeDay.equipment} />
           </section>
-
         </div>
       )}
     </div>

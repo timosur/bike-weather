@@ -23,7 +23,7 @@ export default function RoutesPage() {
 
   const handleRouteSelect = useCallback(
     (routeId: string) => {
-      navigate(`/planner/${routeId}`)
+      navigate(`/report/${routeId}`)
     },
     [navigate],
   )

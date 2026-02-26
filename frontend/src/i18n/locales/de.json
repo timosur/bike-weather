@@ -42,6 +42,7 @@
       "bikeType": "Fahrradtyp",
       "intensity": "Intensität",
       "distance": "Distanz",
+      "distanceDay1": "Distanz (Tag 1)",
       "elevation": "Höhenmeter",
       "duration": "Dauer",
       "averageSpeed": "Ø Geschw.",
@@ -85,7 +86,8 @@
     "validation": {
       "locationRequired": "Bitte gib einen Startort ein",
       "dateRequired": "Datum erforderlich",
-      "timeRequired": "Uhrzeit erforderlich"
+      "timeRequired": "Uhrzeit erforderlich",
+      "distanceRequired": "Distanz ist erforderlich"
     },
     "placeholder": {
       "cityOrAddress": "Stadt oder Adresse eingeben…",
@@ -138,6 +140,7 @@
     "detecting": "Erkennung…"
   },
   "dayList": {
+    "dayLabel": "Tag {{n}}",
     "overnightStop": "Übernachtungsstopp {{n}}…",
     "addStop": "Übernachtungsstopp hinzufügen",
     "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen"
@@ -157,7 +160,8 @@
     "section": {
       "weather": "Wetter",
       "clothing": "Kleidungsempfehlung",
-      "equipment": "Checkliste"
+      "equipment": "Checkliste",
+      "packingList": "Packliste für die gesamte Tour"
     },
     "noData": {
       "heading": "Keine Fahrtdaten",
@@ -203,6 +207,11 @@
         "lightsNeeded": "Licht benötigt",
         "twilight": "Nacht / Dämmerung"
       }
+    },
+    "multiDay": {
+      "weatherTimeline": "Wetter-Zeitstrahl",
+      "allDays": "Über {{count}} Tage",
+      "worstCase": "Höchstwert über alle Tage"
     },
     "clothing": {
       "alternativeAvailable": "Alternative verfügbar",

@@ -92,12 +92,16 @@ export function RidePlanner({
 
   useEffect(() => {
     if (form.isMultiDay && form.dayStops.length > 0 && form.startDate) {
-      const calculatedEnd = addDays(form.startDate, form.dayStops.length)
+      // Use the last stop's explicit date if available, otherwise calculate from startDate
+      const lastStop = form.dayStops[form.dayStops.length - 1]
+      const calculatedEnd = lastStop.startDate
+        ? lastStop.startDate
+        : addDays(form.startDate, form.dayStops.length)
       setForm(f => ({ ...f, endDate: calculatedEnd }))
     } else if (!form.isMultiDay) {
       setForm(f => ({ ...f, endDate: null }))
     }
-  }, [form.isMultiDay, form.dayStops.length, form.startDate])
+  }, [form.isMultiDay, form.dayStops, form.startDate])
 
   // Default speed for current bike type + intensity
   const defaultSpeed = (() => {
@@ -152,6 +156,7 @@ export function RidePlanner({
     if (!form.location) errs.location = t('planner.validation.locationRequired')
     if (!form.startDate) errs.startDate = t('planner.validation.dateRequired')
     if (!form.startTime) errs.startTime = t('planner.validation.timeRequired')
+    if (!form.distanceKm || form.distanceKm <= 0) errs.distance = t('planner.validation.distanceRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -375,6 +380,97 @@ export function RidePlanner({
               </div>
             </div>
 
+            {/* Distance (mandatory) */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                {form.isMultiDay ? t('planner.label.distanceDay1') : t('planner.label.distance')} *
+              </label>
+              <div className="relative">
+                <Route
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                  strokeWidth={1.5}
+                />
+                <input
+                  type="number"
+                  min="1"
+                  max="999"
+                  value={form.distanceKm ?? ''}
+                  onChange={e =>
+                    setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
+                  }
+                  placeholder={t('planner.placeholder.egDistance')}
+                  className={`${inputBase} pl-9 pr-12 ${errors.distance ? inputError : inputNormal}`}
+                />
+                <span
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                  style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                >
+                  km
+                </span>
+              </div>
+              {errors.distance && (
+                <p className="text-[10px] text-red-500 dark:text-red-400">{errors.distance}</p>
+              )}
+            </div>
+
+            {/* Multi-day toggle */}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setForm(f => ({
+                    ...f,
+                    isMultiDay: !f.isMultiDay,
+                    endDate: f.isMultiDay ? null : f.endDate,
+                    dayStops: f.isMultiDay ? [] : f.dayStops,
+                  }))
+                }
+                className="flex items-center gap-2.5 text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
+              >
+                <div
+                  className={`relative w-8 h-[18px] rounded-full transition-colors ${form.isMultiDay ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-700'
+                    }`}
+                >
+                  <div
+                    className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-all ${form.isMultiDay ? 'left-[18px]' : 'left-[2px]'
+                      }`}
+                  />
+                </div>
+                {t('planner.label.multiDayTour')}
+              </button>
+
+              {form.isMultiDay && (
+                <div className="space-y-3">
+                  {form.endDate && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-500" strokeWidth={1.5} />
+                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                        {t('planner.label.endDate', { date: new Date(form.endDate).toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }) })}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                      {t('planner.label.overnightLocations')}
+                    </label>
+                    <DayLocationList
+                      startLocation={form.location}
+                      startDate={form.startDate}
+                      startTime={form.startTime}
+                      dayStops={form.dayStops}
+                      suggestions={dayStopLocationSuggestions}
+                      onStopSearch={onDayStopLocationSearch}
+                      onChange={(dayStops: DayStop[]) => setForm(f => ({ ...f, dayStops }))}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-stone-100 dark:border-stone-800" />
+
             {/* Advanced Options */}
             <div className="space-y-3">
               <button
@@ -391,55 +487,28 @@ export function RidePlanner({
 
               {showAdvanced && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                        {t('planner.label.distance')}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="1"
-                          max="999"
-                          value={form.distanceKm ?? ''}
-                          onChange={e =>
-                            setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
-                          }
-                          placeholder={t('planner.placeholder.egDistance')}
-                          className={`${inputBase} pl-4 pr-12 ${inputNormal}`}
-                        />
-                        <span
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
-                          style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-                        >
-                          km
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                        {t('planner.label.elevation')}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="0"
-                          max="9999"
-                          value={form.elevationMeters ?? ''}
-                          onChange={e =>
-                            setForm(f => ({ ...f, elevationMeters: e.target.value ? Number(e.target.value) : null }))
-                          }
-                          placeholder={t('planner.placeholder.egElevation')}
-                          className={`${inputBase} pl-4 pr-10 ${inputNormal}`}
-                        />
-                        <span
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
-                          style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-                        >
-                          hm
-                        </span>
-                      </div>
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                      {t('planner.label.elevation')}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        max="9999"
+                        value={form.elevationMeters ?? ''}
+                        onChange={e =>
+                          setForm(f => ({ ...f, elevationMeters: e.target.value ? Number(e.target.value) : null }))
+                        }
+                        placeholder={t('planner.placeholder.egElevation')}
+                        className={`${inputBase} pl-4 pr-10 ${inputNormal}`}
+                      />
+                      <span
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                        style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                      >
+                        hm
+                      </span>
                     </div>
                   </div>
 
@@ -541,62 +610,6 @@ export function RidePlanner({
                         {t('planner.durationReset')}
                       </button>
                     )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-stone-100 dark:border-stone-800" />
-
-            {/* Multi-day toggle */}
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setForm(f => ({
-                    ...f,
-                    isMultiDay: !f.isMultiDay,
-                    endDate: f.isMultiDay ? null : f.endDate,
-                    dayStops: f.isMultiDay ? [] : f.dayStops,
-                  }))
-                }
-                className="flex items-center gap-2.5 text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
-              >
-                <div
-                  className={`relative w-8 h-[18px] rounded-full transition-colors ${form.isMultiDay ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-700'
-                    }`}
-                >
-                  <div
-                    className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-all ${form.isMultiDay ? 'left-[18px]' : 'left-[2px]'
-                      }`}
-                  />
-                </div>
-                {t('planner.label.multiDayTour')}
-              </button>
-
-              {form.isMultiDay && (
-                <div className="space-y-3">
-                  {form.endDate && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
-                      <Calendar className="w-3.5 h-3.5 text-emerald-500" strokeWidth={1.5} />
-                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                        {t('planner.label.endDate', { date: new Date(form.endDate).toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }) })}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      {t('planner.label.overnightLocations')}
-                    </label>
-                    <DayLocationList
-                      startLocation={form.location}
-                      dayStops={form.dayStops}
-                      suggestions={dayStopLocationSuggestions}
-                      onStopSearch={onDayStopLocationSearch}
-                      onChange={(dayStops: DayStop[]) => setForm(f => ({ ...f, dayStops }))}
-                    />
                   </div>
                 </div>
               )}
