@@ -38,6 +38,10 @@ export default function PlannerPage() {
   // Submission state for loading indicator
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Edit mode state (for routes with stored rideInput)
+  const [editRouteId, setEditRouteId] = useState<string | null>(null)
+  const [editOriginalInput, setEditOriginalInput] = useState<RideInput | null>(null)
+
   // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
   const THROTTLE_THRESHOLD = 3
   const THROTTLE_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
@@ -91,6 +95,9 @@ export default function PlannerPage() {
       clearFormState()
       clearSuggestions()
       clearDetectedLocation()
+      // Also clear edit mode on reset
+      setEditRouteId(null)
+      setEditOriginalInput(null)
       setResetKey(k => k + 1)
       // Clear the state so refresh doesn't re-trigger reset
       window.history.replaceState({}, '')
@@ -98,12 +105,21 @@ export default function PlannerPage() {
   }, [shouldReset, clearFormState, clearSuggestions, clearDetectedLocation])
 
   // Submit handler - navigates to /report with input
-  const doSubmit = useCallback((input: RideInput, routeId?: string) => {
+  const doSubmit = useCallback((input: RideInput, routeId?: string, originalInput?: RideInput) => {
     setIsSubmitting(true)
     saveFormState(input)
-    // Navigate to report page with the input (history is added there after fetch succeeds)
-    navigate('/report', { state: { input, routeId } })
-  }, [navigate, saveFormState])
+    // Navigate to report page with the input
+    // Pass originalInput for change detection when editing an existing route
+    const targetRouteId = routeId ?? editRouteId
+    const targetPath = targetRouteId ? `/report/${targetRouteId}` : '/report'
+    navigate(targetPath, {
+      state: {
+        input,
+        routeId: targetRouteId,
+        originalInput: originalInput ?? editOriginalInput,
+      }
+    })
+  }, [navigate, saveFormState, editRouteId, editOriginalInput])
 
   const handleSubmit = (input: RideInput) => {
     const now = Date.now()
@@ -145,22 +161,31 @@ export default function PlannerPage() {
     urlRouteLoading.current = true
     fetchRoute(urlRouteId)
       .then((route) => {
-        const today = new Date().toISOString().slice(0, 10)
-        const now = new Date()
-        const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-        const input: RideInput = {
-          location: { address: route.startLocation },
-          startDate: today,
-          startTime,
-          endDate: null,
-          isMultiDay: false,
-          bikeType: 'rennrad',
-          intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
-          distanceKm: route.totalDistance,
-          dayStops: [],
+        // If route has stored rideInput, enter edit mode (don't auto-submit)
+        if (route.rideInput) {
+          setEditRouteId(urlRouteId)
+          setEditOriginalInput(route.rideInput)
+          setUrlRouteInput(route.rideInput)
+          // Don't auto-submit — user will see the form and can modify before submitting
+        } else {
+          // Legacy route without rideInput: reconstruct minimal input and auto-submit
+          const today = new Date().toISOString().slice(0, 10)
+          const now = new Date()
+          const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+          const input: RideInput = {
+            location: { address: route.startLocation },
+            startDate: today,
+            startTime,
+            endDate: null,
+            isMultiDay: false,
+            bikeType: 'rennrad',
+            intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
+            distanceKm: route.totalDistance,
+            dayStops: [],
+          }
+          setUrlRouteInput(input)
+          doSubmit(input, urlRouteId)
         }
-        setUrlRouteInput(input)
-        doSubmit(input, urlRouteId)
       })
       .catch(() => {
         // Route not found or auth error — redirect to plain planner
@@ -173,12 +198,9 @@ export default function PlannerPage() {
     doSubmit(entry.rideInput)
   }
 
-  const handleNavigateToLogin = () => {
-    navigate('/login', { state: { from: '/planner' } })
-  }
-
   // Determine initial values for the planner
   const getInitialValues = (): Partial<RideInput> | undefined => {
+    if (editOriginalInput) return editOriginalInput  // edit mode uses stored rideInput
     if (incomingPrefillInput) return incomingPrefillInput
     if (incomingRideInput) return incomingRideInput
     if (urlRouteInput) return urlRouteInput
@@ -189,6 +211,7 @@ export default function PlannerPage() {
 
   // Determine formSource for the info banner
   const getFormSource = (): 'restored' | 'route' | 'history' | null => {
+    if (editRouteId) return 'route'  // edit mode shows as route source
     if (incomingPrefillInput) return 'history'
     if (incomingRideInput && incomingRouteId) return 'route'
     if (urlRouteId) return 'route'
@@ -202,6 +225,9 @@ export default function PlannerPage() {
     clearFormState()
     clearSuggestions()
     clearDetectedLocation()
+    // Clear edit mode
+    setEditRouteId(null)
+    setEditOriginalInput(null)
     // Navigate to clean planner URL (removes routeId from path)
     navigate('/planner', { replace: true, state: { reset: true } })
     // Increment reset key to force RidePlanner remount with fresh defaults
@@ -231,7 +257,7 @@ export default function PlannerPage() {
 
       {/* Planner form with recent rides inside */}
       <RidePlanner
-        key={`form-${detectKeyRef.current}-${resetKey}`}
+        key={`form-${detectKeyRef.current}-${resetKey}-${editRouteId ?? ''}`}
         initialValues={resetKey > 0 ? (detectedLocation ? { location: detectedLocation } : undefined) : getInitialValues()}
         locationSuggestions={suggestions}
         dayStopLocationSuggestions={dayStopSuggestions}
@@ -254,7 +280,6 @@ export default function PlannerPage() {
             onSelect={handleHistorySelect}
             onRemove={removeEntry}
             onClear={clearHistory}
-            onNavigateToLogin={handleNavigateToLogin}
           />
         )}
         {showPlannerCaptcha && (

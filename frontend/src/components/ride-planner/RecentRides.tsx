@@ -1,18 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Calendar, Bike, Trash2, BookmarkPlus, Check, Loader2, LogIn, ChevronDown, History } from 'lucide-react'
+import { MapPin, Calendar, Bike, Trash2, ChevronDown, History } from 'lucide-react'
 import type { RideHistoryEntry } from '../../hooks/useRideHistory'
 import type { ConditionRating } from '../ride-report/types'
-import { useAuth } from '../../contexts/AuthContext'
-import { createRoute } from '../../api/routes'
-import { useToast } from '../../hooks/useToast'
 
 interface RecentRidesProps {
   history: RideHistoryEntry[]
   onSelect: (entry: RideHistoryEntry) => void
   onRemove: (id: string) => void
   onClear: () => void
-  onNavigateToLogin: () => void
 }
 
 const conditionColors: Record<ConditionRating, string> = {
@@ -26,20 +22,12 @@ function RideCard({
   entry,
   onSelect,
   onRemove,
-  onSaveRoute,
-  onNavigateToLogin,
-  saveState,
-  isAuthenticated,
   formatDate,
   t,
 }: {
   entry: RideHistoryEntry
   onSelect: (entry: RideHistoryEntry) => void
   onRemove: (id: string) => void
-  onSaveRoute: (entry: RideHistoryEntry, e: React.MouseEvent) => void
-  onNavigateToLogin: () => void
-  saveState: 'idle' | 'saving' | 'saved'
-  isAuthenticated: boolean
   formatDate: (ts: number) => string
   t: (key: string) => string
 }) {
@@ -75,85 +63,25 @@ function RideCard({
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${conditionColors[condition]}`}>
             {t(`report.condition.${condition === 'not-recommended' ? 'notRecommended' : condition}`)}
           </span>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onRemove(entry.id) }}
+            className="text-stone-300 dark:text-stone-600 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+            title={t('common.remove')}
+          >
+            <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+          </button>
         </div>
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone-100 dark:border-stone-800">
-        {isAuthenticated ? (
-          <button
-            type="button"
-            onClick={(e) => onSaveRoute(entry, e)}
-            disabled={saveState !== 'idle'}
-            className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${saveState === 'saved'
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : saveState === 'saving'
-                  ? 'text-stone-400 dark:text-stone-500'
-                  : 'text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400'
-              }`}
-          >
-            {saveState === 'saving' && <Loader2 className="w-3.5 h-3.5 animate-spin" strokeWidth={2} />}
-            {saveState === 'saved' && <Check className="w-3.5 h-3.5" strokeWidth={2} />}
-            {saveState === 'idle' && <BookmarkPlus className="w-3.5 h-3.5" strokeWidth={2} />}
-            {saveState === 'saving'
-              ? t('planner.recentRides.saving')
-              : saveState === 'saved'
-                ? t('planner.recentRides.saved')
-                : t('planner.recentRides.saveToRoutes')}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onNavigateToLogin() }}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-          >
-            <LogIn className="w-3.5 h-3.5" strokeWidth={2} />
-            {t('planner.recentRides.loginToSave')}
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onRemove(entry.id) }}
-          className="text-stone-300 dark:text-stone-600 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-          title={t('common.remove')}
-        >
-          <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
-        </button>
       </div>
     </div>
   )
 }
 
-export function RecentRides({ history, onSelect, onRemove, onClear, onNavigateToLogin }: RecentRidesProps) {
+export function RecentRides({ history, onSelect, onRemove, onClear }: RecentRidesProps) {
   const { t, i18n } = useTranslation()
-  const { isAuthenticated } = useAuth()
-  const { addToast } = useToast()
-  const [saveStates, setSaveStates] = useState<Record<string, 'idle' | 'saving' | 'saved'>>({})
   const [showAll, setShowAll] = useState(false)
 
   if (history.length === 0) return null
-
-  const handleSaveRoute = async (entry: RideHistoryEntry, e: React.MouseEvent) => {
-    e.stopPropagation()
-    const state = saveStates[entry.id]
-    if (state === 'saving' || state === 'saved') return
-
-    setSaveStates(prev => ({ ...prev, [entry.id]: 'saving' }))
-    try {
-      await createRoute({
-        name: entry.report.rideName,
-        start_location: entry.report.startLocation,
-        total_distance: entry.report.totalDistance,
-        distance_unit: entry.report.distanceUnit,
-        riding_style: entry.report.ridingStyle,
-      })
-      setSaveStates(prev => ({ ...prev, [entry.id]: 'saved' }))
-      addToast(t('report.routeSaved'), 'success')
-    } catch {
-      setSaveStates(prev => ({ ...prev, [entry.id]: 'idle' }))
-      addToast(t('report.routeSaveError'), 'error')
-    }
-  }
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString(i18n.language, {
@@ -197,10 +125,6 @@ export function RecentRides({ history, onSelect, onRemove, onClear, onNavigateTo
             entry={entry}
             onSelect={onSelect}
             onRemove={onRemove}
-            onSaveRoute={handleSaveRoute}
-            onNavigateToLogin={onNavigateToLogin}
-            saveState={saveStates[entry.id] ?? 'idle'}
-            isAuthenticated={isAuthenticated}
             formatDate={formatDate}
             t={t}
           />

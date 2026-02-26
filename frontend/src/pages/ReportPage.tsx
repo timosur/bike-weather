@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
@@ -6,7 +6,7 @@ import { useToast } from '../hooks/useToast'
 import { useAuth } from '../contexts/AuthContext'
 import { useRideHistory } from '../hooks/useRideHistory'
 import { fetchReport } from '../api/rides'
-import { createRoute, fetchRoute } from '../api/routes'
+import { createRoute, fetchRoute, updateRoute } from '../api/routes'
 import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { RideInput } from '../components/ride-planner/types'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
@@ -14,6 +14,17 @@ import type { RideReport as RideReportType } from '../components/ride-report/typ
 interface ReportLocationState {
   input: RideInput
   routeId?: string
+  originalInput?: RideInput  // For edit mode change detection
+}
+
+/** Deep comparison of RideInput for change detection (ignores captchaToken) */
+function hasInputChanged(current: RideInput, original: RideInput): boolean {
+  const normalize = (input: RideInput) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { captchaToken, ...rest } = input
+    return JSON.stringify(rest)
+  }
+  return normalize(current) !== normalize(original)
 }
 
 export default function ReportPage() {
@@ -29,6 +40,7 @@ export default function ReportPage() {
   const locationState = location.state as ReportLocationState | null
   const inputFromState = locationState?.input
   const routeIdFromState = locationState?.routeId ?? urlRouteId
+  const originalInputFromState = locationState?.originalInput
 
   // Report state
   const [report, setReport] = useState<RideReportType | null>(null)
@@ -37,7 +49,11 @@ export default function ReportPage() {
   const [submittedInput, setSubmittedInput] = useState<RideInput | null>(inputFromState ?? null)
   const [currentRouteId, setCurrentRouteId] = useState<string | undefined>(routeIdFromState)
 
-  // Save-route state
+  // Edit mode state (for save changes)
+  const [editOriginalInput, setEditOriginalInput] = useState<RideInput | null>(originalInputFromState ?? null)
+  const [saveChangesLoading, setSaveChangesLoading] = useState(false)
+
+  // Save-route state (for new routes)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(!!urlRouteId)
 
@@ -45,6 +61,12 @@ export default function ReportPage() {
   const hasFetched = useRef(false)
   const fetchIdRef = useRef(0)
   const routeLoadedRef = useRef(false)
+
+  // Detect if there are unsaved changes (edit mode)
+  const hasUnsavedChanges = useMemo(() => {
+    if (!editOriginalInput || !submittedInput) return false
+    return hasInputChanged(submittedInput, editOriginalInput)
+  }, [submittedInput, editOriginalInput])
 
   // Fetch report
   const doFetch = useCallback(async (input: RideInput, routeId?: string) => {
@@ -57,8 +79,10 @@ export default function ReportPage() {
       const result = await fetchReport(input, routeId)
       if (fetchIdRef.current !== currentFetchId) return
       setReport(result)
-      // Add to history on successful fetch
-      addEntry(input, result)
+      // Only add to history for new rides (not saved routes)
+      if (!routeId) {
+        addEntry(input, result)
+      }
     } catch (err) {
       if (fetchIdRef.current !== currentFetchId) return
       setReportError(err instanceof Error ? err.message : t('report.error.fallback'))
@@ -76,23 +100,32 @@ export default function ReportPage() {
       setReportLoading(true)
       fetchRoute(urlRouteId)
         .then((route) => {
-          const today = new Date().toISOString().slice(0, 10)
-          const now = new Date()
-          const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-          const input: RideInput = {
-            location: { address: route.startLocation },
-            startDate: today,
-            startTime,
-            endDate: null,
-            isMultiDay: false,
-            bikeType: 'rennrad',
-            intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
-            distanceKm: route.totalDistance,
-            dayStops: [],
+          // If route has stored rideInput, use that and set up edit mode
+          if (route.rideInput) {
+            setSubmittedInput(route.rideInput)
+            setEditOriginalInput(route.rideInput)
+            hasFetched.current = true
+            doFetch(route.rideInput, urlRouteId)
+          } else {
+            // Legacy route without rideInput: reconstruct minimal input
+            const today = new Date().toISOString().slice(0, 10)
+            const now = new Date()
+            const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+            const input: RideInput = {
+              location: { address: route.startLocation },
+              startDate: today,
+              startTime,
+              endDate: null,
+              isMultiDay: false,
+              bikeType: 'rennrad',
+              intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
+              distanceKm: route.totalDistance,
+              dayStops: [],
+            }
+            setSubmittedInput(input)
+            hasFetched.current = true
+            doFetch(input, urlRouteId)
           }
-          setSubmittedInput(input)
-          hasFetched.current = true
-          doFetch(input, urlRouteId)
         })
         .catch(() => {
           navigate('/planner', { replace: true })
@@ -127,7 +160,7 @@ export default function ReportPage() {
   }, [i18n, submittedInput, currentRouteId, report, doFetch])
 
   const handleSaveRoute = () => {
-    if (!report || saving || saved) return
+    if (!report || saving || saved || !submittedInput) return
     setSaving(true)
     createRoute({
       name: report.rideName,
@@ -135,10 +168,12 @@ export default function ReportPage() {
       total_distance: report.totalDistance,
       distance_unit: report.distanceUnit,
       riding_style: report.ridingStyle,
+      ride_input: submittedInput,
     })
       .then((route) => {
         setSaved(true)
         setCurrentRouteId(route.id)
+        setEditOriginalInput(submittedInput) // Now this is the original for future edits
         // Update URL to include route ID so refresh preserves data
         navigate(`/report/${route.id}`, { replace: true })
         addToast(t('report.routeSaved'), 'success')
@@ -147,6 +182,28 @@ export default function ReportPage() {
         addToast(t('report.routeSaveError'), 'error')
       })
       .finally(() => setSaving(false))
+  }
+
+  // Save changes to an existing route (edit mode)
+  const handleSaveChanges = async () => {
+    if (!currentRouteId || !submittedInput || !report || saveChangesLoading) return
+
+    setSaveChangesLoading(true)
+    try {
+      await updateRoute(currentRouteId, {
+        name: report.rideName,
+        start_location: report.startLocation,
+        total_distance: report.totalDistance,
+        riding_style: report.ridingStyle,
+        ride_input: submittedInput,
+      })
+      setEditOriginalInput(submittedInput) // Update original so change detection resets
+      addToast(t('report.changesSaved'), 'success')
+    } catch {
+      addToast(t('report.saveChangesError'), 'error')
+    } finally {
+      setSaveChangesLoading(false)
+    }
   }
 
   const handleSwapClothingItem = (dayId: string, itemId: string, alternativeId: string) => {
@@ -196,9 +253,19 @@ export default function ReportPage() {
     }
   }
 
-  // "Plan Again" - go back to planner with same form values
-  const handlePlanAgain = () => {
-    navigate('/planner', { state: { prefillInput: submittedInput } })
+  // "Edit Ride" - go back to planner with route ID in URL
+  const handleEditRide = () => {
+    if (currentRouteId) {
+      // Navigate to planner with route ID — planner will load route and enter edit mode
+      navigate(`/planner/${currentRouteId}`)
+    } else {
+      // No saved route yet — just go back to planner with the current input
+      navigate('/planner', {
+        state: {
+          prefillInput: submittedInput,
+        }
+      })
+    }
   }
 
   // "New Ride" - go back to fresh planner
@@ -207,8 +274,11 @@ export default function ReportPage() {
   }
 
   const handleNavigateToLogin = () => {
-    navigate('/login', { state: { from: '/report' } })
+    navigate('/login', { state: { from: location.pathname } })
   }
+
+  // Determine if we're in edit mode (route exists with stored rideInput)
+  const isEditMode = !!currentRouteId && !!editOriginalInput
 
   // Early return if no input and no URL route ID - will redirect
   if (!inputFromState && !urlRouteId) {
@@ -259,7 +329,11 @@ export default function ReportPage() {
             routeSaving={saving}
             routeSaved={saved || !!currentRouteId}
             onLoginToSave={!isAuthenticated && !currentRouteId ? handleNavigateToLogin : undefined}
+            onEditRide={submittedInput ? handleEditRide : undefined}
             onNewRide={handleNewRide}
+            onSaveChanges={isEditMode && isAuthenticated ? handleSaveChanges : undefined}
+            saveChangesLoading={saveChangesLoading}
+            hasUnsavedChanges={hasUnsavedChanges}
             onSwapClothingItem={handleSwapClothingItem}
             products={sampleProducts}
             shops={shops}

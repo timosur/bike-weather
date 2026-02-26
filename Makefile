@@ -21,6 +21,15 @@ dev: db-up db-migrate ## Start PostgreSQL, run migrations, seed, launch backend 
 
 dev-stop: db-stop ## Stop the PostgreSQL dev container
 
+kill: ## Kill any running dev processes (backend on 8000, frontend on 5173)
+	@echo "Killing processes on port 8000 (backend)..."
+	-@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+	@echo "Killing processes on port 5173 (frontend)..."
+	-@lsof -ti:5173 | xargs kill -9 2>/dev/null || true
+	@echo "Killing honcho processes..."
+	-@pkill -f "honcho start" 2>/dev/null || true
+	@echo "Done."
+
 db-up: ## Start PostgreSQL + Authentik containers
 	$(COMPOSE_DEV) up -d --wait
 

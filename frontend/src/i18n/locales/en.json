@@ -81,7 +81,16 @@
     },
     "button": {
       "getWeather": "Get weather",
-      "fetchingWeather": "Fetching weather…"
+      "fetchingWeather": "Fetching weather…",
+      "saveChanges": "Save changes",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "noChanges": "No changes to save",
+      "loginToSave": "Log in to save"
+    },
+    "toast": {
+      "changesSaved": "Changes saved successfully",
+      "saveError": "Failed to save changes"
     },
     "validation": {
       "locationRequired": "Please enter a start location",
@@ -143,6 +152,7 @@
     "dayLabel": "Day {{n}}",
     "overnightStop": "Overnight stop {{n}}…",
     "addStop": "Add overnight stop",
+    "removeDay": "Remove day {{n}}",
     "ridingDays": "{{count}} riding days · Weather fetched per day at each start location"
   },
   "report": {
@@ -154,6 +164,11 @@
     "saving": "Saving…",
     "saved": "Saved",
     "loginToSave": "Log in to save",
+    "saveChanges": "Save changes",
+    "savingChanges": "Saving…",
+    "noChanges": "No changes",
+    "changesSaved": "Changes saved",
+    "saveChangesError": "Failed to save changes",
     "planAgain": "Plan again",
     "newRide": "New ride",
     "days": "{{count}} days",

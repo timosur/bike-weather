@@ -1,5 +1,6 @@
 import { apiFetch } from "./client";
 import type { SavedRoute } from "../components/my-routes/types";
+import type { RideInput } from "../components/ride-planner/types";
 
 export interface CreateRouteData {
   name: string;
@@ -7,6 +8,7 @@ export interface CreateRouteData {
   total_distance: number;
   distance_unit?: string;
   riding_style: string;
+  ride_input?: RideInput;
 }
 
 export interface UpdateRouteData {
@@ -15,6 +17,7 @@ export interface UpdateRouteData {
   total_distance?: number;
   distance_unit?: string;
   riding_style?: string;
+  ride_input?: RideInput;
 }
 
 interface SavedRouteAPI {
@@ -28,6 +31,7 @@ interface SavedRouteAPI {
   last_used: string | null;
   share_token: string | null;
   created_at: string;
+  ride_input: RideInput | null;
 }
 
 function mapRoute(r: SavedRouteAPI): SavedRoute {
@@ -42,6 +46,7 @@ function mapRoute(r: SavedRouteAPI): SavedRoute {
     lastUsed: r.last_used,
     shareToken: r.share_token,
     createdAt: r.created_at,
+    rideInput: r.ride_input,
   };
 }
 

@@ -12,6 +12,7 @@ export const sampleRoutes: SavedRoute[] = [
     lastUsed: "2026-02-20T08:30:00Z",
     shareToken: null,
     createdAt: "2026-01-15T10:00:00Z",
+    rideInput: null,
   },
   {
     id: "route-002",
@@ -24,6 +25,7 @@ export const sampleRoutes: SavedRoute[] = [
     lastUsed: "2026-02-22T07:15:00Z",
     shareToken: null,
     createdAt: "2025-11-03T09:20:00Z",
+    rideInput: null,
   },
   {
     id: "route-003",
@@ -36,6 +38,7 @@ export const sampleRoutes: SavedRoute[] = [
     lastUsed: "2026-02-10T06:45:00Z",
     shareToken: null,
     createdAt: "2026-01-28T14:10:00Z",
+    rideInput: null,
   },
   {
     id: "route-004",
@@ -48,6 +51,7 @@ export const sampleRoutes: SavedRoute[] = [
     lastUsed: "2026-01-05T09:00:00Z",
     shareToken: null,
     createdAt: "2025-12-20T16:30:00Z",
+    rideInput: null,
   },
   {
     id: "route-005",
@@ -60,6 +64,7 @@ export const sampleRoutes: SavedRoute[] = [
     lastUsed: "2026-02-18T17:00:00Z",
     shareToken: null,
     createdAt: "2026-02-01T11:45:00Z",
+    rideInput: null,
   },
   {
     id: "route-006",
@@ -72,5 +77,6 @@ export const sampleRoutes: SavedRoute[] = [
     lastUsed: null,
     shareToken: null,
     createdAt: "2026-02-22T20:00:00Z",
+    rideInput: null,
   },
 ];

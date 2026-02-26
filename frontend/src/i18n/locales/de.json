@@ -81,7 +81,16 @@
     },
     "button": {
       "getWeather": "Wetter abrufen",
-      "fetchingWeather": "Wetter wird abgerufen…"
+      "fetchingWeather": "Wetter wird abgerufen…",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Speichern…",
+      "saved": "Gespeichert",
+      "noChanges": "Keine Änderungen",
+      "loginToSave": "Anmelden zum Speichern"
+    },
+    "toast": {
+      "changesSaved": "Änderungen erfolgreich gespeichert",
+      "saveError": "Speichern fehlgeschlagen"
     },
     "validation": {
       "locationRequired": "Bitte gib einen Startort ein",
@@ -143,6 +152,7 @@
     "dayLabel": "Tag {{n}}",
     "overnightStop": "Übernachtungsstopp {{n}}…",
     "addStop": "Übernachtungsstopp hinzufügen",
+    "removeDay": "Tag {{n}} entfernen",
     "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen"
   },
   "report": {
@@ -154,6 +164,11 @@
     "saving": "Speichern…",
     "saved": "Gespeichert",
     "loginToSave": "Anmelden zum Speichern",
+    "saveChanges": "Änderungen speichern",
+    "savingChanges": "Speichern…",
+    "noChanges": "Keine Änderungen",
+    "changesSaved": "Änderungen gespeichert",
+    "saveChangesError": "Änderungen konnten nicht gespeichert werden",
     "planAgain": "Neu planen",
     "newRide": "Neue Fahrt",
     "days": "{{count}} Tage",

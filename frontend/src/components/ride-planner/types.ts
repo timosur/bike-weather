@@ -79,6 +79,14 @@ export interface ValidationErrors {
   intensity: string | null;
 }
 
+/** Edit mode configuration for RidePlanner */
+export interface EditModeConfig {
+  /** Route ID being edited */
+  routeId: string;
+  /** Original saved RideInput for change detection */
+  originalInput: RideInput;
+}
+
 export interface RidePlannerProps {
   /** Initial form values, e.g. pre-filled from a saved route */
   initialValues?: Partial<RideInput>;

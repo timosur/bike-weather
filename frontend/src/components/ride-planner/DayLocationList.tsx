@@ -1,4 +1,4 @@
-import { Plus, Calendar, Clock } from 'lucide-react'
+import { Plus, Minus, Calendar, Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { RideLocation, DayStop, LocationSuggestion } from './types'
 import { LocationPicker } from './LocationPicker'
@@ -136,15 +136,6 @@ export function DayLocationList({
                   hideLocate
                 />
               </div>
-              {stop.location.address && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="mt-1.5 p-1.5 rounded-lg text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-xs font-medium shrink-0"
-                >
-                  {t('common.remove')}
-                </button>
-              )}
             </div>
 
             {/* Date, Time, km row */}
@@ -172,7 +163,7 @@ export function DayLocationList({
                   type="time"
                   value={stop.startTime ?? '08:00'}
                   onChange={e => handleTimeChange(index, e.target.value)}
-                  className="w-[90px] rounded-lg text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-1.5 pl-7 pr-2"
+                  className="w-[110px] rounded-lg text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-1.5 pl-7 pr-2"
                 />
               </div>
               {/* km */}
@@ -194,6 +185,16 @@ export function DayLocationList({
                 </span>
               </div>
             </div>
+
+            {/* Remove day button */}
+            <button
+              type="button"
+              onClick={() => handleRemove(index)}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+            >
+              <Minus className="w-3 h-3" strokeWidth={2.5} />
+              {t('dayList.removeDay', { n: index + 2 })}
+            </button>
           </div>
         </div>
       ))}

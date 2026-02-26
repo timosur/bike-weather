@@ -130,8 +130,14 @@ export interface RideReportProps {
   routeSaved?: boolean;
   /** Called when unauthenticated user clicks save — navigates to login */
   onLoginToSave?: () => void;
-  /** Called when the user wants to edit the ride / plan again */
-  onPlanAgain?: () => void;
+  /** Called when user saves changes to an existing route (edit mode) */
+  onSaveChanges?: () => void;
+  /** Whether save changes is in progress */
+  saveChangesLoading?: boolean;
+  /** Whether there are unsaved changes (for edit mode) */
+  hasUnsavedChanges?: boolean;
+  /** Called when the user wants to edit the ride input and return to planner */
+  onEditRide?: () => void;
   /** Called when the user wants to start a completely new ride */
   onNewRide?: () => void;
   onDaySelect?: (dayId: string) => void;

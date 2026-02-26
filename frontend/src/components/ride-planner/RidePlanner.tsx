@@ -228,7 +228,7 @@ export function RidePlanner({
 
         {/* Quick presets */}
         {quickPresets.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             {quickPresets.map(preset => (
               <button
                 key={preset.id}
@@ -272,7 +272,7 @@ export function RidePlanner({
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {t('planner.label.departure')}
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="relative">
                   <Calendar
                     className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
@@ -299,6 +299,39 @@ export function RidePlanner({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Distance (mandatory) */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                {form.isMultiDay ? t('planner.label.distanceDay1') : t('planner.label.distance')} *
+              </label>
+              <div className="relative">
+                <Route
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                  strokeWidth={1.5}
+                />
+                <input
+                  type="number"
+                  min="1"
+                  max="999"
+                  value={form.distanceKm ?? ''}
+                  onChange={e =>
+                    setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
+                  }
+                  placeholder={t('planner.placeholder.egDistance')}
+                  className={`${inputBase} pl-9 pr-12 ${errors.distance ? inputError : inputNormal}`}
+                />
+                <span
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                  style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                >
+                  km
+                </span>
+              </div>
+              {errors.distance && (
+                <p className="text-[10px] text-red-500 dark:text-red-400">{errors.distance}</p>
+              )}
             </div>
 
             {/* Bike Type */}
@@ -378,39 +411,6 @@ export function RidePlanner({
                   )
                 })}
               </div>
-            </div>
-
-            {/* Distance (mandatory) */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                {form.isMultiDay ? t('planner.label.distanceDay1') : t('planner.label.distance')} *
-              </label>
-              <div className="relative">
-                <Route
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
-                  strokeWidth={1.5}
-                />
-                <input
-                  type="number"
-                  min="1"
-                  max="999"
-                  value={form.distanceKm ?? ''}
-                  onChange={e =>
-                    setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
-                  }
-                  placeholder={t('planner.placeholder.egDistance')}
-                  className={`${inputBase} pl-9 pr-12 ${errors.distance ? inputError : inputNormal}`}
-                />
-                <span
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
-                  style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-                >
-                  km
-                </span>
-              </div>
-              {errors.distance && (
-                <p className="text-[10px] text-red-500 dark:text-red-400">{errors.distance}</p>
-              )}
             </div>
 
             {/* Multi-day toggle */}
@@ -617,7 +617,7 @@ export function RidePlanner({
           </div>
 
           {/* Submit */}
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 space-y-3">
             <button
               type="submit"
               disabled={isLoading}

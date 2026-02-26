@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route, PenLine, Plus } from 'lucide-react'
+import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route, PenLine, Plus, Save, Check, Loader2 } from 'lucide-react'
 import type { RideReportProps } from './types'
 import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
@@ -12,7 +12,7 @@ import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
-export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onPlanAgain, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
+export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
   const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
   const chartScrollRef = useRef<HTMLDivElement | null>(null)
@@ -95,13 +95,41 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {onPlanAgain && (
+          {onEditRide && (
             <button
-              onClick={onPlanAgain}
+              onClick={onEditRide}
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
             >
               <PenLine className="w-4 h-4" strokeWidth={1.5} />
-              <span className="hidden sm:inline">{t('report.planAgain')}</span>
+              <span className="hidden sm:inline">{t('planner.editRide')}</span>
+            </button>
+          )}
+          {/* Save Changes button for edit mode */}
+          {onSaveChanges && (
+            <button
+              onClick={onSaveChanges}
+              disabled={saveChangesLoading || !hasUnsavedChanges}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!hasUnsavedChanges
+                  ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
+                  : saveChangesLoading
+                    ? 'text-white bg-emerald-600/70 cursor-wait'
+                    : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                }`}
+            >
+              {saveChangesLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
+              ) : hasUnsavedChanges ? (
+                <Save className="w-4 h-4" strokeWidth={1.5} />
+              ) : (
+                <Check className="w-4 h-4" strokeWidth={1.5} />
+              )}
+              <span className="hidden sm:inline">
+                {saveChangesLoading
+                  ? t('report.savingChanges')
+                  : hasUnsavedChanges
+                    ? t('report.saveChanges')
+                    : t('report.noChanges')}
+              </span>
             </button>
           )}
           {onNewRide && (

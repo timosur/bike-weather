@@ -1,3 +1,5 @@
+import type { RideInput } from "../ride-planner/types";
+
 /** Overall ride condition rating from the last Ride Report */
 export type ConditionRating = "ideal" | "good" | "caution" | "not-recommended";
 
@@ -19,6 +21,8 @@ export interface SavedRoute {
   shareToken: string | null;
   /** ISO timestamp when the route was saved */
   createdAt: string;
+  /** Full RideInput for edit functionality, null for legacy routes */
+  rideInput: RideInput | null;
 }
 
 export interface MyRoutesProps {
