@@ -19,7 +19,7 @@ import type { RideHistoryEntry } from '../hooks/useRideHistory'
 export default function PlannerPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { addToast } = useToast()
   const { isAuthenticated } = useAuth()
 
@@ -154,6 +154,17 @@ export default function PlannerPage() {
       window.history.replaceState({}, '')
     }
   }, [incomingRideInput, incomingRouteId, doSubmit])
+
+  // Re-fetch report when language changes so backend-provided strings update
+  useEffect(() => {
+    const handleLanguageChanged = () => {
+      if (submittedInput && report) {
+        doSubmit(submittedInput, currentRouteId)
+      }
+    }
+    i18n.on('languageChanged', handleLanguageChanged)
+    return () => { i18n.off('languageChanged', handleLanguageChanged) }
+  }, [i18n, submittedInput, currentRouteId, report, doSubmit])
 
   // Report action handlers
   const handleShare = () => {

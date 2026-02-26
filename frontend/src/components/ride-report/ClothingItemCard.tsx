@@ -1,114 +1,90 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
-  ArrowLeftRight,
-  Glasses,
-  Shirt,
-  Hand,
-  Footprints,
-  ShieldCheck,
+  CircleDashed,
   CloudRain,
+  Droplets,
+  Eye,
+  Footprints,
+  Glasses,
+  Hand,
+  HandMetal,
+  HardHat,
+  Layers,
+  PersonStanding,
+  ShieldCheck,
+  ShieldHalf,
+  ShieldPlus,
+  Shirt,
+  ThermometerSnowflake,
+  ThermometerSun,
+  Umbrella,
+  Waves,
 } from 'lucide-react'
 import type { ClothingItem, ClothingIcon } from './types'
 
 function ClothingIconEl({ icon, className }: { icon: ClothingIcon; className?: string }) {
   const cls = className ?? 'w-5 h-5'
+  const sw = 1.5
 
   switch (icon) {
     case 'headband':
+      return <CircleDashed className={cls} strokeWidth={sw} />
     case 'helmet-cover':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2a8 8 0 0 0-8 8v1h16v-1a8 8 0 0 0-8-8Z" />
-          <path d="M4 11v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" />
-        </svg>
-      )
+      return <HardHat className={cls} strokeWidth={sw} />
     case 'sunglasses':
+      return <Glasses className={cls} strokeWidth={sw} />
     case 'glasses':
-      return <Glasses className={cls} strokeWidth={1.5} />
+      return <Eye className={cls} strokeWidth={sw} />
     case 'base-layer':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M8 2v4l-4 2v6h16v-6l-4-2V2" />
-          <path d="M8 2h8" />
-          <path d="M4 14v6h16v-6" />
-        </svg>
-      )
+      return <Layers className={cls} strokeWidth={sw} />
     case 'jersey':
     case 'jersey-long':
-      return <Shirt className={cls} strokeWidth={1.5} />
+      return <Shirt className={cls} strokeWidth={sw} />
     case 'vest':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H10L6 6v14h12V6l-4-4Z" />
-          <path d="M10 2v4" />
-          <path d="M14 2v4" />
-        </svg>
-      )
+      return <ShieldHalf className={cls} strokeWidth={sw} />
     case 'jacket':
+      return <ShieldCheck className={cls} strokeWidth={sw} />
     case 'rain-jacket':
-      return icon === 'rain-jacket' ? (
-        <CloudRain className={cls} strokeWidth={1.5} />
-      ) : (
-        <ShieldCheck className={cls} strokeWidth={1.5} />
-      )
+      return <CloudRain className={cls} strokeWidth={sw} />
     case 'arm-warmers':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M7 4h4v16H7z" />
-          <path d="M13 4h4v16h-4z" />
-          <path d="M7 10h4" />
-          <path d="M13 10h4" />
-        </svg>
-      )
+      return <ThermometerSun className={cls} strokeWidth={sw} />
     case 'pants-short':
     case 'pants-long':
-    case 'overpants':
+      return <PersonStanding className={cls} strokeWidth={sw} />
     case 'leg-warmers':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d={icon === 'pants-short' || icon === 'leg-warmers'
-            ? 'M6 4h12l-1 8h-2l-1 2h-4l-1-2H7z'
-            : 'M6 4h12l-1 8h-2l-1 8h-4l-1-8H7z'
-          } />
-        </svg>
-      )
+      return <ThermometerSnowflake className={cls} strokeWidth={sw} />
+    case 'overpants':
+      return <ShieldPlus className={cls} strokeWidth={sw} />
     case 'gloves-light':
+      return <Hand className={cls} strokeWidth={sw} />
     case 'gloves-warm':
+      return <HandMetal className={cls} strokeWidth={sw} />
     case 'gloves-waterproof':
-      return <Hand className={cls} strokeWidth={1.5} />
+      return <Droplets className={cls} strokeWidth={sw} />
     case 'shoes':
+      return <Footprints className={cls} strokeWidth={sw} />
     case 'shoe-covers':
-      return <Footprints className={cls} strokeWidth={1.5} />
+      return <Umbrella className={cls} strokeWidth={sw} />
     case 'socks':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M8 2v8l-3 4a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4l-3-4V2" />
-          <path d="M8 10h8" />
-        </svg>
-      )
+      return <Footprints className={cls} strokeWidth={sw} />
     default:
-      return <Shirt className={cls} strokeWidth={1.5} />
+      return <Shirt className={cls} strokeWidth={sw} />
   }
 }
 
 interface ClothingItemCardProps {
   item: ClothingItem
   productLink?: React.ReactNode
-  onSwap?: (alternativeId: string) => void
 }
 
-export function ClothingItemCard({ item, productLink, onSwap }: ClothingItemCardProps) {
-  const { t } = useTranslation()
-  const [showAlts, setShowAlts] = useState(false)
+export function ClothingItemCard({ item, productLink }: ClothingItemCardProps) {
   const hasAlternatives = item.alternatives && item.alternatives.length > 0
 
   return (
     <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-4 flex flex-col gap-2.5">
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-          <ClothingIconEl icon={item.icon} className="w-5 h-5" />
+        <div className="w-14 h-14 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+          <ClothingIconEl icon={item.icon} className="w-8 h-8" />
         </div>
 
         {/* Name + Reason */}
@@ -124,47 +100,18 @@ export function ClothingItemCard({ item, productLink, onSwap }: ClothingItemCard
         </div>
       </div>
 
-      {/* Swap button */}
-      {hasAlternatives && !showAlts && (
-        <button
-          type="button"
-          onClick={() => setShowAlts(true)}
-          className="self-start ml-13 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border-2 border-dashed border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 hover:border-amber-400 dark:hover:border-amber-500 transition-all"
-        >
-          <ArrowLeftRight className="w-3.5 h-3.5" strokeWidth={2} />
-          {t('report.clothing.alternativeAvailable')}
-        </button>
-      )}
-
-      {/* Alternatives expanded */}
-      {showAlts && hasAlternatives && (
-        <div className="ml-13 space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-            {t('report.clothing.swapFor')}
-          </p>
+      {/* Alternatives */}
+      {hasAlternatives && (
+        <div className="ml-[4.25rem] flex flex-wrap gap-1.5">
           {item.alternatives!.map((alt) => (
-            <button
+            <div
               key={alt.id}
-              type="button"
-              onClick={() => {
-                onSwap?.(alt.id)
-                setShowAlts(false)
-              }}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-sm font-medium border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:text-emerald-700 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700"
             >
-              <div className="w-7 h-7 rounded-md bg-stone-100 dark:bg-stone-700 flex items-center justify-center shrink-0">
-                <ClothingIconEl icon={alt.icon} className="w-3.5 h-3.5" />
-              </div>
+              <ClothingIconEl icon={alt.icon} className="w-3.5 h-3.5" />
               <span>{alt.name}</span>
-            </button>
+            </div>
           ))}
-          <button
-            type="button"
-            onClick={() => setShowAlts(false)}
-            className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
-          >
-            {t('report.clothing.cancel')}
-          </button>
         </div>
       )}
 

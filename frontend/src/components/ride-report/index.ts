@@ -6,4 +6,4 @@ export { ClothingItemCard } from "./ClothingItemCard";
 export { EquipmentList } from "./EquipmentList";
 export { DayTabs } from "./DayTabs";
 export { RideReportSkeleton } from "./RideReportSkeleton";
-export { BodyZoneVisualizer } from "./BodyZoneVisualizer";
+

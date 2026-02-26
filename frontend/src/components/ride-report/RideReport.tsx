@@ -7,7 +7,8 @@ import { ConditionBadge } from './ConditionBadge'
 import { DayTabs } from './DayTabs'
 import { WeatherPanel } from './WeatherPanel'
 import { EquipmentList } from './EquipmentList'
-import { BodyZoneVisualizer } from './BodyZoneVisualizer'
+import { ClothingItemCard } from './ClothingItemCard'
+import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
 export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onPlanAgain, onNewRide, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
@@ -20,8 +21,8 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
     [shops],
   )
 
-  function findItemProduct(itemName: string): Product | undefined {
-    return products?.find((p) => p.matchesLabel === itemName)
+  function findItemProduct(itemIcon: string): Product | undefined {
+    return products?.find((p) => p.matchesIcon === itemIcon)
   }
 
   function handleDaySelect(dayId: string) {
@@ -142,16 +143,27 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             >
               {t('report.section.clothing')}
             </h2>
-            <div className="rounded-2xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-4 sm:p-6">
-              <BodyZoneVisualizer
-                clothingItems={activeDay.clothingItems}
-                onSwap={(itemId, altId) => onSwapClothingItem?.(activeDay.id, itemId, altId)}
-                products={products}
-                shopMap={shopMap}
-                disclosure={disclosure}
-                findItemProduct={findItemProduct}
-                onProductClick={onProductClick}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {activeDay.clothingItems.map((item) => {
+                const itemProduct = disclosure ? findItemProduct(item.icon) : undefined
+                const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
+                return (
+                  <ClothingItemCard
+                    key={item.id}
+                    item={item}
+                    productLink={
+                      itemProduct && shop && disclosure ? (
+                        <InlineProductLink
+                          product={itemProduct}
+                          shop={shop}
+                          disclosure={disclosure}
+                          onProductClick={onProductClick}
+                        />
+                      ) : undefined
+                    }
+                  />
+                )
+              })}
             </div>
           </section>
 

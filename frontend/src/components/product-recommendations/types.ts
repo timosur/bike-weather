@@ -57,6 +57,7 @@ export interface Product {
   affiliateUrl: string;
   matchesZone: ClothingZoneId | null;
   matchesLabel: string;
+  matchesIcon?: string;
   weather: WeatherSuitability;
 }
 

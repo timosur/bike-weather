@@ -32,6 +32,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B07XYZ1234?tag=bikeweather-21',
     matchesZone: 'upperBody',
     matchesLabel: 'Waterproof Cycling Jacket',
+    matchesIcon: 'rain-jacket',
     weather: { tempRange: { min: -5, max: 15, unit: '°C' }, precipitation: 'heavy-rain', wind: 'strong-wind', summary: '-5–15 °C, waterproof, windproof' },
   },
   {
@@ -45,6 +46,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B09ABC5678?tag=bikeweather-21',
     matchesZone: 'upperBody',
     matchesLabel: 'Long-sleeve Cycling Jersey',
+    matchesIcon: 'jersey-long',
     weather: { tempRange: { min: 8, max: 18, unit: '°C' }, precipitation: 'light-rain', wind: 'strong-wind', summary: '8–18 °C, water-resistant, windproof' },
   },
   {
@@ -58,6 +60,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B08DEF9012?tag=bikeweather-21',
     matchesZone: 'hands',
     matchesLabel: 'Waterproof Winter Gloves',
+    matchesIcon: 'gloves-waterproof',
     weather: { tempRange: { min: -10, max: 5, unit: '°C' }, precipitation: 'heavy-rain', wind: 'strong-wind', summary: '-10–5 °C, waterproof, windproof' },
   },
   {
@@ -71,6 +74,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B07GHI3456?tag=bikeweather-21',
     matchesZone: 'hands',
     matchesLabel: 'Light Cycling Gloves',
+    matchesIcon: 'gloves-light',
     weather: { tempRange: { min: 15, max: 35, unit: '°C' }, precipitation: 'none', wind: 'none', summary: '15–35 °C, dry, padding & grip' },
   },
   {
@@ -84,6 +88,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B09JKL7890?tag=bikeweather-21',
     matchesZone: 'lowerBody',
     matchesLabel: 'Thermal Cycling Tights',
+    matchesIcon: 'pants-long',
     weather: { tempRange: { min: -5, max: 10, unit: '°C' }, precipitation: 'light-rain', wind: 'light-wind', summary: '-5–10 °C, light water-resistance, thermal lining' },
   },
   {
@@ -97,6 +102,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B08MNO1234?tag=bikeweather-21',
     matchesZone: null,
     matchesLabel: 'Bike Lights (front + rear)',
+    matchesIcon: undefined,
     weather: { tempRange: null, precipitation: 'heavy-rain', wind: 'none', summary: 'All temperatures, weatherproof, IPX4' },
   },
   {
@@ -110,6 +116,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B06PQR5678?tag=bikeweather-21',
     matchesZone: 'head',
     matchesLabel: 'Light Headband',
+    matchesIcon: 'headband',
     weather: { tempRange: { min: 5, max: 18, unit: '°C' }, precipitation: 'none', wind: 'light-wind', summary: '5–18 °C, light wind protection, breathable' },
   },
   {
@@ -123,6 +130,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B07STU9012?tag=bikeweather-21',
     matchesZone: 'lowerBody',
     matchesLabel: 'Waterproof Overpants',
+    matchesIcon: 'overpants',
     weather: { tempRange: { min: 0, max: 20, unit: '°C' }, precipitation: 'heavy-rain', wind: 'strong-wind', summary: '0–20 °C, waterproof, windproof, reflective' },
   },
   {
@@ -136,6 +144,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B08VWX3456?tag=bikeweather-21',
     matchesZone: 'feet',
     matchesLabel: 'Waterproof Overshoes',
+    matchesIcon: 'shoe-covers',
     weather: { tempRange: { min: -5, max: 10, unit: '°C' }, precipitation: 'heavy-rain', wind: 'strong-wind', summary: '-5–10 °C, waterproof, windproof' },
   },
   {
@@ -149,6 +158,7 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.amazon.de/dp/B01YZA7890?tag=bikeweather-21',
     matchesZone: null,
     matchesLabel: 'Dry Bag for Valuables',
+    matchesIcon: undefined,
     weather: { tempRange: null, precipitation: 'heavy-rain', wind: 'none', summary: 'All temperatures, 100% waterproof (IP67)' },
   },
 ]
