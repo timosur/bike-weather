@@ -12,3 +12,6 @@ __pycache__
 
 # Environment
 .env
+
+# e2e test results
+test-results

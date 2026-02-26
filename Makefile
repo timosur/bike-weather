@@ -66,6 +66,9 @@ test-backend: ## Run backend tests with pytest
 test-agent: ## Run agent tests with pytest
 	cd agent && uv run pytest
 
+test-frontend: ## Run frontend E2E tests with Playwright
+	cd frontend && npx playwright test
+
 build-frontend: ## Build frontend for production
 	cd frontend && npm run build
 
