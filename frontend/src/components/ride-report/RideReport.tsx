@@ -6,9 +6,8 @@ import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
 import { DayTabs } from './DayTabs'
 import { WeatherPanel } from './WeatherPanel'
-import { ClothingItemCard } from './ClothingItemCard'
 import { EquipmentList } from './EquipmentList'
-import { InlineProductLink } from '../product-recommendations/InlineProductLink'
+import { BodyZoneVisualizer } from './BodyZoneVisualizer'
 
 export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onPlanAgain, onNewRide, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
@@ -135,7 +134,7 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             />
           </section>
 
-          {/* Clothing Items */}
+          {/* Clothing — Body Zone Visualizer */}
           <section>
             <h2
               className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
@@ -143,28 +142,16 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
             >
               {t('report.section.clothing')}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {activeDay.clothingItems.map((item) => {
-                const itemProduct = disclosure ? findItemProduct(item.name) : undefined
-                const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
-                return (
-                  <ClothingItemCard
-                    key={item.id}
-                    item={item}
-                    onSwap={(altId) => onSwapClothingItem?.(activeDay.id, item.id, altId)}
-                    productLink={
-                      itemProduct && shop && disclosure ? (
-                        <InlineProductLink
-                          product={itemProduct}
-                          shop={shop}
-                          disclosure={disclosure}
-                          onProductClick={onProductClick}
-                        />
-                      ) : undefined
-                    }
-                  />
-                )
-              })}
+            <div className="rounded-2xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-4 sm:p-6">
+              <BodyZoneVisualizer
+                clothingItems={activeDay.clothingItems}
+                onSwap={(itemId, altId) => onSwapClothingItem?.(activeDay.id, itemId, altId)}
+                products={products}
+                shopMap={shopMap}
+                disclosure={disclosure}
+                findItemProduct={findItemProduct}
+                onProductClick={onProductClick}
+              />
             </div>
           </section>
 

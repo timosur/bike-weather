@@ -185,8 +185,39 @@ export default function PlannerPage() {
       .finally(() => setSaving(false))
   }
 
-  const handleSwapClothingItem = (_dayId: string, _itemId: string, _alternativeId: string) => {
-    // TODO: Implement swap logic
+  const handleSwapClothingItem = (dayId: string, itemId: string, alternativeId: string) => {
+    if (!report) return
+
+    setReport((prev) => {
+      if (!prev) return prev
+
+      const updatedDays = prev.days.map((day) => {
+        if (day.id !== dayId) return day
+
+        const updatedItems = day.clothingItems.map((item) => {
+          if (item.id !== itemId) return item
+
+          const alt = item.alternatives?.find((a) => a.id === alternativeId)
+          if (!alt) return item
+
+          // Build the swapped item: take the alternative's name/icon,
+          // move the original into alternatives, remove the chosen alt
+          const originalAsAlt = { id: item.id, name: item.name, icon: item.icon }
+          const remainingAlts = (item.alternatives ?? []).filter((a) => a.id !== alternativeId)
+
+          return {
+            ...item,
+            name: alt.name,
+            icon: alt.icon,
+            alternatives: [originalAsAlt, ...remainingAlts],
+          }
+        })
+
+        return { ...day, clothingItems: updatedItems }
+      })
+
+      return { ...prev, days: updatedDays }
+    })
   }
 
   const handleProductClick = (productId: string) => {

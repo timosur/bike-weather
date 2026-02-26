@@ -199,6 +199,19 @@
       "swapFor": "Swap for",
       "cancel": "Cancel"
     },
+    "zone": {
+      "head": "Head",
+      "upperBody": "Upper Body",
+      "lowerBody": "Lower Body",
+      "hands": "Hands",
+      "feet": "Feet",
+      "bodyLabel": "Body zone overview",
+      "selectPrompt": "Tap a body zone to see gear details",
+      "noGear": "No gear needed for this zone.",
+      "close": "Close",
+      "itemCount_one": "1 item",
+      "itemCount": "{{count}} items"
+    },
     "equipment": {
       "heading": "Equipment"
     },

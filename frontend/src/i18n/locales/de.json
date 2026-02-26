@@ -199,6 +199,19 @@
       "swapFor": "Tauschen gegen",
       "cancel": "Abbrechen"
     },
+    "zone": {
+      "head": "Kopf",
+      "upperBody": "Oberkörper",
+      "lowerBody": "Unterkörper",
+      "hands": "Hände",
+      "feet": "Füße",
+      "bodyLabel": "Körperzonen-Übersicht",
+      "selectPrompt": "Tippe auf eine Körperzone für Details",
+      "noGear": "Keine Ausrüstung für diese Zone nötig.",
+      "close": "Schließen",
+      "itemCount_one": "1 Teil",
+      "itemCount": "{{count}} Teile"
+    },
     "equipment": {
       "heading": "Ausrüstung"
     },
