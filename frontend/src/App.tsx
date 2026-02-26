@@ -58,13 +58,6 @@ function useFooterSections(): FooterSection[] {
         { label: t('shell.footerLinks.giveFeedback'), href: '/contact' },
       ],
     },
-    {
-      title: t('shell.footerSection.legal'),
-      links: [
-        { label: t('shell.footerLinks.imprint'), href: '/imprint' },
-        { label: t('shell.footerLinks.privacyPolicy'), href: '/privacy-policy' },
-      ],
-    },
   ]
 }
 

@@ -1,11 +1,14 @@
 import { useMemo, useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Sunrise, Sunset } from 'lucide-react'
 import type { HourlyWeather } from './types'
 
 interface WeatherChartProps {
   hourlyForecast: HourlyWeather[]
   rideStartHour?: number
   rideEndHour?: number
+  sunrise?: string
+  sunset?: string
 }
 
 // Chart layout constants
@@ -36,7 +39,14 @@ function buildPath(points: { x: number; y: number }[], smooth = true): string {
   return d
 }
 
-export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: WeatherChartProps) {
+/** Parse "HH:MM" string into fractional hours (e.g. "06:30" → 6.5) */
+function parseTimeToHours(time: string): number | null {
+  const m = time.match(/^(\d{1,2}):(\d{2})$/)
+  if (!m) return null
+  return parseInt(m[1], 10) + parseInt(m[2], 10) / 60
+}
+
+export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunrise, sunset }: WeatherChartProps) {
   const { t } = useTranslation()
 
   const data = useMemo(() => {
@@ -47,6 +57,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
     const feelsLike = hourlyForecast.map(h => h.tempFeelsLike)
     const precip = hourlyForecast.map(h => h.precipitationProbability)
     const wind = hourlyForecast.map(h => h.windSpeed)
+    const isDay = hourlyForecast.map(h => h.isDay)
 
     // Temperature scale (shared for temp + feels-like)
     const allTemps = [...temps, ...feelsLike]
@@ -86,14 +97,58 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
     // X-axis ticks (every 3 hours)
     const xTicks = hours.filter(h => h % 3 === 0)
 
+    // Light zone boundaries
+    const TWILIGHT_OFFSET = 0.5 // 30 min in fractional hours
+    const sunriseH = sunrise ? parseTimeToHours(sunrise) : null
+    const sunsetH = sunset ? parseTimeToHours(sunset) : null
+
+    // Clamp x-position to chart bounds
+    const clampX = (x: number) => Math.max(PADDING.left, Math.min(PADDING.left + PLOT_W, x))
+
+    let lightZones: {
+      nightStartX: number | null // left edge of chart → morning twilight start
+      morningTwilightX0: number | null // twilight start
+      morningTwilightX1: number | null // sunrise (twilight end)
+      sunriseX: number | null
+      sunsetX: number | null
+      eveningTwilightX0: number | null // sunset (twilight start)
+      eveningTwilightX1: number | null // twilight end
+      nightEndX: number | null // evening twilight end → right edge
+    } = {
+      nightStartX: null, morningTwilightX0: null, morningTwilightX1: null,
+      sunriseX: null, sunsetX: null,
+      eveningTwilightX0: null, eveningTwilightX1: null, nightEndX: null,
+    }
+
+    if (sunriseH != null && sunsetH != null) {
+      const morningTwilightStart = sunriseH - TWILIGHT_OFFSET
+      const eveningTwilightEnd = sunsetH + TWILIGHT_OFFSET
+
+      // Ensure twilight zones don't overlap for very short days
+      const safeMorningEnd = Math.min(sunriseH, sunsetH)
+      const safeEveningStart = Math.max(sunriseH, sunsetH)
+
+      lightZones = {
+        nightStartX: clampX(xScale(minHour)),
+        morningTwilightX0: clampX(xScale(Math.max(morningTwilightStart, minHour))),
+        morningTwilightX1: clampX(xScale(Math.min(safeMorningEnd, maxHour))),
+        sunriseX: sunriseH >= minHour && sunriseH <= maxHour ? clampX(xScale(sunriseH)) : null,
+        sunsetX: sunsetH >= minHour && sunsetH <= maxHour ? clampX(xScale(sunsetH)) : null,
+        eveningTwilightX0: clampX(xScale(Math.max(safeEveningStart, minHour))),
+        eveningTwilightX1: clampX(xScale(Math.min(eveningTwilightEnd, maxHour))),
+        nightEndX: clampX(xScale(maxHour)),
+      }
+    }
+
     return {
-      hours, temps, feelsLike, precip, wind,
+      hours, temps, feelsLike, precip, wind, isDay,
       tempMin, tempMax, minHour, maxHour,
       xScale, tempScale, precipScale, windScale,
       tempPoints, feelsPoints, precipPoints, windPoints,
       rideX0, rideX1, tempTicks, xTicks,
+      lightZones, sunriseH, sunsetH,
     }
-  }, [hourlyForecast, rideStartHour, rideEndHour])
+  }, [hourlyForecast, rideStartHour, rideEndHour, sunrise, sunset])
 
   // Hover state
   const svgRef = useRef<SVGSVGElement>(null)
@@ -126,7 +181,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
 
   if (!data) return null
 
-  const { rideX0, rideX1, tempPoints, feelsPoints, windPoints, tempTicks, xTicks, xScale, tempScale } = data
+  const { rideX0, rideX1, tempPoints, feelsPoints, windPoints, tempTicks, xTicks, xScale, tempScale, lightZones, sunriseH, sunsetH } = data
 
   // Precip bar width
   const barW = Math.max(4, PLOT_W / data.hours.length * 0.6)
@@ -158,7 +213,105 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
               <stop offset="0%" stopColor="rgb(245,158,11)" stopOpacity="0.15" />
               <stop offset="100%" stopColor="rgb(245,158,11)" stopOpacity="0.02" />
             </linearGradient>
+            {/* Light zone gradients for smooth twilight transitions */}
+            {lightZones.morningTwilightX0 != null && lightZones.morningTwilightX1 != null && (
+              <>
+                <linearGradient id="nightToTwilightMorning" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0.10" />
+                  <stop offset="100%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0.05" />
+                </linearGradient>
+                <linearGradient id="twilightToDayMorning" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0.05" />
+                  <stop offset="100%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="dayToTwilightEvening" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0" />
+                  <stop offset="100%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0.05" />
+                </linearGradient>
+                <linearGradient id="twilightToNightEvening" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0.05" />
+                  <stop offset="100%" className="[stop-color:rgb(28,25,23)] dark:[stop-color:rgb(168,162,158)]" stopOpacity="0.10" />
+                </linearGradient>
+              </>
+            )}
           </defs>
+
+          {/* Light zone background shading */}
+          {lightZones.morningTwilightX0 != null && (() => {
+            const lz = lightZones
+            const chartLeft = PADDING.left
+            const chartRight = PADDING.left + PLOT_W
+            return (
+              <>
+                {/* Pre-dawn night zone */}
+                {lz.morningTwilightX0! > chartLeft && (
+                  <rect
+                    x={chartLeft}
+                    y={PADDING.top}
+                    width={lz.morningTwilightX0! - chartLeft}
+                    height={PLOT_H}
+                    className="fill-stone-900/10 dark:fill-stone-400/[0.08]"
+                  />
+                )}
+                {/* Morning twilight transition (night → twilight) */}
+                {lz.morningTwilightX0! < lz.morningTwilightX1! && (
+                  <rect
+                    x={lz.morningTwilightX0!}
+                    y={PADDING.top}
+                    width={lz.morningTwilightX1! - lz.morningTwilightX0!}
+                    height={PLOT_H}
+                    fill="url(#nightToTwilightMorning)"
+                  />
+                )}
+                {/* Morning twilight transition (twilight → day): sunrise to sunrise+offset */}
+                {lz.sunriseX != null && (() => {
+                  const fadeEnd = Math.min(lz.sunriseX + (lz.morningTwilightX1! - lz.morningTwilightX0!), chartRight)
+                  return fadeEnd > lz.sunriseX ? (
+                    <rect
+                      x={lz.sunriseX}
+                      y={PADDING.top}
+                      width={fadeEnd - lz.sunriseX}
+                      height={PLOT_H}
+                      fill="url(#twilightToDayMorning)"
+                    />
+                  ) : null
+                })()}
+                {/* Evening twilight transition (day → twilight): before sunset */}
+                {lz.sunsetX != null && (() => {
+                  const fadeStart = Math.max(lz.sunsetX - (lz.eveningTwilightX1! - lz.eveningTwilightX0!), chartLeft)
+                  return lz.sunsetX > fadeStart ? (
+                    <rect
+                      x={fadeStart}
+                      y={PADDING.top}
+                      width={lz.sunsetX - fadeStart}
+                      height={PLOT_H}
+                      fill="url(#dayToTwilightEvening)"
+                    />
+                  ) : null
+                })()}
+                {/* Evening twilight zone */}
+                {lz.eveningTwilightX0! < lz.eveningTwilightX1! && (
+                  <rect
+                    x={lz.eveningTwilightX0!}
+                    y={PADDING.top}
+                    width={lz.eveningTwilightX1! - lz.eveningTwilightX0!}
+                    height={PLOT_H}
+                    fill="url(#twilightToNightEvening)"
+                  />
+                )}
+                {/* Post-dusk night zone */}
+                {lz.eveningTwilightX1! < chartRight && (
+                  <rect
+                    x={lz.eveningTwilightX1!}
+                    y={PADDING.top}
+                    width={chartRight - lz.eveningTwilightX1!}
+                    height={PLOT_H}
+                    className="fill-stone-900/10 dark:fill-stone-400/[0.08]"
+                  />
+                )}
+              </>
+            )
+          })()}
 
           {/* Grid lines */}
           {tempTicks.map(v => (
@@ -173,6 +326,61 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
               strokeDasharray="3,3"
             />
           ))}
+
+          {/* Sunrise/sunset marker lines */}
+          {lightZones.sunriseX != null && (
+            <line
+              x1={lightZones.sunriseX} x2={lightZones.sunriseX}
+              y1={PADDING.top} y2={PADDING.top + PLOT_H}
+              className="stroke-amber-400/60 dark:stroke-amber-300/40"
+              strokeWidth={1}
+              strokeDasharray="3,3"
+            />
+          )}
+          {lightZones.sunsetX != null && (
+            <line
+              x1={lightZones.sunsetX} x2={lightZones.sunsetX}
+              y1={PADDING.top} y2={PADDING.top + PLOT_H}
+              className="stroke-amber-400/60 dark:stroke-amber-300/40"
+              strokeWidth={1}
+              strokeDasharray="3,3"
+            />
+          )}
+
+          {/* Sunrise icon + label */}
+          {lightZones.sunriseX != null && sunrise && (
+            <foreignObject
+              x={lightZones.sunriseX - 16}
+              y={PADDING.top - 18}
+              width={32}
+              height={18}
+              style={{ overflow: 'visible' }}
+            >
+              <div className="flex flex-col items-center">
+                <Sunrise className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                <span className="text-[7px] font-medium text-amber-500 dark:text-amber-400 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                  {sunrise}
+                </span>
+              </div>
+            </foreignObject>
+          )}
+          {/* Sunset icon + label */}
+          {lightZones.sunsetX != null && sunset && (
+            <foreignObject
+              x={lightZones.sunsetX - 16}
+              y={PADDING.top - 18}
+              width={32}
+              height={18}
+              style={{ overflow: 'visible' }}
+            >
+              <div className="flex flex-col items-center">
+                <Sunset className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                <span className="text-[7px] font-medium text-amber-500 dark:text-amber-400 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+                  {sunset}
+                </span>
+              </div>
+            </foreignObject>
+          )}
 
           {/* Ride window highlight */}
           {rideX0 != null && rideX1 != null && rideX1 > rideX0 && (
@@ -337,8 +545,16 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
             const prec = data.precip[hoverIdx]
             const wnd = data.wind[hoverIdx]
             // Tooltip dimensions
+            // Check if lights-needed row will be shown
+            const hourIsDay = data.isDay[hoverIdx]
+            const hourVal = data.hours[hoverIdx]
+            const inTwilightCheck = sunriseH != null && sunsetH != null && (
+              (hourVal >= sunriseH - 0.5 && hourVal < sunriseH) ||
+              (hourVal >= sunsetH && hourVal < sunsetH + 0.5)
+            )
+            const showLights = !hourIsDay || inTwilightCheck
             const tw = 130
-            const th = 80
+            const th = showLights ? 93 : 80
             const tp = 8
             // Position tooltip to left or right of crosshair depending on space
             const tooltipX = hx + tw + tp > CHART_WIDTH - PADDING.right
@@ -394,6 +610,24 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
                   className="fill-stone-500 dark:fill-stone-400" pointerEvents="none">
                   {t('report.weather.legend.wind')}: {wnd.toFixed(1)} km/h
                 </text>
+                {/* Lights needed indicator */}
+                {(() => {
+                  const hourIsDay = data.isDay[hoverIdx]
+                  const hourVal = data.hours[hoverIdx]
+                  const inTwilight = sunriseH != null && sunsetH != null && (
+                    (hourVal >= sunriseH - 0.5 && hourVal < sunriseH) ||
+                    (hourVal >= sunsetH && hourVal < sunsetH + 0.5)
+                  )
+                  if (!hourIsDay || inTwilight) {
+                    return (
+                      <text x={tooltipX + 8} y={tooltipY + 82} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                        className="fill-amber-500 dark:fill-amber-400" pointerEvents="none">
+                        🔦 {t('report.weather.chart.lightsNeeded')}
+                      </text>
+                    )
+                  }
+                  return null
+                })()}
               </>
             )
           })()}
@@ -421,6 +655,12 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour }: Wea
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 bg-emerald-500/20 border border-dashed border-emerald-500 rounded-sm" />
               <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.rideWindow')}</span>
+            </div>
+          )}
+          {lightZones.sunriseX != null && (
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 bg-stone-900/10 dark:bg-stone-400/[0.08] rounded-sm" />
+              <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.chart.twilight')}</span>
             </div>
           )}
         </div>

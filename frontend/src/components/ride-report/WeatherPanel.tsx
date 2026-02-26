@@ -81,6 +81,8 @@ export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHo
           hourlyForecast={hourlyForecast}
           rideStartHour={rideStartHour}
           rideEndHour={rideEndHour}
+          sunrise={weather.sunrise}
+          sunset={weather.sunset}
         />
       )}
 

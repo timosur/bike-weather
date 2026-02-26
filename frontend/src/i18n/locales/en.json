@@ -189,9 +189,15 @@
       "legend": {
         "temp": "Temperature",
         "feelsLike": "Feels like",
-        "precip": "Precipitation %",
+        "precip": "Precipitation",
         "wind": "Wind",
         "rideWindow": "Your ride"
+      },
+      "chart": {
+        "sunrise": "Sunrise",
+        "sunset": "Sunset",
+        "lightsNeeded": "Lights needed",
+        "twilight": "Night / twilight"
       }
     },
     "clothing": {
