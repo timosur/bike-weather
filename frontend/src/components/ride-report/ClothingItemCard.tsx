@@ -17,7 +17,6 @@ import {
   ThermometerSnowflake,
   ThermometerSun,
   Umbrella,
-  Waves,
 } from 'lucide-react'
 import type { ClothingItem, ClothingIcon } from './types'
 

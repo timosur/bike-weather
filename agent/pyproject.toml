@@ -32,7 +32,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = { "agent" = "." }
-packages = ["agent", "agent.shops", "agent.tests"]
+packages = ["agent", "agent.shops"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

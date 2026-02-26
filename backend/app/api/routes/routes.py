@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +9,12 @@ from app.api.dependencies import get_current_user
 from app.database import get_session
 from app.models.saved_route import SavedRoute
 from app.models.user import User
-from app.schemas.route import SavedRouteCreate, SavedRouteResponse, SavedRouteUpdate
+from app.schemas.route import (
+    SavedRouteCreate,
+    SavedRouteResponse,
+    SavedRouteUpdate,
+    ShareRouteResponse,
+)
 
 router = APIRouter(prefix="/routes", tags=["routes"])
 
@@ -22,9 +27,26 @@ async def list_routes(
     result = await session.execute(
         select(SavedRoute)
         .where(SavedRoute.user_id == user.id)
-        .order_by(SavedRoute.last_used.desc().nulls_last(), SavedRoute.created_at.desc())
+        .order_by(
+            SavedRoute.last_used.desc().nulls_last(), SavedRoute.created_at.desc()
+        )
     )
     return list(result.scalars().all())
+
+
+@router.get("/{route_id}", response_model=SavedRouteResponse)
+async def get_route(
+    route_id: str,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> SavedRoute:
+    result = await session.execute(select(SavedRoute).where(SavedRoute.id == route_id))
+    route = result.scalars().first()
+    if route is None or route.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Route not found"
+        )
+    return route
 
 
 @router.post("", response_model=SavedRouteResponse, status_code=status.HTTP_201_CREATED)
@@ -55,12 +77,12 @@ async def update_route(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> SavedRoute:
-    result = await session.execute(
-        select(SavedRoute).where(SavedRoute.id == route_id)
-    )
+    result = await session.execute(select(SavedRoute).where(SavedRoute.id == route_id))
     route = result.scalars().first()
     if route is None or route.user_id != user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Route not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Route not found"
+        )
 
     updates = data.model_dump(exclude_unset=True)
     for field, value in updates.items():
@@ -76,12 +98,54 @@ async def delete_route(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    result = await session.execute(
-        select(SavedRoute).where(SavedRoute.id == route_id)
-    )
+    result = await session.execute(select(SavedRoute).where(SavedRoute.id == route_id))
     route = result.scalars().first()
     if route is None or route.user_id != user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Route not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Route not found"
+        )
 
     await session.delete(route)
+    await session.commit()
+
+
+@router.post("/{route_id}/share", response_model=ShareRouteResponse)
+async def share_route(
+    route_id: str,
+    request: Request,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> ShareRouteResponse:
+    result = await session.execute(select(SavedRoute).where(SavedRoute.id == route_id))
+    route = result.scalars().first()
+    if route is None or route.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Route not found"
+        )
+
+    if not route.share_token:
+        route.share_token = str(uuid.uuid4())
+        await session.commit()
+        await session.refresh(route)
+
+    base_url = str(request.base_url).rstrip("/")
+    share_url = f"{base_url}/shared/{route.share_token}"
+
+    return ShareRouteResponse(share_token=route.share_token, share_url=share_url)
+
+
+@router.delete("/{route_id}/share", status_code=status.HTTP_204_NO_CONTENT)
+async def unshare_route(
+    route_id: str,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    result = await session.execute(select(SavedRoute).where(SavedRoute.id == route_id))
+    route = result.scalars().first()
+    if route is None or route.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Route not found"
+        )
+
+    route.share_token = None
     await session.commit()

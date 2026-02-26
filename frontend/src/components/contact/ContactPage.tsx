@@ -47,7 +47,7 @@ export function ContactPage({
 
   if (isSuccess) {
     return (
-      <div className="min-h-[calc(100vh-56px)] flex items-center justify-center py-12 px-4">
+      <div className="flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-[480px] text-center space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-7 h-7 text-emerald-500" strokeWidth={1.5} />
@@ -67,7 +67,7 @@ export function ContactPage({
   }
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-12 px-4">
+    <div className="flex items-start justify-center py-12 px-4">
       <div className="w-full max-w-[480px] space-y-6">
         {/* Header */}
         <div className="space-y-1">
@@ -105,8 +105,8 @@ export function ContactPage({
                   type="button"
                   onClick={() => setForm(f => ({ ...f, category: c.value }))}
                   className={`py-2 px-3 rounded-xl text-xs font-medium border-2 transition-all ${form.category === c.value
-                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                      : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                    : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
                     }`}
                 >
                   {t(c.key)}

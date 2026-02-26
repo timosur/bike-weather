@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RidePlanner, RecentRides } from '../components/ride-planner'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
@@ -9,7 +9,8 @@ import { usePlannerFormPersistence } from '../hooks/usePlannerFormPersistence'
 import { useToast } from '../hooks/useToast'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchReport } from '../api/rides'
-import { createRoute } from '../api/routes'
+import { createRoute, fetchRoute } from '../api/routes'
+
 import { TurnstileWidget, useTurnstile } from '../components/common/TurnstileWidget'
 import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { BikeTypeOption, RidingIntensityOption, QuickPreset, RideInput } from '../components/ride-planner/types'
@@ -19,6 +20,7 @@ import type { RideHistoryEntry } from '../hooks/useRideHistory'
 export default function PlannerPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { routeId: urlRouteId } = useParams<{ routeId?: string }>()
   const { t, i18n } = useTranslation()
   const { addToast } = useToast()
   const { isAuthenticated } = useAuth()
@@ -70,6 +72,10 @@ export default function PlannerPage() {
   const incomingRouteId = routerState?.routeId
   const hasAutoSubmitted = useRef(false)
 
+  // Route loaded from URL param (for reload support)
+  const [urlRouteInput, setUrlRouteInput] = useState<RideInput | null>(null)
+  const urlRouteLoading = useRef(false)
+
   const bikeTypeOptions: BikeTypeOption[] = [
     { value: 'rennrad', label: t('planner.bikeType.rennrad'), description: t('planner.bikeType.rennradDesc'), icon: 'gauge' },
     { value: 'gravel', label: t('planner.bikeType.gravel'), description: t('planner.bikeType.gravelDesc'), icon: 'mountain' },
@@ -107,10 +113,6 @@ export default function PlannerPage() {
       if (submitIdRef.current !== currentSubmitId) return
       setReport(result)
       addEntry(input, result)
-      // Scroll to report
-      setTimeout(() => {
-        reportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
     } catch (err) {
       if (submitIdRef.current !== currentSubmitId) return
       setReportError(err instanceof Error ? err.message : t('report.error.fallback'))
@@ -155,6 +157,36 @@ export default function PlannerPage() {
     }
   }, [incomingRideInput, incomingRouteId, doSubmit])
 
+  // Load route from URL param on mount / page reload
+  useEffect(() => {
+    if (!urlRouteId || hasAutoSubmitted.current || urlRouteLoading.current) return
+    urlRouteLoading.current = true
+    hasAutoSubmitted.current = true
+    fetchRoute(urlRouteId)
+      .then((route) => {
+        const today = new Date().toISOString().slice(0, 10)
+        const now = new Date()
+        const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+        const input: RideInput = {
+          location: { address: route.startLocation },
+          startDate: today,
+          startTime,
+          endDate: null,
+          isMultiDay: false,
+          bikeType: 'rennrad',
+          intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
+          distanceKm: route.totalDistance,
+          dayStops: [],
+        }
+        setUrlRouteInput(input)
+        doSubmit(input, urlRouteId)
+      })
+      .catch(() => {
+        // Route not found or auth error — redirect to plain planner
+        navigate('/planner', { replace: true })
+      })
+  }, [urlRouteId, doSubmit, navigate])
+
   // Re-fetch report when language changes so backend-provided strings update
   useEffect(() => {
     const handleLanguageChanged = () => {
@@ -166,16 +198,6 @@ export default function PlannerPage() {
     return () => { i18n.off('languageChanged', handleLanguageChanged) }
   }, [i18n, submittedInput, currentRouteId, report, doSubmit])
 
-  // Report action handlers
-  const handleShare = () => {
-    if (!report) return
-    if (navigator.share) {
-      navigator.share({ title: report.rideName, url: window.location.href }).catch(() => { })
-    } else {
-      navigator.clipboard.writeText(window.location.href).catch(() => { })
-    }
-  }
-
   const handleSaveRoute = () => {
     if (!report || saving || saved) return
     setSaving(true)
@@ -186,8 +208,11 @@ export default function PlannerPage() {
       distance_unit: report.distanceUnit,
       riding_style: report.ridingStyle,
     })
-      .then(() => {
+      .then((route) => {
         setSaved(true)
+        setCurrentRouteId(route.id)
+        // Update URL to include the new route ID
+        navigate(`/planner/${route.id}`, { replace: true })
         addToast(t('report.routeSaved'), 'success')
       })
       .catch(() => {
@@ -256,6 +281,7 @@ export default function PlannerPage() {
   // Determine initial values for the planner
   const getInitialValues = (): Partial<RideInput> | undefined => {
     if (incomingRideInput) return incomingRideInput
+    if (urlRouteInput) return urlRouteInput
     if (detectedLocation) return { location: detectedLocation }
     if (savedFormState) return savedFormState
     return undefined
@@ -264,6 +290,7 @@ export default function PlannerPage() {
   // Determine formSource for the info banner
   const getFormSource = (): 'restored' | 'route' | 'history' | null => {
     if (incomingRideInput && incomingRouteId) return 'route'
+    if (urlRouteId) return 'route'
     if (incomingRideInput) return 'history'
     if (savedFormState && !detectedLocation) return 'restored'
     return null
@@ -284,8 +311,8 @@ export default function PlannerPage() {
     // Clear stale location search state so the new planner starts clean
     clearSuggestions()
     clearDetectedLocation()
-    // Clear router state if any
-    window.history.replaceState({}, '')
+    // Navigate to clean planner URL (removes routeId from path)
+    navigate('/planner', { replace: true })
     // Increment reset key to force RidePlanner remount with fresh defaults
     setResetKey(k => k + 1)
   }
@@ -303,7 +330,7 @@ export default function PlannerPage() {
   const showReport = reportLoading || reportError || report
 
   return (
-    <div className="min-h-[calc(100vh-56px)]">
+    <div className="">
       {/* Ambient background */}
       {!showReport && (
         <>
@@ -323,7 +350,7 @@ export default function PlannerPage() {
         // Full planner form with recent rides inside
         <RidePlanner
           key={`form-${detectKeyRef.current}-${resetKey}`}
-          initialValues={resetKey > 0 ? undefined : getInitialValues()}
+          initialValues={resetKey > 0 ? (detectedLocation ? { location: detectedLocation } : undefined) : getInitialValues()}
           locationSuggestions={suggestions}
           dayStopLocationSuggestions={dayStopSuggestions}
           bikeTypeOptions={bikeTypeOptions}
@@ -406,10 +433,10 @@ export default function PlannerPage() {
           <div className="max-w-4xl mx-auto px-4 pb-10">
             <RideReport
               report={report}
-              onShare={handleShare}
               onSaveRoute={isAuthenticated ? handleSaveRoute : undefined}
               routeSaving={saving}
-              routeSaved={saved}
+              routeSaved={saved || !!currentRouteId}
+              onLoginToSave={!isAuthenticated ? handleNavigateToLogin : undefined}
               onPlanAgain={() => {
                 setReport(null)
                 setReportError(null)

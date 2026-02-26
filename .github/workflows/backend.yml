@@ -2,19 +2,9 @@ name: Backend — Build & Push
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend.yml"
     tags:
-      - "backend/v[0-9]+.[0-9]+.[0-9]+*"
+      - "backend/v[0-9]+.[0-9]+.[0-9]+"
       - "backend/v[0-9]+.[0-9]+.[0-9]+-preview.*"
-  pull_request:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend.yml"
-  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -36,19 +26,7 @@ jobs:
       - name: Determine version
         id: version
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/backend/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/backend/v}"
-          else
-            # Find latest backend tag and append short SHA
-            LATEST_TAG=$(git tag -l 'backend/v*' --sort=-v:refname | head -n1 || true)
-            if [[ -n "$LATEST_TAG" ]]; then
-              BASE_VERSION="${LATEST_TAG#backend/v}"
-            else
-              BASE_VERSION="0.0.0"
-            fi
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${BASE_VERSION}-dev.${SHORT_SHA}"
-          fi
+          VERSION="${GITHUB_REF#refs/tags/backend/v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "📦 Backend version: ${VERSION}"
 
@@ -56,7 +34,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -69,22 +46,17 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # On semver tag: 1.2.3, 1.2, 1, latest
-            type=semver,pattern={{version}},value=v${{ steps.version.outputs.version }},enable=${{ startsWith(github.ref, 'refs/tags/backend/v') }}
-            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.version.outputs.version }},enable=${{ startsWith(github.ref, 'refs/tags/backend/v') }}
-            type=semver,pattern={{major}},value=v${{ steps.version.outputs.version }},enable=${{ startsWith(github.ref, 'refs/tags/backend/v') }}
-            # On main branch push: latest + sha
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix=sha-,enable=${{ github.ref == 'refs/heads/main' }}
-            # On PR: pr-<number>
-            type=ref,event=pr
+            type=semver,pattern={{version}},value=v${{ steps.version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.version.outputs.version }}
+            type=semver,pattern={{major}},value=v${{ steps.version.outputs.version }}
+            type=raw,value=latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64

@@ -144,9 +144,13 @@
   },
   "report": {
     "share": "Teilen",
+    "sharing": "Teilen…",
+    "linkCopied": "Link zum Teilen kopiert!",
+    "shareError": "Link konnte nicht erstellt werden.",
     "save": "Speichern",
     "saving": "Speichern…",
     "saved": "Gespeichert",
+    "loginToSave": "Anmelden zum Speichern",
     "planAgain": "Neu planen",
     "newRide": "Neue Fahrt",
     "days": "{{count}} Tage",
@@ -246,7 +250,8 @@
       "today": "Heute",
       "yesterday": "Gestern",
       "daysAgo": "Vor {{count}} Tagen",
-      "weeksAgo": "Vor {{count}} Wochen"
+      "weeksAgo": "Vor {{count}} Wochen",
+      "shared": "Geteilt"
     },
     "edit": {
       "heading": "Route bearbeiten",
@@ -261,8 +266,12 @@
     },
     "actions": {
       "edit": "Bearbeiten",
-      "delete": "Löschen"
-    }
+      "delete": "Löschen",
+      "share": "Teilen",
+      "copyLink": "Link kopieren",
+      "unshare": "Teilen beenden"
+    },
+    "unshared": "Teilen beendet"
   },
   "auth": {
     "login": {
@@ -410,5 +419,13 @@
     "logout": "Abmelden",
     "signedInAs": "Angemeldet als",
     "admin": "Admin"
+  },
+  "shared": {
+    "badge": "Geteilter Fahrtbericht",
+    "notFound": "Bericht nicht gefunden",
+    "notFoundText": "Dieser geteilte Bericht ist nicht mehr verfügbar. Er wurde möglicherweise vom Ersteller entfernt.",
+    "error": "Der geteilte Bericht konnte nicht geladen werden.",
+    "planYourOwn": "Eigene Fahrt planen",
+    "cta": "Möchtest du deinen eigenen personalisierten Wetter- und Ausrüstungsbericht?"
   }
 }

@@ -144,9 +144,13 @@
   },
   "report": {
     "share": "Share",
+    "sharing": "Sharing…",
+    "linkCopied": "Share link copied!",
+    "shareError": "Could not create share link.",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
+    "loginToSave": "Log in to save",
     "planAgain": "Plan again",
     "newRide": "New ride",
     "days": "{{count}} days",
@@ -246,7 +250,8 @@
       "today": "Today",
       "yesterday": "Yesterday",
       "daysAgo": "{{count}} days ago",
-      "weeksAgo": "{{count}} weeks ago"
+      "weeksAgo": "{{count}} weeks ago",
+      "shared": "Shared"
     },
     "edit": {
       "heading": "Edit route",
@@ -261,8 +266,12 @@
     },
     "actions": {
       "edit": "Edit",
-      "delete": "Delete"
-    }
+      "delete": "Delete",
+      "share": "Share",
+      "copyLink": "Copy link",
+      "unshare": "Stop sharing"
+    },
+    "unshared": "Sharing stopped"
   },
   "auth": {
     "login": {
@@ -410,5 +419,13 @@
     "logout": "Logout",
     "signedInAs": "Signed in as",
     "admin": "Admin"
+  },
+  "shared": {
+    "badge": "Shared Ride Report",
+    "notFound": "Report not found",
+    "notFoundText": "This shared report is no longer available. It may have been removed by the owner.",
+    "error": "Could not load the shared report.",
+    "planYourOwn": "Plan your own ride",
+    "cta": "Want your own personalized weather & gear report?"
   }
 }

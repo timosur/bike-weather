@@ -31,7 +31,7 @@ export function AboutMe({ sections }: AboutMeProps) {
   const { t } = useTranslation()
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-12 px-4">
+    <div className="flex items-start justify-center py-12 px-4">
       <div className="w-full max-w-[640px] space-y-10">
         {/* Hero */}
         <div className="text-center space-y-4">

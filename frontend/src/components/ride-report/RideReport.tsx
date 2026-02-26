@@ -10,7 +10,7 @@ import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
-export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSaved, onPlanAgain, onNewRide, onDaySelect, onSwapClothingItem, products, shops, disclosure, onProductClick }: RideReportProps) {
+export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onPlanAgain, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
   const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
 
@@ -84,32 +84,46 @@ export function RideReport({ report, onShare, onSaveRoute, routeSaving, routeSav
               <span className="hidden sm:inline">{t('report.newRide')}</span>
             </button>
           )}
-          <button
-            onClick={() => onShare?.()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-          >
-            <Share2 className="w-4 h-4" strokeWidth={1.5} />
-            <span className="hidden sm:inline">{t('report.share')}</span>
-          </button>
-          <button
-            onClick={() => onSaveRoute?.()}
-            disabled={routeSaving || routeSaved}
-            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
-              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
-              : routeSaving
-                ? 'text-white bg-emerald-600/70 cursor-wait'
-                : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-              }`}
-          >
-            {routeSaved ? (
-              <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
-            ) : (
+          {onShare && (
+            <button
+              onClick={() => onShare?.()}
+              disabled={shareLoading}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${shareLoading ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-wait' : 'text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700'}`}
+            >
+              <Share2 className="w-4 h-4" strokeWidth={1.5} />
+              <span className="hidden sm:inline">{shareLoading ? t('report.sharing') : t('report.share')}</span>
+            </button>
+          )}
+          {onSaveRoute && (
+            <button
+              onClick={() => onSaveRoute()}
+              disabled={routeSaving || routeSaved}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
+                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
+                : routeSaving
+                  ? 'text-white bg-emerald-600/70 cursor-wait'
+                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                }`}
+            >
+              {routeSaved ? (
+                <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
+              ) : (
+                <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+              )}
+              <span className="hidden sm:inline">
+                {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
+              </span>
+            </button>
+          )}
+          {!onSaveRoute && onLoginToSave && (
+            <button
+              onClick={() => onLoginToSave()}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
               <Bookmark className="w-4 h-4" strokeWidth={1.5} />
-            )}
-            <span className="hidden sm:inline">
-              {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
-            </span>
-          </button>
+              <span className="hidden sm:inline">{t('report.loginToSave')}</span>
+            </button>
+          )}
         </div>
       </div>
 

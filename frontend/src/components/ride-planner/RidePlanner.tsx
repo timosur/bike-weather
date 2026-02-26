@@ -169,7 +169,7 @@ export function RidePlanner({
   const [bannerDismissed, setBannerDismissed] = useState(false)
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-10 px-4">
+    <div className=" flex items-start justify-center py-10 px-4">
       {/* Ambient background */}
       <div
         className="fixed inset-0 -z-10"

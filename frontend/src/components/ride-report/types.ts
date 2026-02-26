@@ -118,11 +118,15 @@ export interface RideReport {
 export interface RideReportProps {
   report: RideReport;
   onShare?: () => void;
+  /** Whether the share link is currently being generated */
+  shareLoading?: boolean;
   onSaveRoute?: () => void;
   /** Whether the route is currently being saved */
   routeSaving?: boolean;
   /** Whether the route has been saved successfully */
   routeSaved?: boolean;
+  /** Called when unauthenticated user clicks save — navigates to login */
+  onLoginToSave?: () => void;
   /** Called when the user wants to edit the ride / plan again */
   onPlanAgain?: () => void;
   /** Called when the user wants to start a completely new ride */

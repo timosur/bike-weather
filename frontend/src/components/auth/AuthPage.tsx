@@ -53,7 +53,7 @@ export function AuthPage({
     'w-full rounded-xl text-sm bg-stone-50 dark:bg-stone-800 border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-2.5'
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center py-12 px-4">
+    <div className=" flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-[400px] space-y-6">
         {/* Header */}
         <div className="text-center space-y-1">

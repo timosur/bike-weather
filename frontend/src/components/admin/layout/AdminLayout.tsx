@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { AdminSidebar } from './AdminSidebar'
 import { AdminHeader } from './AdminHeader'
-import { ToastContainer } from '../shared/ToastContainer'
+import { ToastContainer } from '@/components/common/ToastContainer'
 import { ToastProvider } from '@/hooks/useToast'
 
 export default function AdminLayout() {

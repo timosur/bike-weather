@@ -2,7 +2,7 @@ import { SkeletonBlock, SkeletonLine, SkeletonButton, SkeletonCard } from '@/com
 
 export function AuthPageSkeleton() {
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center py-12 px-4">
+    <div className=" flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-[400px] space-y-6">
         {/* Title */}
         <div className="text-center space-y-2">

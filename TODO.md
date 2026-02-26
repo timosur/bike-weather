@@ -1,3 +1,2 @@
-- Restructure footer, remove double imprint/data privacy links
 - Add also referal links to equipment section in report
 - Add insights open source, also used by Peter

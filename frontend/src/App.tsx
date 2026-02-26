@@ -10,6 +10,7 @@ import { AuthPageSkeleton } from './components/auth'
 import { ContentPageSkeleton } from './components/skeleton'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './hooks/useToast'
+import { ToastContainer } from './components/common/ToastContainer'
 import { setAccessTokenProvider } from './api/client'
 
 const PlannerPage = lazy(() => import('./pages/PlannerPage'))
@@ -32,6 +33,7 @@ const AdminShopsPage = lazy(() => import('./pages/admin/AdminShopsPage'))
 const AdminFaqPage = lazy(() => import('./pages/admin/AdminFaqPage'))
 const AdminAboutPage = lazy(() => import('./pages/admin/AdminAboutPage'))
 const AdminContactsPage = lazy(() => import('./pages/admin/AdminContactsPage'))
+const SharedReportPage = lazy(() => import('./pages/SharedReportPage'))
 
 function useNavigationItems(): NavigationItem[] {
   const { t } = useTranslation()
@@ -131,8 +133,10 @@ function AppContent() {
     >
       <Routes>
         <Route path="/" element={<Navigate to="/planner" replace />} />
+        <Route path="/planner/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
         <Route path="/planner" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
         <Route path="/report" element={<Navigate to="/planner" replace />} />
+        <Route path="/shared/:token" element={<Suspense fallback={<RidePlannerSkeleton />}><SharedReportPage /></Suspense>} />
         <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductsPage /></Suspense>} />
         <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} />
         <Route path="/routes" element={<Suspense fallback={<MyRoutesSkeleton />}><RequireAuth><RoutesPage /></RequireAuth></Suspense>} />
@@ -155,6 +159,7 @@ function AppContent() {
           <Route path="contacts" element={<Suspense fallback={null}><AdminContactsPage /></Suspense>} />
         </Route>
       </Routes>
+      <ToastContainer />
     </AppShell>
   )
 }

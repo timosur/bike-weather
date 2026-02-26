@@ -28,6 +28,12 @@ class SavedRouteResponse(BaseModel):
     riding_style: str
     last_condition: str
     last_used: datetime | None
+    share_token: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ShareRouteResponse(BaseModel):
+    share_token: str
+    share_url: str

@@ -6,7 +6,7 @@ import { EditRouteModal } from './EditRouteModal'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { EmptyRoutes } from './EmptyRoutes'
 
-export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, onNavigateToPlanner }: MyRoutesProps) {
+export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, onRouteShare, onRouteUnshare, onCopyShareLink, onNavigateToPlanner }: MyRoutesProps) {
   const { t } = useTranslation()
   const [editingRoute, setEditingRoute] = useState<SavedRoute | null>(null)
   const [deletingRoute, setDeletingRoute] = useState<SavedRoute | null>(null)
@@ -51,6 +51,9 @@ export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, on
             onSelect={() => onRouteSelect?.(route.id)}
             onEdit={() => setEditingRoute(route)}
             onDelete={() => setDeletingRoute(route)}
+            onShare={() => onRouteShare?.(route.id)}
+            onUnshare={() => onRouteUnshare?.(route.id)}
+            onCopyShareLink={() => onCopyShareLink?.(route.id)}
           />
         ))}
       </div>

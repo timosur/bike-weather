@@ -15,7 +15,7 @@ export function FaqPage({ items }: FaqPageProps) {
   }
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-start justify-center py-12 px-4">
+    <div className=" flex items-start justify-center py-12 px-4">
       <div className="w-full max-w-[640px] space-y-8">
         {/* Header */}
         <div className="space-y-1">
@@ -53,16 +53,14 @@ export function FaqPage({ items }: FaqPageProps) {
                             {item.question}
                           </span>
                           <ChevronDown
-                            className={`w-4 h-4 text-stone-400 dark:text-stone-500 shrink-0 transition-transform duration-200 ${
-                              isOpen ? 'rotate-180' : ''
-                            }`}
+                            className={`w-4 h-4 text-stone-400 dark:text-stone-500 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                              }`}
                             strokeWidth={2}
                           />
                         </button>
                         <div
-                          className={`overflow-hidden transition-all duration-200 ${
-                            isOpen ? 'max-h-96' : 'max-h-0'
-                          }`}
+                          className={`overflow-hidden transition-all duration-200 ${isOpen ? 'max-h-96' : 'max-h-0'
+                            }`}
                         >
                           <p className="px-5 pb-4 text-sm text-stone-500 dark:text-stone-400 leading-relaxed">
                             {item.answer}

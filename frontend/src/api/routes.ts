@@ -26,6 +26,7 @@ interface SavedRouteAPI {
   riding_style: string;
   last_condition: string;
   last_used: string | null;
+  share_token: string | null;
   created_at: string;
 }
 
@@ -37,10 +38,9 @@ function mapRoute(r: SavedRouteAPI): SavedRoute {
     totalDistance: r.total_distance,
     distanceUnit: r.distance_unit,
     ridingStyle: r.riding_style as SavedRoute["ridingStyle"],
-    lastCondition: r.last_condition
-      ? (r.last_condition as SavedRoute["lastCondition"])
-      : null,
+    lastCondition: r.last_condition ? (r.last_condition as SavedRoute["lastCondition"]) : null,
     lastUsed: r.last_used,
+    shareToken: r.share_token,
     createdAt: r.created_at,
   };
 }
@@ -48,6 +48,11 @@ function mapRoute(r: SavedRouteAPI): SavedRoute {
 export async function fetchRoutes(): Promise<SavedRoute[]> {
   const data = await apiFetch<SavedRouteAPI[]>("/routes");
   return data.map(mapRoute);
+}
+
+export async function fetchRoute(id: string): Promise<SavedRoute> {
+  const data = await apiFetch<SavedRouteAPI>(`/routes/${id}`);
+  return mapRoute(data);
 }
 
 export async function createRoute(data: CreateRouteData): Promise<SavedRoute> {
@@ -58,10 +63,7 @@ export async function createRoute(data: CreateRouteData): Promise<SavedRoute> {
   return mapRoute(result);
 }
 
-export async function updateRoute(
-  id: string,
-  updates: UpdateRouteData
-): Promise<SavedRoute> {
+export async function updateRoute(id: string, updates: UpdateRouteData): Promise<SavedRoute> {
   const result = await apiFetch<SavedRouteAPI>(`/routes/${id}`, {
     method: "PUT",
     body: JSON.stringify(updates),

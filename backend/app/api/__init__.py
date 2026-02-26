@@ -9,6 +9,7 @@ from app.api.routes.geocoding import router as geocoding_router
 from app.api.routes.products import router as products_router
 from app.api.routes.rides import router as rides_router
 from app.api.routes.routes import router as routes_router
+from app.api.routes.shared import router as shared_router
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(auth_router)
@@ -19,4 +20,5 @@ api_router.include_router(contact_router)
 api_router.include_router(geocoding_router)
 api_router.include_router(rides_router)
 api_router.include_router(routes_router)
+api_router.include_router(shared_router)
 api_router.include_router(admin_router)

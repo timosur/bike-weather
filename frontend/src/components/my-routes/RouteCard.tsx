@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Route, Gauge, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { MapPin, Route, Gauge, MoreVertical, Pencil, Trash2, Share2, Link2Off, Copy } from 'lucide-react'
 import type { SavedRoute, ConditionRating } from './types'
 
 function getConditionConfig(t: (key: string) => string): Record<ConditionRating, { label: string; bg: string; text: string; dot: string }> {
@@ -37,9 +37,12 @@ interface RouteCardProps {
   onSelect?: () => void
   onEdit?: () => void
   onDelete?: () => void
+  onShare?: () => void
+  onUnshare?: () => void
+  onCopyShareLink?: () => void
 }
 
-export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps) {
+export function RouteCard({ route, onSelect, onEdit, onDelete, onShare, onUnshare, onCopyShareLink }: RouteCardProps) {
   const { t, i18n } = useTranslation()
   const conditionConfig = getConditionConfig(t)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -112,6 +115,44 @@ export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps)
                   <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
                   {t('routes.actions.edit')}
                 </button>
+                {route.shareToken ? (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setMenuOpen(false)
+                        onCopyShareLink?.()
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
+                    >
+                      <Copy className="w-3.5 h-3.5" strokeWidth={2} />
+                      {t('routes.actions.copyLink')}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setMenuOpen(false)
+                        onUnshare?.()
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
+                    >
+                      <Link2Off className="w-3.5 h-3.5" strokeWidth={2} />
+                      {t('routes.actions.unshare')}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMenuOpen(false)
+                      onShare?.()
+                    }}
+                    className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
+                  >
+                    <Share2 className="w-3.5 h-3.5" strokeWidth={2} />
+                    {t('routes.actions.share')}
+                  </button>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
@@ -146,20 +187,28 @@ export function RouteCard({ route, onSelect, onEdit, onDelete }: RouteCardProps)
           </div>
         </div>
 
-        {/* Footer: condition badge + last used */}
+        {/* Footer: condition badge + shared indicator + last used */}
         <div className="flex items-center justify-between gap-2 pt-3 border-t border-stone-100 dark:border-stone-800">
-          {route.lastCondition ? (
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionConfig[route.lastCondition].bg} ${conditionConfig[route.lastCondition].text}`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${conditionConfig[route.lastCondition].dot}`} />
-              {conditionConfig[route.lastCondition].label}
-            </span>
-          ) : (
-            <span className="text-xs text-stone-400 dark:text-stone-500 italic">
-              {t('routes.card.notYetChecked')}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {route.lastCondition ? (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${conditionConfig[route.lastCondition].bg} ${conditionConfig[route.lastCondition].text}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${conditionConfig[route.lastCondition].dot}`} />
+                {conditionConfig[route.lastCondition].label}
+              </span>
+            ) : (
+              <span className="text-xs text-stone-400 dark:text-stone-500 italic">
+                {t('routes.card.notYetChecked')}
+              </span>
+            )}
+            {route.shareToken && (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400">
+                <Share2 className="w-2.5 h-2.5" strokeWidth={2} />
+                {t('routes.card.shared')}
+              </span>
+            )}
+          </div>
 
           {route.lastUsed && (
             <span className="text-[11px] text-stone-400 dark:text-stone-500">
