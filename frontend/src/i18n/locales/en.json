@@ -199,7 +199,8 @@
       "cautionDescription": "Ride possible, but with limitations",
       "notRecommended": "Not recommended",
       "notRecommendedDescription": "Too dangerous to ride",
-      "learnMore": "What do the ratings mean?"
+      "learnMore": "What do the ratings mean?",
+      "faqAnchor": "ride-conditions"
     },
     "weather": {
       "feelsLike": "Feels like {{temp}}{{unit}}",

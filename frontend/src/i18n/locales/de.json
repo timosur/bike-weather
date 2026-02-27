@@ -199,7 +199,8 @@
       "cautionDescription": "Fahrt möglich, aber mit Einschränkungen",
       "notRecommended": "Nicht empfohlen",
       "notRecommendedDescription": "Fahrt zu gefährlich",
-      "learnMore": "Was bedeuten die Bewertungen?"
+      "learnMore": "Was bedeuten die Bewertungen?",
+      "faqAnchor": "fahrbedingungen"
     },
     "weather": {
       "feelsLike": "Gefühlt {{temp}}{{unit}}",

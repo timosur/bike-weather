@@ -97,7 +97,7 @@ export function ConditionBadge({ condition, size = 'md', reasons }: ConditionBad
 
         {/* FAQ link */}
         <Link
-          to="/faq#fahrbedingungen"
+          to={`/faq#${t('report.condition.faqAnchor')}`}
           className="inline-flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors pt-1"
         >
           <HelpCircle className="w-3 h-3" />
