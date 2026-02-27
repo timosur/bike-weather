@@ -1,2 +1,5 @@
-- Add also referal links to equipment section in report
+- Add back products with really proper products and refferal links in place
 - Add insights open source, also used by Peter
+- Enable captcha on preview and then also prod
+- Do production release (but after insights have been added, to check insights)
+- Check about mentioning of third party tools that I am using, like location or weather data, because I think I need to name them in my website
