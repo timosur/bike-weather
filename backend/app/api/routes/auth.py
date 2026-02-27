@@ -9,8 +9,11 @@ from app.database import get_session
 from app.models.user import User
 from app.rate_limit import limiter
 from app.schemas.auth import (
+    ForgotPasswordRequest,
     LoginRequest,
+    MessageResponse,
     RegisterRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserResponse,
 )
@@ -18,6 +21,8 @@ from app.services.auth import auth_service
 from app.services.headless_auth import (
     HeadlessAuthError,
     headless_login,
+    headless_recovery_complete,
+    headless_recovery_start,
     headless_register,
 )
 from app.services.turnstile import verify_turnstile
@@ -93,3 +98,38 @@ async def register(
         expires_in=tokens.get("expires_in", 3600),
         scope=tokens.get("scope", "openid profile email"),
     )
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+@limiter.limit("3/minute")
+async def forgot_password(
+    body: ForgotPasswordRequest,
+    request: Request,
+) -> MessageResponse:
+    """Initiate password recovery – always returns 200 to avoid user enumeration."""
+    if body.captcha_token:
+        await verify_turnstile(body.captcha_token, get_remote_address(request))
+    try:
+        await headless_recovery_start(body.email)
+    except HeadlessAuthError:
+        logger.info("Recovery start failed for %s (may not exist)", body.email)
+    return MessageResponse(
+        message="If an account with that email exists, a recovery link has been sent."
+    )
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+@limiter.limit("5/minute")
+async def reset_password(
+    body: ResetPasswordRequest,
+    request: Request,
+) -> MessageResponse:
+    """Complete password recovery using the token from the email link."""
+    try:
+        await headless_recovery_complete(body.token, body.password)
+    except HeadlessAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    return MessageResponse(message="Password has been reset successfully.")

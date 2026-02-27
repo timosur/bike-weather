@@ -19,6 +19,8 @@ const ReportPage = lazy(() => import('./pages/ReportPage'))
 // const ProductCategoryPage = lazy(() => import('./pages/ProductCategoryPage'))
 const RoutesPage = lazy(() => import('./pages/RoutesPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const AboutMePage = lazy(() => import('./pages/AboutMePage'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
@@ -155,6 +157,8 @@ function AppContent() {
         {/* <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} /> */}
         <Route path="/routes" element={<Suspense fallback={<MyRoutesSkeleton />}><RequireAuth><RoutesPage /></RequireAuth></Suspense>} />
         <Route path="/login" element={<Suspense fallback={<AuthPageSkeleton />}><LoginPage /></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<AuthPageSkeleton />}><ForgotPasswordPage /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<AuthPageSkeleton />}><ResetPasswordPage /></Suspense>} />
         <Route path="/auth/callback" element={<Navigate to="/login" replace />} />
         <Route path="/about-me" element={<Suspense fallback={<ContentPageSkeleton sections={3} />}><AboutMePage /></Suspense>} />
         <Route path="/faq" element={<Suspense fallback={<ContentPageSkeleton sections={5} />}><FaqPage /></Suspense>} />

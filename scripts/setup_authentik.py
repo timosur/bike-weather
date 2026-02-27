@@ -2,6 +2,9 @@
 """Bootstrap Authentik with bike-weather OAuth2 application.
 
 Run after `docker compose up` to provision the OIDC provider and application.
+Configures the recovery flow with a custom email template that points
+password-reset links to the frontend instead of Authentik's default UI.
+
 Idempotent — safe to re-run.
 
 Usage:
@@ -69,6 +72,232 @@ def ensure_api_token() -> str:
         )
         sys.exit(1)
     return token
+
+
+def setup_recovery_flow():
+    """Create or configure the recovery flow with all required stages.
+
+    Creates the flow + stages from scratch if they don't exist (fresh Authentik
+    without initial setup wizard), or patches an existing flow's email stage
+    to use the custom template.
+    """
+    print("\n── Recovery flow setup ──")
+
+    flow_slug = "default-recovery-flow"
+
+    # 1. Create or find the recovery flow
+    print(f"   Finding {flow_slug}...")
+    flows = api("GET", f"/api/v3/flows/instances/?slug={flow_slug}")
+    if flows.get("results"):
+        flow_pk = flows["results"][0]["pk"]
+        print(f"   Found existing flow (pk={flow_pk})")
+    else:
+        print(f"   Flow not found — creating it...")
+        flow = api(
+            "POST",
+            "/api/v3/flows/instances/",
+            {
+                "name": "Default recovery flow",
+                "slug": flow_slug,
+                "title": "Reset your password",
+                "designation": "recovery",
+                "denied_action": "message_continue",
+                "policy_engine_mode": "any",
+                "compatibility_mode": True,
+            },
+        )
+        flow_pk = flow.get("pk")
+        if not flow_pk:
+            print("   FAILED to create recovery flow!")
+            return
+        print(f"   Flow created (pk={flow_pk})")
+
+    # 2. Get existing bindings to know what's already there
+    existing_bindings = api(
+        "GET",
+        f"/api/v3/flows/bindings/?target={flow_pk}&ordering=order",
+    )
+    bound_stages = {b["stage"]: b for b in existing_bindings.get("results", [])}
+    print(f"   Flow has {len(bound_stages)} existing stage(s)")
+
+    # Check which stage types already exist
+    email_stage_pk = None
+    for _stage_pk, binding in bound_stages.items():
+        meta_model = binding.get("stage_obj", {}).get("meta_model_name", "")
+        if "email" in meta_model:
+            email_stage_pk = binding["stage"]
+
+    # 3. Create identification stage if needed
+    ident_name = f"{flow_slug}-identification"
+    existing = api("GET", f"/api/v3/stages/identification/?search={ident_name}")
+    if existing.get("results"):
+        ident_pk = existing["results"][0]["pk"]
+        print(f"   Identification stage exists (pk={ident_pk})")
+    else:
+        stage = api(
+            "POST",
+            "/api/v3/stages/identification/",
+            {
+                "name": ident_name,
+                "user_fields": ["email"],
+                "case_insensitive_matching": True,
+                "show_matched_user": False,
+                "pretend_user_exists": True,
+            },
+        )
+        ident_pk = stage.get("pk")
+        if ident_pk:
+            print(f"   Identification stage created (pk={ident_pk})")
+        else:
+            print(f"   FAILED to create identification stage: {stage}")
+
+    # 4. Create email stage if needed
+    email_name = f"{flow_slug}-email"
+    existing = api("GET", f"/api/v3/stages/email/?search={email_name}")
+    if existing.get("results"):
+        email_stage_pk = existing["results"][0]["pk"]
+        print(f"   Email stage exists (pk={email_stage_pk})")
+    elif not email_stage_pk:
+        stage = api(
+            "POST",
+            "/api/v3/stages/email/",
+            {
+                "name": email_name,
+                "template": "email/password_reset.html",
+                "subject": "Fahrrad Wetter — Password Reset",
+                "activate_user_on_success": True,
+                "use_global_settings": True,
+                "token_expiry": "minutes=30",
+            },
+        )
+        email_stage_pk = stage.get("pk")
+        if email_stage_pk:
+            print(f"   Email stage created (pk={email_stage_pk})")
+        else:
+            print(f"   FAILED to create email stage: {stage}")
+
+    # Always patch the email stage template to ensure it's correct
+    if email_stage_pk:
+        result = api(
+            "PATCH",
+            f"/api/v3/stages/email/{email_stage_pk}/",
+            {
+                "template": "email/password_reset.html",
+                "subject": "Fahrrad Wetter — Password Reset",
+                "activate_user_on_success": True,
+            },
+        )
+        if result.get("pk"):
+            print(f"   ✓ Email stage template set to: email/password_reset.html")
+        else:
+            print(f"   ✗ Failed to update email stage template: {result}")
+
+    # 5. Create password stage if needed
+    # Use a user_write stage preceded by a prompt stage for the new password.
+    # Authentik's prompt stage uses /api/v3/stages/prompt/stages/ for the stage
+    # and /api/v3/stages/prompt/prompts/ for the prompt fields.
+    pw_name = f"{flow_slug}-password"
+    existing = api("GET", f"/api/v3/stages/prompt/stages/?search={pw_name}")
+    if existing.get("results"):
+        pw_stage_pk = existing["results"][0]["pk"]
+        print(f"   Password stage exists (pk={pw_stage_pk})")
+    else:
+        # Find or create password prompt fields
+        prompts = api("GET", "/api/v3/stages/prompt/prompts/")
+        pw_prompt_pk = pw_repeat_pk = None
+        for p in prompts.get("results", []):
+            if p.get("field_key") == "password":
+                pw_prompt_pk = p["pk"]
+            elif p.get("field_key") == "password_repeat":
+                pw_repeat_pk = p["pk"]
+
+        if not pw_prompt_pk:
+            r = api(
+                "POST",
+                "/api/v3/stages/prompt/prompts/",
+                {
+                    "name": f"{flow_slug}-password-field",
+                    "field_key": "password",
+                    "label": "New Password",
+                    "type": "password",
+                    "required": True,
+                    "placeholder": "New Password",
+                    "order": 0,
+                },
+            )
+            pw_prompt_pk = r.get("pk")
+
+        if not pw_repeat_pk:
+            r = api(
+                "POST",
+                "/api/v3/stages/prompt/prompts/",
+                {
+                    "name": f"{flow_slug}-password-repeat-field",
+                    "field_key": "password_repeat",
+                    "label": "Repeat Password",
+                    "type": "password",
+                    "required": True,
+                    "placeholder": "Repeat Password",
+                    "order": 1,
+                },
+            )
+            pw_repeat_pk = r.get("pk")
+
+        fields = [pk for pk in [pw_prompt_pk, pw_repeat_pk] if pk]
+        stage = api(
+            "POST",
+            "/api/v3/stages/prompt/stages/",
+            {"name": pw_name, "fields": fields},
+        )
+        pw_stage_pk = stage.get("pk")
+        if pw_stage_pk:
+            print(f"   Password stage created (pk={pw_stage_pk})")
+        else:
+            print(f"   FAILED to create password stage: {stage}")
+
+    # 6. Create user_write stage to persist the password change
+    write_name = f"{flow_slug}-user-write"
+    existing = api("GET", f"/api/v3/stages/user_write/?search={write_name}")
+    if existing.get("results"):
+        write_pk = existing["results"][0]["pk"]
+        print(f"   User-write stage exists (pk={write_pk})")
+    else:
+        stage = api(
+            "POST",
+            "/api/v3/stages/user_write/",
+            {"name": write_name, "create_users_as_inactive": False},
+        )
+        write_pk = stage.get("pk")
+        if write_pk:
+            print(f"   User-write stage created (pk={write_pk})")
+        else:
+            print(f"   FAILED to create user-write stage: {stage}")
+
+    # 7. Bind stages to the flow in order
+    print("   Binding stages to flow...")
+    stage_order = [
+        (ident_pk, 0),
+        (email_stage_pk, 10),
+        (pw_stage_pk, 20),
+        (write_pk, 30),
+    ]
+    for stage_pk, order in stage_order:
+        if not stage_pk:
+            continue
+        if stage_pk in bound_stages:
+            print(f"     Stage {stage_pk} already bound")
+            continue
+        binding = api(
+            "POST",
+            "/api/v3/flows/bindings/",
+            {"target": flow_pk, "stage": stage_pk, "order": order},
+        )
+        if binding.get("pk"):
+            print(f"     Bound stage (order={order})")
+        else:
+            print(f"     FAILED to bind stage at order {order}: {binding}")
+
+    print(f"   ✓ Recovery flow {flow_slug} ready")
 
 
 def main():
@@ -208,8 +437,12 @@ def main():
         print("   Password set to: test1234")
         print("   Email set to: admin@bike-weather.local")
 
+    # Recovery flow setup
+    print("\n9. Configuring recovery flow...")
+    setup_recovery_flow()
+
     # Write API token to .env
-    print("\n9. Writing AUTHENTIK_API_TOKEN to .env...")
+    print("\n10. Writing AUTHENTIK_API_TOKEN to .env...")
     env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
     if os.path.exists(env_path):
         with open(env_path) as f:

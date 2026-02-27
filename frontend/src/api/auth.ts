@@ -67,3 +67,21 @@ export function register(
     ...(captchaToken ? { captcha_token: captchaToken } : {}),
   });
 }
+
+export interface MessageResponse {
+  message: string;
+}
+
+export async function forgotPassword(email: string, captchaToken?: string): Promise<MessageResponse> {
+  return authFetch<MessageResponse>("/auth/forgot-password", {
+    email,
+    ...(captchaToken ? { captcha_token: captchaToken } : {}),
+  });
+}
+
+export async function resetPassword(token: string, password: string): Promise<MessageResponse> {
+  return authFetch<MessageResponse>("/auth/reset-password", {
+    token,
+    password,
+  });
+}

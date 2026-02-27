@@ -30,3 +30,17 @@ class TokenResponse(BaseModel):
     token_type: str = "Bearer"
     expires_in: int
     scope: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+    captcha_token: str | None = None
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+
+class MessageResponse(BaseModel):
+    message: str

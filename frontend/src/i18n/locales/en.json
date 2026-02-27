@@ -1,9 +1,9 @@
 {
   "shell": {
-    "brand": "Fahrrad Wetter",
+    "brand": "Bike Weather",
     "footer": {
       "tagline": "Weather-based clothing recommendations for cyclists.",
-      "copyright": "© {{year}} Fahrrad Wetter. A project by Timo.",
+      "copyright": "© {{year}} Bike Weather. A project by Timo.",
       "imprint": "Imprint",
       "privacy": "Privacy"
     },
@@ -175,7 +175,7 @@
     "section": {
       "weather": "Weather",
       "clothing": "Clothing Recommendation",
-      "equipment": "Checklist",
+      "equipment": "Equipment Recommendation",
       "packingList": "Packing List for Entire Tour",
       "tips": "Tips & Safety"
     },
@@ -254,7 +254,14 @@
       "itemCount": "{{count}} items"
     },
     "equipment": {
-      "heading": "Equipment"
+      "heading": "Equipment",
+      "category": {
+        "safety": "Safety",
+        "gear": "Gear",
+        "hydration": "Hydration",
+        "tools": "Tools",
+        "nutrition": "Nutrition"
+      }
     },
     "routeSaved": "Route saved",
     "routeSaveError": "Could not save route"
@@ -331,6 +338,27 @@
       "passwordRequired": "Password required",
       "passwordMin": "At least 8 characters",
       "passwordMismatch": "Passwords do not match"
+    },
+    "forgotPassword": {
+      "heading": "Reset your password",
+      "subheading": "Enter your email address and we'll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "sentHeading": "Check your email",
+      "sentText": "If an account with that email exists, we've sent you a link to reset your password. Please check your inbox and spam folder.",
+      "backToLogin": "Back to sign in",
+      "error": "Something went wrong. Please try again."
+    },
+    "resetPassword": {
+      "heading": "Set new password",
+      "subheading": "Enter your new password below.",
+      "newPassword": "New password",
+      "submit": "Reset password",
+      "successHeading": "Password reset",
+      "successText": "Your password has been reset successfully. You can now sign in with your new password.",
+      "invalidToken": "Invalid or expired link",
+      "invalidTokenText": "This password reset link is invalid or has expired. Please request a new one.",
+      "requestNewLink": "Request new reset link",
+      "error": "Could not reset password. The link may have expired."
     }
   },
   "contact": {

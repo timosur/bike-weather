@@ -175,7 +175,7 @@
     "section": {
       "weather": "Wetter",
       "clothing": "Kleidungsempfehlung",
-      "equipment": "Checkliste",
+      "equipment": "Equipment-Empfehlung",
       "packingList": "Packliste für die gesamte Tour",
       "tips": "Hinweise & Sicherheit"
     },
@@ -254,7 +254,14 @@
       "itemCount": "{{count}} Teile"
     },
     "equipment": {
-      "heading": "Ausrüstung"
+      "heading": "Ausrüstung",
+      "category": {
+        "safety": "Sicherheit",
+        "gear": "Ausrüstung",
+        "hydration": "Verpflegung",
+        "tools": "Werkzeug",
+        "nutrition": "Ernährung"
+      }
     },
     "routeSaved": "Route gespeichert",
     "routeSaveError": "Route konnte nicht gespeichert werden"
@@ -331,6 +338,27 @@
       "passwordRequired": "Passwort erforderlich",
       "passwordMin": "Mindestens 8 Zeichen",
       "passwordMismatch": "Passwörter stimmen nicht überein"
+    },
+    "forgotPassword": {
+      "heading": "Passwort zurücksetzen",
+      "subheading": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+      "submit": "Link senden",
+      "sentHeading": "E-Mail gesendet",
+      "sentText": "Falls ein Konto mit dieser E-Mail existiert, haben wir dir einen Link zum Zurücksetzen deines Passworts gesendet. Bitte prüfe deinen Posteingang und Spam-Ordner.",
+      "backToLogin": "Zurück zur Anmeldung",
+      "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    },
+    "resetPassword": {
+      "heading": "Neues Passwort festlegen",
+      "subheading": "Gib dein neues Passwort ein.",
+      "newPassword": "Neues Passwort",
+      "submit": "Passwort zurücksetzen",
+      "successHeading": "Passwort zurückgesetzt",
+      "successText": "Dein Passwort wurde erfolgreich zurückgesetzt. Du kannst dich jetzt mit deinem neuen Passwort anmelden.",
+      "invalidToken": "Ungültiger oder abgelaufener Link",
+      "invalidTokenText": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
+      "requestNewLink": "Neuen Link anfordern",
+      "error": "Passwort konnte nicht zurückgesetzt werden. Der Link ist möglicherweise abgelaufen."
     }
   },
   "contact": {

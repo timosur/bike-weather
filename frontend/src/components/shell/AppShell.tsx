@@ -54,7 +54,7 @@ export function AppShell({
   const visibleItems = navigationItems.filter(item => !item.requiresAuth || user)
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="min-h-screen w-full flex flex-col bg-stone-50 dark:bg-stone-950 overflow-x-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -71,7 +71,7 @@ export function AppShell({
                 className="font-semibold text-stone-900 dark:text-stone-100 text-base"
                 style={{ fontFamily: 'Outfit, sans-serif' }}
               >
-                Fahrrad Wetter
+                {t('shell.brand')}
               </span>
             </button>
 
@@ -181,7 +181,7 @@ export function AppShell({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex-1">
+      <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 flex-1 overflow-x-hidden">
         {children}
       </main>
 

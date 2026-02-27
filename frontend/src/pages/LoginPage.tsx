@@ -48,6 +48,7 @@ export default function LoginPage() {
       errorMessage={error}
       onLogin={handleLogin}
       onRegister={handleRegister}
+      onForgotPassword={() => navigate('/forgot-password')}
     />
   )
 }

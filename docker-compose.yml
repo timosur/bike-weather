@@ -53,11 +53,18 @@ services:
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: authentik
       AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_EMAIL__HOST: ${AUTHENTIK_EMAIL__HOST:-smtp.gmail.com}
+      AUTHENTIK_EMAIL__PORT: ${AUTHENTIK_EMAIL__PORT:-587}
+      AUTHENTIK_EMAIL__USERNAME: ${AUTHENTIK_EMAIL__USERNAME:-}
+      AUTHENTIK_EMAIL__PASSWORD: ${AUTHENTIK_EMAIL__PASSWORD:-}
+      AUTHENTIK_EMAIL__USE_TLS: "true"
+      AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL__FROM:-noreply@bike-weather.com}
+      AUTHENTIK_EMAIL__TIMEOUT: "10"
     ports:
       - "9000:9000"
     volumes:
       - authentik_media:/media
-      - authentik_templates:/templates
+      - ./custom-templates:/templates
     depends_on:
       authentik-db:
         condition: service_healthy
@@ -75,9 +82,16 @@ services:
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: authentik
       AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_EMAIL__HOST: ${AUTHENTIK_EMAIL__HOST:-smtp.gmail.com}
+      AUTHENTIK_EMAIL__PORT: ${AUTHENTIK_EMAIL__PORT:-587}
+      AUTHENTIK_EMAIL__USERNAME: ${AUTHENTIK_EMAIL__USERNAME:-}
+      AUTHENTIK_EMAIL__PASSWORD: ${AUTHENTIK_EMAIL__PASSWORD:-}
+      AUTHENTIK_EMAIL__USE_TLS: "true"
+      AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL__FROM:-noreply@bike-weather.com}
+      AUTHENTIK_EMAIL__TIMEOUT: "10"
     volumes:
       - authentik_media:/media
-      - authentik_templates:/templates
+      - ./custom-templates:/templates
     depends_on:
       authentik-db:
         condition: service_healthy
@@ -89,4 +103,3 @@ volumes:
   authentik_pgdata:
   authentik_redis:
   authentik_media:
-  authentik_templates:

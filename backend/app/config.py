@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     AUTHENTIK_API_TOKEN: str = ""
     AUTHENTIK_CLIENT_ID: str = "bike-weather"
     AUTHENTIK_AUTH_FLOW_SLUG: str = "default-authentication-flow"
+    AUTHENTIK_RECOVERY_FLOW_SLUG: str = "default-recovery-flow"
     FRONTEND_URL: str = "http://localhost:5173"
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
     DEBUG: bool = False

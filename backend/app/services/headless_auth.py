@@ -25,6 +25,10 @@ FLOW_URL = (
     f"{settings.AUTHENTIK_BASE_URL}/api/v3/flows/executor"
     f"/{settings.AUTHENTIK_AUTH_FLOW_SLUG}/"
 )
+RECOVERY_FLOW_URL = (
+    f"{settings.AUTHENTIK_BASE_URL}/api/v3/flows/executor"
+    f"/{settings.AUTHENTIK_RECOVERY_FLOW_SLUG}/"
+)
 AUTHORIZE_URL = f"{settings.AUTHENTIK_BASE_URL}/application/o/authorize/"
 TOKEN_URL = f"{settings.AUTHENTIK_BASE_URL}/application/o/token/"
 USERS_URL = f"{settings.AUTHENTIK_BASE_URL}/api/v3/core/users/"
@@ -226,3 +230,168 @@ async def headless_register(
 
     # Now login as the new user to get tokens
     return await headless_login(username, password)
+
+
+async def headless_recovery_start(email: str) -> None:
+    """Initiate password recovery for *email* via Authentik's recovery flow.
+
+    Drives the identification stage so Authentik sends the recovery email.
+    Does not raise on unknown email — to prevent email enumeration.
+    """
+    if not settings.AUTHENTIK_API_TOKEN:
+        raise HeadlessAuthError("Recovery is not available")
+
+    api_headers = {
+        "Authorization": f"Bearer {settings.AUTHENTIK_API_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    # Look up the user by email to get their username/pk
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            USERS_URL,
+            params={"search": email},
+            headers=api_headers,
+        )
+        r.raise_for_status()
+        results = r.json().get("results", [])
+        user = None
+        for u in results:
+            if u.get("email", "").lower() == email.lower():
+                user = u
+                break
+
+        if not user:
+            # Silently succeed to prevent email enumeration
+            logger.debug("Recovery requested for unknown email: %s", email)
+            return
+
+        # Drive the recovery flow's identification stage
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
+        r = await client.get(RECOVERY_FLOW_URL, headers=headers, follow_redirects=True)
+        r.raise_for_status()
+        data = r.json()
+        logger.debug("Recovery flow GET response: %s", data)
+
+        component = data.get("component", "")
+        if component == "ak-stage-identification":
+            r = await client.post(
+                RECOVERY_FLOW_URL,
+                json={"uid_field": email},
+                headers=headers,
+                follow_redirects=True,
+            )
+            r.raise_for_status()
+            data = r.json()
+            logger.debug("After identification POST: %s", data)
+
+        component = data.get("component", "")
+        if component == "ak-stage-email":
+            # Authentik auto-sends the email when this stage is reached.
+            # Do NOT POST to acknowledge — that triggers a duplicate send.
+            logger.debug("Email stage reached; email sent automatically")
+        else:
+            logger.warning(
+                "Expected ak-stage-email but got component=%s, full data=%s",
+                component,
+                data,
+            )
+
+        logger.debug("Recovery flow initiated for user: %s", email)
+
+
+async def headless_recovery_complete(token: str, new_password: str) -> None:
+    """Complete password recovery using the token from the recovery email.
+
+    Looks up the token via the Authentik Admin API (list + view_key),
+    identifies the owning user, and sets their password directly.
+    """
+    if not settings.AUTHENTIK_API_TOKEN:
+        raise HeadlessAuthError("Recovery is not available")
+
+    api_headers = {
+        "Authorization": f"Bearer {settings.AUTHENTIK_API_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    tokens_url = f"{settings.AUTHENTIK_BASE_URL}/api/v3/core/tokens/"
+
+    async with httpx.AsyncClient() as client:
+        # 1. Find the recovery token by checking each verification token's key.
+        #    The list endpoint does not include the secret `key` field, so we
+        #    must call view_key on each candidate.
+        user_pk: int | None = None
+        token_identifier: str | None = None
+        page = 1
+        found = False
+
+        while not found:
+            resp = await client.get(
+                tokens_url,
+                headers=api_headers,
+                params={
+                    "intent": "verification",
+                    "ordering": "-expires",
+                    "page_size": 50,
+                    "page": page,
+                },
+            )
+            if resp.status_code >= 400:
+                raise HeadlessAuthError("Invalid or expired recovery link")
+
+            data = resp.json()
+            results = data.get("results", [])
+
+            for t in results:
+                ident = t.get("identifier", "")
+                # Retrieve the actual secret key for this token
+                key_resp = await client.get(
+                    f"{tokens_url}{ident}/view_key/",
+                    headers=api_headers,
+                )
+                if key_resp.status_code != 200:
+                    continue
+                actual_key = key_resp.json().get("key", "")
+                if actual_key == token:
+                    user_obj = t.get("user_obj") or {}
+                    user_pk = user_obj.get("pk") or t.get("user")
+                    token_identifier = ident
+                    found = True
+                    break
+
+            if found or not data.get("pagination", {}).get("next"):
+                break
+            page += 1
+
+        if not user_pk:
+            raise HeadlessAuthError("Invalid or expired recovery link")
+
+        # 2. Set the user's password via the dedicated set_password endpoint
+        #    (PATCH on the user object stores the raw value instead of hashing)
+        resp = await client.post(
+            f"{USERS_URL}{user_pk}/set_password/",
+            headers=api_headers,
+            json={"password": new_password},
+        )
+        if resp.status_code >= 400:
+            try:
+                err_data = resp.json()
+            except Exception:
+                raise HeadlessAuthError("Password reset failed")
+            if isinstance(err_data.get("password"), list):
+                raise HeadlessAuthError(err_data["password"][0])
+            raise HeadlessAuthError(err_data.get("detail", "Password reset failed"))
+
+        # 3. Clean up the used token (best-effort)
+        if token_identifier:
+            try:
+                await client.delete(
+                    f"{tokens_url}{token_identifier}/",
+                    headers=api_headers,
+                )
+            except Exception:
+                pass
+
+        logger.debug("Password recovery completed successfully")
