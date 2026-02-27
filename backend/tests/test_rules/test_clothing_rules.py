@@ -145,3 +145,80 @@ def test_thermal_undershorts_below_0c() -> None:
     items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
     ids = [i["id"] for i in items]
     assert "cl-thermal-undershorts" in ids
+
+
+# ── Bike-type differentiation tests ─────────────────────────────────────
+
+
+def test_rennrad_gets_bib_shorts() -> None:
+    weather = _make_weather(temp_min=22, temp_max=30, temp_feels_like=26)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-shorts-rennrad" in ids
+
+
+def test_city_gets_casual_shorts() -> None:
+    weather = _make_weather(temp_min=22, temp_max=30, temp_feels_like=26)
+    items = get_clothing_items(weather, "city", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-shorts-city" in ids
+    names = [i["name"] for i in items]
+    assert any("Casual" in n for n in names)
+
+
+def test_mtb_gets_baggy_shorts() -> None:
+    weather = _make_weather(temp_min=22, temp_max=30, temp_feels_like=26)
+    items = get_clothing_items(weather, "mtb", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-shorts-mtb" in ids
+
+
+def test_different_bike_types_different_jerseys() -> None:
+    weather = _make_weather(temp_min=22, temp_max=30, temp_feels_like=26)
+    rennrad_items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    city_items = get_clothing_items(weather, "city", "moderat", locale="en")
+    rr_jersey = next(i for i in rennrad_items if "jersey" in i["id"])
+    city_jersey = next(i for i in city_items if "jersey" in i["id"])
+    assert rr_jersey["id"] != city_jersey["id"]
+    assert rr_jersey["name"] != city_jersey["name"]
+
+
+def test_rennrad_gets_clip_shoes() -> None:
+    weather = _make_weather(temp_min=22, temp_max=30, temp_feels_like=26)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-shoes-rennrad" in ids
+
+
+def test_city_gets_everyday_shoes() -> None:
+    weather = _make_weather(temp_min=22, temp_max=30, temp_feels_like=26)
+    items = get_clothing_items(weather, "city", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-shoes-city" in ids
+
+
+def test_mtb_no_arm_warmers_alternative() -> None:
+    """MTB should not offer arm warmers as alternative (gets full-length instead)."""
+    weather = _make_weather(temp_min=5, temp_max=12, temp_feels_like=8)
+    items = get_clothing_items(weather, "mtb", "moderat", locale="en")
+    jersey = next(i for i in items if "jersey" in i["id"])
+    alts = jersey.get("alternatives")
+    assert alts is None or not any("arm" in a["id"] for a in alts)
+
+
+def test_rennrad_has_arm_warmers_alternative() -> None:
+    """Rennrad should offer arm warmers as alternative for jerseys."""
+    weather = _make_weather(temp_min=5, temp_max=12, temp_feels_like=8)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    jersey = next(i for i in items if "jersey" in i["id"])
+    alts = jersey.get("alternatives", [])
+    assert any("arm" in a["id"] for a in alts)
+
+
+def test_city_no_leg_warmers_alternative() -> None:
+    """City should not offer leg warmers as alternative (gets full-length instead)."""
+    weather = _make_weather(temp_min=5, temp_max=12, temp_feels_like=8)
+    items = get_clothing_items(weather, "city", "moderat", locale="en")
+    tights = next(i for i in items if "tights" in i["id"] or "padded" in i["id"])
+    alts = tights.get("alternatives")
+    assert alts is None or not any("leg" in a["id"] for a in alts)

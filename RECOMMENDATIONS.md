@@ -104,6 +104,104 @@
 
 ---
 
+## Bike-Type-Specific Clothing Differences
+
+The weather thresholds above apply equally to all bike types. The *specific items* differ by bike type for the following zones:
+
+### Shorts (feels ≥ 15°C)
+
+| Bike Type | Item | Description |
+|---|---|---|
+| Rennrad | Bib Shorts (aerodynamic) | Tight-fitting bib shorts with chamois |
+| Gravel | Gravel Shorts (relaxed fit) | Relaxed cycling shorts with chamois |
+| MTB | MTB Baggy Shorts | Rugged loose shorts with liner and chamois |
+| City | Casual Shorts | Comfortable everyday shorts without chamois |
+
+### Long Pants (feels 5–14°C)
+
+| Bike Type | Item | Description |
+|---|---|---|
+| Rennrad | Bib Tights (tight fit) | Tight-fitting bib tights with chamois |
+| Gravel | Gravel Cycling Pants (robust) | Rugged, slightly relaxed cycling pants |
+| MTB | MTB Pants (abrasion-resistant) | Loose, abrasion-resistant with liner |
+| City | Casual Pants (warm) | Comfortable long pants without chamois |
+
+### Thermal Pants (feels < 5°C)
+
+| Bike Type | Item | Description |
+|---|---|---|
+| Rennrad | Thermal Bib Tights | Tight-fitting thermal bib tights with wind protection |
+| Gravel | Gravel Thermal Pants | Rugged thermal cycling pants |
+| MTB | MTB Thermal Pants | Loose, abrasion-resistant thermal pants |
+| City | Warm Casual Pants | Lined, comfortable pants for cold rides |
+
+### Jersey / Shirt
+
+| Bike Type | Short (≥ 20°C) | Long (< 10°C) | Light Long (10–19°C) |
+|---|---|---|---|
+| Rennrad | Aero jersey (tight) | Long-sleeve jersey (tight) | Light long-sleeve jersey (tight) |
+| Gravel | Gravel jersey (relaxed) | Long-sleeve gravel jersey | Light long-sleeve gravel jersey |
+| MTB | MTB jersey (loose, rugged) | Long-sleeve MTB jersey (loose) | Light long-sleeve MTB jersey |
+| City | Casual performance shirt | Long-sleeve performance shirt | Light long-sleeve performance shirt |
+
+### Base Layer
+
+| Bike Type | Cold (< 10°C) | Warm (≥ 10°C) |
+|---|---|---|
+| Rennrad | Merino (tight, compression) | Light base layer (tight, compression) |
+| Gravel | Merino (merino wool) | Moisture-wicking base layer |
+| MTB | Merino (loose) | Loose functional base layer |
+| City | Warm functional undershirt | Optional light casual undershirt |
+
+### Shoes
+
+| Bike Type | Item | Description |
+|---|---|---|
+| Rennrad | Road clip-in shoes | Stiff sole for max power transfer |
+| Gravel | Gravel clip-in shoes | Tread sole for off-road excursions |
+| MTB | MTB shoes (flat/SPD) | Rugged sole with grip for trails |
+| City | Sturdy everyday shoes | Comfortable shoes with firm sole |
+
+### Gloves
+
+| Bike Type | Light (≥ 10°C) | Warm (0–9°C) |
+|---|---|---|
+| Rennrad | Light road gloves (aero) | Warm road gloves (insulated, tight) |
+| Gravel | Gravel gloves (extra grip) | Warm gravel gloves (insulated, grip) |
+| MTB | MTB gloves (padding + grip) | Warm MTB gloves (insulated, padded) |
+| City | Optional casual gloves | Warm casual gloves |
+
+### Rain Jacket
+
+| Bike Type | Item | Description |
+|---|---|---|
+| Rennrad | Waterproof road jacket (tight) | Tight-fitting, sealed seams |
+| Gravel | Waterproof gravel jacket | Rugged rain jacket for gravel roads |
+| MTB | Waterproof MTB jacket (rugged) | Rugged with ventilation |
+| City | Everyday rain jacket | Casual all-weather rain jacket |
+
+### Arm/Leg Warmers
+
+Arm and leg warmers are only offered as alternatives for **Rennrad** and **Gravel**. MTB and City riders get the full-length item directly instead.
+
+---
+
+## Safety Equipment
+
+| Condition | Item | Bike-Type Specific |
+|---|---|---|
+| Always | Helmet | Rennrad: Aero helmet · Gravel: All-round helmet · MTB: Enduro/full-face · City: Urban helmet |
+| Dusk/dawn/night OR precip > 50% | Reflective safety vest | All bike types |
+| MTB: always | Knee & elbow pads | MTB only |
+| Gravel: always | Light knee pads (optional) | Gravel only |
+| Distance > 20 km OR MTB | First aid kit (compact) | All, emphasis on MTB |
+| City: always | Bike lock | City only |
+| Distance > 50 km | Light cable lock | Other bike types |
+| City: always | Bike bell (StVZO required) | City only |
+| Gravel | Bike bell | Gravel on mixed paths |
+
+---
+
 ## Equipment
 
 | Condition | Item |

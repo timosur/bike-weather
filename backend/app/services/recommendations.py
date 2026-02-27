@@ -110,7 +110,15 @@ def _clothing_dicts_to_schemas(items: list[dict]) -> list[ClothingItemSchema]:
 
 
 def _equipment_dicts_to_schemas(items: list[dict]) -> list[EquipmentItemSchema]:
-    return [EquipmentItemSchema(**item) for item in items]
+    return [
+        EquipmentItemSchema(
+            id=item["id"],
+            name=item["name"],
+            reason=item["reason"],
+            category=item.get("category", "gear"),
+        )
+        for item in items
+    ]
 
 
 def _format_condition_reasons(
@@ -480,6 +488,7 @@ async def build_report(
             distance_km=ride_input.distanceKm,
             ride_start_time=ride_input.startTime,
             ride_end_time=f"{ride_end_h:02d}:00",
+            bike_type=ride_input.bikeType,
             locale=locale,
         )
 

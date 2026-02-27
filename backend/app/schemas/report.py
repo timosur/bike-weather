@@ -54,6 +54,7 @@ class EquipmentItemSchema(BaseModel):
     id: str
     name: str
     reason: str
+    category: str = "gear"  # "safety" | "gear" | "hydration" | "tools" | "nutrition"
 
 
 class ConditionReasonSchema(BaseModel):

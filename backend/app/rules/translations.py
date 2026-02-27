@@ -330,6 +330,439 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
         "name": "Thin Merino Socks",
         "reason": "Breathable and odour-neutral at {temp_max:.0f}°C.",
     },
+    # ── BIKE-TYPE-SPECIFIC OVERRIDES ─────────────────────────────────
+    # SHORTS — Rennrad
+    ("cl-shorts-rennrad", "de"): {
+        "name": "Bib Shorts (aerodynamisch)",
+        "reason": "Eng anliegende Bib Shorts mit Sitzpolster bei {temp_max:.0f}°C.",
+    },
+    ("cl-shorts-rennrad", "en"): {
+        "name": "Bib Shorts (aerodynamic)",
+        "reason": "Tight-fitting bib shorts with chamois at {temp_max:.0f}°C.",
+    },
+    # SHORTS — Gravel
+    ("cl-shorts-gravel", "de"): {
+        "name": "Gravel-Shorts (Relaxed Fit)",
+        "reason": "Lockere Radshorts mit Polster für Komfort bei {temp_max:.0f}°C.",
+    },
+    ("cl-shorts-gravel", "en"): {
+        "name": "Gravel Shorts (relaxed fit)",
+        "reason": "Relaxed cycling shorts with chamois for comfort at {temp_max:.0f}°C.",
+    },
+    # SHORTS — MTB
+    ("cl-shorts-mtb", "de"): {
+        "name": "MTB Baggy Shorts",
+        "reason": "Robuste, weite Shorts mit Innenhose und Polster bei {temp_max:.0f}°C.",
+    },
+    ("cl-shorts-mtb", "en"): {
+        "name": "MTB Baggy Shorts",
+        "reason": "Rugged loose shorts with liner and chamois at {temp_max:.0f}°C.",
+    },
+    # SHORTS — City
+    ("cl-shorts-city", "de"): {
+        "name": "Bequeme Alltagsshorts",
+        "reason": "Legere Shorts ohne Radpolster — alltagstauglich bei {temp_max:.0f}°C.",
+    },
+    ("cl-shorts-city", "en"): {
+        "name": "Casual Shorts",
+        "reason": "Comfortable everyday shorts without chamois at {temp_max:.0f}°C.",
+    },
+    # PADDED TIGHTS — Rennrad
+    ("cl-padded-tights-rennrad", "de"): {
+        "name": "Bib Tights (eng anliegend)",
+        "reason": "Eng anliegende Trägerhose mit Polster bei {temp_range}°C.",
+    },
+    ("cl-padded-tights-rennrad", "en"): {
+        "name": "Bib Tights (tight fit)",
+        "reason": "Tight-fitting bib tights with chamois at {temp_range}°C.",
+    },
+    # PADDED TIGHTS — Gravel
+    ("cl-padded-tights-gravel", "de"): {
+        "name": "Gravel-Radhose (robust)",
+        "reason": "Robuste, etwas lockere Radhose mit Polster bei {temp_range}°C.",
+    },
+    ("cl-padded-tights-gravel", "en"): {
+        "name": "Gravel Cycling Pants (robust)",
+        "reason": "Rugged, slightly relaxed cycling pants with chamois at {temp_range}°C.",
+    },
+    # PADDED TIGHTS — MTB
+    ("cl-padded-tights-mtb", "de"): {
+        "name": "MTB-Hose (abriebfest)",
+        "reason": "Weite, abriebfeste Hose mit Innenhose bei {temp_range}°C.",
+    },
+    ("cl-padded-tights-mtb", "en"): {
+        "name": "MTB Pants (abrasion-resistant)",
+        "reason": "Loose, abrasion-resistant pants with liner at {temp_range}°C.",
+    },
+    # PADDED TIGHTS — City
+    ("cl-padded-tights-city", "de"): {
+        "name": "Alltagshose (warm, bequem)",
+        "reason": "Bequeme lange Hose ohne Radpolster bei {temp_range}°C.",
+    },
+    ("cl-padded-tights-city", "en"): {
+        "name": "Casual Pants (warm, comfortable)",
+        "reason": "Comfortable long pants without chamois at {temp_range}°C.",
+    },
+    # THERMAL TIGHTS — Rennrad
+    ("cl-thermal-tights-rennrad", "de"): {
+        "name": "Thermo-Bib-Tights",
+        "reason": "Eng anliegende Thermo-Trägerhose mit Windschutz bei {temp_min:.0f}°C.",
+    },
+    ("cl-thermal-tights-rennrad", "en"): {
+        "name": "Thermal Bib Tights",
+        "reason": "Tight-fitting thermal bib tights with wind protection at {temp_min:.0f}°C.",
+    },
+    # THERMAL TIGHTS — Gravel
+    ("cl-thermal-tights-gravel", "de"): {
+        "name": "Gravel Thermo-Hose (robust)",
+        "reason": "Robuste Thermo-Radhose mit Windschutz bei {temp_min:.0f}°C.",
+    },
+    ("cl-thermal-tights-gravel", "en"): {
+        "name": "Gravel Thermal Pants (robust)",
+        "reason": "Rugged thermal cycling pants with wind protection at {temp_min:.0f}°C.",
+    },
+    # THERMAL TIGHTS — MTB
+    ("cl-thermal-tights-mtb", "de"): {
+        "name": "MTB Thermo-Hose (weit, abriebfest)",
+        "reason": "Weite, abriebfeste Thermo-Hose mit Innenhose bei {temp_min:.0f}°C.",
+    },
+    ("cl-thermal-tights-mtb", "en"): {
+        "name": "MTB Thermal Pants (loose, abrasion-resistant)",
+        "reason": "Loose, abrasion-resistant thermal pants with liner at {temp_min:.0f}°C.",
+    },
+    # THERMAL TIGHTS — City
+    ("cl-thermal-tights-city", "de"): {
+        "name": "Warme Alltagshose",
+        "reason": "Gefütterte, bequeme Hose für kalte Fahrten bei {temp_min:.0f}°C.",
+    },
+    ("cl-thermal-tights-city", "en"): {
+        "name": "Warm Casual Pants",
+        "reason": "Lined, comfortable pants for cold rides at {temp_min:.0f}°C.",
+    },
+    # SHORT JERSEY — Rennrad
+    ("cl-jersey-short-rennrad", "de"): {
+        "name": "Aero-Radtrikot (eng)",
+        "reason": "Eng anliegend und aerodynamisch bei {temp_max:.0f}°C.",
+    },
+    ("cl-jersey-short-rennrad", "en"): {
+        "name": "Aero Cycling Jersey (tight)",
+        "reason": "Tight-fitting and aerodynamic at {temp_max:.0f}°C.",
+    },
+    # SHORT JERSEY — Gravel
+    ("cl-jersey-short-gravel", "de"): {
+        "name": "Gravel-Trikot (Relaxed Fit)",
+        "reason": "Etwas lockerer Schnitt für Komfort bei {temp_max:.0f}°C.",
+    },
+    ("cl-jersey-short-gravel", "en"): {
+        "name": "Gravel Jersey (relaxed fit)",
+        "reason": "Slightly relaxed cut for comfort at {temp_max:.0f}°C.",
+    },
+    # SHORT JERSEY — MTB
+    ("cl-jersey-short-mtb", "de"): {
+        "name": "MTB-Jersey (locker, robust)",
+        "reason": "Lockeres, robustes Jersey mit Belüftung bei {temp_max:.0f}°C.",
+    },
+    ("cl-jersey-short-mtb", "en"): {
+        "name": "MTB Jersey (loose, rugged)",
+        "reason": "Loose, rugged jersey with ventilation at {temp_max:.0f}°C.",
+    },
+    # SHORT JERSEY — City
+    ("cl-jersey-short-city", "de"): {
+        "name": "Legeres Funktionsshirt",
+        "reason": "Alltagstaugliches Funktionsshirt bei {temp_max:.0f}°C.",
+    },
+    ("cl-jersey-short-city", "en"): {
+        "name": "Casual Performance Shirt",
+        "reason": "Everyday performance shirt at {temp_max:.0f}°C.",
+    },
+    # LONG JERSEY — Rennrad
+    ("cl-jersey-long-rennrad", "de"): {
+        "name": "Langarm-Radtrikot (eng)",
+        "reason": "Eng anliegend mit Wärme bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-rennrad", "en"): {
+        "name": "Long-sleeve Cycling Jersey (tight)",
+        "reason": "Tight-fitting warmth at {temp_range}°C.",
+    },
+    # LONG JERSEY — Gravel
+    ("cl-jersey-long-gravel", "de"): {
+        "name": "Langarm Gravel-Jersey",
+        "reason": "Robustes Langarm-Trikot bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-gravel", "en"): {
+        "name": "Long-sleeve Gravel Jersey",
+        "reason": "Rugged long-sleeve jersey at {temp_range}°C.",
+    },
+    # LONG JERSEY — MTB
+    ("cl-jersey-long-mtb", "de"): {
+        "name": "Langarm MTB-Jersey (locker)",
+        "reason": "Lockeres Langarm-Jersey mit Belüftung bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-mtb", "en"): {
+        "name": "Long-sleeve MTB Jersey (loose)",
+        "reason": "Loose long-sleeve jersey with ventilation at {temp_range}°C.",
+    },
+    # LONG JERSEY — City
+    ("cl-jersey-long-city", "de"): {
+        "name": "Langarm-Funktionsshirt",
+        "reason": "Alltagstaugliches Langarm-Funktionsshirt bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-city", "en"): {
+        "name": "Long-sleeve Performance Shirt",
+        "reason": "Everyday long-sleeve performance shirt at {temp_range}°C.",
+    },
+    # LIGHT LONG JERSEY — Rennrad
+    ("cl-jersey-long-light-rennrad", "de"): {
+        "name": "Leichtes Langarm-Radtrikot (eng)",
+        "reason": "Eng anliegend, Ärmel aufrollbar bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-light-rennrad", "en"): {
+        "name": "Light Long-sleeve Jersey (tight)",
+        "reason": "Tight-fitting, can roll up sleeves at {temp_range}°C.",
+    },
+    # LIGHT LONG JERSEY — Gravel
+    ("cl-jersey-long-light-gravel", "de"): {
+        "name": "Leichtes Gravel-Langarmtrikot",
+        "reason": "Lockerer Schnitt, Ärmel aufrollbar bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-light-gravel", "en"): {
+        "name": "Light Long-sleeve Gravel Jersey",
+        "reason": "Relaxed fit, can roll up sleeves at {temp_range}°C.",
+    },
+    # LIGHT LONG JERSEY — MTB
+    ("cl-jersey-long-light-mtb", "de"): {
+        "name": "Leichtes MTB-Langarmtrikot",
+        "reason": "Lockeres MTB-Shirt mit langen Ärmeln bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-light-mtb", "en"): {
+        "name": "Light Long-sleeve MTB Jersey",
+        "reason": "Loose MTB shirt with long sleeves at {temp_range}°C.",
+    },
+    # LIGHT LONG JERSEY — City
+    ("cl-jersey-long-light-city", "de"): {
+        "name": "Leichtes Langarm-Funktionsshirt",
+        "reason": "Legeres Langarmshirt bei {temp_range}°C.",
+    },
+    ("cl-jersey-long-light-city", "en"): {
+        "name": "Light Long-sleeve Performance Shirt",
+        "reason": "Casual long-sleeve shirt at {temp_range}°C.",
+    },
+    # BASE LAYER MERINO — Rennrad
+    ("cl-base-merino-rennrad", "de"): {
+        "name": "Merino-Baselayer (eng, Kompression)",
+        "reason": "Eng anliegend mit Kompression bei {feels:.0f}°C.",
+    },
+    ("cl-base-merino-rennrad", "en"): {
+        "name": "Merino Base Layer (tight, compression)",
+        "reason": "Tight-fitting with compression at {feels:.0f}°C.",
+    },
+    # BASE LAYER MERINO — Gravel
+    ("cl-base-merino-gravel", "de"): {
+        "name": "Merino-Baselayer (Merinowolle)",
+        "reason": "Merinowolle reguliert Wärme bei {feels:.0f}°C.",
+    },
+    ("cl-base-merino-gravel", "en"): {
+        "name": "Merino Base Layer (merino wool)",
+        "reason": "Merino wool regulates warmth at {feels:.0f}°C.",
+    },
+    # BASE LAYER MERINO — MTB
+    ("cl-base-merino-mtb", "de"): {
+        "name": "Merino-Baselayer (locker)",
+        "reason": "Locker sitzend, feuchtigkeitsregulierend bei {feels:.0f}°C.",
+    },
+    ("cl-base-merino-mtb", "en"): {
+        "name": "Merino Base Layer (loose)",
+        "reason": "Loose-fitting, moisture-regulating at {feels:.0f}°C.",
+    },
+    # BASE LAYER MERINO — City
+    ("cl-base-merino-city", "de"): {
+        "name": "Warmes Funktionsunterhemd",
+        "reason": "Normales Funktionsshirt unter der Kleidung bei {feels:.0f}°C.",
+    },
+    ("cl-base-merino-city", "en"): {
+        "name": "Warm Functional Undershirt",
+        "reason": "Normal functional undershirt under clothing at {feels:.0f}°C.",
+    },
+    # BASE LAYER WICKING — Rennrad
+    ("cl-base-wicking-rennrad", "de"): {
+        "name": "Leichtes Unterhemd (eng, Kompression)",
+        "reason": "Eng anliegend, transportiert Schweiß bei {feels:.0f}°C.",
+    },
+    ("cl-base-wicking-rennrad", "en"): {
+        "name": "Light Base Layer (tight, compression)",
+        "reason": "Tight-fitting, wicks sweat at {feels:.0f}°C.",
+    },
+    # BASE LAYER WICKING — Gravel
+    ("cl-base-wicking-gravel", "de"): {
+        "name": "Feuchtigkeitsableitendes Unterhemd",
+        "reason": "Transportiert Schweiß von der Haut bei {feels:.0f}°C.",
+    },
+    ("cl-base-wicking-gravel", "en"): {
+        "name": "Moisture-wicking Base Layer",
+        "reason": "Moves sweat away from skin at {feels:.0f}°C.",
+    },
+    # BASE LAYER WICKING — MTB
+    ("cl-base-wicking-mtb", "de"): {
+        "name": "Lockeres Funktionsunterhemd",
+        "reason": "Locker sitzend, leitet Feuchtigkeit ab bei {feels:.0f}°C.",
+    },
+    ("cl-base-wicking-mtb", "en"): {
+        "name": "Loose Functional Base Layer",
+        "reason": "Loose-fitting, wicks moisture at {feels:.0f}°C.",
+    },
+    # BASE LAYER WICKING — City
+    ("cl-base-wicking-city", "de"): {
+        "name": "Leichtes Alltagsunterhemd",
+        "reason": "Optional bei {feels:.0f}°C — bequem unter Alltagskleidung.",
+    },
+    ("cl-base-wicking-city", "en"): {
+        "name": "Light Casual Undershirt",
+        "reason": "Optional at {feels:.0f}°C — comfortable under everyday clothes.",
+    },
+    # SHOES — Rennrad
+    ("cl-shoes-rennrad", "de"): {
+        "name": "Rennrad-Klickschuhe",
+        "reason": "{ventilation} bei {temp_max:.0f}°C. Steife Sohle für maximale Kraftübertragung.",
+    },
+    ("cl-shoes-rennrad", "en"): {
+        "name": "Road Clip-in Shoes",
+        "reason": "{ventilation} at {temp_max:.0f}°C. Stiff sole for max power transfer.",
+    },
+    # SHOES — Gravel
+    ("cl-shoes-gravel", "de"): {
+        "name": "Gravel-Klickschuhe (Profilsohle)",
+        "reason": "{ventilation} bei {temp_max:.0f}°C. Griffige Sohle für Abstecher abseits der Straße.",
+    },
+    ("cl-shoes-gravel", "en"): {
+        "name": "Gravel Clip-in Shoes (tread sole)",
+        "reason": "{ventilation} at {temp_max:.0f}°C. Grippy sole for off-road excursions.",
+    },
+    # SHOES — MTB
+    ("cl-shoes-mtb", "de"): {
+        "name": "MTB-Schuhe (Flatpedal oder SPD)",
+        "reason": "{ventilation} bei {temp_max:.0f}°C. Robuste Sohle mit Grip für Trails.",
+    },
+    ("cl-shoes-mtb", "en"): {
+        "name": "MTB Shoes (flat pedal or SPD)",
+        "reason": "{ventilation} at {temp_max:.0f}°C. Rugged sole with grip for trails.",
+    },
+    # SHOES — City
+    ("cl-shoes-city", "de"): {
+        "name": "Feste Alltagsschuhe",
+        "reason": "Bequeme Schuhe mit fester Sohle bei {temp_max:.0f}°C.",
+    },
+    ("cl-shoes-city", "en"): {
+        "name": "Sturdy Everyday Shoes",
+        "reason": "Comfortable shoes with firm sole at {temp_max:.0f}°C.",
+    },
+    # LIGHT GLOVES — Rennrad
+    ("cl-gloves-light-rennrad", "de"): {
+        "name": "Leichte Rennrad-Handschuhe",
+        "reason": "Aerodynamisch und dünn bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-light-rennrad", "en"): {
+        "name": "Light Road Cycling Gloves",
+        "reason": "Aerodynamic and thin at {feels:.0f}°C.",
+    },
+    # LIGHT GLOVES — Gravel
+    ("cl-gloves-light-gravel", "de"): {
+        "name": "Gravel-Handschuhe (mehr Grip)",
+        "reason": "Grip und Polsterung für Schotter bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-light-gravel", "en"): {
+        "name": "Gravel Gloves (extra grip)",
+        "reason": "Grip and cushioning for gravel at {feels:.0f}°C.",
+    },
+    # LIGHT GLOVES — MTB
+    ("cl-gloves-light-mtb", "de"): {
+        "name": "MTB-Handschuhe (Polsterung + Grip)",
+        "reason": "Extra Polsterung und Grip für Trails bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-light-mtb", "en"): {
+        "name": "MTB Gloves (padding + grip)",
+        "reason": "Extra padding and grip for trails at {feels:.0f}°C.",
+    },
+    # LIGHT GLOVES — City
+    ("cl-gloves-light-city", "de"): {
+        "name": "Optionale Alltagshandschuhe",
+        "reason": "Leichte Handschuhe nach Bedarf bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-light-city", "en"): {
+        "name": "Optional Casual Gloves",
+        "reason": "Light gloves as needed at {feels:.0f}°C.",
+    },
+    # WARM GLOVES — Rennrad
+    ("cl-gloves-warm-rennrad", "de"): {
+        "name": "Warme Rennrad-Handschuhe",
+        "reason": "Isoliert, eng anliegend bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-warm-rennrad", "en"): {
+        "name": "Warm Road Cycling Gloves",
+        "reason": "Insulated, tight-fitting at {feels:.0f}°C.",
+    },
+    # WARM GLOVES — Gravel
+    ("cl-gloves-warm-gravel", "de"): {
+        "name": "Warme Gravel-Handschuhe",
+        "reason": "Isoliert mit extra Grip bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-warm-gravel", "en"): {
+        "name": "Warm Gravel Gloves",
+        "reason": "Insulated with extra grip at {feels:.0f}°C.",
+    },
+    # WARM GLOVES — MTB
+    ("cl-gloves-warm-mtb", "de"): {
+        "name": "Warme MTB-Handschuhe",
+        "reason": "Isoliert, gepolstert und griffig bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-warm-mtb", "en"): {
+        "name": "Warm MTB Gloves",
+        "reason": "Insulated, padded, and grippy at {feels:.0f}°C.",
+    },
+    # WARM GLOVES — City
+    ("cl-gloves-warm-city", "de"): {
+        "name": "Warme Alltagshandschuhe",
+        "reason": "Bequeme warme Handschuhe bei {feels:.0f}°C.",
+    },
+    ("cl-gloves-warm-city", "en"): {
+        "name": "Warm Casual Gloves",
+        "reason": "Comfortable warm gloves at {feels:.0f}°C.",
+    },
+    # RAIN JACKET — Rennrad
+    ("cl-rain-jacket-rennrad", "de"): {
+        "name": "Wasserdichte Rennradjacke (eng)",
+        "reason": "Eng anliegend, versiegelte Nähte bei {precip:.0f}% Regen.",
+    },
+    ("cl-rain-jacket-rennrad", "en"): {
+        "name": "Waterproof Road Jacket (tight)",
+        "reason": "Tight-fitting, sealed seams at {precip:.0f}% rain.",
+    },
+    # RAIN JACKET — Gravel
+    ("cl-rain-jacket-gravel", "de"): {
+        "name": "Wasserdichte Gravel-Jacke",
+        "reason": "Robuste Regenjacke für Schotterpisten bei {precip:.0f}% Regen.",
+    },
+    ("cl-rain-jacket-gravel", "en"): {
+        "name": "Waterproof Gravel Jacket",
+        "reason": "Rugged rain jacket for gravel roads at {precip:.0f}% rain.",
+    },
+    # RAIN JACKET — MTB
+    ("cl-rain-jacket-mtb", "de"): {
+        "name": "Wasserdichte MTB-Jacke (robust)",
+        "reason": "Robuste Regenjacke mit Belüftung bei {precip:.0f}% Regen.",
+    },
+    ("cl-rain-jacket-mtb", "en"): {
+        "name": "Waterproof MTB Jacket (rugged)",
+        "reason": "Rugged rain jacket with ventilation at {precip:.0f}% rain.",
+    },
+    # RAIN JACKET — City
+    ("cl-rain-jacket-city", "de"): {
+        "name": "Allwetter-Regenjacke",
+        "reason": "Alltagstaugliche Regenjacke bei {precip:.0f}% Regen.",
+    },
+    ("cl-rain-jacket-city", "en"): {
+        "name": "Everyday Rain Jacket",
+        "reason": "Everyday rain jacket at {precip:.0f}% rain.",
+    },
 }
 
 
@@ -416,6 +849,109 @@ EQUIPMENT_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     ("eq-energy", "en"): {
         "name": "Energy Bars",
         "reason": "Sustained energy for {dist:.0f} km distance.",
+    },
+    # ── SAFETY EQUIPMENT ─────────────────────────────────────────────
+    # Helmets (per bike type)
+    ("eq-helmet-rennrad", "de"): {
+        "name": "Rennradhelm (Aero)",
+        "reason": "Leichter, aerodynamischer Helm — immer tragen.",
+    },
+    ("eq-helmet-rennrad", "en"): {
+        "name": "Road Helmet (aero)",
+        "reason": "Lightweight, aerodynamic helmet — always wear one.",
+    },
+    ("eq-helmet-gravel", "de"): {
+        "name": "Allround-Radhelm",
+        "reason": "Vielseitiger Helm mit erweitertem Hinterkopfschutz.",
+    },
+    ("eq-helmet-gravel", "en"): {
+        "name": "All-round Cycling Helmet",
+        "reason": "Versatile helmet with extended rear coverage.",
+    },
+    ("eq-helmet-mtb", "de"): {
+        "name": "MTB-Helm (Enduro/Fullface)",
+        "reason": "Maximaler Schutz für Trails — Kinnbügel empfohlen.",
+    },
+    ("eq-helmet-mtb", "en"): {
+        "name": "MTB Helmet (enduro/full-face)",
+        "reason": "Maximum trail protection — chin guard recommended.",
+    },
+    ("eq-helmet-city", "de"): {
+        "name": "Urban-Fahrradhelm",
+        "reason": "Schicker Helm für den Alltag — Sicherheit geht vor.",
+    },
+    ("eq-helmet-city", "en"): {
+        "name": "Urban Cycling Helmet",
+        "reason": "Stylish helmet for daily rides — safety first.",
+    },
+    # Reflective vest
+    ("eq-reflective-vest", "de"): {
+        "name": "Reflektierende Warnweste",
+        "reason": "Sichtbarkeit erhöhen bei Dämmerung oder schlechter Sicht.",
+    },
+    ("eq-reflective-vest", "en"): {
+        "name": "Reflective Safety Vest",
+        "reason": "Increase visibility at dusk or in poor conditions.",
+    },
+    # Protectors
+    ("eq-protectors-mtb", "de"): {
+        "name": "Knie- & Ellbogenschoner",
+        "reason": "Schutz vor Stürzen auf Trails — immer empfohlen für MTB.",
+    },
+    ("eq-protectors-mtb", "en"): {
+        "name": "Knee & Elbow Pads",
+        "reason": "Crash protection on trails — always recommended for MTB.",
+    },
+    ("eq-protectors-gravel", "de"): {
+        "name": "Leichte Knieschoner (optional)",
+        "reason": "Zusätzlicher Schutz auf technischen Schotterpisten.",
+    },
+    ("eq-protectors-gravel", "en"): {
+        "name": "Light Knee Pads (optional)",
+        "reason": "Extra protection on technical gravel roads.",
+    },
+    # First aid kit
+    ("eq-first-aid", "de"): {
+        "name": "Erste-Hilfe-Set (kompakt)",
+        "reason": "Pflaster, Desinfektionstücher und Verband für unterwegs.",
+    },
+    ("eq-first-aid", "en"): {
+        "name": "First Aid Kit (compact)",
+        "reason": "Band-aids, antiseptic wipes, and bandage for the road.",
+    },
+    # Lock
+    ("eq-lock-city", "de"): {
+        "name": "Fahrradschloss",
+        "reason": "Sicheres Schloss für Zwischenstopps in der Stadt — unverzichtbar.",
+    },
+    ("eq-lock-city", "en"): {
+        "name": "Bike Lock",
+        "reason": "Secure lock for city stops — essential.",
+    },
+    ("eq-lock", "de"): {
+        "name": "Leichtes Kabelschloss",
+        "reason": "Leichtes Schloss für Pausen bei {dist:.0f} km langen Fahrten.",
+    },
+    ("eq-lock", "en"): {
+        "name": "Light Cable Lock",
+        "reason": "Light lock for breaks on {dist:.0f} km rides.",
+    },
+    # Bell
+    ("eq-bell-city", "de"): {
+        "name": "Fahrradklingel",
+        "reason": "In Deutschland gesetzlich vorgeschrieben (StVZO) — auf jedem Rad Pflicht.",
+    },
+    ("eq-bell-city", "en"): {
+        "name": "Bike Bell",
+        "reason": "Legally required in Germany (StVZO) — mandatory on every bike.",
+    },
+    ("eq-bell-gravel", "de"): {
+        "name": "Fahrradklingel",
+        "reason": "Empfohlen auf gemischten Rad-/Fußwegen.",
+    },
+    ("eq-bell-gravel", "en"): {
+        "name": "Bike Bell",
+        "reason": "Recommended on shared bike/pedestrian paths.",
     },
 }
 
