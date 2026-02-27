@@ -30,8 +30,12 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "📦 Backend version: ${VERSION}"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+          # Check if this is a stable release that can be retagged from preview
+          if [[ ! "$VERSION" =~ -preview\. ]]; then
+            echo "is_stable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_stable=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -40,7 +44,54 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check for existing preview image
+        id: check_preview
+        if: steps.version.outputs.is_stable == 'true'
+        run: |
+          BASE_VERSION="${{ steps.version.outputs.version }}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+
+          # Find the latest preview tag for this version via the registry
+          LATEST_PREVIEW=""
+          for i in $(seq 20 -1 1); do
+            TAG="${BASE_VERSION}-preview.${i}"
+            if docker manifest inspect "${IMAGE}:${TAG}" > /dev/null 2>&1; then
+              LATEST_PREVIEW="${TAG}"
+              break
+            fi
+          done
+
+          if [[ -n "$LATEST_PREVIEW" ]]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "preview_tag=${LATEST_PREVIEW}" >> "$GITHUB_OUTPUT"
+            echo "✅ Found preview image: ${IMAGE}:${LATEST_PREVIEW}"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No preview image found, will build from source"
+          fi
+
+      - name: Retag preview image as stable
+        if: steps.check_preview.outputs.found == 'true'
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          PREVIEW="${{ steps.check_preview.outputs.preview_tag }}"
+          STABLE="${{ steps.version.outputs.version }}"
+
+          echo "🔄 Retagging ${IMAGE}:${PREVIEW} → ${IMAGE}:${STABLE}"
+
+          # Pull, tag, and push for each platform
+          docker buildx imagetools create \
+            --tag "${IMAGE}:${STABLE}" \
+            "${IMAGE}:${PREVIEW}"
+
+          echo "✅ Successfully retagged as ${IMAGE}:${STABLE}"
+
+      - name: Set up Docker Buildx
+        if: steps.check_preview.outputs.found != 'true'
+        uses: docker/setup-buildx-action@v3
+
       - name: Extract metadata
+        if: steps.check_preview.outputs.found != 'true'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -49,6 +100,7 @@ jobs:
             type=raw,value=${{ steps.version.outputs.version }}
 
       - name: Build and push Docker image
+        if: steps.check_preview.outputs.found != 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./backend

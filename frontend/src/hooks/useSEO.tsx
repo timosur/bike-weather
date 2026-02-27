@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const SITE_URL = 'https://bike-weather.com'
@@ -17,7 +17,7 @@ export interface SEOProps {
   ogType?: string
 }
 
-/** SEO component — renders <Helmet> tags for title, meta, OG, Twitter, canonical, hreflang */
+/** SEO component — renders document metadata using React 19 native support */
 export function SEO({ titleKey, path, noIndex, ogImage, ogType = 'website' }: SEOProps) {
   const { t, i18n } = useTranslation()
 
@@ -28,9 +28,12 @@ export function SEO({ titleKey, path, noIndex, ogImage, ogType = 'website' }: SE
   const ogLocaleAlt = i18n.language === 'en' ? 'de_DE' : 'en_US'
   const image = ogImage || DEFAULT_OG_IMAGE
 
+  useEffect(() => {
+    document.documentElement.lang = i18n.language
+  }, [i18n.language])
+
   return (
-    <Helmet>
-      <html lang={i18n.language} />
+    <>
       <title>{title}</title>
       <meta name="description" content={description} />
 
@@ -58,6 +61,6 @@ export function SEO({ titleKey, path, noIndex, ogImage, ogType = 'website' }: SE
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
-    </Helmet>
+    </>
   )
 }

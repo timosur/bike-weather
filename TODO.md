@@ -1,6 +1,5 @@
 - Add back products with really proper products and refferal links in place
 - Add insights open source, also used by Peter
-- Do production release (but after insights have been added, to check insights)
 - Check for e2e tests and maybe just record the most important flows
-- Add contents of repair kit, what should be part of it depending on distance, style and speed
 - Add auto sync job for preview release in ArgoCD to release fast?
+- Add version number to footer of app
