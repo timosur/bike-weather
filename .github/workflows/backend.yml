@@ -6,6 +6,10 @@ on:
       - "backend/v[0-9]+.[0-9]+.[0-9]+"
       - "backend/v[0-9]+.[0-9]+.[0-9]+-preview.*"
 
+concurrency:
+  group: backend-build
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/backend

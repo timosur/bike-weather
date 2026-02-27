@@ -6,6 +6,10 @@ on:
       - "frontend/v[0-9]+.[0-9]+.[0-9]+"
       - "frontend/v[0-9]+.[0-9]+.[0-9]+-preview.*"
 
+concurrency:
+  group: frontend-build
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/frontend
