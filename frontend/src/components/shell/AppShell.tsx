@@ -276,6 +276,8 @@ export function AppShell({
               <p className="text-xs text-stone-400 dark:text-stone-500">
                 {t('shell.footer.copyright', { year: new Date().getFullYear() })}{' '}
                 <a href="https://github.com/timosur" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.copyrightAuthor')}</a>
+                {' · '}
+                <span className="tabular-nums">v{__APP_VERSION__}</span>
               </p>
               <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
                 <span className="text-xs text-stone-400 dark:text-stone-500">

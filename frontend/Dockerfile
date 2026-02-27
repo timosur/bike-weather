@@ -1,6 +1,9 @@
 # Build stage
 FROM node:20-alpine AS build
 
+ARG APP_VERSION=0.0.0
+ENV VITE_APP_VERSION=${APP_VERSION}
+
 WORKDIR /app
 COPY package.json ./
 RUN npm install
