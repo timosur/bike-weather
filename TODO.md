@@ -3,3 +3,9 @@
 - Enable captcha on preview and then also prod
 - Do production release (but after insights have been added, to check insights)
 - Check about mentioning of third party tools that I am using, like location or weather data, because I think I need to name them in my website
+- Add SEO optimization
+- Check for e2e tests and maybe just record the most important flows
+- Add contents of repair kit, what should be part of it depending on distance, style and speed
+- Fix mobile view on iOS and sizing issues of input in planner and areas in report
+- Add auto sync job for preview release in ArgoCD to release fast?
+- Add password edit to user menu
