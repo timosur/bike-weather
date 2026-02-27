@@ -198,7 +198,8 @@
       "caution": "Vorsicht",
       "cautionDescription": "Fahrt möglich, aber mit Einschränkungen",
       "notRecommended": "Nicht empfohlen",
-      "notRecommendedDescription": "Fahrt zu gefährlich"
+      "notRecommendedDescription": "Fahrt zu gefährlich",
+      "learnMore": "Was bedeuten die Bewertungen?"
     },
     "weather": {
       "feelsLike": "Gefühlt {{temp}}{{unit}}",

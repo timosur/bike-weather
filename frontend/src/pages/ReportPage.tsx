@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useRideHistory } from '../hooks/useRideHistory'
 import { fetchReport } from '../api/rides'
 import { createRoute, fetchRoute, updateRoute } from '../api/routes'
-import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
+// import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { RideInput } from '../components/ride-planner/types'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
 
@@ -247,12 +247,12 @@ export default function ReportPage() {
     })
   }
 
-  const handleProductClick = (productId: string) => {
-    const product = sampleProducts.find((p) => p.id === productId)
-    if (product) {
-      window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
-    }
-  }
+  // const handleProductClick = (productId: string) => {
+  //   const product = sampleProducts.find((p) => p.id === productId)
+  //   if (product) {
+  //     window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
+  //   }
+  // }
 
   const handleRetry = () => {
     if (submittedInput) {
@@ -348,10 +348,10 @@ export default function ReportPage() {
             saveChangesLoading={saveChangesLoading}
             hasUnsavedChanges={hasUnsavedChanges}
             onSwapClothingItem={handleSwapClothingItem}
-            products={sampleProducts}
-            shops={shops}
-            disclosure={disclosure}
-            onProductClick={handleProductClick}
+          // products={sampleProducts}
+          // shops={shops}
+          // disclosure={disclosure}
+          // onProductClick={handleProductClick}
           />
         </div>
       )}

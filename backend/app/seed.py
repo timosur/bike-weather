@@ -414,6 +414,50 @@ async def _seed_faq(session: AsyncSession) -> None:
             category="Technisches",
             display_order=9,
         ),
+        FaqItem(
+            id="bedingungen-erklaerung",
+            question="Was bedeuten die Fahrbedingungen?",
+            answer=(
+                "Die Fahrbedingungen zeigen dir auf einen Blick, wie gut das Wetter f\u00fcr eine "
+                "Radtour geeignet ist. Es gibt vier Stufen: \u00abIdeal\u00bb bedeutet perfektes Radwetter "
+                "mit angenehmen Temperaturen, wenig Wind und keinem Regen. \u00abGut\u00bb hei\u00dft, "
+                "dass die Bedingungen insgesamt in Ordnung sind, aber kleine Einschr\u00e4nkungen "
+                "m\u00f6glich sind. \u00abVorsicht\u00bb wird angezeigt, wenn st\u00e4rkerer Wind, k\u00fchle "
+                "Temperaturen oder h\u00f6here Regenwahrscheinlichkeit die Fahrt beeintr\u00e4chtigen "
+                "k\u00f6nnten \u2014 du solltest dich entsprechend vorbereiten. \u00abNicht empfohlen\u00bb "
+                "erscheint bei Extremwetter wie Gewitter, Schnee, Eiseskälte oder Sturm, "
+                "bei dem eine Fahrt gef\u00e4hrlich w\u00e4re."
+            ),
+            category="Fahrbedingungen",
+            display_order=10,
+        ),
+        FaqItem(
+            id="bedingungen-faktoren",
+            question="Welche Faktoren beeinflussen die Bewertung?",
+            answer=(
+                "Die Bewertung ber\u00fccksichtigt mehrere Wetterfaktoren: die gef\u00fchlte Temperatur, "
+                "die Windgeschwindigkeit, die Niederschlagswahrscheinlichkeit und extreme "
+                "Wetterereignisse wie Gewitter oder Schneefall. All diese Faktoren werden "
+                "kombiniert, um eine Gesamteinsch\u00e4tzung zu geben. Die Details zu jedem "
+                "Faktor siehst du direkt im Fahrtbericht unter der Bewertung."
+            ),
+            category="Fahrbedingungen",
+            display_order=11,
+        ),
+        FaqItem(
+            id="empfehlung-system",
+            question="Wie funktioniert das Empfehlungssystem?",
+            answer=(
+                "Das Empfehlungssystem analysiert das Wetter f\u00fcr deine geplante Fahrt und "
+                "ber\u00fccksichtigt dabei Temperatur, Wind, Niederschlag und deine Fahrintensit\u00e4t. "
+                "Daraus werden Kleidungsempfehlungen f\u00fcr jede K\u00f6rperzone erstellt \u2014 von Kopf "
+                "bis Fu\u00df \u2014 sowie passende Ausr\u00fcstungshinweise wie Licht, Schutzbleche oder "
+                "Trinkflasche. Sportliche Fahrer bekommen leichtere Empfehlungen, gem\u00fctliche "
+                "Fahrer etwas w\u00e4rmere."
+            ),
+            category="Empfehlungen",
+            display_order=12,
+        ),
     ]
     for item in items:
         existing = await session.get(FaqItem, item.id)
@@ -885,6 +929,71 @@ async def _seed_translations(session: AsyncSession) -> None:
             "locale": "en",
             "field_name": "category",
             "value": "Technical",
+        },
+        # --- Ride conditions FAQ ---
+        {
+            "entity_type": "faq_item",
+            "entity_id": "bedingungen-erklaerung",
+            "locale": "en",
+            "field_name": "question",
+            "value": "What do the ride conditions mean?",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "bedingungen-erklaerung",
+            "locale": "en",
+            "field_name": "answer",
+            "value": "Ride conditions show you at a glance how suitable the weather is for cycling. There are four levels: \u00abIdeal\u00bb means perfect cycling weather with pleasant temperatures, light wind, and no rain. \u00abGood\u00bb means conditions are generally fine but minor limitations are possible. \u00abCaution\u00bb appears when stronger wind, cool temperatures, or a higher chance of rain could affect your ride \u2014 you should prepare accordingly. \u00abNot recommended\u00bb is shown in extreme weather such as thunderstorms, snow, freezing cold, or storms where riding would be dangerous.",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "bedingungen-erklaerung",
+            "locale": "en",
+            "field_name": "category",
+            "value": "Ride Conditions",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "bedingungen-faktoren",
+            "locale": "en",
+            "field_name": "question",
+            "value": "What factors influence the rating?",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "bedingungen-faktoren",
+            "locale": "en",
+            "field_name": "answer",
+            "value": "The rating considers several weather factors: the feels-like temperature, wind speed, precipitation probability, and extreme weather events such as thunderstorms or snowfall. All these factors are combined to produce an overall assessment. You can see the details for each factor in the ride report below the rating.",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "bedingungen-faktoren",
+            "locale": "en",
+            "field_name": "category",
+            "value": "Ride Conditions",
+        },
+        # --- Recommendation system FAQ ---
+        {
+            "entity_type": "faq_item",
+            "entity_id": "empfehlung-system",
+            "locale": "en",
+            "field_name": "question",
+            "value": "How does the recommendation system work?",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "empfehlung-system",
+            "locale": "en",
+            "field_name": "answer",
+            "value": "The recommendation system analyses the weather for your planned ride, taking into account temperature, wind, precipitation, and your riding intensity. From this it generates clothing recommendations for every body zone \u2014 from head to toe \u2014 as well as gear suggestions like lights, mudguards, or water bottles. Athletic riders receive lighter recommendations while leisurely riders get warmer ones.",
+        },
+        {
+            "entity_type": "faq_item",
+            "entity_id": "empfehlung-system",
+            "locale": "en",
+            "field_name": "category",
+            "value": "Recommendations",
         },
         # --- About content ---
         {

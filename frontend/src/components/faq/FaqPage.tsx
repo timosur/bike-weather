@@ -1,14 +1,43 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { FaqPageProps } from './types'
 
-export function FaqPage({ items }: FaqPageProps) {
-  const [openId, setOpenId] = useState<string | null>(null)
+/** Slugify a category name for use as an HTML id / anchor target. */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[äÄ]/g, 'ae')
+    .replace(/[öÖ]/g, 'oe')
+    .replace(/[üÜ]/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+export function FaqPage({ items, initialSection }: FaqPageProps) {
   const { t } = useTranslation()
 
   const categories = [...new Set(items.map(i => i.category))]
+
+  // Auto-open the first item in the target category when navigated via anchor
+  const initialOpenId = (() => {
+    if (!initialSection) return null
+    const targetCategory = categories.find(c => slugify(c) === initialSection)
+    if (!targetCategory) return null
+    const firstItem = items.find(i => i.category === targetCategory)
+    return firstItem?.id ?? null
+  })()
+
+  const [openId, setOpenId] = useState<string | null>(initialOpenId)
+
+  // Update openId when initialSection changes (navigation from another page)
+  useEffect(() => {
+    if (initialOpenId) {
+      setOpenId(initialOpenId)
+    }
+  }, [initialOpenId])
 
   const toggle = (id: string) => {
     setOpenId(prev => (prev === id ? null : id))
@@ -33,7 +62,7 @@ export function FaqPage({ items }: FaqPageProps) {
         {/* FAQ sections */}
         <div className="space-y-6">
           {categories.map(category => (
-            <div key={category} className="space-y-2">
+            <div key={category} id={slugify(category)} className="space-y-2 scroll-mt-24">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {category}
               </h2>

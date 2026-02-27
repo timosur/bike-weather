@@ -198,7 +198,8 @@
       "caution": "Caution",
       "cautionDescription": "Ride possible, but with limitations",
       "notRecommended": "Not recommended",
-      "notRecommendedDescription": "Too dangerous to ride"
+      "notRecommendedDescription": "Too dangerous to ride",
+      "learnMore": "What do the ratings mean?"
     },
     "weather": {
       "feelsLike": "Feels like {{temp}}{{unit}}",

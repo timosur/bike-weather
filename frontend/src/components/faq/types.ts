@@ -7,4 +7,6 @@ export interface FaqItem {
 
 export interface FaqPageProps {
   items: FaqItem[]
+  /** Slug of the category section to auto-open (from URL hash). */
+  initialSection?: string
 }

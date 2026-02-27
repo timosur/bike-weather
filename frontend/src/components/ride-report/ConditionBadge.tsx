@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+import { HelpCircle } from 'lucide-react'
 import type { ConditionRating, ConditionReason } from './types'
 
 const conditionConfig: Record<ConditionRating, { key: string; bg: string; text: string; dot: string; border: string; accent: string }> = {
@@ -92,6 +94,15 @@ export function ConditionBadge({ condition, size = 'md', reasons }: ConditionBad
             </li>
           ))}
         </ul>
+
+        {/* FAQ link */}
+        <Link
+          to="/faq#fahrbedingungen"
+          className="inline-flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors pt-1"
+        >
+          <HelpCircle className="w-3 h-3" />
+          {t('report.condition.learnMore')}
+        </Link>
       </div>
     </div>
   )
