@@ -29,10 +29,10 @@ test.describe('My Routes', () => {
   test('route card shows details', async ({ page }) => {
     await page.goto('/routes')
 
-    // Check route card contains location and distance
+    // Check route card contains location and distance (mock has 12 km for Morning Commute)
     await expect(page.getByText(/morning commute/i)).toBeVisible({ timeout: 10000 })
     await expect(page.getByText(/berlin/i).first()).toBeVisible()
-    await expect(page.getByText(/50\s*km/i).first()).toBeVisible()
+    await expect(page.getByText(/12\s*km/i).first()).toBeVisible()
   })
 
   test('empty state shows when no routes', async ({ page }) => {
@@ -79,11 +79,11 @@ test.describe('My Routes', () => {
     // Click Delete
     await page.getByText(/^delete$/i).click()
 
-    // Should show confirmation dialog
-    await expect(page.getByText(/confirm|are you sure|wirklich/i).first()).toBeVisible({ timeout: 5000 })
+    // Should show confirmation dialog (heading: "Really delete route?")
+    await expect(page.getByText(/really delete|wirklich löschen/i).first()).toBeVisible({ timeout: 5000 })
 
     // Confirm deletion
-    const confirmBtn = page.getByRole('button', { name: /confirm|delete|yes|löschen/i }).last()
+    const confirmBtn = page.getByRole('button', { name: /^delete$/i })
     await confirmBtn.click()
   })
 

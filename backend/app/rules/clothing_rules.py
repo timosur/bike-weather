@@ -1,6 +1,10 @@
 """Rule-based clothing recommendations from weather, bike type, and intensity."""
 
-from app.rules.translations import get_clothing_translation, SHOE_VENTILATION
+from app.rules.translations import (
+    get_clothing_translation,
+    SHOE_VENTILATION,
+    temp_range_str,
+)
 from app.services.weather import WeatherForecast
 
 
@@ -21,16 +25,20 @@ def _make_item(
         translated_alts = []
         for a in alternatives:
             alt_trans = get_clothing_translation(a["id"], locale)
-            translated_alts.append({
-                "id": a["id"],
-                "name": alt_trans["name"] if alt_trans else a["id"],
-                "icon": a["icon"],
-            })
+            translated_alts.append(
+                {
+                    "id": a["id"],
+                    "name": alt_trans["name"] if alt_trans else a["id"],
+                    "icon": a["icon"],
+                }
+            )
         item["alternatives"] = translated_alts
     return item
 
 
-def get_clothing_items(weather: WeatherForecast, bike_type: str, intensity: str, locale: str = "de") -> list[dict]:
+def get_clothing_items(
+    weather: WeatherForecast, bike_type: str, intensity: str, locale: str = "de"
+) -> list[dict]:
     """Return a list of clothing item dicts based on weather conditions."""
     items: list[dict] = []
     feels = weather.temp_feels_like
@@ -51,6 +59,7 @@ def get_clothing_items(weather: WeatherForecast, bike_type: str, intensity: str,
     fvars = {
         "temp_min": temp_min,
         "temp_max": temp_max,
+        "temp_range": temp_range_str(temp_min, temp_max),
         "feels": feels,
         "precip": precip,
         "wind": wind,
@@ -79,15 +88,25 @@ def get_clothing_items(weather: WeatherForecast, bike_type: str, intensity: str,
     if effective_feels < 0:
         items.append(_make_item("cl-thermal-jersey", "jersey-long", locale, fvars))
     elif effective_feels < 10:
-        items.append(_make_item(
-            "cl-jersey-long", "jersey-long", locale, fvars,
-            alternatives=[{"id": "cl-jersey-arm", "icon": "arm-warmers"}],
-        ))
+        items.append(
+            _make_item(
+                "cl-jersey-long",
+                "jersey-long",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-jersey-arm", "icon": "arm-warmers"}],
+            )
+        )
     elif effective_feels < 20:
-        items.append(_make_item(
-            "cl-jersey-long-light", "jersey-long", locale, fvars,
-            alternatives=[{"id": "cl-jersey-short-alt", "icon": "arm-warmers"}],
-        ))
+        items.append(
+            _make_item(
+                "cl-jersey-long-light",
+                "jersey-long",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-jersey-short-alt", "icon": "arm-warmers"}],
+            )
+        )
     else:
         items.append(_make_item("cl-jersey-short", "jersey", locale, fvars))
 
@@ -95,31 +114,51 @@ def get_clothing_items(weather: WeatherForecast, bike_type: str, intensity: str,
     if precip > 50:
         items.append(_make_item("cl-rain-jacket", "rain-jacket", locale, fvars))
     elif precip > 20:
-        items.append(_make_item(
-            "cl-packable-rain", "jacket", locale, fvars,
-            alternatives=[{"id": "cl-vest-alt", "icon": "vest"}],
-        ))
+        items.append(
+            _make_item(
+                "cl-packable-rain",
+                "jacket",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-vest-alt", "icon": "vest"}],
+            )
+        )
     elif wind > 30:
         items.append(_make_item("cl-wind-jacket", "jacket", locale, fvars))
     elif wind > 15:
-        items.append(_make_item(
-            "cl-wind-vest", "vest", locale, fvars,
-            alternatives=[{"id": "cl-jacket-alt", "icon": "jacket"}],
-        ))
+        items.append(
+            _make_item(
+                "cl-wind-vest",
+                "vest",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-jacket-alt", "icon": "jacket"}],
+            )
+        )
     elif effective_feels < 5:
         items.append(_make_item("cl-insulated-jacket", "jacket", locale, fvars))
 
     # --- LEGS ---
     if effective_feels < 5:
-        items.append(_make_item(
-            "cl-thermal-tights", "pants-long", locale, fvars,
-            alternatives=[{"id": "cl-tights-warmers", "icon": "leg-warmers"}],
-        ))
+        items.append(
+            _make_item(
+                "cl-thermal-tights",
+                "pants-long",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-tights-warmers", "icon": "leg-warmers"}],
+            )
+        )
     elif effective_feels < 15:
-        items.append(_make_item(
-            "cl-padded-tights", "pants-long", locale, fvars,
-            alternatives=[{"id": "cl-shorts-warmers", "icon": "leg-warmers"}],
-        ))
+        items.append(
+            _make_item(
+                "cl-padded-tights",
+                "pants-long",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-shorts-warmers", "icon": "leg-warmers"}],
+            )
+        )
     else:
         items.append(_make_item("cl-shorts", "pants-short", locale, fvars))
 
@@ -129,7 +168,9 @@ def get_clothing_items(weather: WeatherForecast, bike_type: str, intensity: str,
 
     # --- HANDS ---
     if effective_feels < 0:
-        items.append(_make_item("cl-gloves-waterproof", "gloves-waterproof", locale, fvars))
+        items.append(
+            _make_item("cl-gloves-waterproof", "gloves-waterproof", locale, fvars)
+        )
     elif effective_feels < 10:
         if precip > 40:
             items.append(_make_item("cl-gloves-wp", "gloves-waterproof", locale, fvars))
@@ -146,7 +187,9 @@ def get_clothing_items(weather: WeatherForecast, bike_type: str, intensity: str,
     if effective_feels > 15:
         ventilation = SHOE_VENTILATION.get(f"{locale}_good", "Good ventilation")
     else:
-        ventilation = SHOE_VENTILATION.get(f"{locale}_stiff", "Stiff sole for efficient power transfer")
+        ventilation = SHOE_VENTILATION.get(
+            f"{locale}_stiff", "Stiff sole for efficient power transfer"
+        )
     shoe_fvars = {**fvars, "ventilation": ventilation}
     items.append(_make_item("cl-shoes", "shoes", locale, shoe_fvars))
 

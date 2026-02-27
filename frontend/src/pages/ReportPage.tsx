@@ -175,7 +175,15 @@ export default function ReportPage() {
         setCurrentRouteId(route.id)
         setEditOriginalInput(submittedInput) // Now this is the original for future edits
         // Update URL to include route ID so refresh preserves data
-        navigate(`/report/${route.id}`, { replace: true })
+        // Pass state so the component doesn't re-fetch and lose edit context
+        navigate(`/report/${route.id}`, {
+          replace: true,
+          state: {
+            input: submittedInput,
+            routeId: route.id,
+            originalInput: submittedInput,
+          },
+        })
         addToast(t('report.routeSaved'), 'success')
       })
       .catch(() => {
@@ -256,8 +264,13 @@ export default function ReportPage() {
   // "Edit Ride" - go back to planner with route ID in URL
   const handleEditRide = () => {
     if (currentRouteId) {
-      // Navigate to planner with route ID — planner will load route and enter edit mode
-      navigate(`/planner/${currentRouteId}`)
+      // Navigate to planner with route ID and pass current input via state
+      // so planner can enter edit mode even if ride_input isn't stored in DB yet
+      navigate(`/planner/${currentRouteId}`, {
+        state: {
+          editInput: submittedInput,
+        }
+      })
     } else {
       // No saved route yet — just go back to planner with the current input
       navigate('/planner', {

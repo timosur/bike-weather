@@ -85,9 +85,7 @@ export function RidePlanner({
   const [durationManuallySet, setDurationManuallySet] = useState(!!initialValues?.durationMinutes)
   const [speedManuallySet, setSpeedManuallySet] = useState(!!initialValues?.averageSpeedKmh)
 
-  const [showAdvanced, setShowAdvanced] = useState(
-    !!(initialValues?.distanceKm || initialValues?.elevationMeters || initialValues?.durationMinutes || initialValues?.averageSpeedKmh)
-  )
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -147,7 +145,6 @@ export function RidePlanner({
       endDate: preset.isMultiDay ? f.endDate : null,
       dayStops: preset.isMultiDay ? f.dayStops : [],
     }))
-    if (preset.distanceKm) setShowAdvanced(true)
     onPresetSelect?.(preset)
   }
 

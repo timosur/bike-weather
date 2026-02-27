@@ -12,14 +12,14 @@ export async function fillBasicRide(
   const distance = options?.distance ?? 35
 
   if (!options?.skipLocationSearch) {
-    // Click "Search location" idle button
+    // Click "Search location" idle button — must wait for render
     const searchBtn = page.getByRole('button', { name: /search location/i })
-    if (await searchBtn.isVisible().catch(() => false)) {
-      await searchBtn.click()
-    }
+    await expect(searchBtn).toBeVisible({ timeout: 10000 })
+    await searchBtn.click()
 
     // Type into the location input (placeholder: "Enter city or address…")
     const locationInput = page.getByPlaceholder(/city or address|ort oder adresse/i)
+    await expect(locationInput).toBeVisible({ timeout: 5000 })
     await locationInput.fill('Berlin')
     await page.waitForTimeout(400)
 
@@ -39,6 +39,6 @@ export async function fillBasicRide(
  * Click the "Get weather" submit button and wait for navigation to /report.
  */
 export async function submitPlannerForm(page: Page) {
-  await page.getByRole('button', { name: /get weather|wetter/i }).click()
+  await page.locator('form').getByRole('button', { name: /get weather/i }).click()
   await expect(page).toHaveURL(/\/report/, { timeout: 10000 })
 }

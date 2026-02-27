@@ -41,9 +41,9 @@ test.describe('Ride Report', () => {
 
     // Clothing section header
     await expect(page.getByText(/clothing recommendation/i)).toBeVisible({ timeout: 10000 })
-    // Clothing items from mock — rendered directly as item.name
-    await expect(page.getByText('Long-sleeve jersey')).toBeVisible()
-    await expect(page.getByText('Windproof vest')).toBeVisible()
+    // Clothing items from mock — rendered directly as item.name (exact to avoid product name matches)
+    await expect(page.getByText('Long-sleeve jersey', { exact: true })).toBeVisible()
+    await expect(page.getByText('Windproof vest', { exact: true })).toBeVisible()
   })
 
   test('displays equipment checklist', async ({ page }) => {

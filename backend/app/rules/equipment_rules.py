@@ -1,6 +1,6 @@
 """Rule-based equipment recommendations from weather, distance, and time."""
 
-from app.rules.translations import get_equipment_translation
+from app.rules.translations import get_equipment_translation, temp_range_str
 from app.services.weather import WeatherForecast
 
 
@@ -16,6 +16,7 @@ def get_equipment_items(
     weather: WeatherForecast,
     distance_km: float | None,
     ride_start_time: str | None = None,
+    ride_end_time: str | None = None,
     locale: str = "de",
 ) -> list[dict]:
     """Return a list of equipment item dicts."""
@@ -24,14 +25,22 @@ def get_equipment_items(
     precip = weather.precipitation_probability
     temp = weather.temp_feels_like
 
-    dist_suffix = f" over {dist:.0f} km" if dist > 0 and locale == "en" else (f" über {dist:.0f} km" if dist > 0 else "")
+    dist_suffix = (
+        f" over {dist:.0f} km"
+        if dist > 0 and locale == "en"
+        else (f" über {dist:.0f} km" if dist > 0 else "")
+    )
 
     fvars = {
         "temp_min": weather.temp_min,
         "temp_max": weather.temp_max,
+        "temp_range": temp_range_str(weather.temp_min, weather.temp_max),
         "precip": precip,
         "uv_index": weather.uv_index,
+        "sunrise": weather.sunrise,
         "sunset": weather.sunset,
+        "ride_start": ride_start_time or "",
+        "ride_end": ride_end_time or "",
         "dist": dist,
         "dist_suffix": dist_suffix,
     }
@@ -45,9 +54,16 @@ def get_equipment_items(
     if weather.uv_index >= 3:
         items.append(_make_eq_item("eq-sunscreen", locale, fvars))
 
-    # Lights: if ride could extend near sunset
-    if ride_start_time and weather.sunset:
-        items.append(_make_eq_item("eq-lights", locale, fvars))
+    # Lights: if ride falls outside daylight hours
+    if ride_start_time and weather.sunrise and weather.sunset:
+        before_sunrise = ride_start_time < weather.sunrise
+        after_sunset = (ride_end_time or ride_start_time) >= weather.sunset
+        if before_sunrise and after_sunset:
+            items.append(_make_eq_item("eq-lights-both", locale, fvars))
+        elif before_sunrise:
+            items.append(_make_eq_item("eq-lights-before-sunrise", locale, fvars))
+        elif after_sunset:
+            items.append(_make_eq_item("eq-lights-after-sunset", locale, fvars))
 
     # Rain gear
     if precip > 50:

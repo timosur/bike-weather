@@ -52,12 +52,14 @@ export default function PlannerPage() {
   // Check for incoming state from navigation
   interface PlannerLocationState {
     prefillInput?: RideInput
+    editInput?: RideInput   // passed from ReportPage "Edit Ride" button
     reset?: boolean
     rideInput?: RideInput  // legacy: from RoutesPage
     routeId?: string       // legacy: from RoutesPage
   }
   const routerState = location.state as PlannerLocationState | null
   const incomingPrefillInput = routerState?.prefillInput
+  const incomingEditInput = routerState?.editInput    // from "Edit Ride"
   const incomingRideInput = routerState?.rideInput  // legacy
   const incomingRouteId = routerState?.routeId       // legacy
   const shouldReset = routerState?.reset
@@ -159,6 +161,18 @@ export default function PlannerPage() {
   useEffect(() => {
     if (!urlRouteId || urlRouteLoading.current) return
     urlRouteLoading.current = true
+
+    // If we received the input via navigation state (from "Edit Ride" button),
+    // use it directly to enter edit mode — no API fetch needed.
+    if (incomingEditInput) {
+      setEditRouteId(urlRouteId)
+      setEditOriginalInput(incomingEditInput)
+      setUrlRouteInput(incomingEditInput)
+      // Clear the state so refresh triggers a fresh fetch
+      window.history.replaceState({}, '')
+      return
+    }
+
     fetchRoute(urlRouteId)
       .then((route) => {
         // If route has stored rideInput, enter edit mode (don't auto-submit)
@@ -191,7 +205,7 @@ export default function PlannerPage() {
         // Route not found or auth error — redirect to plain planner
         navigate('/planner', { replace: true })
       })
-  }, [urlRouteId, doSubmit, navigate])
+  }, [urlRouteId, incomingEditInput, doSubmit, navigate])
 
   // Recent rides: select an entry → navigate to report
   const handleHistorySelect = (entry: RideHistoryEntry) => {

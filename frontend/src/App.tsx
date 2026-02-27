@@ -121,7 +121,8 @@ function AppContent() {
 
   const handleLogout = useCallback(() => {
     logout()
-  }, [logout])
+    navigate('/login')
+  }, [logout, navigate])
 
   const appUser = isAuthenticated && user
     ? { name: user.name || user.email || 'User' }

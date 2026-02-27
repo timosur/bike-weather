@@ -97,7 +97,7 @@ test.describe('Auth', () => {
     // Click Logout
     await page.getByRole('button', { name: /logout/i }).click()
 
-    // Should redirect to login
-    await expect(page).toHaveURL(/\/login/, { timeout: 10000 })
+    // /planner is public but logout now explicitly navigates to /login
+    await expect(page).toHaveURL(/\/login/, { timeout: 5000 })
   })
 })

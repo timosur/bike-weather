@@ -39,7 +39,11 @@ def test_high_uv_includes_sunscreen() -> None:
 def test_evening_ride_includes_lights() -> None:
     weather = _make_weather(sunset="18:30")
     items = get_equipment_items(
-        weather, distance_km=20, ride_start_time="16:00", locale="en"
+        weather,
+        distance_km=20,
+        ride_start_time="16:00",
+        ride_end_time="19:00",
+        locale="en",
     )
     names = [i["name"] for i in items]
     assert any("Light" in n for n in names)

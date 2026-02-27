@@ -411,6 +411,7 @@ async def build_report(
             forecast,
             distance_km=ride_input.distanceKm,
             ride_start_time=ride_input.startTime,
+            ride_end_time=f"{ride_end_h:02d}:00",
             locale=locale,
         )
 

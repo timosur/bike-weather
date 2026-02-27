@@ -63,6 +63,7 @@ async def create_route(
         total_distance=data.total_distance,
         distance_unit=data.distance_unit,
         riding_style=data.riding_style,
+        ride_input=data.ride_input,
     )
     session.add(route)
     await session.commit()

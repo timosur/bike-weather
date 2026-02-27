@@ -8,6 +8,13 @@ class ItemTranslation(TypedDict):
     reason: str  # f-string template with placeholders
 
 
+def temp_range_str(temp_min: float, temp_max: float) -> str:
+    """Return 'X' when min==max, otherwise 'X–Y'."""
+    if round(temp_min) == round(temp_max):
+        return f"{temp_min:.0f}"
+    return f"{temp_min:.0f}–{temp_max:.0f}"
+
+
 # ---------------------------------------------------------------------------
 # Clothing item translations keyed by (item_id, locale)
 # ---------------------------------------------------------------------------
@@ -74,11 +81,11 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     },
     ("cl-jersey-long", "de"): {
         "name": "Langarm-Radtrikot",
-        "reason": "Wärme bei {temp_min:.0f}–{temp_max:.0f}°C ohne Überhitzung.",
+        "reason": "Wärme bei {temp_range}°C ohne Überhitzung.",
     },
     ("cl-jersey-long", "en"): {
         "name": "Long-sleeve Cycling Jersey",
-        "reason": "Warmth at {temp_min:.0f}–{temp_max:.0f}°C without overheating.",
+        "reason": "Warmth at {temp_range}°C without overheating.",
     },
     ("cl-jersey-arm", "de"): {"name": "Kurzarmtrikot + Armlinge", "reason": ""},
     ("cl-jersey-arm", "en"): {
@@ -87,11 +94,11 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     },
     ("cl-jersey-long-light", "de"): {
         "name": "Leichtes Langarm-Radtrikot",
-        "reason": "Leichte Abdeckung bei {temp_min:.0f}–{temp_max:.0f}°C, Ärmel aufrollbar.",
+        "reason": "Leichte Abdeckung bei {temp_range}°C, Ärmel aufrollbar.",
     },
     ("cl-jersey-long-light", "en"): {
         "name": "Long-sleeve Cycling Jersey",
-        "reason": "Light coverage at {temp_min:.0f}–{temp_max:.0f}°C, can roll up sleeves.",
+        "reason": "Light coverage at {temp_range}°C, can roll up sleeves.",
     },
     ("cl-jersey-short-alt", "de"): {"name": "Kurzarmtrikot + Armlinge", "reason": ""},
     ("cl-jersey-short-alt", "en"): {
@@ -164,11 +171,11 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     ("cl-tights-warmers", "en"): {"name": "Cycling Tights + Leg Warmers", "reason": ""},
     ("cl-padded-tights", "de"): {
         "name": "Lange Radhose mit Polster",
-        "reason": "Polsterung für Komfort, lange Beine bei {temp_min:.0f}–{temp_max:.0f}°C.",
+        "reason": "Polsterung für Komfort, lange Beine bei {temp_range}°C.",
     },
     ("cl-padded-tights", "en"): {
         "name": "Long Padded Cycling Tights",
-        "reason": "Padding for comfort, long legs at {temp_min:.0f}–{temp_max:.0f}°C.",
+        "reason": "Padding for comfort, long legs at {temp_range}°C.",
     },
     ("cl-shorts-warmers", "de"): {"name": "Kurze Trägerhose + Beinlinge", "reason": ""},
     ("cl-shorts-warmers", "en"): {
@@ -297,13 +304,29 @@ EQUIPMENT_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
         "name": "Sunscreen SPF 30+",
         "reason": "UV index {uv_index:.0f} — sun protection recommended for multi-hour rides.",
     },
-    ("eq-lights", "de"): {
+    ("eq-lights-before-sunrise", "de"): {
         "name": "Fahrradlichter (vorne + hinten)",
-        "reason": "Sonnenuntergang um {sunset} — nötig bei späterer Rückkehr.",
+        "reason": "Start um {ride_start} vor Sonnenaufgang ({sunrise}) — Beleuchtung nötig.",
     },
-    ("eq-lights", "en"): {
+    ("eq-lights-before-sunrise", "en"): {
         "name": "Bike Lights (front + rear)",
-        "reason": "Sunset at {sunset} — needed if returning later.",
+        "reason": "Start at {ride_start} before sunrise ({sunrise}) — lights needed.",
+    },
+    ("eq-lights-after-sunset", "de"): {
+        "name": "Fahrradlichter (vorne + hinten)",
+        "reason": "Fahrt bis ca. {ride_end} — Sonnenuntergang um {sunset}, Beleuchtung einplanen.",
+    },
+    ("eq-lights-after-sunset", "en"): {
+        "name": "Bike Lights (front + rear)",
+        "reason": "Ride until ~{ride_end} — sunset at {sunset}, pack lights.",
+    },
+    ("eq-lights-both", "de"): {
+        "name": "Fahrradlichter (vorne + hinten)",
+        "reason": "Fahrt {ride_start}–{ride_end} — vor Sonnenaufgang ({sunrise}) und nach Sonnenuntergang ({sunset}).",
+    },
+    ("eq-lights-both", "en"): {
+        "name": "Bike Lights (front + rear)",
+        "reason": "Ride {ride_start}–{ride_end} — before sunrise ({sunrise}) and after sunset ({sunset}).",
     },
     ("eq-mudguards", "de"): {
         "name": "Schutzbleche",

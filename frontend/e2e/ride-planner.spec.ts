@@ -74,10 +74,14 @@ test.describe('Ride Planner', () => {
   test('bike type presets are selectable', async ({ page }) => {
     await page.goto('/planner')
 
-    // Check for bike type buttons/selectors
-    const bikeTypes = page.locator('[class*="bike"], button').filter({ hasText: /road|gravel|mountain|city|e-bike/i })
-    const count = await bikeTypes.count()
-    expect(count).toBeGreaterThanOrEqual(1)
+    // Verify all four bike type buttons render (use exact name to avoid preset matches like "Road bike ride")
+    await expect(page.getByRole('button', { name: 'Road bike', exact: true })).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('button', { name: 'Gravel', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'MTB', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'City', exact: true })).toBeVisible()
+
+    // Click one and verify it becomes selected (has active styling)
+    await page.getByRole('button', { name: /gravel/i }).click()
   })
 
   test('validation on empty submit shows location error', async ({ page }) => {
@@ -98,15 +102,14 @@ test.describe('Ride Planner', () => {
     await page.goto('/planner')
 
     // Fill location first to bypass location validation
-    await fillBasicRide(page, { distance: 0 })
+    await fillBasicRide(page, { distance: 35 })
 
-    // Clear distance to trigger distance validation
+    // Clear distance to empty — triggers custom validation (not browser min="1" check)
     const distanceInput = page.getByPlaceholder(/e\.g\. 35/i)
     await distanceInput.clear()
-    await distanceInput.fill('0')
 
     // Click submit
-    await page.getByRole('button', { name: /get weather/i }).click()
+    await page.locator('form').getByRole('button', { name: /get weather/i }).click()
 
     // Should show distance error
     await expect(page.getByText(/distance.*required|distance.*needed/i)).toBeVisible({ timeout: 5000 })
