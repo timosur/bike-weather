@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import (
     AboutContent,
     AffiliateDisclosure,
+    AppInfoContent,
     FaqItem,
     Product,
     ProductCategory,
@@ -504,6 +505,52 @@ async def _seed_about(session: AsyncSession) -> None:
     for section in sections:
         result = await session.execute(
             select(AboutContent).where(AboutContent.section_key == section.section_key)
+        )
+        if not result.scalars().first():
+            session.add(section)
+
+
+async def _seed_app_info(session: AsyncSession) -> None:
+    sections = [
+        AppInfoContent(
+            section_key="what",
+            title="Was ist Fahrrad Wetter?",
+            body=(
+                "Fahrrad Wetter ist eine Web-App, die Radfahrern wetterbasierte Kleidungs- und "
+                "Ausrüstungsempfehlungen gibt. Gib einfach deine Route und Abfahrtszeit ein — "
+                "wir analysieren die Wetterbedingungen entlang deiner Strecke und sagen dir genau, "
+                "was du anziehen und mitnehmen solltest."
+            ),
+            display_order=0,
+        ),
+        AppInfoContent(
+            section_key="why",
+            title="Warum gibt es Fahrrad Wetter?",
+            body=(
+                "Jeder Radfahrer kennt das Problem: Man checkt die Wetter-App, schätzt die "
+                "Temperatur falsch ein und ist unterwegs zu warm, zu kalt oder ohne Regenschutz. "
+                "Fahrrad Wetter wurde aus genau dieser Frustration heraus entwickelt — damit du "
+                "nie wieder raten musst, was du auf dem Rad anziehen sollst."
+            ),
+            display_order=1,
+        ),
+        AppInfoContent(
+            section_key="how",
+            title="Wie funktioniert es?",
+            body=(
+                "Du gibst deinen Startort, Abfahrtszeit, Fahrradtyp und Intensität ein. "
+                "Fahrrad Wetter ruft dann aktuelle Wetterdaten für deine Route ab und erstellt "
+                "auf Basis von Temperatur, Wind, Niederschlag und weiteren Faktoren eine "
+                "personalisierte Empfehlung — von der Jacke bis zur Sonnenbrille."
+            ),
+            display_order=2,
+        ),
+    ]
+    for section in sections:
+        result = await session.execute(
+            select(AppInfoContent).where(
+                AppInfoContent.section_key == section.section_key
+            )
         )
         if not result.scalars().first():
             session.add(section)
@@ -1038,6 +1085,49 @@ async def _seed_translations(session: AsyncSession) -> None:
             "field_name": "body",
             "value": "Fahrrad Wetter is constantly being improved. I welcome feedback, suggestions, and ideas. If the app helps you on your rides and makes a positive difference, the work has been worth it.",
         },
+        # --- App info content ---
+        {
+            "entity_type": "app_info_content",
+            "entity_id": "what",
+            "locale": "en",
+            "field_name": "title",
+            "value": "What is Bike Weather?",
+        },
+        {
+            "entity_type": "app_info_content",
+            "entity_id": "what",
+            "locale": "en",
+            "field_name": "body",
+            "value": "Bike Weather is a web app that gives cyclists weather-based clothing and gear recommendations. Simply enter your route and departure time \u2014 we\u2019ll analyze the weather conditions along your route and tell you exactly what to wear and bring.",
+        },
+        {
+            "entity_type": "app_info_content",
+            "entity_id": "why",
+            "locale": "en",
+            "field_name": "title",
+            "value": "Why does Bike Weather exist?",
+        },
+        {
+            "entity_type": "app_info_content",
+            "entity_id": "why",
+            "locale": "en",
+            "field_name": "body",
+            "value": "Every cyclist knows the problem: you check the weather app, misjudge the temperature, and end up too warm, too cold, or without rain gear. Bike Weather was built out of exactly that frustration \u2014 so you never have to guess what to wear on the bike again.",
+        },
+        {
+            "entity_type": "app_info_content",
+            "entity_id": "how",
+            "locale": "en",
+            "field_name": "title",
+            "value": "How does it work?",
+        },
+        {
+            "entity_type": "app_info_content",
+            "entity_id": "how",
+            "locale": "en",
+            "field_name": "body",
+            "value": "You enter your start location, departure time, bike type, and intensity. Bike Weather then fetches current weather data for your route and creates a personalized recommendation based on temperature, wind, precipitation, and other factors \u2014 from jacket to sunglasses.",
+        },
     ]
 
     for t in translations:
@@ -1061,5 +1151,6 @@ async def run_seed(session: AsyncSession) -> None:
     await _seed_disclosure(session)
     await _seed_faq(session)
     await _seed_about(session)
+    await _seed_app_info(session)
     await _seed_translations(session)
     await session.commit()

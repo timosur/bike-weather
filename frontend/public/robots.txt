@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /routes
+Disallow: /auth
+
+Sitemap: https://bike-weather.com/sitemap.xml

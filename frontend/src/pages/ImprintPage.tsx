@@ -1,5 +1,11 @@
 import { Imprint } from '../components/imprint'
+import { SEO } from '../hooks/useSEO'
 
 export default function ImprintPage() {
-  return <Imprint />
+  return (
+    <>
+      <SEO titleKey="imprint" path="/imprint" />
+      <Imprint />
+    </>
+  )
 }

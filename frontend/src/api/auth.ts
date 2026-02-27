@@ -85,3 +85,25 @@ export async function resetPassword(token: string, password: string): Promise<Me
     password,
   });
 }
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+  accessToken: string,
+): Promise<MessageResponse> {
+  const response = await fetch(`${API_BASE}/auth/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+
+  if (!response.ok) {
+    const err: AuthError = await response.json().catch(() => ({ detail: "Request failed" }));
+    throw new Error(err.detail || `Error ${response.status}`);
+  }
+
+  return response.json() as Promise<MessageResponse>;
+}

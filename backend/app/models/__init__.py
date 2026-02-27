@@ -1,5 +1,6 @@
 from .about_content import AboutContent
 from .affiliate_disclosure import AffiliateDisclosure
+from .app_info_content import AppInfoContent
 from .contact_message import ContactMessage
 from .content_translation import ContentTranslation
 from .faq_item import FaqItem
@@ -12,6 +13,7 @@ from .user import User
 __all__ = [
     "AboutContent",
     "AffiliateDisclosure",
+    "AppInfoContent",
     "ContactMessage",
     "ContentTranslation",
     "FaqItem",

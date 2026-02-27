@@ -31,6 +31,28 @@ def test_long_ride_includes_repair_kit() -> None:
     assert any("Repair" in n or "Puncture" in n for n in names)
 
 
+def test_short_ride_also_includes_repair_kit() -> None:
+    """Repair kit is always present regardless of distance."""
+    weather = _make_weather()
+    items = get_equipment_items(
+        weather, distance_km=10, bike_type="rennrad", locale="en"
+    )
+    ids = [i["id"] for i in items]
+    assert "eq-repair-kit" in ids
+
+
+def test_repair_kit_has_contents() -> None:
+    """Repair kit item includes a contents sub-list."""
+    weather = _make_weather()
+    items = get_equipment_items(
+        weather, distance_km=50, bike_type="rennrad", locale="en"
+    )
+    repair = next(i for i in items if i["id"] == "eq-repair-kit")
+    assert "contents" in repair
+    assert len(repair["contents"]) > 0
+    assert all("name" in c for c in repair["contents"])
+
+
 def test_high_uv_includes_sunscreen() -> None:
     weather = _make_weather(uv_index=5)
     items = get_equipment_items(

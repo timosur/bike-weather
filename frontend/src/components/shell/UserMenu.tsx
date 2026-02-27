@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { LogOut, ChevronDown, Shield } from 'lucide-react'
+import { LogOut, ChevronDown, Shield, KeyRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 interface UserMenuProps {
@@ -75,6 +75,16 @@ export function UserMenu({ user, isAdmin, onNavigate, onLogout }: UserMenuProps)
               {t('common.admin')}
             </button>
           )}
+          <button
+            onClick={() => {
+              onNavigate?.('/change-password')
+              setOpen(false)
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+          >
+            <KeyRound className="w-3.5 h-3.5" strokeWidth={1.5} />
+            {t('common.changePassword')}
+          </button>
           <button
             onClick={() => {
               onLogout?.()

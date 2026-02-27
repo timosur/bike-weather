@@ -29,9 +29,9 @@ export function PrivacyPolicy() {
           <section id="verantwortlicher" className="space-y-2">
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">1. Responsible party</h2>
             <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-1">
-              <p>Timo [Nachname]</p>
-              <p>[Adresse]</p>
-              <p>E-Mail: [deine@email.de]</p>
+              <p>Timo Surmann</p>
+              <p>Iltisweg 6<br />45663 Recklinghausen</p>
+              <p>E-Mail: bike@timosur.com</p>
             </div>
           </section>
 
@@ -87,7 +87,7 @@ export function PrivacyPolicy() {
           <section id="kontakt-datenschutz" className="space-y-2">
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">7. Contact</h2>
             <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-              For privacy-related questions, you can reach me at <a href="mailto:[deine@email.de]" className="text-emerald-600 dark:text-emerald-400 hover:underline">[deine@email.de]</a>.
+              For privacy-related questions, you can reach me at <a href="mailto:bike@timosur.com" className="text-emerald-600 dark:text-emerald-400 hover:underline">bike@timosur.com</a>.
             </p>
           </section>
         </div>

@@ -50,11 +50,16 @@ class ClothingItemSchema(BaseModel):
     alternatives: list[ClothingAlternativeSchema] = []
 
 
+class EquipmentSubItemSchema(BaseModel):
+    name: str
+
+
 class EquipmentItemSchema(BaseModel):
     id: str
     name: str
     reason: str
     category: str = "gear"  # "safety" | "gear" | "hydration" | "tools" | "nutrition"
+    contents: list[EquipmentSubItemSchema] = []
 
 
 class ConditionReasonSchema(BaseModel):

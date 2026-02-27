@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { SEO } from '../hooks/useSEO'
 import { AuthPage } from '../components/auth'
 import type { LoginFormData, RegisterFormData } from '../components/auth/types'
 
@@ -43,12 +44,15 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthPage
-      isLoading={isSubmitting}
-      errorMessage={error}
-      onLogin={handleLogin}
-      onRegister={handleRegister}
-      onForgotPassword={() => navigate('/forgot-password')}
-    />
+    <>
+      <SEO titleKey="login" path="/login" noIndex />
+      <AuthPage
+        isLoading={isSubmitting}
+        errorMessage={error}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        onForgotPassword={() => navigate('/forgot-password')}
+      />
+    </>
   )
 }

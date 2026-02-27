@@ -5,6 +5,8 @@ import { RidePlanner, RecentRides } from '../components/ride-planner'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import { useRideHistory } from '../hooks/useRideHistory'
 import { usePlannerFormPersistence } from '../hooks/usePlannerFormPersistence'
+import { SEO } from '../hooks/useSEO'
+import { JsonLd } from '../components/seo'
 import { fetchRoute } from '../api/routes'
 
 import { TurnstileWidget, useTurnstile } from '../components/common/TurnstileWidget'
@@ -259,6 +261,16 @@ export default function PlannerPage() {
 
   return (
     <div className="">
+      <SEO titleKey="planner" path="/planner" />
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: t('shell.brand'),
+        description: t('seo.planner.description'),
+        url: 'https://bike-weather.com',
+        applicationCategory: 'WeatherApplication',
+        operatingSystem: 'All',
+      }} />
       {/* Ambient background */}
       <div
         className="fixed inset-0 -z-10"

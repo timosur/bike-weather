@@ -15,9 +15,9 @@ export function Imprint() {
               Information according to § 5 TMG
             </h2>
             <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-1">
-              <p>Timo [Nachname]</p>
-              <p>[Street and house number]</p>
-              <p>[Postal code] [City]</p>
+              <p>Timo Surmann</p>
+              <p>Iltisweg 6</p>
+              <p>45663 Recklinghausen</p>
               <p>Germany</p>
             </div>
           </section>
@@ -25,7 +25,7 @@ export function Imprint() {
           <section className="space-y-2">
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">Contact</h2>
             <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-1">
-              <p>E-Mail: [deine@email.de]</p>
+              <p>E-Mail: bike@timosur.com</p>
             </div>
           </section>
 

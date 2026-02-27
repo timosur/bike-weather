@@ -69,11 +69,16 @@ export interface ClothingItem {
   alternatives?: ClothingAlternative[];
 }
 
+export interface EquipmentSubItem {
+  name: string;
+}
+
 export interface EquipmentItem {
   id: string;
   name: string;
   reason: string;
   category?: 'safety' | 'gear' | 'hydration' | 'tools' | 'nutrition';
+  contents?: EquipmentSubItem[];
 }
 
 export interface ConditionReason {

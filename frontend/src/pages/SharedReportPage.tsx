@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
+import { SEO } from '../hooks/useSEO'
 import { fetchSharedReport } from '../api/shared'
 // import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
@@ -72,6 +73,7 @@ export default function SharedReportPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-10">
+      <SEO titleKey="sharedReport" path={`/shared/${token ?? ''}`} />
       {/* Shared badge */}
       <div className="mb-6 text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">

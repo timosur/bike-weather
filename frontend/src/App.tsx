@@ -21,7 +21,9 @@ const RoutesPage = lazy(() => import('./pages/RoutesPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
+const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'))
 const AboutMePage = lazy(() => import('./pages/AboutMePage'))
+const AboutAppPage = lazy(() => import('./pages/AboutAppPage'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const ImprintPage = lazy(() => import('./pages/ImprintPage'))
@@ -44,7 +46,7 @@ function useNavigationItems(): NavigationItem[] {
     { label: t('shell.nav.planner'), href: '/planner' },
     // { label: t('shell.nav.products'), href: '/products' },
     { label: t('shell.nav.myRoutes'), href: '/routes', requiresAuth: true },
-    { label: t('shell.nav.aboutMe'), href: '/about-me' },
+    { label: t('shell.nav.aboutApp'), href: '/about' },
   ]
 }
 
@@ -55,6 +57,7 @@ function useFooterSections(): FooterSection[] {
       title: t('shell.footerSection.product'),
       links: [
         { label: t('shell.footerLinks.faq'), href: '/faq' },
+        { label: t('shell.footerLinks.aboutMe'), href: '/about-me' },
       ],
     },
     {
@@ -108,6 +111,10 @@ function AppContent() {
     setAccessTokenProvider(getAccessToken)
   }, [getAccessToken])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
   const handleNavigate = useCallback(
     (href: string) => {
       // If clicking "Routenplaner" while already on /planner or /report, force reset
@@ -159,8 +166,10 @@ function AppContent() {
         <Route path="/login" element={<Suspense fallback={<AuthPageSkeleton />}><LoginPage /></Suspense>} />
         <Route path="/forgot-password" element={<Suspense fallback={<AuthPageSkeleton />}><ForgotPasswordPage /></Suspense>} />
         <Route path="/reset-password" element={<Suspense fallback={<AuthPageSkeleton />}><ResetPasswordPage /></Suspense>} />
+        <Route path="/change-password" element={<Suspense fallback={<AuthPageSkeleton />}><RequireAuth><ChangePasswordPage /></RequireAuth></Suspense>} />
         <Route path="/auth/callback" element={<Navigate to="/login" replace />} />
         <Route path="/about-me" element={<Suspense fallback={<ContentPageSkeleton sections={3} />}><AboutMePage /></Suspense>} />
+        <Route path="/about" element={<Suspense fallback={<ContentPageSkeleton sections={3} />}><AboutAppPage /></Suspense>} />
         <Route path="/faq" element={<Suspense fallback={<ContentPageSkeleton sections={5} />}><FaqPage /></Suspense>} />
         <Route path="/contact" element={<Suspense fallback={<ContentPageSkeleton sections={4} maxWidth="max-w-[480px]" />}><ContactPage /></Suspense>} />
         <Route path="/imprint" element={<Suspense fallback={<ContentPageSkeleton sections={4} />}><ImprintPage /></Suspense>} />

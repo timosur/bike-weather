@@ -9,6 +9,7 @@ from app.database import get_session
 from app.models.user import User
 from app.rate_limit import limiter
 from app.schemas.auth import (
+    ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
     MessageResponse,
@@ -20,6 +21,7 @@ from app.schemas.auth import (
 from app.services.auth import auth_service
 from app.services.headless_auth import (
     HeadlessAuthError,
+    headless_change_password,
     headless_login,
     headless_recovery_complete,
     headless_recovery_start,
@@ -98,6 +100,32 @@ async def register(
         expires_in=tokens.get("expires_in", 3600),
         scope=tokens.get("scope", "openid profile email"),
     )
+
+
+@router.post("/change-password", response_model=MessageResponse)
+@limiter.limit("5/minute")
+async def change_password(
+    body: ChangePasswordRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+) -> MessageResponse:
+    """Change password for the authenticated user."""
+    try:
+        await headless_change_password(
+            user.email, body.current_password, body.new_password
+        )
+    except HeadlessAuthError as exc:
+        msg = str(exc)
+        if "incorrect" in msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=msg,
+            ) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=msg,
+        ) from exc
+    return MessageResponse(message="Password has been changed successfully.")
 
 
 @router.post("/forgot-password", response_model=MessageResponse)

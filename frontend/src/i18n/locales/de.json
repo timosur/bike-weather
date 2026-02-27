@@ -1,18 +1,83 @@
 {
+  "seo": {
+    "planner": {
+      "title": "Fahrrad Wetter – Wetterbasierte Kleidungsempfehlung für Radfahrer",
+      "description": "Plane deine Radtour und erhalte personalisierte Kleidungs- und Ausrüstungsempfehlungen basierend auf dem aktuellen Wetter."
+    },
+    "report": {
+      "title": "Fahrtbericht – Fahrrad Wetter",
+      "description": "Dein personalisierter Wetter- und Ausrüstungsbericht für deine geplante Radtour."
+    },
+    "sharedReport": {
+      "title": "Geteilter Fahrtbericht – Fahrrad Wetter",
+      "description": "Ein geteilter Wetter- und Ausrüstungsbericht für eine geplante Radtour."
+    },
+    "routes": {
+      "title": "Meine Routen – Fahrrad Wetter",
+      "description": "Verwalte deine gespeicherten Fahrradrouten und greife schnell auf vergangene Planungen zu."
+    },
+    "faq": {
+      "title": "Häufige Fragen – Fahrrad Wetter",
+      "description": "Antworten auf häufig gestellte Fragen rund um Fahrrad Wetter, Kleidungsempfehlungen und Routenplanung."
+    },
+    "aboutMe": {
+      "title": "Über mich – Fahrrad Wetter",
+      "description": "Erfahre mehr über den Entwickler hinter Fahrrad Wetter und die Motivation hinter dem Projekt."
+    },
+    "aboutApp": {
+      "title": "Über uns – Fahrrad Wetter",
+      "description": "Erfahre, was Fahrrad Wetter ist, warum es existiert und wie es Radfahrern hilft, sich bei jedem Wetter richtig anzuziehen."
+    },
+    "contact": {
+      "title": "Kontakt – Fahrrad Wetter",
+      "description": "Nimm Kontakt mit uns auf – Feedback, Fragen oder Vorschläge zu Fahrrad Wetter."
+    },
+    "imprint": {
+      "title": "Impressum – Fahrrad Wetter",
+      "description": "Impressum und Angaben gemäß § 5 TMG für Fahrrad Wetter."
+    },
+    "privacyPolicy": {
+      "title": "Datenschutz – Fahrrad Wetter",
+      "description": "Datenschutzerklärung von Fahrrad Wetter – Informationen zur Verarbeitung deiner Daten."
+    },
+    "login": {
+      "title": "Anmelden – Fahrrad Wetter",
+      "description": "Melde dich bei Fahrrad Wetter an, um deine Routen zu speichern und zu verwalten."
+    },
+    "forgotPassword": {
+      "title": "Passwort vergessen – Fahrrad Wetter",
+      "description": "Setze dein Passwort für Fahrrad Wetter zurück."
+    },
+    "resetPassword": {
+      "title": "Passwort zurücksetzen – Fahrrad Wetter",
+      "description": "Wähle ein neues Passwort für dein Fahrrad Wetter Konto."
+    },
+    "changePassword": {
+      "title": "Passwort ändern – Fahrrad Wetter",
+      "description": "Aktualisiere das Passwort deines Fahrrad Wetter Kontos."
+    },
+    "admin": {
+      "title": "Admin – Fahrrad Wetter",
+      "description": "Administrationsbereich von Fahrrad Wetter."
+    }
+  },
   "shell": {
     "brand": "Fahrrad Wetter",
     "footer": {
       "tagline": "Wetterbasierte Kleidungsempfehlungen für Radfahrer.",
-      "copyright": "© {{year}} Fahrrad Wetter. Ein Projekt von Timo.",
-      "imprint": "Impressum",
-      "privacy": "Datenschutz"
+      "copyright": "© {{year}} Fahrrad Wetter. Ein Projekt von",
+      "copyrightAuthor": "timosur",
+      "privacy": "Datenschutz",
+      "attributionWeather": "Wetter: Open-Meteo",
+      "attributionMap": "Kartendaten: © OpenStreetMap-Mitwirkende"
     },
     "nav": {
       "planner": "Routenplaner",
       "rideReport": "Fahrtbericht",
       "products": "Produkte",
       "myRoutes": "Meine Routen",
-      "aboutMe": "Über mich"
+      "aboutMe": "Über mich",
+      "aboutApp": "Über uns"
     },
     "footerSection": {
       "product": "Produkt",
@@ -255,6 +320,7 @@
     },
     "equipment": {
       "heading": "Ausrüstung",
+      "contains": "Enthält",
       "category": {
         "safety": "Sicherheit",
         "gear": "Ausrüstung",
@@ -359,6 +425,17 @@
       "invalidTokenText": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
       "requestNewLink": "Neuen Link anfordern",
       "error": "Passwort konnte nicht zurückgesetzt werden. Der Link ist möglicherweise abgelaufen."
+    },
+    "changePassword": {
+      "heading": "Passwort ändern",
+      "subheading": "Gib dein aktuelles Passwort ein und wähle ein neues.",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "submit": "Passwort ändern",
+      "successHeading": "Passwort geändert",
+      "successText": "Dein Passwort wurde erfolgreich aktualisiert.",
+      "backToApp": "Zurück zur App",
+      "error": "Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
   },
   "contact": {
@@ -405,6 +482,12 @@
     "intro": "Jahrgang '92, leidenschaftlicher Softwareentwickler und Radfahrer. Ich habe Fahrrad Wetter gebaut, weil ich selbst eine Lösung brauchte.",
     "giveFeedback": "Feedback geben"
   },
+  "aboutApp": {
+    "badge": "Dein Rad-Wetter-Begleiter",
+    "heading": "Fahrrad Wetter",
+    "intro": "Wetterbasierte Kleidungs- und Ausrüstungsempfehlungen für Radfahrer — damit du nie wieder raten musst, was du anziehen sollst.",
+    "planYourRide": "Plane deine Fahrt"
+  },
   "imprint": {
     "heading": "Impressum",
     "infoHeading": "Angaben gemäß § 5 TMG",
@@ -432,27 +515,36 @@
         "usageData": "Nutzungsdaten",
         "usageDataText": "Beim Besuch der Website werden automatisch technische Daten erfasst (IP-Adresse, Browsertyp, Zugriffszeit). Diese Daten werden zur Sicherstellung des Betriebs genutzt und nicht personenbezogen ausgewertet.",
         "accountData": "Kontodaten",
-        "accountDataText": "Bei der Registrierung speichern wir deine E-Mail-Adresse und ein verschlüsseltes Passwort. Bei der Google-Anmeldung erhalten wir deinen Namen und deine E-Mail-Adresse von Google."
+        "accountDataText": "Bei der Registrierung speichern wir deine E-Mail-Adresse und ein verschlüsseltes Passwort. Bei der Anmeldung über einen externen Anbieter (z. B. Google via Authentik) erhalten wir deinen Namen und deine E-Mail-Adresse."
       },
       "legalBasis": {
         "title": "3. Rechtsgrundlagen",
         "navTitle": "Rechtsgrundlagen",
-        "text": "Die Verarbeitung personenbezogener Daten erfolgt auf Grundlage von Art. 6 Abs. 1 DSGVO: Einwilligung (lit. a) für Standortdaten und Cookies, Vertragserfüllung (lit. b) für Kontodaten und berechtigtes Interesse (lit. f) für Nutzungsdaten zur Sicherstellung des Betriebs."
+        "text": "Die Verarbeitung personenbezogener Daten erfolgt auf Grundlage von Art. 6 Abs. 1 DSGVO: Einwilligung (lit. a) für Standortdaten, Vertragserfüllung (lit. b) für Kontodaten und berechtigtes Interesse (lit. f) für Nutzungsdaten zur Sicherstellung des Betriebs sowie für den Bot-Schutz (Cloudflare Turnstile)."
       },
-      "cookies": {
-        "title": "4. Cookies & Tracking",
-        "navTitle": "Cookies & Tracking",
-        "text1": "Diese Website verwendet technisch notwendige Cookies für die Sitzungsverwaltung und optionale Analyse-Cookies (Google Analytics) zur Verbesserung des Dienstes.",
-        "text2before": "Google-Anzeigen werden geschaltet, um die App kostenlos zu halten. Google kann Cookies setzen und Daten sammeln. Weitere Informationen findest du in der",
-        "text2link": "Datenschutzerklärung von Google"
+      "localStorage": {
+        "title": "4. Lokale Speicherung",
+        "navTitle": "Lokale Speicherung",
+        "text1": "Diese Website verwendet ausschließlich technisch notwendigen lokalen Speicher (localStorage) im Browser. Es werden keine Cookies gesetzt und kein Tracking oder Analyse-Dienste eingesetzt.",
+        "text2": "Folgende Schlüssel werden im localStorage gespeichert:",
+        "keys": {
+          "auth": "bike-weather:auth — Authentifizierungsdaten (Sitzung)",
+          "theme": "bike-weather:theme — Gewähltes Farbschema (Hell/Dunkel)",
+          "plannerForm": "bike-weather:planner-form — Zwischengespeicherte Formulardaten der Fahrtenplanung",
+          "rideHistory": "bike-weather:ride-history — Verlauf vergangener Fahrtenberichte",
+          "language": "i18nextLng — Gewählte Sprache"
+        },
+        "text3": "Alle gespeicherten Daten dienen ausschließlich der Funktionalität der Anwendung und werden nicht an Dritte übermittelt. Du kannst die Daten jederzeit über die Browser-Einstellungen löschen."
       },
       "thirdParties": {
         "title": "5. Drittanbieter",
         "navTitle": "Drittanbieter",
-        "weatherApi": "Wetter-API:",
-        "weatherApiText": "Zum Abruf von Wetterdaten wird dein gewählter Standort an einen externen Wetterdienst übermittelt.",
-        "googleLogin": "Google-Anmeldung:",
-        "googleLoginText": "Bei Nutzung der Google-Anmeldung werden Daten gemäß deren Datenschutzerklärung mit Google ausgetauscht.",
+        "weatherApi": "Wetterdaten (Open-Meteo):",
+        "weatherApiText": "Zum Abruf von Wettervorhersagen wird dein gewählter Standort (Koordinaten) an Open-Meteo (open-meteo.com) übermittelt. Open-Meteo ist eine kostenlose, quelloffene Wetter-API. Es werden keine personenbezogenen Daten durch diesen Dienst gespeichert.",
+        "nominatim": "Standortsuche (OpenStreetMap / Nominatim):",
+        "nominatimText": "Für die Adresssuche und Rückwärtsgeokodierung werden deine Suchanfrage oder GPS-Koordinaten an Nominatim übermittelt, einen Geocodierungsdienst auf Basis von OpenStreetMap-Daten (openstreetmap.org). Die Daten stehen unter der Open Database License (ODbL). Es werden keine personenbezogenen Daten gespeichert.",
+        "turnstile": "Bot-Schutz (Cloudflare Turnstile):",
+        "turnstileText": "Zum Schutz von Formularen (Anmeldung, Registrierung, Kontakt) vor automatisiertem Missbrauch wird Cloudflare Turnstile eingesetzt. Dabei werden technische Daten (z. B. Browser-Merkmale) an Cloudflare, Inc. übermittelt. Informationen: cloudflare.com/privacypolicy.",
         "affiliateLinks": "Affiliate-Links:",
         "affiliateLinksText": "Produktlinks führen zu externen Shops. Beim Klicken können Cookies gesetzt werden."
       },
@@ -464,7 +556,7 @@
       "contactPrivacy": {
         "title": "7. Kontakt",
         "navTitle": "Kontakt",
-        "text": "Bei datenschutzbezogenen Fragen erreichst du mich unter [deine@email.de]."
+        "text": "Bei datenschutzbezogenen Fragen erreichst du mich unter bike@timosur.com."
       }
     }
   },
@@ -477,7 +569,8 @@
     "signIn": "Anmelden",
     "logout": "Abmelden",
     "signedInAs": "Angemeldet als",
-    "admin": "Admin"
+    "admin": "Admin",
+    "changePassword": "Passwort ändern"
   },
   "shared": {
     "badge": "Geteilter Fahrtbericht",

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MyRoutes } from '../components/my-routes'
+import { SEO } from '../hooks/useSEO'
 import type { SavedRoute } from '../components/my-routes/types'
 import { fetchRoutes, updateRoute as apiUpdateRoute, deleteRoute as apiDeleteRoute } from '../api/routes'
 import { shareRoute, unshareRoute, getShareUrl } from '../api/shared'
@@ -113,15 +114,18 @@ export default function RoutesPage() {
   }
 
   return (
-    <MyRoutes
-      routes={routes}
-      onRouteSelect={handleRouteSelect}
-      onRouteEdit={handleRouteEdit}
-      onRouteDelete={handleRouteDelete}
-      onRouteShare={handleRouteShare}
-      onRouteUnshare={handleRouteUnshare}
-      onCopyShareLink={handleCopyShareLink}
-      onNavigateToPlanner={handleNavigateToPlanner}
-    />
+    <>
+      <SEO titleKey="routes" path="/routes" noIndex />
+      <MyRoutes
+        routes={routes}
+        onRouteSelect={handleRouteSelect}
+        onRouteEdit={handleRouteEdit}
+        onRouteDelete={handleRouteDelete}
+        onRouteShare={handleRouteShare}
+        onRouteUnshare={handleRouteUnshare}
+        onCopyShareLink={handleCopyShareLink}
+        onNavigateToPlanner={handleNavigateToPlanner}
+      />
+    </>
   )
 }

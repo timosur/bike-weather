@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
+import { SEO } from '../hooks/useSEO'
 import { useToast } from '../hooks/useToast'
 import { useAuth } from '../contexts/AuthContext'
 import { useRideHistory } from '../hooks/useRideHistory'
@@ -300,6 +301,7 @@ export default function ReportPage() {
 
   return (
     <div className="w-full overflow-x-hidden">
+      <SEO titleKey="report" path="/report" noIndex />
       {reportLoading && (
         <div className="w-full max-w-4xl mx-auto px-4 pb-10">
           <RideReportSkeleton />

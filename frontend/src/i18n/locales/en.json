@@ -1,18 +1,84 @@
 {
+  "seo": {
+    "planner": {
+      "title": "Bike Weather – Weather-Based Clothing Recommendations for Cyclists",
+      "description": "Plan your bike ride and get personalized clothing and gear recommendations based on current weather conditions."
+    },
+    "report": {
+      "title": "Ride Report – Bike Weather",
+      "description": "Your personalized weather and gear report for your planned bike ride."
+    },
+    "sharedReport": {
+      "title": "Shared Ride Report – Bike Weather",
+      "description": "A shared weather and gear report for a planned bike ride."
+    },
+    "routes": {
+      "title": "My Routes – Bike Weather",
+      "description": "Manage your saved cycling routes and quickly access past ride plans."
+    },
+    "faq": {
+      "title": "FAQ – Bike Weather",
+      "description": "Answers to frequently asked questions about Bike Weather, clothing recommendations, and route planning."
+    },
+    "aboutMe": {
+      "title": "About Me – Bike Weather",
+      "description": "Learn more about the developer behind Bike Weather and the motivation behind the project."
+    },
+    "aboutApp": {
+      "title": "About – Bike Weather",
+      "description": "Learn what Bike Weather is, why it exists, and how it helps cyclists dress for any weather."
+    },
+    "contact": {
+      "title": "Contact – Bike Weather",
+      "description": "Get in touch – feedback, questions, or suggestions about Bike Weather."
+    },
+    "imprint": {
+      "title": "Legal Notice – Bike Weather",
+      "description": "Legal notice and information in accordance with German law for Bike Weather."
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy – Bike Weather",
+      "description": "Privacy policy for Bike Weather – information about how your data is processed."
+    },
+    "login": {
+      "title": "Sign In – Bike Weather",
+      "description": "Sign in to Bike Weather to save and manage your cycling routes."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password – Bike Weather",
+      "description": "Reset your Bike Weather password."
+    },
+    "resetPassword": {
+      "title": "Reset Password – Bike Weather",
+      "description": "Choose a new password for your Bike Weather account."
+    },
+    "changePassword": {
+      "title": "Change Password – Bike Weather",
+      "description": "Update your Bike Weather account password."
+    },
+    "admin": {
+      "title": "Admin – Bike Weather",
+      "description": "Bike Weather administration area."
+    }
+  },
   "shell": {
     "brand": "Bike Weather",
     "footer": {
       "tagline": "Weather-based clothing recommendations for cyclists.",
-      "copyright": "© {{year}} Bike Weather. A project by Timo.",
+      "copyright": "© {{year}} Bike Weather. A project by",
+      "copyrightAuthor": "timosur",
       "imprint": "Imprint",
-      "privacy": "Privacy"
+      "privacy": "Privacy",
+      "attributionWeather": "Weather: Open-Meteo",
+      "attributionMap": "Map data: © OpenStreetMap contributors"
     },
     "nav": {
       "planner": "Planner",
       "rideReport": "Ride Report",
       "products": "Products",
       "myRoutes": "My Routes",
-      "aboutMe": "About Me"
+      "aboutMe": "About Me",
+      "aboutApp": "About"
     },
     "footerSection": {
       "product": "Product",
@@ -255,6 +321,7 @@
     },
     "equipment": {
       "heading": "Equipment",
+      "contains": "Contains",
       "category": {
         "safety": "Safety",
         "gear": "Gear",
@@ -359,6 +426,17 @@
       "invalidTokenText": "This password reset link is invalid or has expired. Please request a new one.",
       "requestNewLink": "Request new reset link",
       "error": "Could not reset password. The link may have expired."
+    },
+    "changePassword": {
+      "heading": "Change password",
+      "subheading": "Enter your current password and choose a new one.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "submit": "Change password",
+      "successHeading": "Password changed",
+      "successText": "Your password has been updated successfully.",
+      "backToApp": "Back to app",
+      "error": "Could not change password. Please try again."
     }
   },
   "contact": {
@@ -405,6 +483,12 @@
     "intro": "Born in '92, passionate software developer and cyclist. I built Fahrrad Wetter because I needed a solution myself.",
     "giveFeedback": "Give feedback"
   },
+  "aboutApp": {
+    "badge": "Your cycling weather companion",
+    "heading": "Bike Weather",
+    "intro": "Weather-based clothing and gear recommendations for cyclists — so you never have to guess what to wear again.",
+    "planYourRide": "Plan your ride"
+  },
   "imprint": {
     "heading": "Imprint",
     "infoHeading": "Information according to § 5 TMG",
@@ -432,27 +516,36 @@
         "usageData": "Usage data",
         "usageDataText": "When visiting the website, technical data is automatically collected (IP address, browser type, access time). This data is used to ensure operation and is not evaluated on a personal basis.",
         "accountData": "Account data",
-        "accountDataText": "Upon registration, we store your email address and an encrypted password. With Google login, we receive your name and email address from Google."
+        "accountDataText": "Upon registration, we store your email address and an encrypted password. When signing in via an external provider (e.g. Google via Authentik), we receive your name and email address."
       },
       "legalBasis": {
         "title": "3. Legal basis",
         "navTitle": "Legal basis",
-        "text": "The processing of personal data is based on Art. 6 Abs. 1 DSGVO: consent (lit. a) for location data and cookies, contract fulfillment (lit. b) for account data, and legitimate interest (lit. f) for usage data to ensure operation."
+        "text": "The processing of personal data is based on Art. 6(1) GDPR: consent (lit. a) for location data, contract fulfillment (lit. b) for account data, and legitimate interest (lit. f) for usage data to ensure operation and for bot protection (Cloudflare Turnstile)."
       },
-      "cookies": {
-        "title": "4. Cookies & Tracking",
-        "navTitle": "Cookies & Tracking",
-        "text1": "This website uses technically necessary cookies for session management and optional analytics cookies (Google Analytics) to improve the service.",
-        "text2before": "Google Ads are displayed to keep the app free. Google may set cookies and collect data. For more information, see",
-        "text2link": "Google's Privacy Policy"
+      "localStorage": {
+        "title": "4. Local storage",
+        "navTitle": "Local storage",
+        "text1": "This website uses only technically necessary local storage (localStorage) in the browser. No cookies are set and no tracking or analytics services are used.",
+        "text2": "The following keys are stored in localStorage:",
+        "keys": {
+          "auth": "bike-weather:auth — Authentication data (session)",
+          "theme": "bike-weather:theme — Selected color scheme (light/dark)",
+          "plannerForm": "bike-weather:planner-form — Cached ride planner form data",
+          "rideHistory": "bike-weather:ride-history — History of past ride reports",
+          "language": "i18nextLng — Selected language"
+        },
+        "text3": "All stored data serves exclusively the functionality of the application and is not shared with third parties. You can delete this data at any time via your browser settings."
       },
       "thirdParties": {
         "title": "5. Third parties",
         "navTitle": "Third parties",
-        "weatherApi": "Weather API:",
-        "weatherApiText": "To retrieve weather data, your selected location is transmitted to an external weather service.",
-        "googleLogin": "Google Login:",
-        "googleLoginText": "When using Google login, data is exchanged with Google in accordance with their privacy policy.",
+        "weatherApi": "Weather data (Open-Meteo):",
+        "weatherApiText": "To retrieve weather forecasts, your selected location (coordinates) is transmitted to Open-Meteo (open-meteo.com). Open-Meteo is a free, open-source weather API. No personal data is stored by this service.",
+        "nominatim": "Location search (OpenStreetMap / Nominatim):",
+        "nominatimText": "For address search and reverse geocoding, your search query or GPS coordinates are transmitted to Nominatim, a geocoding service based on OpenStreetMap data (openstreetmap.org). The data is licensed under the Open Database License (ODbL). No personal data is stored.",
+        "turnstile": "Bot protection (Cloudflare Turnstile):",
+        "turnstileText": "To protect forms (login, registration, contact) from automated abuse, Cloudflare Turnstile is used. During the check, technical data (e.g. browser characteristics) is transmitted to Cloudflare, Inc. Information: cloudflare.com/privacypolicy.",
         "affiliateLinks": "Affiliate links:",
         "affiliateLinksText": "Product links lead to external shops. Cookies may be set when clicking."
       },
@@ -464,7 +557,7 @@
       "contactPrivacy": {
         "title": "7. Contact",
         "navTitle": "Contact",
-        "text": "For privacy-related questions, you can reach me at [deine@email.de]."
+        "text": "For privacy-related questions, you can reach me at bike@timosur.com."
       }
     }
   },
@@ -477,7 +570,8 @@
     "signIn": "Login",
     "logout": "Logout",
     "signedInAs": "Signed in as",
-    "admin": "Admin"
+    "admin": "Admin",
+    "changePassword": "Change password"
   },
   "shared": {
     "badge": "Shared Ride Report",

@@ -218,6 +218,43 @@ Arm and leg warmers are only offered as alternatives for **Rennrad** and **Grave
 
 ---
 
+## Repair Kit Contents
+
+The repair kit is **always included** in equipment recommendations. Its contents scale based on **distance tier**, **bike type**, and **riding intensity**.
+
+### Distance Tiers
+
+`sportlich` intensity adds +30 km to effective distance for tier calculation (higher component stress → more spares).
+
+| Tier | Effective Distance | Contents |
+|---|---|---|
+| **Minimal** | < 30 km | Spare tube, tire levers, mini pump, multi-tool |
+| **Standard** | 30–80 km | Minimal + patch kit, quick link, zip ties, tire boot |
+| **Extended** | > 80 km | Standard + second spare tube, chain tool, spoke wrench, electrical tape |
+
+### Bike-Type-Specific Additions
+
+Items added on top of the tier-based contents:
+
+| Bike Type | From Minimal Tier | From Standard Tier |
+|---|---|---|
+| Rennrad | CO₂ cartridge + inflator | — |
+| Gravel | Tubeless plug kit | Gravel tire boot (reinforced) |
+| MTB | Tubeless plug kit | Disc brake pad (spare), chain lube sachet |
+| City | — | — |
+
+### Examples
+
+| Ride | Tier | Kit Contents |
+|---|---|---|
+| 15 km · City · gemütlich | Minimal | Spare tube, tire levers, mini pump, multi-tool |
+| 15 km · Rennrad · moderat | Minimal | Spare tube, tire levers, mini pump, multi-tool, CO₂ cartridge |
+| 50 km · Gravel · moderat | Standard | Minimal + patch kit, quick link, zip ties, tire boot, tubeless plugs, gravel tire boot |
+| 15 km · Rennrad · sportlich | Standard | Effective 45 km → standard tier (intensity bump) |
+| 100 km · MTB · moderat | Extended | Full kit + tubeless plugs, disc brake pad, chain lube |
+
+---
+
 ## Safety & Comfort Tips
 
 | Condition | Category | Severity | Tip |

@@ -1,5 +1,6 @@
 """Rule-based equipment recommendations from weather, distance, and time."""
 
+from app.rules.repair_kit_rules import get_repair_kit_contents
 from app.rules.safety_rules import get_safety_items
 from app.rules.translations import get_equipment_translation, temp_range_str
 from app.services.weather import WeatherForecast
@@ -21,6 +22,7 @@ def get_equipment_items(
     ride_start_time: str | None = None,
     ride_end_time: str | None = None,
     bike_type: str = "rennrad",
+    intensity: str = "moderat",
     locale: str = "de",
 ) -> list[dict]:
     """Return a list of equipment item dicts."""
@@ -97,9 +99,12 @@ def get_equipment_items(
         items.append(_make_eq_item("eq-mudguards", locale, fvars, category="gear"))
         items.append(_make_eq_item("eq-dry-bag", locale, fvars, category="gear"))
 
-    # Long rides
-    if dist > 30:
-        items.append(_make_eq_item("eq-repair-kit", locale, fvars, category="tools"))
+    # Repair kit — always included, contents scale with distance/bike/intensity
+    repair_contents = get_repair_kit_contents(dist, bike_type, intensity, locale)
+    repair_item = _make_eq_item("eq-repair-kit", locale, fvars, category="tools")
+    repair_item["contents"] = repair_contents
+    items.append(repair_item)
+
     if dist > 50:
         items.append(_make_eq_item("eq-energy", locale, fvars, category="nutrition"))
 

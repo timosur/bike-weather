@@ -25,6 +25,7 @@ from app.schemas.report import (
     ConditionReasonSchema,
     DayForecastSchema,
     EquipmentItemSchema,
+    EquipmentSubItemSchema,
     HourlyWeatherSchema,
     RideReportSchema,
     TipSchema,
@@ -116,6 +117,9 @@ def _equipment_dicts_to_schemas(items: list[dict]) -> list[EquipmentItemSchema]:
             name=item["name"],
             reason=item["reason"],
             category=item.get("category", "gear"),
+            contents=[
+                EquipmentSubItemSchema(name=c["name"]) for c in item.get("contents", [])
+            ],
         )
         for item in items
     ]
@@ -489,6 +493,7 @@ async def build_report(
             ride_start_time=ride_input.startTime,
             ride_end_time=f"{ride_end_h:02d}:00",
             bike_type=ride_input.bikeType,
+            intensity=ride_input.intensity,
             locale=locale,
         )
 

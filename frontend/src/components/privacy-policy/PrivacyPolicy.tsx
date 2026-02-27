@@ -23,7 +23,7 @@ export function PrivacyPolicy() {
               <li><a href="#verantwortlicher" className="hover:underline">{t('privacy.section.responsible.navTitle')}</a></li>
               <li><a href="#erhobene-daten" className="hover:underline">{t('privacy.section.dataCollected.navTitle')}</a></li>
               <li><a href="#rechtsgrundlagen" className="hover:underline">{t('privacy.section.legalBasis.navTitle')}</a></li>
-              <li><a href="#cookies" className="hover:underline">{t('privacy.section.cookies.navTitle')}</a></li>
+              <li><a href="#local-storage" className="hover:underline">{t('privacy.section.localStorage.navTitle')}</a></li>
               <li><a href="#drittanbieter" className="hover:underline">{t('privacy.section.thirdParties.navTitle')}</a></li>
               <li><a href="#nutzerrechte" className="hover:underline">{t('privacy.section.rights.navTitle')}</a></li>
               <li><a href="#kontakt-datenschutz" className="hover:underline">{t('privacy.section.contactPrivacy.navTitle')}</a></li>
@@ -33,9 +33,9 @@ export function PrivacyPolicy() {
           <section id="verantwortlicher" className="space-y-2">
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">{t('privacy.section.responsible.title')}</h2>
             <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-1">
-              <p>Timo [Nachname]</p>
-              <p>[Adresse]</p>
-              <p>E-Mail: [deine@email.de]</p>
+              <p>Timo Surmann</p>
+              <p>Iltisweg 6<br />45663 Recklinghausen</p>
+              <p>E-Mail: bike@timosur.com</p>
             </div>
           </section>
 
@@ -64,11 +64,19 @@ export function PrivacyPolicy() {
             </p>
           </section>
 
-          <section id="cookies" className="space-y-2">
-            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">{t('privacy.section.cookies.title')}</h2>
+          <section id="local-storage" className="space-y-2">
+            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">{t('privacy.section.localStorage.title')}</h2>
             <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-2">
-              <p>{t('privacy.section.cookies.text1')}</p>
-              <p>{t('privacy.section.cookies.text2before')} <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 hover:underline">{t('privacy.section.cookies.text2link')}</a>.</p>
+              <p>{t('privacy.section.localStorage.text1')}</p>
+              <p>{t('privacy.section.localStorage.text2')}</p>
+              <ul className="list-disc list-inside space-y-1 pl-2">
+                <li>{t('privacy.section.localStorage.keys.auth')}</li>
+                <li>{t('privacy.section.localStorage.keys.theme')}</li>
+                <li>{t('privacy.section.localStorage.keys.plannerForm')}</li>
+                <li>{t('privacy.section.localStorage.keys.rideHistory')}</li>
+                <li>{t('privacy.section.localStorage.keys.language')}</li>
+              </ul>
+              <p>{t('privacy.section.localStorage.text3')}</p>
             </div>
           </section>
 
@@ -76,7 +84,8 @@ export function PrivacyPolicy() {
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">{t('privacy.section.thirdParties.title')}</h2>
             <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-2">
               <p><strong className="text-stone-700 dark:text-stone-300">{t('privacy.section.thirdParties.weatherApi')}</strong> {t('privacy.section.thirdParties.weatherApiText')}</p>
-              <p><strong className="text-stone-700 dark:text-stone-300">{t('privacy.section.thirdParties.googleLogin')}</strong> {t('privacy.section.thirdParties.googleLoginText')}</p>
+              <p><strong className="text-stone-700 dark:text-stone-300">{t('privacy.section.thirdParties.nominatim')}</strong> {t('privacy.section.thirdParties.nominatimText')}</p>
+              <p><strong className="text-stone-700 dark:text-stone-300">{t('privacy.section.thirdParties.turnstile')}</strong> {t('privacy.section.thirdParties.turnstileText')}</p>
               <p><strong className="text-stone-700 dark:text-stone-300">{t('privacy.section.thirdParties.affiliateLinks')}</strong> {t('privacy.section.thirdParties.affiliateLinksText')}</p>
             </div>
           </section>

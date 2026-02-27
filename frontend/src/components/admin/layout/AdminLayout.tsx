@@ -4,6 +4,7 @@ import { AdminSidebar } from './AdminSidebar'
 import { AdminHeader } from './AdminHeader'
 import { ToastContainer } from '@/components/common/ToastContainer'
 import { ToastProvider } from '@/hooks/useToast'
+import { SEO } from '@/hooks/useSEO'
 
 export default function AdminLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -16,6 +17,7 @@ export default function AdminLayout() {
 
   return (
     <ToastProvider>
+      <SEO titleKey="admin" path="/admin" noIndex />
       <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex">
         <AdminSidebar
           collapsed={sidebarCollapsed}

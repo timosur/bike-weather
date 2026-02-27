@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, X, Bike, LogIn } from 'lucide-react'
+import { Menu, X, LogIn, KeyRound, Shield, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { MainNav } from './MainNav'
 import { UserMenu } from './UserMenu'
@@ -65,7 +65,12 @@ export function AppShell({
               className="flex items-center gap-2 shrink-0 group"
             >
               <div className="w-7 h-7 rounded-md bg-emerald-500 flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
-                <Bike className="w-4 h-4 text-white" strokeWidth={2} />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-4 h-4" fill="currentColor">
+                  <path d="M25,30a6,6,0,1,1,6-6A6.0069,6.0069,0,0,1,25,30Zm0-10a4,4,0,1,0,4,4A4.0045,4.0045,0,0,0,25,20Z" />
+                  <path d="M7,30a6,6,0,1,1,6-6A6.0069,6.0069,0,0,1,7,30ZM7,20a4,4,0,1,0,4,4A4.0045,4.0045,0,0,0,7,20Z" />
+                  <path d="M17,27H15V20.4139L9.5849,15a2.003,2.003,0,0,1,0-2.8292l4.5859-4.5859a2.0024,2.0024,0,0,1,2.8286,0L21.414,12H27v1.9993L20.5853,14l-5-5L11,13.5849l6,6Z" />
+                  <path d="M21.5,8A3.5,3.5,0,1,1,25,4.5,3.5042,3.5042,0,0,1,21.5,8Zm0-5A1.5,1.5,0,1,0,23,4.5,1.5017,1.5017,0,0,0,21.5,3Z" />
+                </svg>
               </div>
               <span
                 className="font-semibold text-stone-900 dark:text-stone-100 text-base"
@@ -141,40 +146,68 @@ export function AppShell({
                 </button>
               ))}
             </div>
-            <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ThemeToggle theme={theme} onToggle={toggleTheme} />
-                <SegmentedToggle
-                  value={language}
-                  onChange={(v) => onLanguageChange?.(v as 'de' | 'en')}
-                  options={[
-                    { value: 'de', label: '🇩🇪', ariaLabel: 'Deutsch' },
-                    { value: 'en', label: '🇬🇧', ariaLabel: 'English' },
-                  ]}
-                />
-              </div>
-              {user ? (
+            {user ? (
+              <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 space-y-1">
+                <p className="px-3 py-1 text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+                  {user.name}
+                </p>
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      onNavigate?.('/admin')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                  >
+                    <Shield className="w-4 h-4 text-stone-400 dark:text-stone-500" strokeWidth={1.5} />
+                    {t('common.admin')}
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    onNavigate?.('/change-password')
+                    setMobileMenuOpen(false)
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                >
+                  <KeyRound className="w-4 h-4 text-stone-400 dark:text-stone-500" strokeWidth={1.5} />
+                  {t('common.changePassword')}
+                </button>
                 <button
                   onClick={() => {
                     onLogout?.()
                     setMobileMenuOpen(false)
                   }}
-                  className="text-xs text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
+                  <LogOut className="w-4 h-4" strokeWidth={1.5} />
                   {t('common.logout')}
                 </button>
-              ) : (
+              </div>
+            ) : (
+              <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800">
                 <button
                   onClick={() => {
                     onNavigate?.('/login')
                     setMobileMenuOpen(false)
                   }}
-                  className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 px-3 py-2 rounded transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
                 >
                   <LogIn className="w-3.5 h-3.5" strokeWidth={2} />
                   {t('common.signIn')}
                 </button>
-              )}
+              </div>
+            )}
+            <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2">
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+              <SegmentedToggle
+                value={language}
+                onChange={(v) => onLanguageChange?.(v as 'de' | 'en')}
+                options={[
+                  { value: 'de', label: '🇩🇪', ariaLabel: 'Deutsch' },
+                  { value: 'en', label: '🇬🇧', ariaLabel: 'English' },
+                ]}
+              />
             </div>
           </div>
         )}
@@ -197,7 +230,12 @@ export function AppShell({
                   className="flex items-center gap-2 group"
                 >
                   <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
-                    <Bike className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-3.5 h-3.5" fill="currentColor">
+                      <path d="M25,30a6,6,0,1,1,6-6A6.0069,6.0069,0,0,1,25,30Zm0-10a4,4,0,1,0,4,4A4.0045,4.0045,0,0,0,25,20Z" />
+                      <path d="M7,30a6,6,0,1,1,6-6A6.0069,6.0069,0,0,1,7,30ZM7,20a4,4,0,1,0,4,4A4.0045,4.0045,0,0,0,7,20Z" />
+                      <path d="M17,27H15V20.4139L9.5849,15a2.003,2.003,0,0,1,0-2.8292l4.5859-4.5859a2.0024,2.0024,0,0,1,2.8286,0L21.414,12H27v1.9993L20.5853,14l-5-5L11,13.5849l6,6Z" />
+                      <path d="M21.5,8A3.5,3.5,0,1,1,25,4.5,3.5042,3.5042,0,0,1,21.5,8Zm0-5A1.5,1.5,0,1,0,23,4.5,1.5017,1.5017,0,0,0,21.5,3Z" />
+                    </svg>
                   </div>
                   <span
                     className="font-semibold text-stone-900 dark:text-stone-100 text-sm"
@@ -236,9 +274,15 @@ export function AppShell({
             {/* Bottom bar */}
             <div className="mt-8 pt-6 border-t border-stone-100 dark:border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-stone-400 dark:text-stone-500">
-                {t('shell.footer.copyright', { year: new Date().getFullYear() })}
+                {t('shell.footer.copyright', { year: new Date().getFullYear() })}{' '}
+                <a href="https://github.com/timosur" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.copyrightAuthor')}</a>
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
+                <span className="text-xs text-stone-400 dark:text-stone-500">
+                  <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.attributionWeather')}</a>
+                  {' · '}
+                  <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.attributionMap')}</a>
+                </span>
                 <button
                   onClick={() => onNavigate?.('/imprint')}
                   className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"

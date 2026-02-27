@@ -83,7 +83,7 @@ Structure example:
     "brand": "Fahrrad Wetter",
     "footer": {
       "tagline": "Wetterbasierte Kleidungsempfehlungen für Radfahrer.",
-      "copyright": "© {{year}} Fahrrad Wetter. Ein Projekt von Timo.",
+      "copyright": "© {{year}} Fahrrad Wetter. Ein Projekt von <a href='https://github.com/timosur'>timosur</a>",
       "imprint": "Impressum",
       "privacy": "Datenschutz"
     },

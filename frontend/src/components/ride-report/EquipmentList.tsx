@@ -70,6 +70,16 @@ export function EquipmentList({ items }: EquipmentListProps) {
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{item.name}</p>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{item.reason}</p>
+                  {item.contents && item.contents.length > 0 && (
+                    <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+                      {item.contents.map((sub, idx) => (
+                        <li key={idx} className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
+                          <span className="text-stone-300 dark:text-stone-600">•</span>
+                          {sub.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </li>
             ))}

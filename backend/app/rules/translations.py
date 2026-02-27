@@ -836,11 +836,11 @@ EQUIPMENT_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     },
     ("eq-repair-kit", "de"): {
         "name": "Reparaturset",
-        "reason": "Unverzichtbar für {dist:.0f} km Fahrt.",
+        "reason": "Unverzichtbar für jede Fahrt.",
     },
     ("eq-repair-kit", "en"): {
-        "name": "Puncture Repair Kit",
-        "reason": "Essential kit for {dist:.0f} km ride.",
+        "name": "Repair Kit",
+        "reason": "Essential for every ride.",
     },
     ("eq-energy", "de"): {
         "name": "Energieriegel",
@@ -1246,6 +1246,59 @@ def get_clothing_translation(item_id: str, locale: str) -> ItemTranslation | Non
 def get_equipment_translation(item_id: str, locale: str) -> ItemTranslation | None:
     """Get equipment item translation for the given locale."""
     return EQUIPMENT_TRANSLATIONS.get((item_id, locale))
+
+
+# ── REPAIR KIT ITEM TRANSLATIONS ────────────────────────────────────────
+
+RepairKitTranslation = dict  # {"name": str}
+
+REPAIR_KIT_TRANSLATIONS: dict[tuple[str, str], RepairKitTranslation] = {
+    # ── Minimal tier ──────────────────────────────────────────────────
+    ("rk-spare-tube", "de"): {"name": "Ersatzschlauch"},
+    ("rk-spare-tube", "en"): {"name": "Spare Tube"},
+    ("rk-tire-levers", "de"): {"name": "Reifenheber"},
+    ("rk-tire-levers", "en"): {"name": "Tire Levers"},
+    ("rk-mini-pump", "de"): {"name": "Minipumpe"},
+    ("rk-mini-pump", "en"): {"name": "Mini Pump"},
+    ("rk-multi-tool", "de"): {"name": "Multitool"},
+    ("rk-multi-tool", "en"): {"name": "Multi-Tool"},
+    # ── Standard tier extras ─────────────────────────────────────────
+    ("rk-patch-kit", "de"): {"name": "Flickzeug"},
+    ("rk-patch-kit", "en"): {"name": "Patch Kit"},
+    ("rk-quick-link", "de"): {"name": "Kettenschloss (Quick Link)"},
+    ("rk-quick-link", "en"): {"name": "Quick Link"},
+    ("rk-zip-ties", "de"): {"name": "Kabelbinder"},
+    ("rk-zip-ties", "en"): {"name": "Zip Ties"},
+    ("rk-tire-boot", "de"): {"name": "Reifenflicken (Tire Boot)"},
+    ("rk-tire-boot", "en"): {"name": "Tire Boot"},
+    # ── Extended tier extras ─────────────────────────────────────────
+    ("rk-spare-tube-2", "de"): {"name": "Zweiter Ersatzschlauch"},
+    ("rk-spare-tube-2", "en"): {"name": "Second Spare Tube"},
+    ("rk-chain-tool", "de"): {"name": "Kettennieter"},
+    ("rk-chain-tool", "en"): {"name": "Chain Tool"},
+    ("rk-spoke-wrench", "de"): {"name": "Speichenschlüssel"},
+    ("rk-spoke-wrench", "en"): {"name": "Spoke Wrench"},
+    ("rk-electrical-tape", "de"): {"name": "Isolierband"},
+    ("rk-electrical-tape", "en"): {"name": "Electrical Tape"},
+    # ── Bike-type-specific ───────────────────────────────────────────
+    ("rk-co2-cartridge", "de"): {"name": "CO\u2082-Kartusche + Adapter"},
+    ("rk-co2-cartridge", "en"): {"name": "CO\u2082 Cartridge + Inflator"},
+    ("rk-tubeless-plugs", "de"): {"name": "Tubeless-Reparaturset"},
+    ("rk-tubeless-plugs", "en"): {"name": "Tubeless Plug Kit"},
+    ("rk-tire-boot-gravel", "de"): {"name": "Gravel-Reifenflicken (verstärkt)"},
+    ("rk-tire-boot-gravel", "en"): {"name": "Gravel Tire Boot (reinforced)"},
+    ("rk-disc-brake-pad", "de"): {"name": "Bremsbelag (Ersatz)"},
+    ("rk-disc-brake-pad", "en"): {"name": "Disc Brake Pad (spare)"},
+    ("rk-chain-lube", "de"): {"name": "Kettenöl-Sachet"},
+    ("rk-chain-lube", "en"): {"name": "Chain Lube Sachet"},
+}
+
+
+def get_repair_kit_translation(
+    item_id: str, locale: str
+) -> RepairKitTranslation | None:
+    """Get repair kit item translation for the given locale."""
+    return REPAIR_KIT_TRANSLATIONS.get((item_id, locale))
 
 
 def get_wmo_description(code: int, locale: str) -> str:

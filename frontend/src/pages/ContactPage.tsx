@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { ContactPage as ContactPageComponent } from '../components/contact'
+import { SEO } from '../hooks/useSEO'
 import type { ContactFormData } from '../components/contact/types'
 import { submitContactForm } from '../api/contact'
 
@@ -22,11 +23,14 @@ export default function ContactPage() {
   }, [])
 
   return (
-    <ContactPageComponent
-      isLoading={isLoading}
-      isSuccess={isSuccess}
-      errorMessage={errorMessage}
-      onSubmit={handleSubmit}
-    />
+    <>
+      <SEO titleKey="contact" path="/contact" />
+      <ContactPageComponent
+        isLoading={isLoading}
+        isSuccess={isSuccess}
+        errorMessage={errorMessage}
+        onSubmit={handleSubmit}
+      />
+    </>
   )
 }

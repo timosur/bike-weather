@@ -395,3 +395,61 @@ async def headless_recovery_complete(token: str, new_password: str) -> None:
                 pass
 
         logger.debug("Password recovery completed successfully")
+
+
+async def headless_change_password(
+    user_email: str, current_password: str, new_password: str
+) -> None:
+    """Change password for an authenticated user.
+
+    Verifies the current password by driving the login flow, then looks up
+    the Authentik user pk by email and sets the new password via the Admin API.
+    """
+    if not settings.AUTHENTIK_API_TOKEN:
+        raise HeadlessAuthError("Password change is not available")
+
+    # Verify current password (raises HeadlessAuthError if wrong)
+    try:
+        await headless_login(user_email, current_password)
+    except HeadlessAuthError:
+        raise HeadlessAuthError("Current password is incorrect")
+
+    api_headers = {
+        "Authorization": f"Bearer {settings.AUTHENTIK_API_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    async with httpx.AsyncClient() as client:
+        # Look up the Authentik user pk by email
+        r = await client.get(
+            USERS_URL,
+            params={"search": user_email},
+            headers=api_headers,
+        )
+        r.raise_for_status()
+        results = r.json().get("results", [])
+        user_pk = None
+        for u in results:
+            if u.get("email", "").lower() == user_email.lower():
+                user_pk = u.get("pk")
+                break
+
+        if not user_pk:
+            raise HeadlessAuthError("Password change failed")
+
+        # Set the new password via Authentik Admin API
+        resp = await client.post(
+            f"{USERS_URL}{user_pk}/set_password/",
+            headers=api_headers,
+            json={"password": new_password},
+        )
+        if resp.status_code >= 400:
+            try:
+                err_data = resp.json()
+            except Exception:
+                raise HeadlessAuthError("Password change failed")
+            if isinstance(err_data.get("password"), list):
+                raise HeadlessAuthError(err_data["password"][0])
+            raise HeadlessAuthError(err_data.get("detail", "Password change failed"))
+
+    logger.debug("Password changed successfully for user: %s", user_email)
