@@ -28,11 +28,6 @@ jobs:
         run: |
           VERSION="${GITHUB_REF#refs/tags/frontend/v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          if [[ "$VERSION" == *"-preview"* ]]; then
-            echo "is_preview=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_preview=false" >> "$GITHUB_OUTPUT"
-          fi
           echo "📦 Frontend version: ${VERSION}"
 
       - name: Set up Docker Buildx
@@ -52,8 +47,6 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest,enable=${{ steps.version.outputs.is_preview == 'false' }}
-            type=raw,value=preview-latest,enable=${{ steps.version.outputs.is_preview == 'true' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
