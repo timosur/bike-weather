@@ -28,6 +28,11 @@ jobs:
         run: |
           VERSION="${GITHUB_REF#refs/tags/agent/v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          if [[ "$VERSION" == *"-preview"* ]]; then
+            echo "is_preview=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_preview=false" >> "$GITHUB_OUTPUT"
+          fi
           echo "📦 Agent version: ${VERSION}"
 
       - name: Set up Docker Buildx
@@ -46,10 +51,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}},value=v${{ steps.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.version.outputs.version }}
-            type=semver,pattern={{major}},value=v${{ steps.version.outputs.version }}
-            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest,enable=${{ steps.version.outputs.is_preview == 'false' }}
+            type=raw,value=preview-latest,enable=${{ steps.version.outputs.is_preview == 'true' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

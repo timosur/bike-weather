@@ -63,7 +63,9 @@ function loadTurnstileScript(): Promise<void> {
   })
 }
 
-const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
+import { getConfig } from '../../config'
+
+const SITE_KEY = getConfig('VITE_TURNSTILE_SITE_KEY')
 
 export function TurnstileWidget({
   onVerify,

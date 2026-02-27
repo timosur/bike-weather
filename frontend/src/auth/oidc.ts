@@ -1,7 +1,8 @@
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts'
+import { getConfig } from '../config'
 
-const authority = import.meta.env.VITE_AUTHENTIK_URL as string
-const clientId = import.meta.env.VITE_AUTHENTIK_CLIENT_ID as string
+const authority = getConfig('VITE_AUTHENTIK_URL')
+const clientId = getConfig('VITE_AUTHENTIK_CLIENT_ID')
 
 export const userManager = new UserManager({
   authority,
