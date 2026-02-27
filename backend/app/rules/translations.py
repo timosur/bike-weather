@@ -36,6 +36,14 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
         "name": "Light Headband",
         "reason": "Protects ears from cool riding wind at {temp_min:.0f}°C.",
     },
+    ("cl-cycling-cap", "de"): {
+        "name": "Radmütze",
+        "reason": "Sonnenschutz unter dem Helm bei {temp_max:.0f}°C.",
+    },
+    ("cl-cycling-cap", "en"): {
+        "name": "Cycling Cap",
+        "reason": "Sun protection under helmet at {temp_max:.0f}°C.",
+    },
     # --- EYES ---
     ("cl-sunglasses", "de"): {
         "name": "Sport-Sonnenbrille",
@@ -52,6 +60,31 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     ("cl-glasses", "en"): {
         "name": "Clear Cycling Glasses",
         "reason": "Protects eyes from spray and rain at {precip:.0f}% precipitation.",
+    },
+    ("cl-glasses-wind", "de"): {
+        "name": "Radbrille (Windschutz)",
+        "reason": "Gut abschließend — schützt die Augen vor kalter Zugluft bei {feels:.0f}°C.",
+    },
+    ("cl-glasses-wind", "en"): {
+        "name": "Cycling Glasses (Wind Protection)",
+        "reason": "Close-fitting — protects eyes from cold drafts at {feels:.0f}°C.",
+    },
+    # --- NECK / FACE ---
+    ("cl-neck-gaiter", "de"): {
+        "name": "Halstuch / Nackenschutz",
+        "reason": "Schützt Hals und Nacken vor Kälte bei {feels:.0f}°C.",
+    },
+    ("cl-neck-gaiter", "en"): {
+        "name": "Neck Gaiter",
+        "reason": "Protects neck from cold at {feels:.0f}°C.",
+    },
+    ("cl-face-mask", "de"): {
+        "name": "Gesichtsmaske / Atemschutz",
+        "reason": "Schützt Atemwege und Gesicht vor Kälte bei {feels:.0f}°C.",
+    },
+    ("cl-face-mask", "en"): {
+        "name": "Face Mask",
+        "reason": "Protects airways and face from cold at {feels:.0f}°C.",
     },
     # --- BASE LAYER ---
     ("cl-base-merino", "de"): {
@@ -113,6 +146,14 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
         "name": "Short-sleeve Cycling Jersey",
         "reason": "Breathable at {temp_max:.0f}°C, keeps you cool.",
     },
+    ("cl-jersey-sleeveless", "de"): {
+        "name": "Ärmelloses Radtrikot",
+        "reason": "Maximale Belüftung bei {temp_max:.0f}°C Hitze.",
+    },
+    ("cl-jersey-sleeveless", "en"): {
+        "name": "Sleeveless Cycling Jersey",
+        "reason": "Maximum ventilation in {temp_max:.0f}°C heat.",
+    },
     # --- OUTER LAYER ---
     ("cl-rain-jacket", "de"): {
         "name": "Wasserdichte Radjacke",
@@ -158,6 +199,14 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
         "name": "Insulated Cycling Jacket",
         "reason": "Extra warmth at {feels:.0f}°C feels-like temperature.",
     },
+    ("cl-windstopper-jacket", "de"): {
+        "name": "Windstopper-Radjacke",
+        "reason": "Winddicht und isolierend bei {feels:.0f}°C — Standard unter 10°C.",
+    },
+    ("cl-windstopper-jacket", "en"): {
+        "name": "Windproof Cycling Jacket",
+        "reason": "Windproof and insulating at {feels:.0f}°C — standard below 10°C.",
+    },
     # --- LEGS ---
     ("cl-thermal-tights", "de"): {
         "name": "Thermo-Radhose",
@@ -166,6 +215,14 @@ CLOTHING_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
     ("cl-thermal-tights", "en"): {
         "name": "Thermal Cycling Tights",
         "reason": "Warm legs at {temp_min:.0f}°C minimum, wind-resistant.",
+    },
+    ("cl-thermal-undershorts", "de"): {
+        "name": "Thermo-Radunterhose",
+        "reason": "Zusätzliche Isolierung unter der Trägerhose bei {feels:.0f}°C.",
+    },
+    ("cl-thermal-undershorts", "en"): {
+        "name": "Thermal Undershorts",
+        "reason": "Extra insulation under bib tights at {feels:.0f}°C.",
     },
     ("cl-tights-warmers", "de"): {"name": "Radhose + Beinlinge", "reason": ""},
     ("cl-tights-warmers", "en"): {"name": "Cycling Tights + Leg Warmers", "reason": ""},
@@ -470,6 +527,179 @@ SHOE_VENTILATION: dict[str, str] = {
     "en_good": "Good ventilation",
     "en_stiff": "Stiff sole for efficient power transfer",
 }
+
+
+# ---------------------------------------------------------------------------
+# Condition-reason translations keyed by (reason_code, locale)
+# ---------------------------------------------------------------------------
+class ConditionReasonTranslation(TypedDict):
+    label: str
+    detail: str  # f-string template with {actual} and {threshold}
+
+
+CONDITION_REASON_TRANSLATIONS: dict[tuple[str, str], ConditionReasonTranslation] = {
+    # --- NOT RECOMMENDED ---
+    ("thunderstorm", "de"): {
+        "label": "Gewitter",
+        "detail": "Gewitter vorhergesagt — zu gefährlich zum Radfahren.",
+    },
+    ("thunderstorm", "en"): {
+        "label": "Thunderstorm",
+        "detail": "Thunderstorm forecast — too dangerous for cycling.",
+    },
+    ("snow", "de"): {
+        "label": "Schneefall",
+        "detail": "Schneefall vorhergesagt — Sturzgefahr auf glatten Straßen.",
+    },
+    ("snow", "en"): {
+        "label": "Snowfall",
+        "detail": "Snowfall forecast — risk of crashes on slippery roads.",
+    },
+    ("extreme_cold", "de"): {
+        "label": "Extreme Kälte",
+        "detail": "Temperatur: {actual:.0f}°C (Grenze: {threshold:.0f}°C)",
+    },
+    ("extreme_cold", "en"): {
+        "label": "Extreme cold",
+        "detail": "Temperature: {actual:.0f}°C (limit: {threshold:.0f}°C)",
+    },
+    ("extreme_wind", "de"): {
+        "label": "Extremer Wind",
+        "detail": "Wind: {actual:.0f} km/h (Grenze: {threshold:.0f} km/h)",
+    },
+    ("extreme_wind", "en"): {
+        "label": "Extreme wind",
+        "detail": "Wind: {actual:.0f} km/h (limit: {threshold:.0f} km/h)",
+    },
+    ("extreme_heat", "de"): {
+        "label": "Extreme Hitze",
+        "detail": "Gefühlt: {actual:.0f}°C (Grenze: {threshold:.0f}°C)",
+    },
+    ("extreme_heat", "en"): {
+        "label": "Extreme heat",
+        "detail": "Feels like: {actual:.0f}°C (limit: {threshold:.0f}°C)",
+    },
+    # --- CAUTION ---
+    ("high_heat", "de"): {
+        "label": "Große Hitze",
+        "detail": "Gefühlt: {actual:.0f}°C (Grenze: {threshold:.0f}°C)",
+    },
+    ("high_heat", "en"): {
+        "label": "High heat",
+        "detail": "Feels like: {actual:.0f}°C (limit: {threshold:.0f}°C)",
+    },
+    ("high_precip", "de"): {
+        "label": "Regen wahrscheinlich",
+        "detail": "Niederschlag: {actual:.0f}% (Grenze: {threshold:.0f}%)",
+    },
+    ("high_precip", "en"): {
+        "label": "Rain likely",
+        "detail": "Precipitation: {actual:.0f}% (limit: {threshold:.0f}%)",
+    },
+    ("cold", "de"): {
+        "label": "Kalt",
+        "detail": "Temperatur: {actual:.0f}°C (Grenze: {threshold:.0f}°C)",
+    },
+    ("cold", "en"): {
+        "label": "Cold",
+        "detail": "Temperature: {actual:.0f}°C (limit: {threshold:.0f}°C)",
+    },
+    ("high_wind", "de"): {
+        "label": "Starker Wind",
+        "detail": "Wind: {actual:.0f} km/h (Grenze: {threshold:.0f} km/h)",
+    },
+    ("high_wind", "en"): {
+        "label": "Strong wind",
+        "detail": "Wind: {actual:.0f} km/h (limit: {threshold:.0f} km/h)",
+    },
+    # --- IDEAL / GOOD (positive) ---
+    ("pleasant_temp", "de"): {
+        "label": "Angenehme Temperaturen",
+        "detail": "Gefühlt: {actual:.0f}°C — angenehmer Bereich zum Radfahren.",
+    },
+    ("pleasant_temp", "en"): {
+        "label": "Pleasant temperature",
+        "detail": "Feels like: {actual:.0f}°C — comfortable range for cycling.",
+    },
+    ("low_precip", "de"): {
+        "label": "Trocken",
+        "detail": "Niederschlag: {actual:.0f}% (Grenze: {threshold:.0f}%)",
+    },
+    ("low_precip", "en"): {
+        "label": "Dry",
+        "detail": "Precipitation: {actual:.0f}% (limit: {threshold:.0f}%)",
+    },
+    ("calm_wind", "de"): {
+        "label": "Wenig Wind",
+        "detail": "Wind: {actual:.0f} km/h (Grenze: {threshold:.0f} km/h)",
+    },
+    ("calm_wind", "en"): {
+        "label": "Calm wind",
+        "detail": "Wind: {actual:.0f} km/h (limit: {threshold:.0f} km/h)",
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# Safety/comfort tip translations keyed by (tip_id, locale)
+# ---------------------------------------------------------------------------
+TIP_TRANSLATIONS: dict[tuple[str, str], str] = {
+    (
+        "tip-extreme-heat",
+        "de",
+    ): "Extreme Hitze: Ozonbelastung möglich, Dehydrierungsgefahr. Training ggf. verschieben.",
+    (
+        "tip-extreme-heat",
+        "en",
+    ): "Extreme heat: risk of ozone exposure and dehydration. Consider postponing your ride.",
+    (
+        "tip-heat",
+        "de",
+    ): "Viel trinken (mind. 1 L/h), Sonnenschutz verwenden, Bergetappen meiden.",
+    ("tip-heat", "en"): "Drink at least 1 L/h, apply sunscreen, avoid mountain stages.",
+    (
+        "tip-ice",
+        "de",
+    ): "Vorsicht vor Glätte! Besonders nasses Laub und Brücken können rutschig sein.",
+    ("tip-ice", "en"): "Watch for ice! Wet leaves and bridges are especially slippery.",
+    (
+        "tip-visibility",
+        "de",
+    ): "Helle, reflektierende Kleidung tragen. Licht einschalten — Sichtbarkeit ist reduziert.",
+    (
+        "tip-visibility",
+        "en",
+    ): "Wear bright/reflective clothing and use lights — visibility is reduced.",
+    (
+        "tip-layering",
+        "de",
+    ): "Zwiebelschalen-Prinzip: Schichten zum einfachen An- und Ausziehen mitnehmen.",
+    (
+        "tip-layering",
+        "en",
+    ): "Layer up: easy to add/remove clothes as conditions change.",
+    (
+        "tip-hypothermia",
+        "de",
+    ): "Regenklamotten anlassen! Gefahr des Auskühlens durch Verdunstung von Schweiß.",
+    (
+        "tip-hypothermia",
+        "en",
+    ): "Keep rain gear on! Risk of cooling down from sweat evaporation.",
+}
+
+
+def get_condition_reason_translation(
+    code: str,
+    locale: str,
+) -> ConditionReasonTranslation | None:
+    """Get condition reason translation for the given locale."""
+    return CONDITION_REASON_TRANSLATIONS.get((code, locale))
+
+
+def get_tip_translation(tip_id: str, locale: str) -> str:
+    """Get tip message translation for the given locale."""
+    return TIP_TRANSLATIONS.get((tip_id, locale), "")
 
 
 def get_clothing_translation(item_id: str, locale: str) -> ItemTranslation | None:

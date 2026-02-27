@@ -93,3 +93,55 @@ def test_temperature_bands_are_complete() -> None:
         assert results[i] != results[i + 1], (
             f"Bands {bands[i]} and {bands[i + 1]} produced identical items"
         )
+
+
+def test_neck_gaiter_below_5c() -> None:
+    weather = _make_weather(temp_min=-2, temp_max=3, temp_feels_like=0)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    icons = [i["icon"] for i in items]
+    assert "neck-gaiter" in icons
+
+
+def test_no_neck_gaiter_warm() -> None:
+    weather = _make_weather(temp_min=10, temp_max=18, temp_feels_like=14)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    icons = [i["icon"] for i in items]
+    assert "neck-gaiter" not in icons
+
+
+def test_face_mask_below_0c() -> None:
+    weather = _make_weather(temp_min=-5, temp_max=0, temp_feels_like=-3)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    icons = [i["icon"] for i in items]
+    assert "face-mask" in icons
+
+
+def test_no_face_mask_above_0c() -> None:
+    weather = _make_weather(temp_min=2, temp_max=8, temp_feels_like=4)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    icons = [i["icon"] for i in items]
+    assert "face-mask" not in icons
+
+
+def test_cycling_cap_hot_weather() -> None:
+    weather = _make_weather(temp_min=28, temp_max=35, temp_feels_like=32)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-cycling-cap" in ids
+
+
+def test_broadened_shoe_covers_rain() -> None:
+    """Shoe covers should trigger at precip > 30% regardless of temp."""
+    weather = _make_weather(
+        temp_min=15, temp_max=22, temp_feels_like=18, precipitation_probability=40
+    )
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    icons = [i["icon"] for i in items]
+    assert "shoe-covers" in icons
+
+
+def test_thermal_undershorts_below_0c() -> None:
+    weather = _make_weather(temp_min=-5, temp_max=0, temp_feels_like=-3)
+    items = get_clothing_items(weather, "rennrad", "moderat", locale="en")
+    ids = [i["id"] for i in items]
+    assert "cl-thermal-undershorts" in ids

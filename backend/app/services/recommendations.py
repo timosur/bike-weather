@@ -9,21 +9,25 @@ from app.rules.clothing_rules import get_clothing_items
 from app.rules.condition import compute_condition
 from app.rules.equipment_rules import get_equipment_items
 from app.rules.speed_estimation import resolve_duration_minutes
+from app.rules.tips_rules import get_tips
 from app.rules.translations import (
     BIKE_LABELS,
     DAY_LABELS,
     INTENSITY_LABELS,
     RIDE_NAME_TEMPLATE,
     RIDING_STYLE_TEMPLATE,
+    get_condition_reason_translation,
     get_wmo_description,
 )
 from app.schemas.report import (
     ClothingAlternativeSchema,
     ClothingItemSchema,
+    ConditionReasonSchema,
     DayForecastSchema,
     EquipmentItemSchema,
     HourlyWeatherSchema,
     RideReportSchema,
+    TipSchema,
     WeatherDataSchema,
 )
 from app.schemas.ride import RideInputSchema
@@ -107,6 +111,67 @@ def _clothing_dicts_to_schemas(items: list[dict]) -> list[ClothingItemSchema]:
 
 def _equipment_dicts_to_schemas(items: list[dict]) -> list[EquipmentItemSchema]:
     return [EquipmentItemSchema(**item) for item in items]
+
+
+def _format_condition_reasons(
+    reasons: list,
+    locale: str,
+) -> list[ConditionReasonSchema]:
+    """Convert ConditionReason objects to translated schemas."""
+    from app.rules.condition import ConditionReason
+
+    result: list[ConditionReasonSchema] = []
+    for r in reasons:
+        trans = get_condition_reason_translation(r.code, locale)
+        label = trans["label"] if trans else r.code
+        detail_template = trans["detail"] if trans else ""
+        # Format detail with actual/threshold values
+        try:
+            detail = detail_template.format(
+                actual=r.actual if r.actual is not None else 0,
+                threshold=r.threshold if r.threshold is not None else 0,
+            )
+        except (KeyError, ValueError):
+            detail = detail_template
+        result.append(
+            ConditionReasonSchema(
+                code=r.code,
+                emoji=r.emoji,
+                label=label,
+                detail=detail,
+            )
+        )
+    return result
+
+
+def _tips_to_schemas(tips: list[dict]) -> list[TipSchema]:
+    """Convert tip dicts to TipSchema instances."""
+    return [TipSchema(**t) for t in tips]
+
+
+def _merge_tips_across_days(
+    per_day_tips: list[list[TipSchema]],
+    day_labels: list[str],
+) -> list[TipSchema]:
+    """Merge tips from all days, deduplicating by id."""
+    seen: dict[str, tuple[TipSchema, set[int]]] = {}
+    for day_idx, tips in enumerate(per_day_tips):
+        for tip in tips:
+            if tip.id in seen:
+                seen[tip.id][1].add(day_idx)
+            else:
+                seen[tip.id] = (tip, {day_idx})
+
+    merged: list[TipSchema] = []
+    for tip_id, (tip, day_indices) in seen.items():
+        if len(day_indices) < len(per_day_tips):
+            day_names = ", ".join(day_labels[i] for i in sorted(day_indices))
+            merged.append(
+                tip.model_copy(update={"message": f"{tip.message} ({day_names})"})
+            )
+        else:
+            merged.append(tip)
+    return merged
 
 
 # Clothing icon severity: higher = more protection. Used for merging multi-day items.
@@ -306,6 +371,8 @@ async def build_report(
     # Fetch weather and build days
     day_forecasts: list[DayForecastSchema] = []
     conditions: list[str] = []
+    all_condition_reasons: list[list] = []  # raw ConditionReason per day
+    per_day_tips: list[list[TipSchema]] = []
 
     for day_idx, (
         location_name,
@@ -401,8 +468,9 @@ async def build_report(
         else:
             forecast = full_day_window.summary
 
-        condition = compute_condition(forecast)
+        condition, reasons = compute_condition(forecast)
         conditions.append(condition)
+        all_condition_reasons.append(reasons)
 
         clothing = get_clothing_items(
             forecast, ride_input.bikeType, ride_input.intensity, locale=locale
@@ -414,6 +482,10 @@ async def build_report(
             ride_end_time=f"{ride_end_h:02d}:00",
             locale=locale,
         )
+
+        tips = get_tips(forecast, locale)
+        day_tip_schemas = _tips_to_schemas(tips)
+        per_day_tips.append(day_tip_schemas)
 
         day_label: str
         if len(day_locations) == 1:
@@ -428,12 +500,14 @@ async def build_report(
                 dayLabel=day_label,
                 location=location_name,
                 condition=condition,
+                conditionReasons=_format_condition_reasons(reasons, locale),
                 weather=_forecast_to_weather_schema(forecast, locale),
                 hourlyForecast=_hourly_to_schemas(chart_hours, date_str),
                 rideStartHour=ride_start_h,
                 rideEndHour=ride_end_h,
                 clothingItems=_clothing_dicts_to_schemas(clothing),
                 equipment=_equipment_dicts_to_schemas(equipment),
+                tips=day_tip_schemas,
             )
         )
 
@@ -445,6 +519,7 @@ async def build_report(
     # Build merged packing list for multi-day tours
     merged_clothing: list[ClothingItemSchema] = []
     merged_equipment: list[EquipmentItemSchema] = []
+    merged_tips: list[TipSchema] = []
     if len(day_forecasts) > 1:
         per_day_clothing = [d.clothingItems for d in day_forecasts]
         per_day_equipment = [d.equipment for d in day_forecasts]
@@ -453,6 +528,21 @@ async def build_report(
         merged_equipment = _merge_equipment_across_days(
             per_day_equipment, day_labels_list
         )
+        merged_tips = _merge_tips_across_days(per_day_tips, day_labels_list)
+
+    # Determine overall condition reasons (use worst day's reasons)
+    overall_condition = _worst_condition(conditions)
+    worst_day_idx = next(
+        (i for i, c in enumerate(conditions) if c == overall_condition), 0
+    )
+    overall_reasons = _format_condition_reasons(
+        all_condition_reasons[worst_day_idx] if all_condition_reasons else [],
+        locale,
+    )
+
+    # Merge tips for single-day
+    if len(day_forecasts) == 1:
+        merged_tips = per_day_tips[0] if per_day_tips else []
 
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",
@@ -464,8 +554,10 @@ async def build_report(
             bike=bike_label, intensity=intensity_label
         ),
         totalDistance=ride_input.distanceKm or 0,
-        overallCondition=_worst_condition(conditions),
+        overallCondition=overall_condition,
+        overallConditionReasons=overall_reasons,
         days=day_forecasts,
         mergedClothingItems=merged_clothing,
         mergedEquipment=merged_equipment,
+        tips=merged_tips,
     )

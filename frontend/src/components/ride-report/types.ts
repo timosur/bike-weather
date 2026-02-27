@@ -33,7 +33,9 @@ export type ClothingIcon =
   | "gloves-waterproof"
   | "shoes"
   | "shoe-covers"
-  | "socks";
+  | "socks"
+  | "neck-gaiter"
+  | "face-mask";
 
 export interface WeatherData {
   tempMin: number;
@@ -73,6 +75,20 @@ export interface EquipmentItem {
   reason: string;
 }
 
+export interface ConditionReason {
+  code: string;
+  emoji: string;
+  label: string;
+  detail: string;
+}
+
+export interface Tip {
+  id: string;
+  category: string;
+  message: string;
+  severity: string;
+}
+
 export interface HourlyWeather {
   hour: string; // HH:MM
   datetime?: string; // ISO timestamp e.g. "2026-02-27T14:00"
@@ -96,12 +112,14 @@ export interface DayForecast {
   dayLabel: string;
   location?: string;
   condition: ConditionRating;
+  conditionReasons?: ConditionReason[];
   weather: WeatherData;
   hourlyForecast?: HourlyWeather[];
   rideStartHour?: number;
   rideEndHour?: number;
   clothingItems: ClothingItem[];
   equipment: EquipmentItem[];
+  tips?: Tip[];
 }
 
 export interface RideReport {
@@ -112,10 +130,12 @@ export interface RideReport {
   totalDistance: number;
   distanceUnit: string;
   overallCondition: ConditionRating;
+  overallConditionReasons?: ConditionReason[];
   shareUrl: string;
   days: DayForecast[];
   mergedClothingItems?: ClothingItem[];
   mergedEquipment?: EquipmentItem[];
+  tips?: Tip[];
 }
 
 export interface RideReportProps {

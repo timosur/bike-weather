@@ -67,16 +67,30 @@ def get_clothing_items(
     }
 
     # --- HEAD ---
-    if effective_feels < 5:
+    if effective_feels >= 30:
+        items.append(_make_item("cl-cycling-cap", "headband", locale, fvars))
+    elif effective_feels < 5:
         items.append(_make_item("cl-helmet-cover", "helmet-cover", locale, fvars))
     elif effective_feels < 15:
         items.append(_make_item("cl-headband", "headband", locale, fvars))
+
+    # Helmet rain cover — broader: rain even at warmer temps (5-20°C)
+    if precip > 30 and 5 <= effective_feels < 20:
+        items.append(_make_item("cl-helmet-cover", "helmet-cover", locale, fvars))
 
     # --- EYES ---
     if weather.uv_index >= 3:
         items.append(_make_item("cl-sunglasses", "sunglasses", locale, fvars))
     elif precip > 30:
         items.append(_make_item("cl-glasses", "glasses", locale, fvars))
+    elif effective_feels < 5:
+        items.append(_make_item("cl-glasses-wind", "glasses", locale, fvars))
+
+    # --- NECK / FACE ---
+    if effective_feels < 5:
+        items.append(_make_item("cl-neck-gaiter", "neck-gaiter", locale, fvars))
+    if effective_feels < 0:
+        items.append(_make_item("cl-face-mask", "face-mask", locale, fvars))
 
     # --- BASE LAYER ---
     if effective_feels < 10:
@@ -108,7 +122,19 @@ def get_clothing_items(
             )
         )
     else:
-        items.append(_make_item("cl-jersey-short", "jersey", locale, fvars))
+        items.append(
+            _make_item(
+                "cl-jersey-short",
+                "jersey",
+                locale,
+                fvars,
+                alternatives=(
+                    [{"id": "cl-jersey-sleeveless", "icon": "jersey"}]
+                    if effective_feels >= 30
+                    else None
+                ),
+            )
+        )
 
     # --- OUTER LAYER ---
     if precip > 50:
@@ -137,6 +163,17 @@ def get_clothing_items(
         )
     elif effective_feels < 5:
         items.append(_make_item("cl-insulated-jacket", "jacket", locale, fvars))
+    elif effective_feels < 10:
+        # Windstopper standard below 10°C per Pedalieri guide
+        items.append(
+            _make_item(
+                "cl-windstopper-jacket",
+                "jacket",
+                locale,
+                fvars,
+                alternatives=[{"id": "cl-wind-vest", "icon": "vest"}],
+            )
+        )
 
     # --- LEGS ---
     if effective_feels < 5:
@@ -149,6 +186,11 @@ def get_clothing_items(
                 alternatives=[{"id": "cl-tights-warmers", "icon": "leg-warmers"}],
             )
         )
+        # Thermal undershorts for extreme cold
+        if effective_feels < 0:
+            items.append(
+                _make_item("cl-thermal-undershorts", "pants-short", locale, fvars)
+            )
     elif effective_feels < 15:
         items.append(
             _make_item(
@@ -162,8 +204,8 @@ def get_clothing_items(
     else:
         items.append(_make_item("cl-shorts", "pants-short", locale, fvars))
 
-    # Rain overpants
-    if precip > 50 and effective_feels < 15:
+    # Rain overpants — broadened: up to 25°C per Pedalieri guide
+    if precip > 50 and effective_feels < 25:
         items.append(_make_item("cl-overpants", "overpants", locale, fvars))
 
     # --- HANDS ---
@@ -180,7 +222,8 @@ def get_clothing_items(
         items.append(_make_item("cl-gloves-light", "gloves-light", locale, fvars))
 
     # --- FEET ---
-    if precip > 50 and effective_feels < 10:
+    # Shoe covers — broadened: any rain > 30% (per Pedalieri guide)
+    if precip > 30:
         items.append(_make_item("cl-shoe-covers", "shoe-covers", locale, fvars))
 
     # Shoes — dynamic ventilation text
@@ -200,7 +243,5 @@ def get_clothing_items(
         items.append(_make_item("cl-socks-mid", "socks", locale, fvars))
     else:
         items.append(_make_item("cl-socks-thin", "socks", locale, fvars))
-
-    return items
 
     return items

@@ -56,18 +56,34 @@ class EquipmentItemSchema(BaseModel):
     reason: str
 
 
+class ConditionReasonSchema(BaseModel):
+    code: str
+    emoji: str
+    label: str
+    detail: str
+
+
+class TipSchema(BaseModel):
+    id: str
+    category: str  # "heat" | "safety" | "comfort"
+    message: str
+    severity: str  # "info" | "warning" | "danger"
+
+
 class DayForecastSchema(BaseModel):
     id: str
     date: str
     dayLabel: str
     location: str | None = None
     condition: str
+    conditionReasons: list[ConditionReasonSchema] = []
     weather: WeatherDataSchema
     hourlyForecast: list[HourlyWeatherSchema] = []
     rideStartHour: int = 8
     rideEndHour: int = 10
     clothingItems: list[ClothingItemSchema]
     equipment: list[EquipmentItemSchema]
+    tips: list[TipSchema] = []
 
 
 class RideReportSchema(BaseModel):
@@ -78,7 +94,9 @@ class RideReportSchema(BaseModel):
     totalDistance: float
     distanceUnit: str = "km"
     overallCondition: str
+    overallConditionReasons: list[ConditionReasonSchema] = []
     shareUrl: str = ""
     days: list[DayForecastSchema]
     mergedClothingItems: list[ClothingItemSchema] = []
     mergedEquipment: list[EquipmentItemSchema] = []
+    tips: list[TipSchema] = []

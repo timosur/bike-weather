@@ -176,7 +176,8 @@
       "weather": "Weather",
       "clothing": "Clothing Recommendation",
       "equipment": "Checklist",
-      "packingList": "Packing List for Entire Tour"
+      "packingList": "Packing List for Entire Tour",
+      "tips": "Tips & Safety"
     },
     "noData": {
       "heading": "No ride data",
@@ -191,9 +192,13 @@
     },
     "condition": {
       "ideal": "Ideal",
+      "idealDescription": "Best conditions for cycling",
       "good": "Good",
+      "goodDescription": "Good conditions, minor limitations possible",
       "caution": "Caution",
-      "notRecommended": "Not recommended"
+      "cautionDescription": "Ride possible, but with limitations",
+      "notRecommended": "Not recommended",
+      "notRecommendedDescription": "Too dangerous to ride"
     },
     "weather": {
       "feelsLike": "Feels like {{temp}}{{unit}}",

@@ -176,7 +176,8 @@
       "weather": "Wetter",
       "clothing": "Kleidungsempfehlung",
       "equipment": "Checkliste",
-      "packingList": "Packliste für die gesamte Tour"
+      "packingList": "Packliste für die gesamte Tour",
+      "tips": "Hinweise & Sicherheit"
     },
     "noData": {
       "heading": "Keine Fahrtdaten",
@@ -191,9 +192,13 @@
     },
     "condition": {
       "ideal": "Ideal",
+      "idealDescription": "Beste Bedingungen zum Radfahren",
       "good": "Gut",
+      "goodDescription": "Gute Bedingungen, leichte Einschränkungen möglich",
       "caution": "Vorsicht",
-      "notRecommended": "Nicht empfohlen"
+      "cautionDescription": "Fahrt möglich, aber mit Einschränkungen",
+      "notRecommended": "Nicht empfohlen",
+      "notRecommendedDescription": "Fahrt zu gefährlich"
     },
     "weather": {
       "feelsLike": "Gefühlt {{temp}}{{unit}}",

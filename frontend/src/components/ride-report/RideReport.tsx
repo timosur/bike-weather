@@ -10,6 +10,7 @@ import { MultiDayWeatherChart } from './MultiDayWeatherChart'
 import { MultiDayWeatherSummary } from './MultiDayWeatherSummary'
 import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
+import { TipsList } from './TipsList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
 export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
@@ -90,7 +91,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             )}
           </div>
           <div className="mt-3">
-            <ConditionBadge condition={report.overallCondition} />
+            <ConditionBadge condition={report.overallCondition} reasons={report.overallConditionReasons} />
           </div>
         </div>
 
@@ -110,10 +111,10 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               onClick={onSaveChanges}
               disabled={saveChangesLoading || !hasUnsavedChanges}
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!hasUnsavedChanges
-                  ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
-                  : saveChangesLoading
-                    ? 'text-white bg-emerald-600/70 cursor-wait'
-                    : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
+                : saveChangesLoading
+                  ? 'text-white bg-emerald-600/70 cursor-wait'
+                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
                 }`}
             >
               {saveChangesLoading ? (
@@ -253,6 +254,19 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             </h2>
             <EquipmentList items={equipmentItems} />
           </section>
+
+          {/* Tips & Safety */}
+          {report.tips && report.tips.length > 0 && (
+            <section>
+              <h2
+                className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+                style={{ fontFamily: 'Outfit, sans-serif' }}
+              >
+                {t('report.section.tips')}
+              </h2>
+              <TipsList tips={report.tips} />
+            </section>
+          )}
         </div>
       )}
 
@@ -317,6 +331,19 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             </h2>
             <EquipmentList items={activeDay.equipment} />
           </section>
+
+          {/* Tips & Safety */}
+          {activeDay.tips && activeDay.tips.length > 0 && (
+            <section>
+              <h2
+                className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+                style={{ fontFamily: 'Outfit, sans-serif' }}
+              >
+                {t('report.section.tips')}
+              </h2>
+              <TipsList tips={activeDay.tips} />
+            </section>
+          )}
         </div>
       )}
     </div>

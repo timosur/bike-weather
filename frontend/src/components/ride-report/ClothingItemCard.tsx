@@ -10,6 +10,7 @@ import {
   HardHat,
   Layers,
   PersonStanding,
+  ShieldAlert,
   ShieldCheck,
   ShieldHalf,
   ShieldPlus,
@@ -17,6 +18,7 @@ import {
   ThermometerSnowflake,
   ThermometerSun,
   Umbrella,
+  Wind,
 } from 'lucide-react'
 import type { ClothingItem, ClothingIcon } from './types'
 
@@ -65,6 +67,10 @@ function ClothingIconEl({ icon, className }: { icon: ClothingIcon; className?: s
       return <Umbrella className={cls} strokeWidth={sw} />
     case 'socks':
       return <Footprints className={cls} strokeWidth={sw} />
+    case 'neck-gaiter':
+      return <Wind className={cls} strokeWidth={sw} />
+    case 'face-mask':
+      return <ShieldAlert className={cls} strokeWidth={sw} />
     default:
       return <Shirt className={cls} strokeWidth={sw} />
   }

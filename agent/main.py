@@ -47,7 +47,7 @@ ALL_CATEGORIES: list[str] = [
     "accessories-gear",
 ]
 
-DEFAULT_MAX_PRODUCTS = 10
+DEFAULT_MAX_PRODUCTS = 5
 
 
 def _resolve_category_id(category: str) -> str:

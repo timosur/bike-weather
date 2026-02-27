@@ -116,7 +116,7 @@ export function MultiDayWeatherSummary({ days }: MultiDayWeatherSummaryProps) {
           {days.map(day => (
             <div key={day.id} className="flex items-center gap-1.5">
               <span className="text-xs text-stone-500 dark:text-stone-400">{day.dayLabel}:</span>
-              <ConditionBadge condition={day.condition} size="sm" />
+              <ConditionBadge condition={day.condition} size="sm" reasons={day.conditionReasons} />
             </div>
           ))}
         </div>
