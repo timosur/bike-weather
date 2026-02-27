@@ -61,10 +61,11 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
+        {/* Left column: title, meta, buttons */}
+        <div className="min-w-0">
           <h1
             className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
@@ -90,98 +91,100 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               </span>
             )}
           </div>
-          <div className="mt-3">
-            <ConditionBadge condition={report.overallCondition} reasons={report.overallConditionReasons} />
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            {onEditRide && (
+              <button
+                onClick={onEditRide}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                <PenLine className="w-4 h-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">{t('planner.editRide')}</span>
+              </button>
+            )}
+            {onSaveChanges && (
+              <button
+                onClick={onSaveChanges}
+                disabled={saveChangesLoading || !hasUnsavedChanges}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!hasUnsavedChanges
+                  ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
+                  : saveChangesLoading
+                    ? 'text-white bg-emerald-600/70 cursor-wait'
+                    : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                  }`}
+              >
+                {saveChangesLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
+                ) : hasUnsavedChanges ? (
+                  <Save className="w-4 h-4" strokeWidth={1.5} />
+                ) : (
+                  <Check className="w-4 h-4" strokeWidth={1.5} />
+                )}
+                <span className="hidden sm:inline">
+                  {saveChangesLoading
+                    ? t('report.savingChanges')
+                    : hasUnsavedChanges
+                      ? t('report.saveChanges')
+                      : t('report.noChanges')}
+                </span>
+              </button>
+            )}
+            {onNewRide && (
+              <button
+                onClick={onNewRide}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">{t('report.newRide')}</span>
+              </button>
+            )}
+            {onShare && (
+              <button
+                onClick={() => onShare?.()}
+                disabled={shareLoading}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${shareLoading ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-wait' : 'text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700'}`}
+              >
+                <Share2 className="w-4 h-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">{shareLoading ? t('report.sharing') : t('report.share')}</span>
+              </button>
+            )}
+            {onSaveRoute && (
+              <button
+                onClick={() => onSaveRoute()}
+                disabled={routeSaving || routeSaved}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
+                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
+                  : routeSaving
+                    ? 'text-white bg-emerald-600/70 cursor-wait'
+                    : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                  }`}
+              >
+                {routeSaved ? (
+                  <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
+                ) : (
+                  <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+                )}
+                <span className="hidden sm:inline">
+                  {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
+                </span>
+              </button>
+            )}
+            {!onSaveRoute && onLoginToSave && (
+              <button
+                onClick={() => onLoginToSave()}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">{t('report.loginToSave')}</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {onEditRide && (
-            <button
-              onClick={onEditRide}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-            >
-              <PenLine className="w-4 h-4" strokeWidth={1.5} />
-              <span className="hidden sm:inline">{t('planner.editRide')}</span>
-            </button>
-          )}
-          {/* Save Changes button for edit mode */}
-          {onSaveChanges && (
-            <button
-              onClick={onSaveChanges}
-              disabled={saveChangesLoading || !hasUnsavedChanges}
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!hasUnsavedChanges
-                ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
-                : saveChangesLoading
-                  ? 'text-white bg-emerald-600/70 cursor-wait'
-                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-                }`}
-            >
-              {saveChangesLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
-              ) : hasUnsavedChanges ? (
-                <Save className="w-4 h-4" strokeWidth={1.5} />
-              ) : (
-                <Check className="w-4 h-4" strokeWidth={1.5} />
-              )}
-              <span className="hidden sm:inline">
-                {saveChangesLoading
-                  ? t('report.savingChanges')
-                  : hasUnsavedChanges
-                    ? t('report.saveChanges')
-                    : t('report.noChanges')}
-              </span>
-            </button>
-          )}
-          {onNewRide && (
-            <button
-              onClick={onNewRide}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" strokeWidth={1.5} />
-              <span className="hidden sm:inline">{t('report.newRide')}</span>
-            </button>
-          )}
-          {onShare && (
-            <button
-              onClick={() => onShare?.()}
-              disabled={shareLoading}
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${shareLoading ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-wait' : 'text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700'}`}
-            >
-              <Share2 className="w-4 h-4" strokeWidth={1.5} />
-              <span className="hidden sm:inline">{shareLoading ? t('report.sharing') : t('report.share')}</span>
-            </button>
-          )}
-          {onSaveRoute && (
-            <button
-              onClick={() => onSaveRoute()}
-              disabled={routeSaving || routeSaved}
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
-                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
-                : routeSaving
-                  ? 'text-white bg-emerald-600/70 cursor-wait'
-                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-                }`}
-            >
-              {routeSaved ? (
-                <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
-              ) : (
-                <Bookmark className="w-4 h-4" strokeWidth={1.5} />
-              )}
-              <span className="hidden sm:inline">
-                {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
-              </span>
-            </button>
-          )}
-          {!onSaveRoute && onLoginToSave && (
-            <button
-              onClick={() => onLoginToSave()}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-            >
-              <Bookmark className="w-4 h-4" strokeWidth={1.5} />
-              <span className="hidden sm:inline">{t('report.loginToSave')}</span>
-            </button>
-          )}
+        {/* Right column: condition badge */}
+        <div className="md:min-w-[240px] md:max-w-[280px]">
+          <ConditionBadge condition={report.overallCondition} reasons={report.overallConditionReasons} />
         </div>
       </div>
 

@@ -73,6 +73,7 @@ export interface EquipmentItem {
   id: string;
   name: string;
   reason: string;
+  category?: 'safety' | 'gear' | 'hydration' | 'tools' | 'nutrition';
 }
 
 export interface ConditionReason {

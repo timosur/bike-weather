@@ -193,7 +193,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
           {t('report.weather.dailyForecast')}
         </p>
       </div>
-      <div className="px-2 pb-3 overflow-x-auto">
+      <div className="px-2 pb-3 overflow-x-auto max-w-full">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}

@@ -259,7 +259,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
           {t('report.multiDay.weatherTimeline')}
         </p>
       </div>
-      <div ref={setRefs} className="px-2 pb-3 overflow-x-auto scrollbar-thin">
+      <div ref={setRefs} className="px-2 pb-3 overflow-x-auto scrollbar-thin max-w-full">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}

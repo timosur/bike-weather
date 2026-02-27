@@ -299,9 +299,9 @@ export default function ReportPage() {
   }
 
   return (
-    <div className="">
+    <div className="w-full overflow-x-hidden">
       {reportLoading && (
-        <div className="max-w-4xl mx-auto px-4 pb-10">
+        <div className="w-full max-w-4xl mx-auto px-4 pb-10">
           <RideReportSkeleton />
         </div>
       )}
@@ -335,7 +335,7 @@ export default function ReportPage() {
       )}
 
       {report && !reportLoading && (
-        <div className="max-w-4xl mx-auto px-4 pb-10">
+        <div className="w-full max-w-4xl mx-auto px-4 pb-10">
           <RideReport
             report={report}
             onSaveRoute={isAuthenticated && !saved && !currentRouteId ? handleSaveRoute : undefined}

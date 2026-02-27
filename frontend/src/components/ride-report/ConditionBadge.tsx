@@ -53,9 +53,8 @@ export function ConditionBadge({ condition, size = 'md', reasons }: ConditionBad
   if (size === 'sm' || !hasReasons) {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full font-medium ${config.bg} ${config.text} ${
-          size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm'
-        }`}
+        className={`inline-flex items-center gap-1.5 rounded-full font-medium ${config.bg} ${config.text} ${size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm'
+          }`}
       >
         <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
         {t(config.key)}
@@ -67,8 +66,8 @@ export function ConditionBadge({ condition, size = 'md', reasons }: ConditionBad
   const descKey = `report.condition.${condition === 'not-recommended' ? 'notRecommended' : condition}Description`
 
   return (
-    <div className={`rounded-xl border-l-4 ${config.accent} ${config.bg} ring-1 ${config.border} overflow-hidden`}>
-      <div className="px-4 py-3 space-y-2">
+    <div className={`rounded-xl border-l-4 ${config.accent} ${config.bg} ring-1 ${config.border} overflow-hidden h-full`}>
+      <div className="px-4 py-3 space-y-2 h-full flex flex-col justify-center">
         {/* Badge pill + description */}
         <div>
           <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${config.text}`}>
