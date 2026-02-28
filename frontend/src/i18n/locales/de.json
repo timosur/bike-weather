@@ -67,6 +67,7 @@
       "tagline": "Wetterbasierte Kleidungsempfehlungen für Radfahrer.",
       "copyright": "© {{year}} Fahrrad Wetter. Ein Projekt von",
       "copyrightAuthor": "timosur",
+      "imprint": "Impressum",
       "privacy": "Datenschutz",
       "attributionWeather": "Wetter: Open-Meteo",
       "attributionMap": "Kartendaten: © OpenStreetMap-Mitwirkende"
