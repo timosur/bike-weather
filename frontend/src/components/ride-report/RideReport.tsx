@@ -61,7 +61,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
         {/* Left column: title, meta, buttons */}

@@ -21,6 +21,7 @@ class RideInputSchema(BaseModel):
     endDate: str | None = None
     isMultiDay: bool = False
     bikeType: str
+    gravelStyle: str | None = None
     intensity: str
     distanceKm: float | None = None
     elevationMeters: float | None = None

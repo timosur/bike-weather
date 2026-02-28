@@ -2,5 +2,3 @@
 - Add insights open source, also used by Peter
 - Check for e2e tests and maybe just record the most important flows
 - Add auto sync job for preview release in ArgoCD to release fast?
-- Add version number to footer of app
-- Upgrade frontend to node 24

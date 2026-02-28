@@ -19,6 +19,7 @@ def get_safety_items(
     ride_start_time: str | None = None,
     ride_end_time: str | None = None,
     locale: str = "de",
+    gravel_style: str | None = None,
 ) -> list[dict]:
     """Return safety equipment items adjusted for bike type and conditions."""
     items: list[dict] = []
@@ -55,10 +56,10 @@ def get_safety_items(
     if needs_visibility:
         items.append(_make_safety_item("eq-reflective-vest", locale, fvars))
 
-    # ── PROTECTORS (knee/elbow) — MTB always, Gravel optional ───────
+    # ── PROTECTORS (knee/elbow) — MTB always, Gravel offroad only ───
     if bike_type == "mtb":
         items.append(_make_safety_item("eq-protectors-mtb", locale, fvars))
-    elif bike_type == "gravel":
+    elif bike_type == "gravel" and gravel_style == "offroad":
         items.append(_make_safety_item("eq-protectors-gravel", locale, fvars))
 
     # ── FIRST AID KIT — long rides, remote rides, MTB ────────────────
@@ -71,10 +72,10 @@ def get_safety_items(
     elif dist > 50:
         items.append(_make_safety_item("eq-lock", locale, fvars))
 
-    # ── BELL — City always (StVZO), Gravel on mixed paths ───────────
+    # ── BELL — City always (StVZO), Gravel offroad on mixed paths ───
     if bike_type == "city":
         items.append(_make_safety_item("eq-bell-city", locale, fvars))
-    elif bike_type == "gravel":
+    elif bike_type == "gravel" and gravel_style == "offroad":
         items.append(_make_safety_item("eq-bell-gravel", locale, fvars))
 
     return items

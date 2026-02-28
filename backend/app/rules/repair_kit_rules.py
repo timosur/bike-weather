@@ -67,21 +67,27 @@ def get_repair_kit_contents(
     bike_type: str = "rennrad",
     intensity: str = "moderat",
     locale: str = "de",
+    gravel_style: str | None = None,
 ) -> list[dict]:
     """Return a list of repair kit content dicts: [{"name": "..."}, ...]."""
     tier = _distance_tier(distance_km, intensity)
+
+    # Gravel on road/forest paths uses road-bike-like repair kit
+    effective_bike_type = bike_type
+    if bike_type == "gravel" and gravel_style == "road":
+        effective_bike_type = "rennrad"
 
     # Build item ID list
     item_ids: list[str] = list(_MINIMAL_ITEMS)
 
     # Add bike-type minimal extras
-    for extra_id in _BIKE_TYPE_MINIMAL_EXTRAS.get(bike_type, []):
+    for extra_id in _BIKE_TYPE_MINIMAL_EXTRAS.get(effective_bike_type, []):
         if extra_id not in item_ids:
             item_ids.append(extra_id)
 
     if tier in ("standard", "extended"):
         item_ids.extend(_STANDARD_EXTRAS)
-        for extra_id in _BIKE_TYPE_EXTRAS.get(bike_type, []):
+        for extra_id in _BIKE_TYPE_EXTRAS.get(effective_bike_type, []):
             if extra_id not in item_ids:
                 item_ids.append(extra_id)
 

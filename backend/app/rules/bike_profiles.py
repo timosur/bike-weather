@@ -85,14 +85,21 @@ BIKE_CLOTHING_OVERRIDES: dict[tuple[str, str], BikeOverride] = {
 BIKE_TYPES_WITH_WARMERS = {"rennrad", "gravel"}
 
 
-def apply_bike_override(item: dict, bike_type: str) -> dict:
+def apply_bike_override(
+    item: dict, bike_type: str, gravel_style: str | None = None
+) -> dict:
     """Return a copy of *item* with bike-type-specific ID override applied.
 
     The caller (clothing_rules.py) will then look up the overridden ID
     in translations to get the bike-specific name & reason.  If there is
     no override for this (item_id, bike_type) combo, the item is returned
     unchanged.
+
+    When *bike_type* is ``"gravel"`` and *gravel_style* is ``"road"``,
+    overrides are skipped so the user gets generic (road-like) items.
     """
+    if bike_type == "gravel" and gravel_style == "road":
+        return item
     key = (item["id"], bike_type)
     override = BIKE_CLOTHING_OVERRIDES.get(key)
     if not override:

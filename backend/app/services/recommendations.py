@@ -302,6 +302,7 @@ async def build_report(
         ride_input.bikeType,
         ride_input.intensity,
         ride_input.averageSpeedKmh,
+        gravel_style=ride_input.gravelStyle,
     )
 
     # Parse start hour from startTime
@@ -352,6 +353,7 @@ async def build_report(
                     ride_input.bikeType,
                     ride_input.intensity,
                     ride_input.averageSpeedKmh,
+                    gravel_style=ride_input.gravelStyle,
                 )
             else:
                 day_duration = duration_minutes
@@ -485,7 +487,11 @@ async def build_report(
         all_condition_reasons.append(reasons)
 
         clothing = get_clothing_items(
-            forecast, ride_input.bikeType, ride_input.intensity, locale=locale
+            forecast,
+            ride_input.bikeType,
+            ride_input.intensity,
+            locale=locale,
+            gravel_style=ride_input.gravelStyle,
         )
         equipment = get_equipment_items(
             forecast,
@@ -495,6 +501,7 @@ async def build_report(
             bike_type=ride_input.bikeType,
             intensity=ride_input.intensity,
             locale=locale,
+            gravel_style=ride_input.gravelStyle,
         )
 
         tips = get_tips(forecast, locale)

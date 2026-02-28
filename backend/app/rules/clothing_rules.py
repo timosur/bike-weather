@@ -19,13 +19,14 @@ def _make_item(
     format_vars: dict,
     alternatives: list[dict] | None = None,
     bike_type: str = "",
+    gravel_style: str | None = None,
 ) -> dict:
     # Build the generic item first
     item: dict = {"id": id, "icon": icon}
 
     # Apply bike-type override (may change id and icon)
     if bike_type:
-        item = apply_bike_override(item, bike_type)
+        item = apply_bike_override(item, bike_type, gravel_style)
 
     # Look up translation for the (possibly overridden) id, fallback to generic
     trans = get_clothing_translation(item["id"], locale)
@@ -54,7 +55,11 @@ def _make_item(
 
 
 def get_clothing_items(
-    weather: WeatherForecast, bike_type: str, intensity: str, locale: str = "de"
+    weather: WeatherForecast,
+    bike_type: str,
+    intensity: str,
+    locale: str = "de",
+    gravel_style: str | None = None,
 ) -> list[dict]:
     """Return a list of clothing item dicts based on weather conditions."""
     items: list[dict] = []
@@ -88,24 +93,24 @@ def get_clothing_items(
     # --- HEAD ---
     if effective_feels >= 30:
         items.append(
-            _make_item("cl-cycling-cap", "headband", locale, fvars, bike_type=bike_type)
+            _make_item("cl-cycling-cap", "headband", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
     elif effective_feels < 5:
         items.append(
             _make_item(
-                "cl-helmet-cover", "helmet-cover", locale, fvars, bike_type=bike_type
+                "cl-helmet-cover", "helmet-cover", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     elif effective_feels < 15:
         items.append(
-            _make_item("cl-headband", "headband", locale, fvars, bike_type=bike_type)
+            _make_item("cl-headband", "headband", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
 
     # Helmet rain cover — broader: rain even at warmer temps (5-20°C)
     if precip > 30 and 5 <= effective_feels < 20:
         items.append(
             _make_item(
-                "cl-helmet-cover", "helmet-cover", locale, fvars, bike_type=bike_type
+                "cl-helmet-cover", "helmet-cover", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
 
@@ -113,41 +118,41 @@ def get_clothing_items(
     if weather.uv_index >= 3:
         items.append(
             _make_item(
-                "cl-sunglasses", "sunglasses", locale, fvars, bike_type=bike_type
+                "cl-sunglasses", "sunglasses", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     elif precip > 30:
         items.append(
-            _make_item("cl-glasses", "glasses", locale, fvars, bike_type=bike_type)
+            _make_item("cl-glasses", "glasses", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
     elif effective_feels < 5:
         items.append(
-            _make_item("cl-glasses-wind", "glasses", locale, fvars, bike_type=bike_type)
+            _make_item("cl-glasses-wind", "glasses", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
 
     # --- NECK / FACE ---
     if effective_feels < 5:
         items.append(
             _make_item(
-                "cl-neck-gaiter", "neck-gaiter", locale, fvars, bike_type=bike_type
+                "cl-neck-gaiter", "neck-gaiter", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     if effective_feels < 0:
         items.append(
-            _make_item("cl-face-mask", "face-mask", locale, fvars, bike_type=bike_type)
+            _make_item("cl-face-mask", "face-mask", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
 
     # --- BASE LAYER ---
     if effective_feels < 10:
         items.append(
             _make_item(
-                "cl-base-merino", "base-layer", locale, fvars, bike_type=bike_type
+                "cl-base-merino", "base-layer", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     else:
         items.append(
             _make_item(
-                "cl-base-wicking", "base-layer", locale, fvars, bike_type=bike_type
+                "cl-base-wicking", "base-layer", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
 
@@ -155,7 +160,7 @@ def get_clothing_items(
     if effective_feels < 0:
         items.append(
             _make_item(
-                "cl-thermal-jersey", "jersey-long", locale, fvars, bike_type=bike_type
+                "cl-thermal-jersey", "jersey-long", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     elif effective_feels < 10:
@@ -168,6 +173,7 @@ def get_clothing_items(
                 fvars,
                 alternatives=alts,
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
     elif effective_feels < 20:
@@ -184,6 +190,7 @@ def get_clothing_items(
                 fvars,
                 alternatives=alts,
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
     else:
@@ -199,6 +206,7 @@ def get_clothing_items(
                     else None
                 ),
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
 
@@ -206,7 +214,7 @@ def get_clothing_items(
     if precip > 50:
         items.append(
             _make_item(
-                "cl-rain-jacket", "rain-jacket", locale, fvars, bike_type=bike_type
+                "cl-rain-jacket", "rain-jacket", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     elif precip > 20:
@@ -218,11 +226,12 @@ def get_clothing_items(
                 fvars,
                 alternatives=[{"id": "cl-vest-alt", "icon": "vest"}],
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
     elif wind > 30:
         items.append(
-            _make_item("cl-wind-jacket", "jacket", locale, fvars, bike_type=bike_type)
+            _make_item("cl-wind-jacket", "jacket", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
     elif wind > 15:
         items.append(
@@ -233,12 +242,13 @@ def get_clothing_items(
                 fvars,
                 alternatives=[{"id": "cl-jacket-alt", "icon": "jacket"}],
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
     elif effective_feels < 5:
         items.append(
             _make_item(
-                "cl-insulated-jacket", "jacket", locale, fvars, bike_type=bike_type
+                "cl-insulated-jacket", "jacket", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
     elif effective_feels < 10:
@@ -251,6 +261,7 @@ def get_clothing_items(
                 fvars,
                 alternatives=[{"id": "cl-wind-vest", "icon": "vest"}],
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
 
@@ -269,6 +280,7 @@ def get_clothing_items(
                 fvars,
                 alternatives=alts,
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
         # Thermal undershorts for extreme cold
@@ -280,6 +292,7 @@ def get_clothing_items(
                     locale,
                     fvars,
                     bike_type=bike_type,
+                gravel_style=gravel_style,
                 )
             )
     elif effective_feels < 15:
@@ -296,17 +309,18 @@ def get_clothing_items(
                 fvars,
                 alternatives=alts,
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
     else:
         items.append(
-            _make_item("cl-shorts", "pants-short", locale, fvars, bike_type=bike_type)
+            _make_item("cl-shorts", "pants-short", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
 
     # Rain overpants — broadened: up to 25°C per Pedalieri guide
     if precip > 50 and effective_feels < 25:
         items.append(
-            _make_item("cl-overpants", "overpants", locale, fvars, bike_type=bike_type)
+            _make_item("cl-overpants", "overpants", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
 
     # --- HANDS ---
@@ -318,6 +332,7 @@ def get_clothing_items(
                 locale,
                 fvars,
                 bike_type=bike_type,
+                gravel_style=gravel_style,
             )
         )
     elif effective_feels < 10:
@@ -329,18 +344,19 @@ def get_clothing_items(
                     locale,
                     fvars,
                     bike_type=bike_type,
+                gravel_style=gravel_style,
                 )
             )
         else:
             items.append(
                 _make_item(
-                    "cl-gloves-warm", "gloves-warm", locale, fvars, bike_type=bike_type
+                    "cl-gloves-warm", "gloves-warm", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
                 )
             )
     else:
         items.append(
             _make_item(
-                "cl-gloves-light", "gloves-light", locale, fvars, bike_type=bike_type
+                "cl-gloves-light", "gloves-light", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
 
@@ -349,7 +365,7 @@ def get_clothing_items(
     if precip > 30:
         items.append(
             _make_item(
-                "cl-shoe-covers", "shoe-covers", locale, fvars, bike_type=bike_type
+                "cl-shoe-covers", "shoe-covers", locale, fvars, bike_type=bike_type, gravel_style=gravel_style
             )
         )
 
@@ -362,21 +378,21 @@ def get_clothing_items(
         )
     shoe_fvars = {**fvars, "ventilation": ventilation}
     items.append(
-        _make_item("cl-shoes", "shoes", locale, shoe_fvars, bike_type=bike_type)
+        _make_item("cl-shoes", "shoes", locale, shoe_fvars, bike_type=bike_type, gravel_style=gravel_style)
     )
 
     # --- SOCKS ---
     if effective_feels < 5:
         items.append(
-            _make_item("cl-socks-warm", "socks", locale, fvars, bike_type=bike_type)
+            _make_item("cl-socks-warm", "socks", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
     elif effective_feels < 15:
         items.append(
-            _make_item("cl-socks-mid", "socks", locale, fvars, bike_type=bike_type)
+            _make_item("cl-socks-mid", "socks", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
     else:
         items.append(
-            _make_item("cl-socks-thin", "socks", locale, fvars, bike_type=bike_type)
+            _make_item("cl-socks-thin", "socks", locale, fvars, bike_type=bike_type, gravel_style=gravel_style)
         )
 
     return items

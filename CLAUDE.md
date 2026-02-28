@@ -11,7 +11,7 @@ Bike Weather is a React/TypeScript web app that gives cyclists personalized clot
 ### Prerequisites
 
 - Docker (for PostgreSQL)
-- Node.js 20+
+- Node.js 24+
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) (Python package manager)
 

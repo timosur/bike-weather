@@ -2,6 +2,8 @@ export type BikeType = "rennrad" | "gravel" | "mtb" | "city";
 
 export type RidingIntensity = "gemuetlich" | "moderat" | "sportlich";
 
+export type GravelStyle = "road" | "offroad";
+
 export interface RideLocation {
   address: string;
   lat?: number;
@@ -34,6 +36,8 @@ export interface RideInput {
   durationMinutes?: number | null;
   /** Optional average speed in km/h (user override for duration estimation) */
   averageSpeedKmh?: number | null;
+  /** Gravel riding style — only relevant when bikeType is "gravel" */
+  gravelStyle?: GravelStyle | null;
   /** Per-day overnight stops for multi-day tours (one per night) */
   dayStops: DayStop[];
   /** Turnstile CAPTCHA token (sent when throttle threshold exceeded) */
@@ -69,6 +73,7 @@ export interface QuickPreset {
   intensity: RidingIntensity;
   distanceKm?: number;
   isMultiDay: boolean;
+  gravelStyle?: GravelStyle | null;
 }
 
 export interface ValidationErrors {

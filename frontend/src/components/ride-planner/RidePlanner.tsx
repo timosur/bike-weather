@@ -22,6 +22,7 @@ import type {
   RideInput,
   BikeType,
   RidingIntensity,
+  GravelStyle,
   LocationSuggestion,
   QuickPreset,
   DayStop,
@@ -79,6 +80,7 @@ export function RidePlanner({
     elevationMeters: initialValues?.elevationMeters ?? null,
     durationMinutes: initialValues?.durationMinutes ?? null,
     averageSpeedKmh: initialValues?.averageSpeedKmh ?? null,
+    gravelStyle: initialValues?.gravelStyle ?? ((initialValues?.bikeType ?? 'gravel') === 'gravel' ? 'road' : null),
     dayStops: initialValues?.dayStops ?? [],
   })
 
@@ -106,10 +108,12 @@ export function RidePlanner({
     const speedTable: Record<string, Record<string, number>> = {
       rennrad: { gemuetlich: 22, moderat: 27, sportlich: 32 },
       gravel: { gemuetlich: 18, moderat: 23, sportlich: 28 },
+      'gravel-road': { gemuetlich: 20, moderat: 25, sportlich: 30 },
       mtb: { gemuetlich: 12, moderat: 16, sportlich: 20 },
       city: { gemuetlich: 14, moderat: 18, sportlich: 22 },
     }
-    return speedTable[form.bikeType]?.[form.intensity] ?? 20
+    const key = form.bikeType === 'gravel' && form.gravelStyle === 'road' ? 'gravel-road' : form.bikeType
+    return speedTable[key]?.[form.intensity] ?? 20
   })()
 
   // Auto-estimate duration from distance + speed (explicit or default)
@@ -144,6 +148,7 @@ export function RidePlanner({
       isMultiDay: preset.isMultiDay,
       endDate: preset.isMultiDay ? f.endDate : null,
       dayStops: preset.isMultiDay ? f.dayStops : [],
+      gravelStyle: preset.bikeType === 'gravel' ? (preset.gravelStyle ?? 'road') : null,
     }))
     onPresetSelect?.(preset)
   }
@@ -280,7 +285,7 @@ export function RidePlanner({
                     value={form.startDate}
                     min={today}
                     onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
-                    className={`${inputBase} pl-9 pr-3 ${errors.startDate ? inputError : inputNormal}`}
+                    className={`${inputBase} appearance-none pl-9 pr-3 ${errors.startDate ? inputError : inputNormal}`}
                   />
                 </div>
                 <div className="relative">
@@ -292,7 +297,7 @@ export function RidePlanner({
                     type="time"
                     value={form.startTime}
                     onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))}
-                    className={`${inputBase} pl-9 pr-3 ${errors.startTime ? inputError : inputNormal}`}
+                    className={`${inputBase} appearance-none pl-9 pr-3 ${errors.startTime ? inputError : inputNormal}`}
                   />
                 </div>
               </div>
@@ -343,7 +348,14 @@ export function RidePlanner({
                     <button
                       key={option.value}
                       type="button"
-                      onClick={() => setForm(f => ({ ...f, bikeType: option.value as BikeType }))}
+                      onClick={() => {
+                        const newBikeType = option.value as BikeType
+                        setForm(f => ({
+                          ...f,
+                          bikeType: newBikeType,
+                          gravelStyle: newBikeType === 'gravel' ? (f.gravelStyle ?? 'road') : null,
+                        }))
+                      }}
                       className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 text-center transition-all ${active
                         ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-500'
                         : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-600'
@@ -369,6 +381,36 @@ export function RidePlanner({
                   )
                 })}
               </div>
+
+              {/* Gravel riding style sub-selection */}
+              {form.bikeType === 'gravel' && (
+                <div className="grid grid-cols-2 gap-2 mt-2 transition-all">
+                  {(['road', 'offroad'] as GravelStyle[]).map(style => {
+                    const active = form.gravelStyle === style
+                    return (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, gravelStyle: style }))}
+                        className={`flex flex-col items-center gap-0.5 py-2 px-2 rounded-lg border text-center transition-all ${active
+                          ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/20 dark:border-emerald-600'
+                          : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-600'
+                          }`}
+                      >
+                        <span className={`text-xs font-semibold ${active
+                          ? 'text-emerald-700 dark:text-emerald-300'
+                          : 'text-stone-600 dark:text-stone-400'
+                          }`}>
+                          {t(`planner.bikeType.gravelStyle${style === 'road' ? 'Road' : 'Offroad'}`)}
+                        </span>
+                        <span className="text-[10px] text-stone-400 dark:text-stone-500 leading-snug">
+                          {t(`planner.bikeType.gravelStyle${style === 'road' ? 'Road' : 'Offroad'}Desc`)}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Riding Intensity */}

@@ -24,6 +24,7 @@ def get_equipment_items(
     bike_type: str = "rennrad",
     intensity: str = "moderat",
     locale: str = "de",
+    gravel_style: str | None = None,
 ) -> list[dict]:
     """Return a list of equipment item dicts."""
     items: list[dict] = []
@@ -59,6 +60,7 @@ def get_equipment_items(
         ride_start_time=ride_start_time,
         ride_end_time=ride_end_time,
         locale=locale,
+        gravel_style=gravel_style,
     )
     items.extend(safety_items)
 
@@ -100,7 +102,9 @@ def get_equipment_items(
         items.append(_make_eq_item("eq-dry-bag", locale, fvars, category="gear"))
 
     # Repair kit — always included, contents scale with distance/bike/intensity
-    repair_contents = get_repair_kit_contents(dist, bike_type, intensity, locale)
+    repair_contents = get_repair_kit_contents(
+        dist, bike_type, intensity, locale, gravel_style=gravel_style
+    )
     repair_item = _make_eq_item("eq-repair-kit", locale, fvars, category="tools")
     repair_item["contents"] = repair_contents
     items.append(repair_item)

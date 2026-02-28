@@ -193,11 +193,11 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
           {t('report.weather.dailyForecast')}
         </p>
       </div>
-      <div className="px-2 pb-3 overflow-x-auto max-w-full">
+      <div className="px-2 pb-3 overflow-x-auto max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
         <svg
           ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-          className="w-full h-auto min-w-[480px]"
+          className="w-full h-auto"
           role="img"
           aria-label={t('report.weather.dailyForecast')}
           onMouseMove={handleMouseMove}
