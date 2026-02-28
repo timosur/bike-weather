@@ -1,6 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
-import { HelpCircle } from 'lucide-react'
 import type { ConditionRating, ConditionReason } from './types'
 
 const conditionConfig: Record<ConditionRating, { key: string; bg: string; text: string; dot: string; border: string; accent: string }> = {
