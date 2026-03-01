@@ -8,3 +8,5 @@
 - Add text summary of the expected weather in the ride window
 - Add calculated ride window and speed on basis of input to report
 - Adjust iOS icon for saving as PWA to home screen
+- Optional Destination with route calc for headwind and detailed weather breakdown
+- GPX Import
