@@ -10,3 +10,4 @@
 - Adjust iOS icon for saving as PWA to home screen
 - Optional Destination with route calc for headwind and detailed weather breakdown
 - GPX Import
+- Remove "Last restored" from planner, just keep local history
