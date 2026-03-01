@@ -2,3 +2,8 @@
 - Add insights open source, also used by Peter
 - Check for e2e tests and maybe just record the most important flows
 - Add auto sync job for preview release in ArgoCD to release fast?
+- After first submission of a form with Captcha, CAPTCHA validation fails on the frontend
+- Sometimes after navigation the view gets slightly zoomed in, which is annoying on iOS
+- Add weather icons to report per hour
+- Add text summary of the expected weather in the ride window
+- Add calculated ride window and speed on basis of input to report
