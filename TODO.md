@@ -1,13 +1,23 @@
-- Add back products with really proper products and refferal links in place
-- Add insights open source, also used by Peter
-- Check for e2e tests and maybe just record the most important flows
-- Add auto sync job for preview release in ArgoCD to release fast?
-- After first submission of a form with Captcha, CAPTCHA validation fails on the frontend
-- Sometimes after navigation the view gets slightly zoomed in, which is annoying on iOS
-- Add weather icons to report per hour
-- Add text summary of the expected weather in the ride window
-- Add calculated ride window and speed on basis of input to report
-- Adjust iOS icon for saving as PWA to home screen
-- Optional Destination with route calc for headwind and detailed weather breakdown
-- GPX Import
-- Remove "Last restored" from planner, just keep local history
+- Feature: Add back products with really proper products and refferal links to amazon in place
+- Feature: Add web insights via Plausible (needs to be hosted in my cluster, too)
+- Chore: Check for e2e tests and maybe just record the most important flows
+- Idea: Add auto sync job for preview release in ArgoCD to release fast?
+- Bug: After first submission of a form with Captcha, CAPTCHA validation fails on the frontend
+- Bug: Sometimes after navigation the view gets slightly zoomed in, which is annoying on iOS
+- Feature: Add weather icons to report per hour
+- Feature: Add text summary of the expected weather in the ride window
+- Feature: Add calculated ride window and speed on basis of input to report
+- Fix: Adjust iOS icon for saving as PWA to home screen (currently too big)
+- Feature: Optional Destination with route calc for headwind and detailed weather breakdown, should be displayed on a Map
+- Feature: GPX Import for real route
+- Feature: Import from komoot or strava route
+- Adjustment: Remove "Last restored" from planner, just keep local history
+- Fix: Authenticate k3s in homelab with pull token against now private repo here
+- Bug: Distance is being resetted, if location has been found via GPS
+- Adjustment: Those presets at the beginning needs to be clearer, that those are just presets, maybe been moved on the bottom?
+- Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
+- Feature: Add a link to buymeacoffe https://buymeacoffee.com/timosur, when somebody wants to support this product
+- Docs: Create a product vision, maybe as part of the documentation
+- Bug: The app does not use the native language of the OS as basis, it seems its always english?
+- Bug: "Über uns" should rather be something like "About the app" or just "About"
+- Feature: We definitly need better icons for each product to wear, don't know where to get them from, because SVG generation is not nice for them I have seen
