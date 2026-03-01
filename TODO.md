@@ -7,3 +7,4 @@
 - Add weather icons to report per hour
 - Add text summary of the expected weather in the ride window
 - Add calculated ride window and speed on basis of input to report
+- Adjust iOS icon for saving as PWA to home screen
