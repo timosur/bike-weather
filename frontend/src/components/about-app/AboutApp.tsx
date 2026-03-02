@@ -1,4 +1,4 @@
-import { CloudSun, Target, Cog, ArrowRight, Bike } from 'lucide-react'
+import { CloudSun, Target, Cog, ArrowRight, Bike, Coffee } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { AppInfoSection } from '../../api/appInfo'
@@ -82,6 +82,26 @@ export function AboutApp({ sections }: AboutAppProps) {
               <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
             </Link>
           </div>
+        </div>
+
+        {/* Support */}
+        <div className="bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-200 dark:border-amber-800/40 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-5">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+            <Coffee className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1 text-center sm:text-left space-y-1">
+            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">{t('aboutApp.support.heading')}</h2>
+            <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">{t('aboutApp.support.body')}</p>
+          </div>
+          <a
+            href="https://buymeacoffee.com/timosur"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700/50 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors"
+          >
+            <Coffee className="w-4 h-4" strokeWidth={1.5} />
+            {t('aboutApp.support.cta')}
+          </a>
         </div>
       </div>
     </div>

@@ -524,7 +524,12 @@
     "badge": "Your cycling weather companion",
     "heading": "Bike Weather",
     "intro": "Weather-based clothing and gear recommendations for cyclists — so you never have to guess what to wear again.",
-    "planYourRide": "Plan your ride"
+    "planYourRide": "Plan your ride",
+    "support": {
+      "heading": "Support this project",
+      "body": "Bike Weather is a free, solo-built app. If it saves you from wearing the wrong kit, consider buying me a coffee — it keeps the project alive.",
+      "cta": "Buy me a coffee"
+    }
   },
   "imprint": {
     "heading": "Imprint",

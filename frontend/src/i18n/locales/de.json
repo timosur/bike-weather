@@ -524,7 +524,12 @@
     "badge": "Dein Rad-Wetter-Begleiter",
     "heading": "Fahrrad Wetter",
     "intro": "Wetterbasierte Kleidungs- und Ausrüstungsempfehlungen für Radfahrer — damit du nie wieder raten musst, was du anziehen sollst.",
-    "planYourRide": "Plane deine Fahrt"
+    "planYourRide": "Plane deine Fahrt",
+    "support": {
+      "heading": "Dieses Projekt unterstützen",
+      "body": "Fahrrad Wetter ist kostenlos und wird von einer einzelnen Person entwickelt. Wenn dir die App hilft, kauf mir einen Kaffee — das hält das Projekt am Leben.",
+      "cta": "Kauf mir einen Kaffee"
+    }
   },
   "imprint": {
     "heading": "Impressum",

@@ -12,7 +12,5 @@
 - Feature: Import from komoot or strava route
 - Fix: Authenticate k3s in homelab with pull token against now private repo here
 - Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
-- Feature: Add a link to buymeacoffe https://buymeacoffee.com/timosur, when somebody wants to support this product
 - Docs: Create a product vision, maybe as part of the documentation
-- Bug: The app does not use the native language of the OS as basis, it seems its always english?
 - Feature: We definitly need better icons for each product to wear, don't know where to get them from, because SVG generation is not nice for them I have seen
