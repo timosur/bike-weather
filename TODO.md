@@ -2,7 +2,6 @@
 - Feature: Add web insights via Plausible (needs to be hosted in my cluster, too)
 - Chore: Check for e2e tests and maybe just record the most important flows
 - Idea: Add auto sync job for preview release in ArgoCD to release fast?
-- Bug: After first submission of a form with Captcha, CAPTCHA validation fails on the frontend
 - Bug: Sometimes after navigation the view gets slightly zoomed in, which is annoying on iOS
 - Feature: Add weather icons to report per hour
 - Feature: Add text summary of the expected weather in the ride window
@@ -11,10 +10,7 @@
 - Feature: Optional Destination with route calc for headwind and detailed weather breakdown, should be displayed on a Map
 - Feature: GPX Import for real route
 - Feature: Import from komoot or strava route
-- Adjustment: Remove "Last restored" from planner, just keep local history
 - Fix: Authenticate k3s in homelab with pull token against now private repo here
-- Bug: Distance is being resetted, if location has been found via GPS
-- Adjustment: Those presets at the beginning needs to be clearer, that those are just presets, maybe been moved on the bottom?
 - Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
 - Feature: Add a link to buymeacoffe https://buymeacoffee.com/timosur, when somebody wants to support this product
 - Docs: Create a product vision, maybe as part of the documentation
