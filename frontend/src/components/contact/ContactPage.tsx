@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send, Loader2, CheckCircle2 } from 'lucide-react'
 import { TurnstileWidget, useTurnstile } from '../common/TurnstileWidget'
@@ -26,6 +26,10 @@ export function ContactPage({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { t } = useTranslation()
   const turnstile = useTurnstile()
+
+  useEffect(() => {
+    if (errorMessage) turnstile.reset()
+  }, [errorMessage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -161,8 +165,10 @@ export function ContactPage({
 
           {/* Turnstile CAPTCHA */}
           <TurnstileWidget
+            key={turnstile.resetKey}
             onVerify={turnstile.onVerify}
             onExpire={turnstile.onExpire}
+            onError={turnstile.onError}
             className="flex justify-center"
           />
 

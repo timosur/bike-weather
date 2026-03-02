@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 
 const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script'
 const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
@@ -131,6 +131,7 @@ export function TurnstileWidget({
 /** Hook to manage Turnstile token state */
 export function useTurnstile() {
   const tokenRef = useRef<string | null>(null)
+  const [resetKey, setResetKey] = useState(0)
 
   const onVerify = useCallback((token: string) => {
     tokenRef.current = token
@@ -140,11 +141,20 @@ export function useTurnstile() {
     tokenRef.current = null
   }, [])
 
+  const onError = useCallback(() => {
+    tokenRef.current = null
+  }, [])
+
   const getToken = useCallback(() => tokenRef.current, [])
 
   const clearToken = useCallback(() => {
     tokenRef.current = null
   }, [])
 
-  return { onVerify, onExpire, getToken, clearToken }
+  const reset = useCallback(() => {
+    tokenRef.current = null
+    setResetKey(k => k + 1)
+  }, [])
+
+  return { onVerify, onExpire, onError, getToken, clearToken, reset, resetKey }
 }

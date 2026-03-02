@@ -27,6 +27,7 @@ export default function ForgotPasswordPage() {
       setIsSent(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth.forgotPassword.error'))
+      turnstile.reset()
     } finally {
       setIsSubmitting(false)
     }
@@ -91,8 +92,10 @@ export default function ForgotPasswordPage() {
                   </div>
 
                   <TurnstileWidget
+                    key={turnstile.resetKey}
                     onVerify={turnstile.onVerify}
                     onExpire={turnstile.onExpire}
+                    onError={turnstile.onError}
                     className="flex justify-center"
                   />
 

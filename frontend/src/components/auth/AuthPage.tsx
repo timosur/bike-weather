@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User as UserIcon, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { TurnstileWidget, useTurnstile } from '../common/TurnstileWidget'
@@ -20,6 +20,13 @@ export function AuthPage({
   const { t } = useTranslation()
   const loginTurnstile = useTurnstile()
   const registerTurnstile = useTurnstile()
+
+  useEffect(() => {
+    if (errorMessage) {
+      if (tab === 'login') loginTurnstile.reset()
+      else registerTurnstile.reset()
+    }
+  }, [errorMessage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const validateLogin = () => {
     const errs: Record<string, string> = {}
@@ -138,8 +145,10 @@ export function AuthPage({
                 </div>
 
                 <TurnstileWidget
+                  key={loginTurnstile.resetKey}
                   onVerify={loginTurnstile.onVerify}
                   onExpire={loginTurnstile.onExpire}
+                  onError={loginTurnstile.onError}
                   className="flex justify-center"
                 />
 
@@ -217,8 +226,10 @@ export function AuthPage({
                 </div>
 
                 <TurnstileWidget
+                  key={registerTurnstile.resetKey}
                   onVerify={registerTurnstile.onVerify}
                   onExpire={registerTurnstile.onExpire}
+                  onError={registerTurnstile.onError}
                   className="flex justify-center"
                 />
 
