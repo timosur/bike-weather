@@ -24,7 +24,6 @@ import type {
   RidingIntensity,
   GravelStyle,
   LocationSuggestion,
-  QuickPreset,
   DayStop,
 } from './types'
 import { DayLocationList } from './DayLocationList'
@@ -49,17 +48,16 @@ function formatTimeHHMM(date: Date): string {
 
 export function RidePlanner({
   initialValues,
+  detectedLocation,
   locationSuggestions = [],
   bikeTypeOptions,
   intensityOptions,
-  quickPresets = [],
   isLoading = false,
   formSource = null,
   onReset,
   onLocationSearch,
   onUseCurrentLocation,
   onLocationSelect,
-  onPresetSelect,
   dayStopLocationSuggestions = [],
   onDayStopLocationSearch,
   onSubmit,
@@ -89,6 +87,10 @@ export function RidePlanner({
 
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (detectedLocation) setForm(f => ({ ...f, location: detectedLocation }))
+  }, [detectedLocation])
 
   useEffect(() => {
     if (form.isMultiDay && form.dayStops.length > 0 && form.startDate) {
@@ -137,20 +139,6 @@ export function RidePlanner({
       location: { address: suggestion.shortText, lat: suggestion.lat, lon: suggestion.lon },
     }))
     onLocationSelect?.(suggestion)
-  }
-
-  const handlePreset = (preset: QuickPreset) => {
-    setForm(f => ({
-      ...f,
-      bikeType: preset.bikeType,
-      intensity: preset.intensity,
-      distanceKm: preset.distanceKm ?? null,
-      isMultiDay: preset.isMultiDay,
-      endDate: preset.isMultiDay ? f.endDate : null,
-      dayStops: preset.isMultiDay ? f.dayStops : [],
-      gravelStyle: preset.bikeType === 'gravel' ? (preset.gravelStyle ?? 'road') : null,
-    }))
-    onPresetSelect?.(preset)
   }
 
   const validate = () => {
@@ -225,23 +213,6 @@ export function RidePlanner({
             >
               <X className="w-3.5 h-3.5" strokeWidth={2} />
             </button>
-          </div>
-        )}
-
-        {/* Quick presets */}
-        {quickPresets.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2">
-            {quickPresets.map(preset => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => handlePreset(preset)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-emerald-400 hover:text-emerald-700 dark:hover:border-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all shadow-sm"
-              >
-                <Route className="w-3 h-3" strokeWidth={2.5} />
-                {preset.label}
-              </button>
-            ))}
           </div>
         )}
 

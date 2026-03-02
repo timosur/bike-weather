@@ -65,17 +65,6 @@ export interface RidingIntensityOption {
   description: string;
 }
 
-export interface QuickPreset {
-  id: string;
-  label: string;
-  description: string;
-  bikeType: BikeType;
-  intensity: RidingIntensity;
-  distanceKm?: number;
-  isMultiDay: boolean;
-  gravelStyle?: GravelStyle | null;
-}
-
 export interface ValidationErrors {
   location: string | null;
   startDate: string | null;
@@ -95,14 +84,14 @@ export interface EditModeConfig {
 export interface RidePlannerProps {
   /** Initial form values, e.g. pre-filled from a saved route */
   initialValues?: Partial<RideInput>;
+  /** GPS-detected location injected after mount — updates only the location field without resetting other fields */
+  detectedLocation?: RideLocation | null;
   /** Autocomplete suggestions to display as the user types a location */
   locationSuggestions?: LocationSuggestion[];
   /** The four bike type options to display */
   bikeTypeOptions: BikeTypeOption[];
   /** The three riding intensity options to display in the segmented control */
   intensityOptions: RidingIntensityOption[];
-  /** Quick-fill presets shown as shortcut buttons above the form */
-  quickPresets?: QuickPreset[];
   /** Active validation errors to display inline */
   validationErrors?: ValidationErrors;
   /** Whether the form is currently submitting (shows loading state on button) */
@@ -117,8 +106,6 @@ export interface RidePlannerProps {
   onUseCurrentLocation?: () => void;
   /** Called when the user selects a location suggestion */
   onLocationSelect?: (suggestion: LocationSuggestion) => void;
-  /** Called when the user applies a quick preset */
-  onPresetSelect?: (preset: QuickPreset) => void;
   /** Autocomplete suggestions for day stop location search */
   dayStopLocationSuggestions?: LocationSuggestion[];
   /** Called when the user types in a day stop location field */

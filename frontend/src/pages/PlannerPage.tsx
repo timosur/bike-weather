@@ -10,7 +10,7 @@ import { JsonLd } from '../components/seo'
 import { fetchRoute } from '../api/routes'
 
 import { TurnstileWidget, useTurnstile } from '../components/common/TurnstileWidget'
-import type { BikeTypeOption, RidingIntensityOption, QuickPreset, RideInput } from '../components/ride-planner/types'
+import type { BikeTypeOption, RidingIntensityOption, RideInput } from '../components/ride-planner/types'
 import type { RideHistoryEntry } from '../hooks/useRideHistory'
 
 export default function PlannerPage() {
@@ -32,7 +32,7 @@ export default function PlannerPage() {
   } = useLocationSearch()
 
   const { history, removeEntry, clearHistory } = useRideHistory()
-  const { savedFormState, saveFormState, clearFormState } = usePlannerFormPersistence()
+  const { saveFormState, clearFormState } = usePlannerFormPersistence()
 
   // Track form reset key to force remount
   const [resetKey, setResetKey] = useState(0)
@@ -83,13 +83,6 @@ export default function PlannerPage() {
     { value: 'gemuetlich', label: t('planner.intensity.gemuetlich'), description: t('planner.intensity.gemuetlichDesc') },
     { value: 'moderat', label: t('planner.intensity.moderat'), description: t('planner.intensity.moderatDesc') },
     { value: 'sportlich', label: t('planner.intensity.sportlich'), description: t('planner.intensity.sportlichDesc') },
-  ]
-
-  const quickPresets: QuickPreset[] = [
-    { id: 'p1', label: t('planner.preset.commute'), description: t('planner.preset.commuteDesc'), bikeType: 'city', intensity: 'gemuetlich', distanceKm: 12, isMultiDay: false },
-    { id: 'p2', label: t('planner.preset.weekendTour'), description: t('planner.preset.weekendTourDesc'), bikeType: 'gravel', intensity: 'moderat', distanceKm: 50, isMultiDay: false },
-    { id: 'p3', label: t('planner.preset.roadBikeRide'), description: t('planner.preset.roadBikeRideDesc'), bikeType: 'rennrad', intensity: 'sportlich', distanceKm: 80, isMultiDay: false },
-    { id: 'p4', label: t('planner.preset.multiDayTrip'), description: t('planner.preset.multiDayTripDesc'), bikeType: 'gravel', intensity: 'gemuetlich', isMultiDay: true },
   ]
 
   // Handle reset state from navigation
@@ -221,7 +214,6 @@ export default function PlannerPage() {
     if (incomingRideInput) return incomingRideInput
     if (urlRouteInput) return urlRouteInput
     if (detectedLocation) return { location: detectedLocation }
-    if (savedFormState) return savedFormState
     return undefined
   }
 
@@ -232,7 +224,6 @@ export default function PlannerPage() {
     if (incomingRideInput && incomingRouteId) return 'route'
     if (urlRouteId) return 'route'
     if (incomingRideInput) return 'history'
-    if (savedFormState && !detectedLocation) return 'restored'
     return null
   }
 
@@ -248,15 +239,6 @@ export default function PlannerPage() {
     navigate('/planner', { replace: true, state: { reset: true } })
     // Increment reset key to force RidePlanner remount with fresh defaults
     setResetKey(k => k + 1)
-  }
-
-  // Increment a stable key exactly once per successful detection so
-  // RidePlanner remounts with the detected location as initialValues.
-  const detectKeyRef = useRef(0)
-  const prevDetectedRef = useRef(detectedLocation)
-  if (detectedLocation && detectedLocation !== prevDetectedRef.current) {
-    detectKeyRef.current += 1
-    prevDetectedRef.current = detectedLocation
   }
 
   return (
@@ -283,13 +265,13 @@ export default function PlannerPage() {
 
       {/* Planner form with recent rides inside */}
       <RidePlanner
-        key={`form-${detectKeyRef.current}-${resetKey}-${editRouteId ?? ''}`}
-        initialValues={resetKey > 0 ? (detectedLocation ? { location: detectedLocation } : undefined) : getInitialValues()}
+        key={`form-${resetKey}-${editRouteId ?? ''}`}
+        initialValues={resetKey > 0 ? undefined : getInitialValues()}
+        detectedLocation={detectedLocation}
         locationSuggestions={suggestions}
         dayStopLocationSuggestions={dayStopSuggestions}
         bikeTypeOptions={bikeTypeOptions}
         intensityOptions={intensityOptions}
-        quickPresets={quickPresets}
         isLoading={isLocating || isSubmitting}
         formSource={resetKey > 0 ? null : getFormSource()}
         onReset={getFormSource() && resetKey === 0 ? handleReset : undefined}
@@ -297,7 +279,6 @@ export default function PlannerPage() {
         onUseCurrentLocation={useCurrentLocation}
         onLocationSelect={() => { }}
         onDayStopLocationSearch={searchDayStopLocation}
-        onPresetSelect={() => { }}
         onSubmit={handleSubmit}
       >
         {history.length > 0 && (
