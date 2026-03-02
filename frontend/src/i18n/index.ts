@@ -15,6 +15,7 @@ i18n
     },
     fallbackLng: 'de',
     supportedLngs: ['de', 'en'],
+    nonExplicitSupportedLngs: true,
     interpolation: {
       escapeValue: false, // React already escapes
     },

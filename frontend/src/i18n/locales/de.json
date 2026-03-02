@@ -100,7 +100,7 @@
     }
   },
   "planner": {
-    "heading": "Was soll ich anziehen?",
+    "heading": "Was soll ich mitnehmen?",
     "subheading": "Gib deine Fahrtdetails ein — wir sagen dir, was du brauchst.",
     "label": {
       "startLocation": "Startort",
@@ -216,7 +216,8 @@
   "location": {
     "searchLocation": "Ort suchen",
     "detectLocation": "Standort erkennen",
-    "detecting": "Erkennung…"
+    "detecting": "Erkennung…",
+    "currentLocation": "Aktueller Standort"
   },
   "dayList": {
     "dayLabel": "Tag {{n}}",
@@ -345,7 +346,36 @@
     "allCategories": "Alle Kategorien",
     "noProducts": "Keine Produkte für dieses Wetter in dieser Kategorie.",
     "categoryNotFound": "Kategorie nicht gefunden",
-    "backToProducts": "Zurück zu Produkten"
+    "backToProducts": "Zurück zu Produkten",
+    "matchingProducts": "Passende Produkte",
+    "category": {
+      "jackets": "Radjacken",
+      "gloves": "Fahrradhandschuhe",
+      "pants": "Fahrradhosen",
+      "headwear": "Kopfbedeckung",
+      "shoes": "Radschuhe & Überschuhe",
+      "lights": "Fahrradlichter",
+      "accessories": "Zubehör & Ausrüstung"
+    },
+    "filter": {
+      "all": "Alle",
+      "cold": "< 5 °C",
+      "mild": "5–15 °C",
+      "warm": "> 15 °C",
+      "rain": "Regen",
+      "wind": "Wind"
+    },
+    "precipitation": {
+      "none": "Kein Schutz",
+      "lightRain": "Wasserabweisend",
+      "heavyRain": "Wasserdicht",
+      "snow": "Schnee & Regen"
+    },
+    "wind": {
+      "none": "Kein Schutz",
+      "lightWind": "Leichter Windschutz",
+      "strongWind": "Winddicht"
+    }
   },
   "routes": {
     "heading": "Meine Routen",
@@ -367,7 +397,10 @@
       "routeName": "Routenname",
       "startLocation": "Startort",
       "distance": "Distanz ({{unit}})",
-      "ridingStyle": "Fahrstil"
+      "ridingStyle": "Fahrstil",
+      "ridingStyleSporty": "Sportlich",
+      "ridingStyleEasy": "Entspannt",
+      "ridingStyleTouring": "Touring"
     },
     "delete": {
       "heading": "Route wirklich löschen?",

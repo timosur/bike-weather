@@ -100,7 +100,7 @@
     }
   },
   "planner": {
-    "heading": "What should I wear?",
+    "heading": "What should I take with me?",
     "subheading": "Enter your ride details — we'll tell you what you need.",
     "label": {
       "startLocation": "Start location",
@@ -216,7 +216,8 @@
   "location": {
     "searchLocation": "Search location",
     "detectLocation": "Detect location",
-    "detecting": "Detecting…"
+    "detecting": "Detecting…",
+    "currentLocation": "Current location"
   },
   "dayList": {
     "dayLabel": "Day {{n}}",
@@ -345,7 +346,36 @@
     "allCategories": "All categories",
     "noProducts": "No products for this weather in this category.",
     "categoryNotFound": "Category not found",
-    "backToProducts": "Back to Products"
+    "backToProducts": "Back to Products",
+    "matchingProducts": "Matching products",
+    "category": {
+      "jackets": "Cycling jackets",
+      "gloves": "Cycling gloves",
+      "pants": "Cycling pants",
+      "headwear": "Headwear",
+      "shoes": "Cycling shoes & covers",
+      "lights": "Bike lights",
+      "accessories": "Accessories & equipment"
+    },
+    "filter": {
+      "all": "All",
+      "cold": "< 5 °C",
+      "mild": "5–15 °C",
+      "warm": "> 15 °C",
+      "rain": "Rain",
+      "wind": "Wind"
+    },
+    "precipitation": {
+      "none": "No protection",
+      "lightRain": "Water-resistant",
+      "heavyRain": "Waterproof",
+      "snow": "Snow & Rain"
+    },
+    "wind": {
+      "none": "No protection",
+      "lightWind": "Light wind",
+      "strongWind": "Windproof"
+    }
   },
   "routes": {
     "heading": "My Routes",
@@ -367,7 +397,10 @@
       "routeName": "Route name",
       "startLocation": "Start location",
       "distance": "Distance ({{unit}})",
-      "ridingStyle": "Riding style"
+      "ridingStyle": "Riding style",
+      "ridingStyleSporty": "Sporty",
+      "ridingStyleEasy": "Easy",
+      "ridingStyleTouring": "Touring"
     },
     "delete": {
       "heading": "Really delete route?",
