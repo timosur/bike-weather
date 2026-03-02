@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { LocationSuggestion, RideLocation } from '../components/ride-planner/types'
 import { searchLocations, reverseGeocode } from '../api/geocoding'
 
 export function useLocationSearch() {
+  const { t } = useTranslation()
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([])
   const [dayStopSuggestions, setDayStopSuggestions] = useState<LocationSuggestion[]>([])
   const [isLocating, setIsLocating] = useState(false)
@@ -53,10 +55,10 @@ export function useLocationSearch() {
           if (result) {
             setDetectedLocation({ address: result.shortText, lat: latitude, lon: longitude })
           } else {
-            setDetectedLocation({ address: 'Current location', lat: latitude, lon: longitude })
+            setDetectedLocation({ address: t('location.currentLocation'), lat: latitude, lon: longitude })
           }
         } catch {
-          setDetectedLocation({ address: 'Current location', lat: latitude, lon: longitude })
+          setDetectedLocation({ address: t('location.currentLocation'), lat: latitude, lon: longitude })
         } finally {
           setIsLocating(false)
         }
@@ -66,7 +68,7 @@ export function useLocationSearch() {
       },
       { enableHighAccuracy: true, timeout: 10000 },
     )
-  }, [])
+  }, [t])
 
   const clearDetectedLocation = useCallback(() => {
     setDetectedLocation(null)
