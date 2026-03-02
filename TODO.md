@@ -15,5 +15,4 @@
 - Feature: Add a link to buymeacoffe https://buymeacoffee.com/timosur, when somebody wants to support this product
 - Docs: Create a product vision, maybe as part of the documentation
 - Bug: The app does not use the native language of the OS as basis, it seems its always english?
-- Bug: "Über uns" should rather be something like "About the app" or just "About"
 - Feature: We definitly need better icons for each product to wear, don't know where to get them from, because SVG generation is not nice for them I have seen

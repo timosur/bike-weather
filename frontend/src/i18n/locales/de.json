@@ -25,7 +25,7 @@
       "description": "Erfahre mehr über den Entwickler hinter Fahrrad Wetter und die Motivation hinter dem Projekt."
     },
     "aboutApp": {
-      "title": "Über uns – Fahrrad Wetter",
+      "title": "Über die App – Fahrrad Wetter",
       "description": "Erfahre, was Fahrrad Wetter ist, warum es existiert und wie es Radfahrern hilft, sich bei jedem Wetter richtig anzuziehen."
     },
     "contact": {
@@ -78,7 +78,7 @@
       "products": "Produkte",
       "myRoutes": "Meine Routen",
       "aboutMe": "Über mich",
-      "aboutApp": "Über uns"
+      "aboutApp": "Über die App"
     },
     "footerSection": {
       "product": "Produkt",
