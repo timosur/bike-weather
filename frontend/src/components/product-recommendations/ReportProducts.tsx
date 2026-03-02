@@ -1,4 +1,5 @@
 import { ExternalLink, Store } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { ReportProductsProps, Product, Shop } from './types'
 
 function groupByCategory(products: Product[]): Record<string, Product[]> {
@@ -10,13 +11,14 @@ function groupByCategory(products: Product[]): Record<string, Product[]> {
   return groups
 }
 
-function CompactProductCard({ product, shop, badgeLabel, onProductClick }: {
+function CompactProductCard({ product, shop, badgeLabel, onProductClick, priceLocale }: {
   product: Product
   shop: Shop | undefined
   badgeLabel: string
   onProductClick?: (id: string) => void
+  priceLocale: string
 }) {
-  const formattedPrice = new Intl.NumberFormat('de-DE', {
+  const formattedPrice = new Intl.NumberFormat(priceLocale, {
     style: 'currency',
     currency: product.currency,
   }).format(product.price)
@@ -63,19 +65,22 @@ function CompactProductCard({ product, shop, badgeLabel, onProductClick }: {
   )
 }
 
-const categoryLabels: Record<string, string> = {
-  'cat-jackets': 'Cycling jackets',
-  'cat-gloves': 'Cycling gloves',
-  'cat-pants': 'Cycling pants',
-  'cat-headwear': 'Headwear',
-  'cat-shoes': 'Cycling shoes & covers',
-  'cat-lights': 'Bike lights',
-  'cat-accessories': 'Accessories & equipment',
+const categoryTranslationKeys: Record<string, string> = {
+  'cat-jackets': 'products.category.jackets',
+  'cat-gloves': 'products.category.gloves',
+  'cat-pants': 'products.category.pants',
+  'cat-headwear': 'products.category.headwear',
+  'cat-shoes': 'products.category.shoes',
+  'cat-lights': 'products.category.lights',
+  'cat-accessories': 'products.category.accessories',
 }
 
 export function ReportProducts({ products, shops, disclosure, onProductClick }: ReportProductsProps) {
+  const { t, i18n } = useTranslation()
+
   if (products.length === 0) return null
 
+  const priceLocale = i18n.language === 'de' ? 'de-DE' : 'en-US'
   const shopMap = new Map(shops.map((s) => [s.id, s]))
   const grouped = groupByCategory(products)
 
@@ -85,13 +90,13 @@ export function ReportProducts({ products, shops, disclosure, onProductClick }: 
         className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500"
         style={{ fontFamily: 'Outfit, sans-serif' }}
       >
-        Matching products
+        {t('products.matchingProducts')}
       </h2>
 
       {Object.entries(grouped).map(([categoryId, categoryProducts]) => (
         <div key={categoryId}>
           <h3 className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">
-            {categoryLabels[categoryId] ?? categoryId}
+            {categoryTranslationKeys[categoryId] ? t(categoryTranslationKeys[categoryId]) : categoryId}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {categoryProducts.map((product) => (
@@ -101,6 +106,7 @@ export function ReportProducts({ products, shops, disclosure, onProductClick }: 
                 shop={shopMap.get(product.shopId)}
                 badgeLabel={disclosure.badgeLabel}
                 onProductClick={onProductClick}
+                priceLocale={priceLocale}
               />
             ))}
           </div>

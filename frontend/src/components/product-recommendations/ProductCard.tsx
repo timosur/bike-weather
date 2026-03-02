@@ -1,4 +1,5 @@
 import { ExternalLink, Store, Thermometer, CloudRain, Wind } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Product, Shop, AffiliateDisclosure } from './types'
 
 interface ProductCardProps {
@@ -8,21 +9,24 @@ interface ProductCardProps {
   onProductClick?: (productId: string) => void
 }
 
-const precipitationLabels: Record<string, string> = {
-  none: 'No protection',
-  'light-rain': 'Water-resistant',
-  'heavy-rain': 'Waterproof',
-  snow: 'Snow & Rain',
+const precipitationTranslationKeys: Record<string, string> = {
+  none: 'products.precipitation.none',
+  'light-rain': 'products.precipitation.lightRain',
+  'heavy-rain': 'products.precipitation.heavyRain',
+  snow: 'products.precipitation.snow',
 }
 
-const windLabels: Record<string, string> = {
-  none: 'No protection',
-  'light-wind': 'Light wind',
-  'strong-wind': 'Windproof',
+const windTranslationKeys: Record<string, string> = {
+  none: 'products.wind.none',
+  'light-wind': 'products.wind.lightWind',
+  'strong-wind': 'products.wind.strongWind',
 }
 
 export function ProductCard({ product, shop, disclosure, onProductClick }: ProductCardProps) {
-  const formattedPrice = new Intl.NumberFormat('de-DE', {
+  const { t, i18n } = useTranslation()
+
+  const priceLocale = i18n.language === 'de' ? 'de-DE' : 'en-US'
+  const formattedPrice = new Intl.NumberFormat(priceLocale, {
     style: 'currency',
     currency: product.currency,
   }).format(product.price)
@@ -77,13 +81,13 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
           {weather.precipitation !== 'none' && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 ring-1 ring-blue-200/60 dark:ring-blue-800/40">
               <CloudRain className="w-3 h-3" strokeWidth={2} />
-              {precipitationLabels[weather.precipitation]}
+              {t(precipitationTranslationKeys[weather.precipitation] ?? 'products.precipitation.none')}
             </span>
           )}
           {weather.wind !== 'none' && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400 ring-1 ring-violet-200/60 dark:ring-violet-800/40">
               <Wind className="w-3 h-3" strokeWidth={2} />
-              {windLabels[weather.wind]}
+              {t(windTranslationKeys[weather.wind] ?? 'products.wind.none')}
             </span>
           )}
         </div>

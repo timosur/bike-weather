@@ -7,13 +7,13 @@ import { ProductCard } from './ProductCard'
 
 type WeatherFilter = 'all' | 'cold' | 'mild' | 'warm' | 'rain' | 'wind'
 
-const filterConfig: { id: WeatherFilter; label: string; icon: React.ReactNode }[] = [
-  { id: 'all', label: 'All', icon: null },
-  { id: 'cold', label: '< 5 °C', icon: <Thermometer className="w-3 h-3" strokeWidth={2} /> },
-  { id: 'mild', label: '5–15 °C', icon: <Thermometer className="w-3 h-3" strokeWidth={2} /> },
-  { id: 'warm', label: '> 15 °C', icon: <Thermometer className="w-3 h-3" strokeWidth={2} /> },
-  { id: 'rain', label: 'Rain', icon: <CloudRain className="w-3 h-3" strokeWidth={2} /> },
-  { id: 'wind', label: 'Wind', icon: <Wind className="w-3 h-3" strokeWidth={2} /> },
+const filterConfig: { id: WeatherFilter; labelKey: string; icon: React.ReactNode }[] = [
+  { id: 'all', labelKey: 'products.filter.all', icon: null },
+  { id: 'cold', labelKey: 'products.filter.cold', icon: <Thermometer className="w-3 h-3" strokeWidth={2} /> },
+  { id: 'mild', labelKey: 'products.filter.mild', icon: <Thermometer className="w-3 h-3" strokeWidth={2} /> },
+  { id: 'warm', labelKey: 'products.filter.warm', icon: <Thermometer className="w-3 h-3" strokeWidth={2} /> },
+  { id: 'rain', labelKey: 'products.filter.rain', icon: <CloudRain className="w-3 h-3" strokeWidth={2} /> },
+  { id: 'wind', labelKey: 'products.filter.wind', icon: <Wind className="w-3 h-3" strokeWidth={2} /> },
 ]
 
 function matchesFilter(product: Product, filter: WeatherFilter): boolean {
@@ -97,7 +97,7 @@ export function ProductCategoryDetail({
               }`}
             >
               {filter.icon}
-              {filter.label}
+              {t(filter.labelKey)}
               <span className={`text-[10px] ${isActive ? 'text-emerald-200 dark:text-emerald-200' : 'text-stone-400 dark:text-stone-500'}`}>
                 {count}
               </span>
