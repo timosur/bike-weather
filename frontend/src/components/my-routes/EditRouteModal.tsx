@@ -18,6 +18,12 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
   const [ridingStyle, setRidingStyle] = useState<RidingStyle>(route.ridingStyle)
   const { t } = useTranslation()
 
+  const ridingStyleLabels: Record<RidingStyle, string> = {
+    'Sporty': t('routes.edit.ridingStyleSporty'),
+    'Easy': t('routes.edit.ridingStyleEasy'),
+    'Touring': t('routes.edit.ridingStyleTouring'),
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     onSave?.(route.id, { name, startLocation, totalDistance, ridingStyle })
@@ -101,7 +107,7 @@ export function EditRouteModal({ route, onSave, onClose }: EditRouteModalProps) 
                       : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
                   }`}
                 >
-                  {style}
+                  {ridingStyleLabels[style]}
                 </button>
               ))}
             </div>
