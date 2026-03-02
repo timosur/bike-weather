@@ -7,7 +7,7 @@ on:
       - "frontend/v[0-9]+.[0-9]+.[0-9]+-preview.*"
 
 concurrency:
-  group: frontend-build
+  group: ${{ contains(github.ref, '-preview.') && 'frontend-build-preview' || 'frontend-build-production' }}
   cancel-in-progress: true
 
 env:

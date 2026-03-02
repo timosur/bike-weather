@@ -156,6 +156,40 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
 
 Common types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`, `ci`, `build`.
 
+## Release Process
+
+**Always use the release script** to create and push tags. This ensures consistent versioning and proper workflow ordering.
+
+### Frontend Release Workflow
+
+1. **Create a preview release** (test before production):
+
+   ```bash
+   ./release.sh frontend patch -preview
+   # Creates: frontend/v0.0.X-preview.N
+   # Builds Docker image tagged as v0.0.X-preview.N
+   ```
+
+2. **Test the preview** in a staging environment.
+
+3. **Create production release** (after preview validation):
+
+   ```bash
+   ./release.sh frontend patch
+   # Creates: frontend/v0.0.X
+   # Retagges preview image as v0.0.X, or builds from source if no preview exists
+   ```
+
+### Why This Matters
+
+The pipeline uses **separate concurrency groups** for preview and production tags:
+
+- Preview builds run in `frontend-build-preview` group
+- Production builds run in `frontend-build-production` group
+- This prevents production releases from canceling in-progress preview builds
+
+**Always release in order:** `preview` → `test` → `production`. Never push production directly; it breaks the workflow and creates untrackable builds.
+
 ## Architecture
 
 ### Frontend (`frontend/`)
