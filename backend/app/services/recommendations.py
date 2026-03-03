@@ -377,7 +377,7 @@ def _build_route_chart_hours(
             key=lambda pw: abs(pw[0].distance_from_start_km - target_dist),
         )
 
-        hour_str = f"{hour}:00"
+        hour_str = f"{hour:02d}:00"
         hour_weather = next(
             (h for h in closest_window.hours if h.hour == hour_str),
             None,
