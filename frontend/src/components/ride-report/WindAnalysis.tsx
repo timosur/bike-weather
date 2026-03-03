@@ -1,26 +1,26 @@
-import { Wind, Clock, ArrowRight } from 'lucide-react'
+import { Wind, Route } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { RouteWaypointWeather } from './types'
+import type { WeatherIconType } from './types'
 import { WeatherIcon } from './WeatherIcon'
 
-interface WindAnalysisProps {
+interface RouteWeatherSummaryProps {
   waypoints: RouteWaypointWeather[]
   className?: string
 }
 
-function windEffectColor(headwind: number) {
-  if (headwind > 5) return { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', dot: 'bg-red-500' }
-  if (headwind < -5) return { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' }
-  if (Math.abs(headwind) <= 5) return { bg: 'bg-stone-100 dark:bg-stone-800', text: 'text-stone-600 dark:text-stone-400', dot: 'bg-stone-400' }
-  return { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300', dot: 'bg-yellow-500' }
+function windEffectKey(headwind: number): 'headwind' | 'tailwind' | 'neutral' {
+  if (headwind > 5) return 'headwind'
+  if (headwind < -5) return 'tailwind'
+  return 'neutral'
 }
 
-function windEffectLabel(headwind: number, t: (key: string) => string) {
-  if (headwind > 5) return t('report.windAnalysis.headwind')
-  if (headwind < -5) return t('report.windAnalysis.tailwind')
-  return t('report.windAnalysis.neutral')
-}
+const effectStyles = {
+  headwind: { dot: 'bg-red-500', text: 'text-red-700 dark:text-red-300', bar: 'bg-red-500' },
+  tailwind: { dot: 'bg-green-500', text: 'text-green-700 dark:text-green-300', bar: 'bg-green-500' },
+  neutral: { dot: 'bg-stone-400', text: 'text-stone-600 dark:text-stone-400', bar: 'bg-stone-400' },
+} as const
 
 function formatDuration(minutes: number): string {
   if (minutes < 60) return `~${Math.round(minutes)} min`
@@ -29,101 +29,120 @@ function formatDuration(minutes: number): string {
   return m > 0 ? `~${h}h ${m}min` : `~${h}h`
 }
 
-export function WindAnalysis({ waypoints, className }: WindAnalysisProps) {
+export function WindAnalysis({ waypoints, className }: RouteWeatherSummaryProps) {
   const { t } = useTranslation()
 
   if (!waypoints || waypoints.length === 0) return null
 
-  const avgHeadwind = waypoints.reduce((sum, wp) => sum + wp.headwindComponent, 0) / waypoints.length
-  
-  const overallStatus =
-    avgHeadwind > 5
-      ? 'Headwind'
-      : avgHeadwind < -5
-      ? 'Tailwind'
-      : 'Neutral'
+  // Aggregate stats
+  const temps = waypoints.map(wp => wp.temp)
+  const tempMin = Math.round(Math.min(...temps))
+  const tempMax = Math.round(Math.max(...temps))
+  const winds = waypoints.map(wp => wp.windSpeed)
+  const windMin = Math.round(Math.min(...winds))
+  const windMax = Math.round(Math.max(...winds))
+  const avgHeadwind = waypoints.reduce((s, wp) => s + wp.headwindComponent, 0) / waypoints.length
 
+  // Most common weather icon
+  const iconCounts = new Map<string, number>()
+  waypoints.forEach(wp => iconCounts.set(wp.icon, (iconCounts.get(wp.icon) || 0) + 1))
+  const dominantIcon = [...iconCounts.entries()].sort((a, b) => b[1] - a[1])[0][0] as WeatherIconType
+
+  // Build segments summary: group consecutive same-effect waypoints
   const hasSegments = waypoints.some(wp => wp.segmentStartKm != null && wp.segmentEndKm != null)
 
+  type EffectGroup = { effect: 'headwind' | 'tailwind' | 'neutral'; startKm: number; endKm: number; durationMin: number }
+  const groups: EffectGroup[] = []
+
+  for (const wp of waypoints) {
+    const effect = windEffectKey(wp.headwindComponent)
+    const startKm = wp.segmentStartKm ?? wp.distanceKm
+    const endKm = wp.segmentEndKm ?? wp.distanceKm
+    const dur = wp.segmentDurationMinutes ?? 0
+
+    if (groups.length > 0 && groups[groups.length - 1].effect === effect) {
+      const last = groups[groups.length - 1]
+      last.endKm = endKm
+      last.durationMin += dur
+    } else {
+      groups.push({ effect, startKm, endKm, durationMin: dur })
+    }
+  }
+
+  // Total route distance
+  const totalKm = hasSegments
+    ? Math.round(waypoints[waypoints.length - 1].segmentEndKm ?? waypoints[waypoints.length - 1].distanceKm)
+    : Math.round(waypoints[waypoints.length - 1].distanceKm)
+
+  const overallEffect = windEffectKey(avgHeadwind)
+
   return (
-    <div className={`space-y-4 ${className}`}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          <Wind className="w-5 h-5" />
-          {t('report.windAnalysis.title', 'Wind Analysis')}
-        </h3>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          overallStatus === 'Headwind' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
-          overallStatus === 'Tailwind' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-          'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
-        }`}>
-          {overallStatus === 'Headwind' ? t('report.windAnalysis.headwind') : 
-           overallStatus === 'Tailwind' ? t('report.windAnalysis.tailwind') : 
-           t('report.windAnalysis.neutral')} ({Math.round(Math.abs(avgHeadwind))} km/h avg)
-        </span>
-      </div>
+    <div className={`space-y-3 ${className}`}>
+      <h3 className="text-lg font-semibold flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <Route className="w-5 h-5" />
+        {t('report.windAnalysis.title', 'Route Conditions')}
+      </h3>
 
-      <div className="bg-stone-50 dark:bg-stone-900 rounded-xl ring-1 ring-stone-200 dark:ring-stone-800 divide-y divide-stone-200 dark:divide-stone-800">
-        {waypoints.map((wp) => {
-          const colors = windEffectColor(wp.headwindComponent)
-          const segmentLength = hasSegments && wp.segmentStartKm != null && wp.segmentEndKm != null
-            ? wp.segmentEndKm - wp.segmentStartKm
-            : null
+      <div className="bg-stone-50 dark:bg-stone-900 rounded-xl ring-1 ring-stone-200 dark:ring-stone-800 p-4 space-y-4">
+        {/* Summary stats row */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <span className="flex items-center gap-1.5">
+            <WeatherIcon icon={dominantIcon} className="w-5 h-5" />
+            <span className="text-stone-700 dark:text-stone-200">
+              {tempMin === tempMax ? `${tempMin}°C` : `${tempMin}–${tempMax}°C`}
+            </span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Wind className="w-4 h-4 text-stone-400" />
+            <span className="text-stone-700 dark:text-stone-200">
+              {windMin === windMax ? `${windMin} km/h` : `${windMin}–${windMax} km/h`}
+            </span>
+          </span>
+          <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
+            overallEffect === 'headwind' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+            overallEffect === 'tailwind' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+            'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+          }`}>
+            {t(`report.windAnalysis.${overallEffect}`)} {Math.round(Math.abs(avgHeadwind))} km/h avg
+          </span>
+        </div>
 
-          return (
-            <div key={wp.index} className="px-4 py-3 flex flex-col gap-2">
-              {/* Row 1: Distance range + travel time */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {hasSegments && wp.segmentStartKm != null && wp.segmentEndKm != null ? (
-                    <span className="font-mono text-sm font-medium text-stone-700 dark:text-stone-200">
-                      {Math.round(wp.segmentStartKm)} <ArrowRight className="w-3 h-3 inline" /> {Math.round(wp.segmentEndKm)} km
-                    </span>
-                  ) : (
-                    <span className="font-mono text-sm font-medium text-stone-700 dark:text-stone-200">
-                      {Math.round(wp.distanceKm)} km
-                    </span>
-                  )}
-                  {segmentLength != null && segmentLength > 0 && (
-                    <span className="text-xs text-stone-400 dark:text-stone-500">
-                      ({segmentLength.toFixed(1)} km)
-                    </span>
-                  )}
-                </div>
-                {wp.segmentDurationMinutes != null && wp.segmentDurationMinutes > 0 && (
-                  <span className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {formatDuration(wp.segmentDurationMinutes)}
-                  </span>
-                )}
-              </div>
-
-              {/* Row 2: Wind effect + weather */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${colors.dot}`} />
-                  <span className={`text-sm font-medium ${colors.text}`}>
-                    {windEffectLabel(wp.headwindComponent, t)}
-                  </span>
-                  <span className={`text-sm font-medium ${colors.text}`}>
-                    {wp.headwindComponent > 0 ? '+' : ''}{Math.round(wp.headwindComponent)} km/h
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0 text-sm text-stone-600 dark:text-stone-300">
-                  <span className="flex items-center gap-1">
-                    <Wind className="w-3.5 h-3.5 text-stone-400" />
-                    {Math.round(wp.windSpeed)} km/h {wp.windDirection}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <WeatherIcon icon={wp.icon} className="w-4 h-4" />
-                    {Math.round(wp.temp)}°C
-                  </span>
-                </div>
-              </div>
+        {/* Segment bar — visual overview */}
+        {groups.length > 1 && totalKm > 0 && (
+          <div className="space-y-1.5">
+            <div className="flex h-2.5 rounded-full overflow-hidden gap-0.5">
+              {groups.map((g, i) => {
+                const pct = Math.max(((g.endKm - g.startKm) / totalKm) * 100, 2)
+                return (
+                  <div
+                    key={i}
+                    className={`${effectStyles[g.effect].bar} rounded-full`}
+                    style={{ width: `${pct}%` }}
+                    title={`${Math.round(g.startKm)}–${Math.round(g.endKm)} km: ${g.effect}`}
+                  />
+                )
+              })}
             </div>
-          )
-        })}
+
+            {/* Segment labels */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500 dark:text-stone-400">
+              {groups.map((g, i) => {
+                const len = Math.round(g.endKm - g.startKm)
+                return (
+                  <span key={i} className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${effectStyles[g.effect].dot}`} />
+                    <span>
+                      {Math.round(g.startKm)}–{Math.round(g.endKm)} km
+                      {len > 0 && ` (${len} km`}
+                      {g.durationMin > 0 && `, ${formatDuration(g.durationMin)}`}
+                      {len > 0 && ')'}
+                    </span>
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
