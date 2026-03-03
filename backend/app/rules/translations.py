@@ -1222,6 +1222,14 @@ TIP_TRANSLATIONS: dict[tuple[str, str], str] = {
         "tip-hypothermia",
         "en",
     ): "Keep rain gear on! Risk of cooling down from sweat evaporation.",
+    (
+        "tip-wind-endurance",
+        "de",
+    ): "Lange Fahrt bei Wind: Energie einteilen, windgeschützte Pausen einplanen. Windschatten nutzen wenn möglich.",
+    (
+        "tip-wind-endurance",
+        "en",
+    ): "Long ride in wind: pace yourself, plan sheltered rest stops. Draft behind others when possible.",
 }
 
 

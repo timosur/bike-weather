@@ -4,7 +4,12 @@ from app.rules.translations import get_tip_translation
 from app.services.weather import WeatherForecast
 
 
-def get_tips(weather: WeatherForecast, locale: str = "de") -> list[dict]:
+def get_tips(
+    weather: WeatherForecast,
+    locale: str = "de",
+    duration_minutes: float | None = None,
+    distance_km: float | None = None,
+) -> list[dict]:
     """Return a list of contextual safety/comfort tip dicts."""
     tips: list[dict] = []
     feels = weather.temp_feels_like
@@ -74,6 +79,20 @@ def get_tips(weather: WeatherForecast, locale: str = "de") -> list[dict]:
                 "category": "safety",
                 "message": get_tip_translation("tip-hypothermia", locale),
                 "severity": "warning",
+            }
+        )
+
+    # Wind endurance: long rides (>2h or >60km) with moderate+ wind
+    is_long_ride = (duration_minutes is not None and duration_minutes >= 120) or (
+        distance_km is not None and distance_km >= 60
+    )
+    if is_long_ride and weather.wind_speed > 15:
+        tips.append(
+            {
+                "id": "tip-wind-endurance",
+                "category": "comfort",
+                "message": get_tip_translation("tip-wind-endurance", locale),
+                "severity": "info",
             }
         )
 

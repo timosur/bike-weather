@@ -34,7 +34,7 @@ export function StickyActionBar({
   if (!hasAnyAction) return null
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 pointer-events-none">
+    <div className="fixed bottom-0 inset-x-0 z-40 pointer-events-none md:hidden">
       <div className="max-w-4xl mx-auto px-4 pb-4 pt-2">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-stone-900/80 backdrop-blur-lg ring-1 ring-stone-200/60 dark:ring-stone-700/60 shadow-lg">
           {onEditRide && (

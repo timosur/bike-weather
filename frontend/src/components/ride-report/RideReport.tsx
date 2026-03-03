@@ -1,6 +1,6 @@
 import { useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Gauge, Route } from 'lucide-react'
+import { MapPin, Gauge, Route, Clock, Timer, Share2, Bookmark, BookmarkCheck, PenLine, Plus, Save, Check, Loader2 } from 'lucide-react'
 import type { RideReportProps } from './types'
 import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
@@ -10,11 +10,17 @@ import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { TipsList } from './TipsList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
-import { RideWindowInfo } from './RideWindowInfo'
 import { RouteMap } from './RouteMap'
 import { WindAnalysis } from './WindAnalysis'
 import { StickyActionBar } from './StickyActionBar'
 import { DayTimeline } from './DayTimeline'
+
+function formatDuration(minutes: number, t: (key: string, opts?: Record<string, unknown>) => string): string {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (m === 0) return t('report.rideWindow.hours', { h })
+  return t('report.rideWindow.hoursMinutes', { h, m })
+}
 
 export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
@@ -50,7 +56,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
   }, [])
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24">
+    <div className="w-full max-w-4xl mx-auto space-y-6 pb-20 md:pb-6">
       {/* ── 1. HEADER ── */}
       <div>
         <h1
@@ -59,7 +65,8 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         >
           {report.rideName}
         </h1>
-        <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-stone-500 dark:text-stone-400">
+        {/* Meta row: location, distance, style, ride window */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2 text-sm text-stone-500 dark:text-stone-400">
           <span className="inline-flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5" strokeWidth={1.5} />
             {report.startLocation}
@@ -77,23 +84,121 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               {t('report.days', { count: report.days.length })}
             </span>
           )}
+          {/* Ride window info inline (single-day) */}
+          {!isMultiDay && activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
+            <>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
+                <span className="font-medium text-stone-700 dark:text-stone-300">
+                  {activeDay.rideStartHour.toString().padStart(2, '0')}:00 – {activeDay.rideEndHour.toString().padStart(2, '0')}:00
+                </span>
+              </span>
+              {activeDay.estimatedDurationMinutes != null && activeDay.estimatedDurationMinutes > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Timer className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
+                  <span>{t('report.rideWindow.duration')}: <span className="font-medium text-stone-700 dark:text-stone-300">{formatDuration(activeDay.estimatedDurationMinutes, t)}</span></span>
+                </span>
+              )}
+              {activeDay.averageSpeedKmh != null && activeDay.averageSpeedKmh > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Gauge className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
+                  <span>{t('report.rideWindow.avgSpeed')}: <span className="font-medium text-stone-700 dark:text-stone-300">{activeDay.averageSpeedKmh} km/h</span></span>
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Desktop action buttons (hidden on mobile — sticky bar used instead) */}
+        <div className="hidden md:flex flex-wrap items-center gap-2 mt-3">
+          {onEditRide && (
+            <button
+              onClick={onEditRide}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
+              <PenLine className="w-4 h-4" strokeWidth={1.5} />
+              {t('planner.editRide')}
+            </button>
+          )}
+          {onSaveChanges && (
+            <button
+              onClick={onSaveChanges}
+              disabled={saveChangesLoading || !hasUnsavedChanges}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!hasUnsavedChanges
+                ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
+                : saveChangesLoading
+                  ? 'text-white bg-emerald-600/70 cursor-wait'
+                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                }`}
+            >
+              {saveChangesLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
+              ) : hasUnsavedChanges ? (
+                <Save className="w-4 h-4" strokeWidth={1.5} />
+              ) : (
+                <Check className="w-4 h-4" strokeWidth={1.5} />
+              )}
+              {saveChangesLoading
+                ? t('report.savingChanges')
+                : hasUnsavedChanges
+                  ? t('report.saveChanges')
+                  : t('report.noChanges')}
+            </button>
+          )}
+          {onNewRide && (
+            <button
+              onClick={onNewRide}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" strokeWidth={1.5} />
+              {t('report.newRide')}
+            </button>
+          )}
+          {onShare && (
+            <button
+              onClick={() => onShare?.()}
+              disabled={shareLoading}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${shareLoading ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-wait' : 'text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700'}`}
+            >
+              <Share2 className="w-4 h-4" strokeWidth={1.5} />
+              {shareLoading ? t('report.sharing') : t('report.share')}
+            </button>
+          )}
+          {onSaveRoute && (
+            <button
+              onClick={() => onSaveRoute()}
+              disabled={routeSaving || routeSaved}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
+                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
+                : routeSaving
+                  ? 'text-white bg-emerald-600/70 cursor-wait'
+                  : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                }`}
+            >
+              {routeSaved ? (
+                <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
+              ) : (
+                <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+              )}
+              {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
+            </button>
+          )}
+          {!onSaveRoute && onLoginToSave && (
+            <button
+              onClick={() => onLoginToSave()}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+            >
+              <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+              {t('report.loginToSave')}
+            </button>
+          )}
         </div>
       </div>
 
       {/* ── 2. CONDITION BADGE (full-width) ── */}
       <ConditionBadge condition={report.overallCondition} reasons={report.overallConditionReasons} />
 
-      {/* ── 3. RIDE INFO ── */}
-      {!isMultiDay && activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
-        <RideWindowInfo
-          rideStartHour={activeDay.rideStartHour}
-          rideEndHour={activeDay.rideEndHour}
-          estimatedDurationMinutes={activeDay.estimatedDurationMinutes}
-          averageSpeedKmh={activeDay.averageSpeedKmh}
-        />
-      )}
-
-      {/* ── 3b. MULTI-DAY TIMELINE ── */}
+      {/* ── 3. MULTI-DAY TIMELINE ── */}
       {isMultiDay && (
         <section>
           <h2
