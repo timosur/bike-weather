@@ -24,6 +24,15 @@ export function WindAnalysis({ waypoints, className }: WindAnalysisProps) {
       ? 'Tailwind'
       : 'Neutral'
 
+  const hasSegments = waypoints.some(wp => wp.segmentStartKm != null && wp.segmentEndKm != null)
+
+  const formatDistance = (wp: RouteWaypointWeather) => {
+    if (hasSegments && wp.segmentStartKm != null && wp.segmentEndKm != null) {
+      return `${Math.round(wp.segmentStartKm)}–${Math.round(wp.segmentEndKm)} km`
+    }
+    return `${Math.round(wp.distanceKm)} km`
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
@@ -45,8 +54,8 @@ export function WindAnalysis({ waypoints, className }: WindAnalysisProps) {
       <div className="bg-stone-50 dark:bg-stone-900 rounded-xl p-4 space-y-3 ring-1 ring-stone-200 dark:ring-stone-800">
         {waypoints.map((wp) => (
           <div key={wp.index} className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-3 w-24 shrink-0">
-              <span className="text-stone-500 dark:text-stone-400 font-mono w-12 text-right">{Math.round(wp.distanceKm)}km</span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-stone-500 dark:text-stone-400 font-mono text-right text-xs">{formatDistance(wp)}</span>
               <WeatherIcon icon={wp.icon} className="w-4 h-4 text-stone-600 dark:text-stone-300" />
             </div>
             

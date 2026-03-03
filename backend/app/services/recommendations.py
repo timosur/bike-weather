@@ -38,7 +38,7 @@ from app.schemas.report import (
 from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
 from app.services.routing import routing_service
-from app.services.route_waypoints import sample_waypoints
+from app.services.route_waypoints import sample_waypoints_by_direction
 from app.services.wind_analysis import analyze_wind, wind_exposure_factor
 from app.services.weather import (
     HourlyForecast,
@@ -398,7 +398,7 @@ async def build_report(
                 route_geometry = route_result.geometry
                 
                 # 2. Sample Waypoints
-                raw_waypoints = sample_waypoints(route_result.geometry)
+                raw_waypoints = sample_waypoints_by_direction(route_result.geometry)
                 
                 # 3. Calculate timing & fetch weather
                 # Estimate average speed if not provided
@@ -462,6 +462,8 @@ async def build_report(
                             windSpeed=w.wind_speed,
                             windDirection=w.wind_direction,
                             headwindComponent=wind.headwind_component,
+                            segmentStartKm=wp.segment_start_km,
+                            segmentEndKm=wp.segment_end_km,
                         )
                     )
                     

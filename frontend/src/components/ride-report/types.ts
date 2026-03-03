@@ -142,6 +142,8 @@ export interface RouteWaypointWeather {
   windSpeed: number;
   windDirection: string;
   headwindComponent: number;
+  segmentStartKm?: number | null;
+  segmentEndKm?: number | null;
 }
 
 export interface RouteSegment {

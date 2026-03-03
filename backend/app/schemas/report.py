@@ -106,6 +106,8 @@ class RouteWaypointWeather(BaseModel):
     windSpeed: float
     windDirection: str
     headwindComponent: float
+    segmentStartKm: float | None = None
+    segmentEndKm: float | None = None
 
 
 class RouteSegment(BaseModel):
