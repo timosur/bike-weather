@@ -123,6 +123,8 @@ export interface DayForecast {
   hourlyForecast?: HourlyWeather[];
   rideStartHour?: number;
   rideEndHour?: number;
+  rideStartTime?: string;
+  rideEndTime?: string;
   estimatedDurationMinutes?: number;
   averageSpeedKmh?: number;
   weatherSummary?: string;

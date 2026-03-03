@@ -86,12 +86,12 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
           )}
         </div>
         {/* Ride window row (single-day) */}
-        {!isMultiDay && activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
+        {!isMultiDay && activeDay && activeDay.rideStartTime && activeDay.rideEndTime && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-1.5 text-sm text-stone-500 dark:text-stone-400">
             <span className="inline-flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
               <span className="font-medium text-stone-700 dark:text-stone-300">
-                {activeDay.rideStartHour.toString().padStart(2, '0')}:00 – {activeDay.rideEndHour.toString().padStart(2, '0')}:00
+                {activeDay.rideStartTime} – {activeDay.rideEndTime}
               </span>
             </span>
             {activeDay.estimatedDurationMinutes != null && activeDay.estimatedDurationMinutes > 0 && (

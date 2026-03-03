@@ -597,6 +597,7 @@ async def build_report(
     # Per-day duration (minutes) and speed (km/h) parallel to day_locations
     day_durations: list[int] = []
     day_speeds: list[float] = []
+    day_start_times: list[str] = []  # actual HH:MM start times
 
     if ride_input.isMultiDay and ride_input.dayStops:
         # Day 1: start location
@@ -613,6 +614,7 @@ async def build_report(
         )
         day_durations.append(duration_minutes)
         day_speeds.append(avg_speed)
+        day_start_times.append(ride_input.startTime or f"{start_hour:02d}:00")
         # Subsequent days: day stops — use per-stop date/time when provided
         for i, stop in enumerate(ride_input.dayStops):
             # Date: use explicit per-stop date, or fallback to start + (i+1) days
@@ -654,6 +656,7 @@ async def build_report(
             )
             day_durations.append(day_duration)
             day_speeds.append(avg_speed)
+            day_start_times.append(stop.startTime or f"{day_start_hour:02d}:00")
     else:
         # Single-day ride
         end_hour = min(start_hour + math.ceil(duration_minutes / 60), 23)
@@ -669,6 +672,7 @@ async def build_report(
         )
         day_durations.append(duration_minutes)
         day_speeds.append(avg_speed)
+        day_start_times.append(ride_input.startTime or f"{start_hour:02d}:00")
 
     # Fetch weather and build days
     day_forecasts: list[DayForecastSchema] = []
@@ -858,6 +862,16 @@ async def build_report(
         else:
             day_label = DAY_LABELS["day"][locale].format(n=day_idx + 1)
 
+        # Compute actual start/end time strings (HH:MM) from start time + duration
+        actual_start_time = day_start_times[day_idx]
+        try:
+            st_parts = actual_start_time.split(":")
+            st_total_min = int(st_parts[0]) * 60 + int(st_parts[1])
+        except (ValueError, IndexError):
+            st_total_min = ride_start_h * 60
+        et_total_min = min(st_total_min + day_durations[day_idx], 23 * 60 + 59)
+        actual_end_time = f"{et_total_min // 60:02d}:{et_total_min % 60:02d}"
+
         day_forecasts.append(
             DayForecastSchema(
                 id=f"day-{day_idx + 1:03d}",
@@ -870,6 +884,8 @@ async def build_report(
                 hourlyForecast=_hourly_to_schemas(chart_hours, date_str),
                 rideStartHour=ride_start_h,
                 rideEndHour=ride_end_h,
+                rideStartTime=actual_start_time,
+                rideEndTime=actual_end_time,
                 estimatedDurationMinutes=day_durations[day_idx],
                 averageSpeedKmh=round(day_speeds[day_idx], 1),
                 weatherSummary=_build_weather_summary(forecast, locale),

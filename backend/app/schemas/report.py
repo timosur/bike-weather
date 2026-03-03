@@ -87,6 +87,8 @@ class DayForecastSchema(BaseModel):
     hourlyForecast: list[HourlyWeatherSchema] = []
     rideStartHour: int = 8
     rideEndHour: int = 10
+    rideStartTime: str = "08:00"
+    rideEndTime: str = "10:00"
     estimatedDurationMinutes: int = 120
     averageSpeedKmh: float = 20.0
     weatherSummary: str = ""

@@ -34,8 +34,8 @@ export function DayTimeline({ days }: DayTimelineProps) {
   return (
     <div className="space-y-3">
       {days.map((day) => {
-        const startTime = day.rideStartHour != null ? `${day.rideStartHour.toString().padStart(2, '0')}:00` : null
-        const endTime = day.rideEndHour != null ? `${day.rideEndHour.toString().padStart(2, '0')}:00` : null
+        const startTime = day.rideStartTime || (day.rideStartHour != null ? `${day.rideStartHour.toString().padStart(2, '0')}:00` : null)
+        const endTime = day.rideEndTime || (day.rideEndHour != null ? `${day.rideEndHour.toString().padStart(2, '0')}:00` : null)
 
         return (
           <div
