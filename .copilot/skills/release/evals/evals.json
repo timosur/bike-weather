@@ -1,0 +1,35 @@
+{
+  "skill_name": "release",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Ship it",
+      "expected_output": "Full flow: detect services with commits since last tag, propose bump types, tag them, wait for CI, then detect newer tags vs deployed versions in homelab, show comparison table, update deployment YAMLs, commit and push homelab.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "What's deployed right now?",
+      "expected_output": "Read current image tags from homelab deployment files and latest git tags from bike-weather. Present a status table showing deployed vs available versions for each service and environment. No changes made.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Bump frontend patch and deploy to preview",
+      "expected_output": "Tag frontend with next patch version plus -preview.N suffix, push tag, wait for CI, then update only bike-weather-preview/frontend-deployment.yaml in homelab, commit and push.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Tag backend minor",
+      "expected_output": "Phase 1 only: compute next minor version for backend, create annotated git tag, push to origin, wait for GitHub Actions build to complete. Do not update homelab.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Deploy to production",
+      "expected_output": "Phase 2 only: compare latest stable tags to production deployment YAMLs in homelab/apps/bike-weather/. Update any that differ, commit and push. Skip preview environment.",
+      "files": []
+    }
+  ]
+}

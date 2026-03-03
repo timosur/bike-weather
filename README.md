@@ -42,7 +42,6 @@ Run `make help` to see all available targets.
 ├── backend/         # FastAPI REST API
 ├── agent/           # LLM product scraper agent
 ├── scripts/         # Setup & utility scripts
-├── product-plan/    # Design docs & implementation plan
 └── docker-compose.yml
 ```
 
