@@ -87,6 +87,9 @@ class DayForecastSchema(BaseModel):
     hourlyForecast: list[HourlyWeatherSchema] = []
     rideStartHour: int = 8
     rideEndHour: int = 10
+    estimatedDurationMinutes: int = 120
+    averageSpeedKmh: float = 20.0
+    weatherSummary: str = ""
     clothingItems: list[ClothingItemSchema]
     equipment: list[EquipmentItemSchema]
     tips: list[TipSchema] = []

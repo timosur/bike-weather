@@ -16,6 +16,7 @@ interface WeatherPanelProps {
   hourlyForecast?: HourlyWeather[]
   rideStartHour?: number
   rideEndHour?: number
+  weatherSummary?: string
 }
 
 interface WeatherStatProps {
@@ -42,7 +43,7 @@ function WeatherStat({ icon, label, value, subValue }: WeatherStatProps) {
   )
 }
 
-export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHour }: WeatherPanelProps) {
+export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHour, weatherSummary }: WeatherPanelProps) {
   const { t } = useTranslation()
 
   return (
@@ -74,6 +75,18 @@ export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHo
           </div>
         </div>
       </div>
+
+      {/* Weather summary for ride window */}
+      {weatherSummary && (
+        <div className="px-5 py-3 border-b border-stone-200 dark:border-stone-800">
+          <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
+            {t('report.weather.summary')}
+          </p>
+          <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+            {weatherSummary}
+          </p>
+        </div>
+      )}
 
       {/* Hourly forecast chart */}
       {hourlyForecast && hourlyForecast.length > 0 && (

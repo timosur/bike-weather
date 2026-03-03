@@ -12,6 +12,7 @@ import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { TipsList } from './TipsList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
+import { RideWindowInfo } from './RideWindowInfo'
 import { RouteMap } from './RouteMap'
 import { WindAnalysis } from './WindAnalysis'
 
@@ -226,6 +227,16 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             >
               {t('report.section.weather')}
             </h2>
+            {activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
+              <div className="mb-3">
+                <RideWindowInfo
+                  rideStartHour={activeDay.rideStartHour}
+                  rideEndHour={activeDay.rideEndHour}
+                  estimatedDurationMinutes={activeDay.estimatedDurationMinutes}
+                  averageSpeedKmh={activeDay.averageSpeedKmh}
+                />
+              </div>
+            )}
             <MultiDayWeatherSummary days={report.days} />
           </section>
 
@@ -315,11 +326,22 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             >
               {t('report.section.weather')}
             </h2>
+            {activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
+              <div className="mb-3">
+                <RideWindowInfo
+                  rideStartHour={activeDay.rideStartHour}
+                  rideEndHour={activeDay.rideEndHour}
+                  estimatedDurationMinutes={activeDay.estimatedDurationMinutes}
+                  averageSpeedKmh={activeDay.averageSpeedKmh}
+                />
+              </div>
+            )}
             <WeatherPanel
               weather={activeDay.weather}
               hourlyForecast={activeDay.hourlyForecast}
               rideStartHour={activeDay.rideStartHour}
               rideEndHour={activeDay.rideEndHour}
+              weatherSummary={activeDay.weatherSummary}
             />
           </section>
 

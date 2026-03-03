@@ -2,6 +2,8 @@ import { useMemo, useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sunrise, Sunset } from 'lucide-react'
 import type { HourlyWeather } from './types'
+import { WeatherIcon } from './WeatherIcon'
+import type { WeatherIconType } from './types'
 
 interface WeatherChartProps {
   hourlyForecast: HourlyWeather[]
@@ -13,8 +15,8 @@ interface WeatherChartProps {
 
 // Chart layout constants
 const CHART_WIDTH = 720
-const CHART_HEIGHT = 200
-const PADDING = { top: 20, right: 45, bottom: 28, left: 40 }
+const CHART_HEIGHT = 220
+const PADDING = { top: 20, right: 45, bottom: 48, left: 40 }
 const PLOT_W = CHART_WIDTH - PADDING.left - PADDING.right
 const PLOT_H = CHART_HEIGHT - PADDING.top - PADDING.bottom
 
@@ -140,12 +142,19 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
       }
     }
 
+    // Icons at 3-hour x-axis ticks
+    const iconTicks = xTicks.map(h => {
+      const idx = hours.indexOf(h)
+      const icon = idx >= 0 ? hourlyForecast[idx].icon : undefined
+      return { hour: h, x: xScale(h), icon }
+    }).filter(t => t.icon != null) as { hour: number; x: number; icon: WeatherIconType }[]
+
     return {
       hours, temps, feelsLike, precip, wind, isDay,
       tempMin, tempMax, minHour, maxHour,
       xScale, tempScale, precipScale, windScale,
       tempPoints, feelsPoints, precipPoints, windPoints,
-      rideX0, rideX1, tempTicks, xTicks,
+      rideX0, rideX1, tempTicks, xTicks, iconTicks,
       lightZones, sunriseH, sunsetH,
     }
   }, [hourlyForecast, rideStartHour, rideEndHour, sunrise, sunset])
@@ -513,6 +522,22 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
             >
               {h >= 24 ? `${h - 24}:00` : `${h}:00`}
             </text>
+          ))}
+
+          {/* Weather icons below x-axis */}
+          {data.iconTicks.map(({ hour, x, icon }) => (
+            <foreignObject
+              key={`icon-${hour}`}
+              x={x - 8}
+              y={PADDING.top + PLOT_H + 22}
+              width={16}
+              height={16}
+              style={{ overflow: 'visible' }}
+            >
+              <div className="flex items-center justify-center text-stone-500 dark:text-stone-400">
+                <WeatherIcon icon={icon} className="w-3.5 h-3.5" />
+              </div>
+            </foreignObject>
           ))}
 
           {/* Right-side axis label for precipitation */}

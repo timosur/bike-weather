@@ -308,7 +308,8 @@
         "sunset": "Sunset",
         "lightsNeeded": "Lights needed",
         "twilight": "Night / twilight"
-      }
+      },
+      "summary": "Weather during your ride"
     },
     "multiDay": {
       "weatherTimeline": "Weather Timeline",
@@ -345,7 +346,16 @@
       }
     },
     "routeSaved": "Route saved",
-    "routeSaveError": "Could not save route"
+    "routeSaveError": "Could not save route",
+    "rideWindow": {
+      "title": "Your Ride",
+      "startTime": "Start",
+      "endTime": "End",
+      "duration": "Duration",
+      "avgSpeed": "Avg. Speed",
+      "hours": "{{h}}h",
+      "hoursMinutes": "{{h}}h {{m}}min"
+    }
   },
   "products": {
     "heading": "Products",

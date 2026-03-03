@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from app.rules.clothing_rules import get_clothing_items
 from app.rules.condition import compute_condition
 from app.rules.equipment_rules import get_equipment_items
-from app.rules.speed_estimation import resolve_duration_minutes
+from app.rules.speed_estimation import resolve_duration_minutes, get_average_speed
 from app.rules.tips_rules import get_tips
 from app.rules.translations import (
     BIKE_LABELS,
@@ -39,7 +39,7 @@ from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
 from app.services.routing import routing_service
 from app.services.route_waypoints import sample_waypoints
-from app.services.wind_analysis import analyze_wind
+from app.services.wind_analysis import analyze_wind, wind_exposure_factor
 from app.services.weather import (
     HourlyForecast,
     HourlyWeatherWindow,
@@ -54,6 +54,69 @@ logger = logging.getLogger(__name__)
 
 # Condition severity ordering for "worst of" calculation
 _CONDITION_ORDER = {"ideal": 0, "good": 1, "caution": 2, "not-recommended": 3}
+
+# Weather summary templates keyed by locale
+_SUMMARY_TEMPLATES: dict[str, dict[str, str]] = {
+    "de": {
+        "base": "{description}, {temp_range}°C (gefühlt {feels_like}°C).",
+        "wind_light": "Leichter Wind ({wind_speed} km/h) aus {wind_dir}.",
+        "wind_moderate": "Mäßiger Wind ({wind_speed} km/h) aus {wind_dir}.",
+        "wind_strong": "Starker Wind ({wind_speed} km/h) aus {wind_dir}.",
+        "precip_none": "Kein Regen erwartet.",
+        "precip_low": "Geringe Regenwahrscheinlichkeit ({precip}%).",
+        "precip_moderate": "Möglicher Regen ({precip}%).",
+        "precip_high": "Hohe Regenwahrscheinlichkeit ({precip}%).",
+    },
+    "en": {
+        "base": "{description}, {temp_range}°C (feels like {feels_like}°C).",
+        "wind_light": "Light wind ({wind_speed} km/h) from {wind_dir}.",
+        "wind_moderate": "Moderate wind ({wind_speed} km/h) from {wind_dir}.",
+        "wind_strong": "Strong wind ({wind_speed} km/h) from {wind_dir}.",
+        "precip_none": "No rain expected.",
+        "precip_low": "Low chance of rain ({precip}%).",
+        "precip_moderate": "Possible rain ({precip}%).",
+        "precip_high": "High chance of rain ({precip}%).",
+    },
+}
+
+
+def _build_weather_summary(forecast: WeatherForecast, locale: str = "de") -> str:
+    """Build a short natural-language summary of ride-window weather."""
+    tpl = _SUMMARY_TEMPLATES.get(locale, _SUMMARY_TEMPLATES["en"])
+
+    temp_range = (
+        f"{forecast.temp_min:.0f}–{forecast.temp_max:.0f}"
+        if round(forecast.temp_min) != round(forecast.temp_max)
+        else f"{forecast.temp_min:.0f}"
+    )
+
+    parts = [
+        tpl["base"].format(
+            description=forecast.description,
+            temp_range=temp_range,
+            feels_like=f"{forecast.temp_feels_like:.0f}",
+        )
+    ]
+
+    # Wind
+    ws = forecast.wind_speed
+    wind_key = "wind_light" if ws < 20 else "wind_moderate" if ws < 40 else "wind_strong"
+    parts.append(
+        tpl[wind_key].format(wind_speed=f"{ws:.0f}", wind_dir=forecast.wind_direction)
+    )
+
+    # Precipitation
+    pp = forecast.precipitation_probability
+    if pp < 10:
+        parts.append(tpl["precip_none"])
+    elif pp < 30:
+        parts.append(tpl["precip_low"].format(precip=f"{pp:.0f}"))
+    elif pp < 60:
+        parts.append(tpl["precip_moderate"].format(precip=f"{pp:.0f}"))
+    else:
+        parts.append(tpl["precip_high"].format(precip=f"{pp:.0f}"))
+
+    return " ".join(parts)
 
 
 def _worst_condition(conditions: list[str]) -> str:
@@ -441,6 +504,15 @@ async def build_report(
         gravel_style=ride_input.gravelStyle,
     )
 
+    # Resolve average speed for display
+    avg_speed = (
+        ride_input.averageSpeedKmh
+        if ride_input.averageSpeedKmh and ride_input.averageSpeedKmh > 0
+        else get_average_speed(
+            ride_input.bikeType, ride_input.intensity, ride_input.gravelStyle
+        )
+    )
+
     # Parse start hour from startTime
     try:
         start_hour = int(ride_input.startTime.split(":")[0])
@@ -451,6 +523,9 @@ async def build_report(
     start_date = datetime.strptime(ride_input.startDate, "%Y-%m-%d")
     # (location_name, lat, lon, date, ride_start_hour, ride_end_hour)
     day_locations: list[tuple[str, float, float, str, int, int]] = []
+    # Per-day duration (minutes) and speed (km/h) parallel to day_locations
+    day_durations: list[int] = []
+    day_speeds: list[float] = []
 
     if ride_input.isMultiDay and ride_input.dayStops:
         # Day 1: start location
@@ -465,6 +540,8 @@ async def build_report(
                 end_hour_day1,
             )
         )
+        day_durations.append(duration_minutes)
+        day_speeds.append(avg_speed)
         # Subsequent days: day stops — use per-stop date/time when provided
         for i, stop in enumerate(ride_input.dayStops):
             # Date: use explicit per-stop date, or fallback to start + (i+1) days
@@ -504,6 +581,8 @@ async def build_report(
                     day_end_hour,
                 )
             )
+            day_durations.append(day_duration)
+            day_speeds.append(avg_speed)
     else:
         # Single-day ride
         end_hour = min(start_hour + math.ceil(duration_minutes / 60), 23)
@@ -517,6 +596,8 @@ async def build_report(
                 end_hour,
             )
         )
+        day_durations.append(duration_minutes)
+        day_speeds.append(avg_speed)
 
     # Fetch weather and build days
     day_forecasts: list[DayForecastSchema] = []
@@ -599,12 +680,21 @@ async def build_report(
             peak_wind_hour = max(ride_hours, key=lambda h: h.wind_speed)
             wind_dir = peak_wind_hour.wind_direction
 
+            # Compute wind exposure factor for this day's ride segment
+            day_duration = (ride_end_h - ride_start_h) * 60
+            day_distance = ride_input.distanceKm
+            if ride_input.isMultiDay and ride_input.dayStops and day_idx > 0:
+                stop = ride_input.dayStops[day_idx - 1]
+                day_distance = stop.plannedKm if stop.plannedKm else ride_input.distanceKm
+            exposure = wind_exposure_factor(day_duration, day_distance)
+            effective_wind = round(worst_wind * exposure, 1)
+
             forecast = WeatherForecast(
                 temp_min=round(min(temps), 1),
                 temp_max=round(max(temps), 1),
                 temp_feels_like=worst_feels,
                 precipitation_probability=worst_precip,
-                wind_speed=worst_wind,
+                wind_speed=effective_wind,
                 wind_direction=wind_dir,
                 humidity=worst_humidity,
                 uv_index=full_day_window.summary.uv_index,
@@ -614,8 +704,11 @@ async def build_report(
                 icon=wmo_to_icon(worst_wcode),
                 description=wmo_to_description(worst_wcode, locale),
             )
+            # Keep raw wind for display, use effective wind for rules
+            raw_wind_speed = worst_wind
         else:
             forecast = full_day_window.summary
+            raw_wind_speed = forecast.wind_speed
 
         condition, reasons = compute_condition(forecast)
         conditions.append(condition)
@@ -639,9 +732,18 @@ async def build_report(
             gravel_style=ride_input.gravelStyle,
         )
 
-        tips = get_tips(forecast, locale)
+        tips = get_tips(
+            forecast,
+            locale,
+            duration_minutes=duration_minutes,
+            distance_km=ride_input.distanceKm,
+        )
         day_tip_schemas = _tips_to_schemas(tips)
         per_day_tips.append(day_tip_schemas)
+
+        # Build weather display schema with raw (measured) wind speed
+        display_weather = _forecast_to_weather_schema(forecast, locale)
+        display_weather.windSpeed = raw_wind_speed
 
         day_label: str
         if len(day_locations) == 1:
@@ -657,10 +759,13 @@ async def build_report(
                 location=location_name,
                 condition=condition,
                 conditionReasons=_format_condition_reasons(reasons, locale),
-                weather=_forecast_to_weather_schema(forecast, locale),
+                weather=display_weather,
                 hourlyForecast=_hourly_to_schemas(chart_hours, date_str),
                 rideStartHour=ride_start_h,
                 rideEndHour=ride_end_h,
+                estimatedDurationMinutes=day_durations[day_idx],
+                averageSpeedKmh=round(day_speeds[day_idx], 1),
+                weatherSummary=_build_weather_summary(forecast, locale),
                 clothingItems=_clothing_dicts_to_schemas(clothing),
                 equipment=_equipment_dicts_to_schemas(equipment),
                 tips=day_tip_schemas,

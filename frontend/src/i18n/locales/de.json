@@ -308,7 +308,8 @@
         "sunset": "Sonnenuntergang",
         "lightsNeeded": "Licht benötigt",
         "twilight": "Nacht / Dämmerung"
-      }
+      },
+      "summary": "Wetter während deiner Fahrt"
     },
     "multiDay": {
       "weatherTimeline": "Wetter-Zeitstrahl",
@@ -345,7 +346,16 @@
       }
     },
     "routeSaved": "Route gespeichert",
-    "routeSaveError": "Route konnte nicht gespeichert werden"
+    "routeSaveError": "Route konnte nicht gespeichert werden",
+    "rideWindow": {
+      "title": "Deine Fahrt",
+      "startTime": "Start",
+      "endTime": "Ende",
+      "duration": "Dauer",
+      "avgSpeed": "Ø Geschwindigkeit",
+      "hours": "{{h}}h",
+      "hoursMinutes": "{{h}}h {{m}}min"
+    }
   },
   "products": {
     "heading": "Produkte",
