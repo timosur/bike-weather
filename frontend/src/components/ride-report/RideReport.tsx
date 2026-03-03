@@ -1,13 +1,11 @@
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Share2, Bookmark, BookmarkCheck, MapPin, Gauge, Route, PenLine, Plus, Save, Check, Loader2 } from 'lucide-react'
+import { MapPin, Gauge, Route } from 'lucide-react'
 import type { RideReportProps } from './types'
 import type { Product } from '../product-recommendations/types'
 import { ConditionBadge } from './ConditionBadge'
-import { DayTabs } from './DayTabs'
 import { WeatherPanel } from './WeatherPanel'
 import { MultiDayWeatherChart } from './MultiDayWeatherChart'
-import { MultiDayWeatherSummary } from './MultiDayWeatherSummary'
 import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { TipsList } from './TipsList'
@@ -15,15 +13,15 @@ import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 import { RideWindowInfo } from './RideWindowInfo'
 import { RouteMap } from './RouteMap'
 import { WindAnalysis } from './WindAnalysis'
+import { StickyActionBar } from './StickyActionBar'
+import { DayTimeline } from './DayTimeline'
 
-export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
+export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
-  const [activeDayId, setActiveDayId] = useState(report.days[0]?.id ?? '')
   const chartScrollRef = useRef<HTMLDivElement | null>(null)
 
   const isMultiDay = report.days.length > 1
-
-  const activeDay = report.days.find((d) => d.id === activeDayId) ?? report.days[0]
+  const activeDay = report.days[0]
 
   const shopMap = useMemo(
     () => (shops ? new Map(shops.map((s) => [s.id, s])) : new Map()),
@@ -38,6 +36,11 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
     ? (report.mergedEquipment ?? activeDay?.equipment ?? [])
     : (activeDay?.equipment ?? [])
 
+  // Tips: merged for multi-day, per-day for single
+  const tips = isMultiDay
+    ? (report.tips ?? [])
+    : (activeDay?.tips ?? [])
+
   function findItemProduct(itemIcon: string): Product | undefined {
     return products?.find((p) => p.matchesIcon === itemIcon)
   }
@@ -46,369 +49,192 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
     chartScrollRef.current = el
   }, [])
 
-  function handleDaySelect(dayId: string) {
-    setActiveDayId(dayId)
-    onDaySelect?.(dayId)
-
-    // Multi-day: scroll chart to the selected day
-    if (isMultiDay && chartScrollRef.current) {
-      const dayMarker = chartScrollRef.current.querySelector(`[data-day-id="${dayId}"]`)
-      if (dayMarker) {
-        const container = chartScrollRef.current
-        const markerRect = dayMarker.getBoundingClientRect()
-        const containerRect = container.getBoundingClientRect()
-        const scrollLeft = container.scrollLeft + (markerRect.left - containerRect.left) - 20
-        container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' })
-      }
-    }
-  }
-
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
-        {/* Left column: title, meta, buttons */}
-        <div className="min-w-0">
-          <h1
-            className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight"
-            style={{ fontFamily: 'Outfit, sans-serif' }}
-          >
-            {report.rideName}
-          </h1>
-          <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-stone-500 dark:text-stone-400">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {report.startLocation}
+    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24">
+      {/* ── 1. HEADER ── */}
+      <div>
+        <h1
+          className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          {report.rideName}
+        </h1>
+        <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-stone-500 dark:text-stone-400">
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5" strokeWidth={1.5} />
+            {report.startLocation}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Route className="w-3.5 h-3.5" strokeWidth={1.5} />
+            {report.totalDistance} {report.distanceUnit}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Gauge className="w-3.5 h-3.5" strokeWidth={1.5} />
+            {report.ridingStyle}
+          </span>
+          {isMultiDay && (
+            <span className="text-stone-400 dark:text-stone-500">
+              {t('report.days', { count: report.days.length })}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Route className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {report.totalDistance} {report.distanceUnit}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Gauge className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {report.ridingStyle}
-            </span>
-            {isMultiDay && (
-              <span className="text-stone-400 dark:text-stone-500">
-                {t('report.days', { count: report.days.length })}
-              </span>
-            )}
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-2 mt-3">
-            {onEditRide && (
-              <button
-                onClick={onEditRide}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-              >
-                <PenLine className="w-4 h-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">{t('planner.editRide')}</span>
-              </button>
-            )}
-            {onSaveChanges && (
-              <button
-                onClick={onSaveChanges}
-                disabled={saveChangesLoading || !hasUnsavedChanges}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!hasUnsavedChanges
-                  ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-default'
-                  : saveChangesLoading
-                    ? 'text-white bg-emerald-600/70 cursor-wait'
-                    : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-                  }`}
-              >
-                {saveChangesLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
-                ) : hasUnsavedChanges ? (
-                  <Save className="w-4 h-4" strokeWidth={1.5} />
-                ) : (
-                  <Check className="w-4 h-4" strokeWidth={1.5} />
-                )}
-                <span className="hidden sm:inline">
-                  {saveChangesLoading
-                    ? t('report.savingChanges')
-                    : hasUnsavedChanges
-                      ? t('report.saveChanges')
-                      : t('report.noChanges')}
-                </span>
-              </button>
-            )}
-            {onNewRide && (
-              <button
-                onClick={onNewRide}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">{t('report.newRide')}</span>
-              </button>
-            )}
-            {onShare && (
-              <button
-                onClick={() => onShare?.()}
-                disabled={shareLoading}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${shareLoading ? 'text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-800 cursor-wait' : 'text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700'}`}
-              >
-                <Share2 className="w-4 h-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">{shareLoading ? t('report.sharing') : t('report.share')}</span>
-              </button>
-            )}
-            {onSaveRoute && (
-              <button
-                onClick={() => onSaveRoute()}
-                disabled={routeSaving || routeSaved}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${routeSaved
-                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 cursor-default'
-                  : routeSaving
-                    ? 'text-white bg-emerald-600/70 cursor-wait'
-                    : 'text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-                  }`}
-              >
-                {routeSaved ? (
-                  <BookmarkCheck className="w-4 h-4" strokeWidth={1.5} />
-                ) : (
-                  <Bookmark className="w-4 h-4" strokeWidth={1.5} />
-                )}
-                <span className="hidden sm:inline">
-                  {routeSaved ? t('report.saved') : routeSaving ? t('report.saving') : t('report.save')}
-                </span>
-              </button>
-            )}
-            {!onSaveRoute && onLoginToSave && (
-              <button
-                onClick={() => onLoginToSave()}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-              >
-                <Bookmark className="w-4 h-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">{t('report.loginToSave')}</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Right column: condition badge */}
-        <div className="md:min-w-[240px] md:max-w-[280px]">
-          <ConditionBadge condition={report.overallCondition} reasons={report.overallConditionReasons} />
+          )}
         </div>
       </div>
 
-      {/* Route Map */}
-      {report.routeGeometry && report.destinationLocation && (
-        <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm relative z-0">
-          <RouteMap
-            startLocation={{ 
-              lat: report.routeGeometry[0][0], 
-              lon: report.routeGeometry[0][1], 
-              label: report.startLocation 
-            }}
-            destinationLocation={{
-              lat: report.routeGeometry[report.routeGeometry.length - 1][0],
-              lon: report.routeGeometry[report.routeGeometry.length - 1][1],
-              label: report.destinationLocation
-            }}
-            routeGeometry={report.routeGeometry}
-            routeSegments={report.routeSegments}
-            waypoints={report.waypoints}
-            className="w-full h-full"
-          />
-        </div>
+      {/* ── 2. CONDITION BADGE (full-width) ── */}
+      <ConditionBadge condition={report.overallCondition} reasons={report.overallConditionReasons} />
+
+      {/* ── 3. RIDE INFO ── */}
+      {!isMultiDay && activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
+        <RideWindowInfo
+          rideStartHour={activeDay.rideStartHour}
+          rideEndHour={activeDay.rideEndHour}
+          estimatedDurationMinutes={activeDay.estimatedDurationMinutes}
+          averageSpeedKmh={activeDay.averageSpeedKmh}
+        />
       )}
 
-      {/* Day Tabs — as jump-links for multi-day, tab switch for single-day */}
-      <DayTabs days={report.days} activeDayId={activeDayId} onDaySelect={handleDaySelect} />
-
-      {/* --- MULTI-DAY LAYOUT --- */}
+      {/* ── 3b. MULTI-DAY TIMELINE ── */}
       {isMultiDay && (
-        <div className="space-y-6">
-          {/* Weather summary across all days */}
-          <section>
-            <h2
-              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.section.weather')}
-            </h2>
-            {activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
-              <div className="mb-3">
-                <RideWindowInfo
-                  rideStartHour={activeDay.rideStartHour}
-                  rideEndHour={activeDay.rideEndHour}
-                  estimatedDurationMinutes={activeDay.estimatedDurationMinutes}
-                  averageSpeedKmh={activeDay.averageSpeedKmh}
-                />
-              </div>
-            )}
-            <MultiDayWeatherSummary days={report.days} />
-          </section>
-
-          {/* Wind Analysis */}
-          {report.waypoints && report.waypoints.length > 0 && (
-            <section>
-              <WindAnalysis waypoints={report.waypoints} />
-            </section>
-          )}
-
-          {/* Continuous weather chart across all days */}
-          <section>
-            <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
-              <MultiDayWeatherChart
-                days={report.days}
-                onChartRef={handleChartRef}
-              />
-            </div>
-          </section>
-
-          {/* Merged packing list */}
-          <section>
-            <h2
-              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.section.packingList')}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {clothingItems.map((item) => {
-                const itemProduct = disclosure ? findItemProduct(item.icon) : undefined
-                const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
-                return (
-                  <ClothingItemCard
-                    key={item.id}
-                    item={item}
-                    productLink={
-                      itemProduct && shop && disclosure ? (
-                        <InlineProductLink
-                          product={itemProduct}
-                          shop={shop}
-                          disclosure={disclosure}
-                          onProductClick={onProductClick}
-                        />
-                      ) : undefined
-                    }
-                  />
-                )
-              })}
-            </div>
-          </section>
-
-          {/* Merged equipment */}
-          <section>
-            <h2
-              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.section.equipment')}
-            </h2>
-            <EquipmentList items={equipmentItems} />
-          </section>
-
-          {/* Tips & Safety */}
-          {report.tips && report.tips.length > 0 && (
-            <section>
-              <h2
-                className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-                style={{ fontFamily: 'Outfit, sans-serif' }}
-              >
-                {t('report.section.tips')}
-              </h2>
-              <TipsList tips={report.tips} />
-            </section>
-          )}
-        </div>
+        <section>
+          <h2
+            className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+            style={{ fontFamily: 'Outfit, sans-serif' }}
+          >
+            {t('report.days', { count: report.days.length })}
+          </h2>
+          <DayTimeline days={report.days} />
+        </section>
       )}
 
-      {/* --- SINGLE-DAY LAYOUT (unchanged) --- */}
-      {!isMultiDay && activeDay && (
-        <div className="space-y-6">
-          {/* Weather */}
-          <section>
-            <h2
-              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.section.weather')}
-            </h2>
-            {activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
-              <div className="mb-3">
-                <RideWindowInfo
-                  rideStartHour={activeDay.rideStartHour}
-                  rideEndHour={activeDay.rideEndHour}
-                  estimatedDurationMinutes={activeDay.estimatedDurationMinutes}
-                  averageSpeedKmh={activeDay.averageSpeedKmh}
-                />
-              </div>
-            )}
-            <WeatherPanel
-              weather={activeDay.weather}
-              hourlyForecast={activeDay.hourlyForecast}
-              rideStartHour={activeDay.rideStartHour}
-              rideEndHour={activeDay.rideEndHour}
-              weatherSummary={activeDay.weatherSummary}
+      {/* ── 4. TIPS & SAFETY (moved up) ── */}
+      {tips.length > 0 && (
+        <section>
+          <h2
+            className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+            style={{ fontFamily: 'Outfit, sans-serif' }}
+          >
+            {t('report.section.tips')}
+          </h2>
+          <TipsList tips={tips} />
+        </section>
+      )}
+
+      {/* ── 5. ROUTE MAP + WIND ANALYSIS ── */}
+      {report.routeGeometry && report.destinationLocation && (
+        <section className="space-y-4">
+          <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm relative z-0">
+            <RouteMap
+              startLocation={{
+                lat: report.routeGeometry[0][0],
+                lon: report.routeGeometry[0][1],
+                label: report.startLocation
+              }}
+              destinationLocation={{
+                lat: report.routeGeometry[report.routeGeometry.length - 1][0],
+                lon: report.routeGeometry[report.routeGeometry.length - 1][1],
+                label: report.destinationLocation
+              }}
+              routeGeometry={report.routeGeometry}
+              routeSegments={report.routeSegments}
+              waypoints={report.waypoints}
+              className="w-full h-full"
             />
-          </section>
-
-          {/* Wind Analysis */}
+          </div>
           {report.waypoints && report.waypoints.length > 0 && (
-            <section>
-              <WindAnalysis waypoints={report.waypoints} />
-            </section>
+            <WindAnalysis waypoints={report.waypoints} />
           )}
-
-          {/* Clothing */}
-          <section>
-            <h2
-              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.section.clothing')}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {activeDay.clothingItems.map((item) => {
-                const itemProduct = disclosure ? findItemProduct(item.icon) : undefined
-                const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
-                return (
-                  <ClothingItemCard
-                    key={item.id}
-                    item={item}
-                    productLink={
-                      itemProduct && shop && disclosure ? (
-                        <InlineProductLink
-                          product={itemProduct}
-                          shop={shop}
-                          disclosure={disclosure}
-                          onProductClick={onProductClick}
-                        />
-                      ) : undefined
-                    }
-                  />
-                )
-              })}
-            </div>
-          </section>
-
-          {/* Equipment */}
-          <section>
-            <h2
-              className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {t('report.section.equipment')}
-            </h2>
-            <EquipmentList items={activeDay.equipment} />
-          </section>
-
-          {/* Tips & Safety */}
-          {activeDay.tips && activeDay.tips.length > 0 && (
-            <section>
-              <h2
-                className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
-                style={{ fontFamily: 'Outfit, sans-serif' }}
-              >
-                {t('report.section.tips')}
-              </h2>
-              <TipsList tips={activeDay.tips} />
-            </section>
-          )}
-        </div>
+        </section>
       )}
+      {/* Wind analysis without route map (no destination but has waypoints) */}
+      {!(report.routeGeometry && report.destinationLocation) && report.waypoints && report.waypoints.length > 0 && (
+        <section>
+          <WindAnalysis waypoints={report.waypoints} />
+        </section>
+      )}
+
+      {/* ── 6. WEATHER ── */}
+      <section>
+        <h2
+          className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          {t('report.section.weather')}
+        </h2>
+        {isMultiDay ? (
+          <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
+            <MultiDayWeatherChart
+              days={report.days}
+              onChartRef={handleChartRef}
+            />
+          </div>
+        ) : activeDay && (
+          <WeatherPanel
+            weather={activeDay.weather}
+            hourlyForecast={activeDay.hourlyForecast}
+            rideStartHour={activeDay.rideStartHour}
+            rideEndHour={activeDay.rideEndHour}
+            weatherSummary={activeDay.weatherSummary}
+          />
+        )}
+      </section>
+
+      {/* ── 7. CLOTHING ── */}
+      <section>
+        <h2
+          className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          {isMultiDay ? t('report.section.packingList') : t('report.section.clothing')}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {clothingItems.map((item) => {
+            const itemProduct = disclosure ? findItemProduct(item.icon) : undefined
+            const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
+            return (
+              <ClothingItemCard
+                key={item.id}
+                item={item}
+                productLink={
+                  itemProduct && shop && disclosure ? (
+                    <InlineProductLink
+                      product={itemProduct}
+                      shop={shop}
+                      disclosure={disclosure}
+                      onProductClick={onProductClick}
+                    />
+                  ) : undefined
+                }
+              />
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── 8. EQUIPMENT ── */}
+      <section>
+        <h2
+          className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          {t('report.section.equipment')}
+        </h2>
+        <EquipmentList items={equipmentItems} />
+      </section>
+
+      {/* ── 9. STICKY ACTION BAR ── */}
+      <StickyActionBar
+        onEditRide={onEditRide}
+        onNewRide={onNewRide}
+        onShare={onShare}
+        shareLoading={shareLoading}
+        onSaveRoute={onSaveRoute}
+        routeSaving={routeSaving}
+        routeSaved={routeSaved}
+        onLoginToSave={onLoginToSave}
+        onSaveChanges={onSaveChanges}
+        saveChangesLoading={saveChangesLoading}
+        hasUnsavedChanges={hasUnsavedChanges}
+      />
     </div>
   )
 }
