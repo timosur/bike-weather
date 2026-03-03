@@ -1,8 +1,8 @@
 - Feature: Add back products with really proper products and refferal links to amazon in place
 - Feature: Add web insights via Plausible (needs to be hosted in my cluster, too)
 - Chore: Check for e2e tests and maybe just record the most important flows
-- Idea: Add auto sync job for preview release in ArgoCD to release fast?
 - Feature: GPX Import for real route
 - Feature: Import from komoot or strava route
 - Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
 - Docs: Create a product vision, maybe as part of the documentation
+- Chore: Add Grafana Faro + Alloy for detailed Frontend Metrics
