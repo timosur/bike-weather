@@ -10,8 +10,10 @@ class RouteWaypoint:
     distance_from_start_km: float
     bearing: float  # Degrees 0-360, 0=N, 90=E
     geometry_index: int  # Index in the original route geometry
-    segment_start_km: float | None = None  # Start of the direction segment
-    segment_end_km: float | None = None  # End of the direction segment
+    segment_start_km: float | None = None
+    segment_end_km: float | None = None
+    segment_start_geom_idx: int | None = None
+    segment_end_geom_idx: int | None = None
 
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -291,6 +293,8 @@ def sample_waypoints_by_direction(
                 geometry_index=mid_geom_idx,
                 segment_start_km=round(seg.start_km, 1),
                 segment_end_km=round(seg.end_km, 1),
+                segment_start_geom_idx=seg.start_geom_idx,
+                segment_end_geom_idx=seg.geom_indices[-1] if seg.geom_indices else seg.start_geom_idx,
             )
         )
 

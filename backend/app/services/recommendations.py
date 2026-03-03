@@ -464,12 +464,19 @@ async def build_report(
                             headwindComponent=wind.headwind_component,
                             segmentStartKm=wp.segment_start_km,
                             segmentEndKm=wp.segment_end_km,
+                            segmentDurationMinutes=(
+                                round((wp.segment_end_km - wp.segment_start_km) / avg_speed * 60, 1)
+                                if wp.segment_start_km is not None and wp.segment_end_km is not None and avg_speed > 0
+                                else None
+                            ),
                         )
                     )
                     
-                    # Create segment from this waypoint to the next
-                    start_idx = wp.geometry_index
-                    end_idx = wp_results[i + 1]["wp"].geometry_index if i < len(wp_results) - 1 else len(route_geometry)
+                    # Create segment using the segment's boundary geometry indices
+                    start_idx = wp.segment_start_geom_idx if wp.segment_start_geom_idx is not None else wp.geometry_index
+                    end_idx = wp.segment_end_geom_idx if wp.segment_end_geom_idx is not None else (
+                        wp_results[i + 1]["wp"].geometry_index if i < len(wp_results) - 1 else len(route_geometry) - 1
+                    )
                     segment_geom = [
                         list(pt) for pt in route_geometry[start_idx : end_idx + 1]
                     ]
