@@ -38,7 +38,7 @@ from app.schemas.report import (
 from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
 from app.services.routing import routing_service
-from app.services.route_waypoints import sample_waypoints_by_direction
+from app.services.route_waypoints import sample_waypoints_by_direction, sample_weather_points
 from app.services.wind_analysis import analyze_wind, wind_exposure_factor
 from app.services.weather import (
     HourlyForecast,
@@ -349,6 +349,60 @@ def _merge_equipment_across_days(
     return merged
 
 
+def _build_route_chart_hours(
+    route_weather: list[tuple],
+    total_distance_km: float,
+    avg_speed_kmh: float,
+    ride_start_hour: int,
+    chart_start: int,
+    chart_end: int,
+) -> list[HourlyForecast]:
+    """For each chart hour, pick weather from the route point closest to rider position."""
+    if not route_weather or avg_speed_kmh <= 0:
+        return []
+
+    ride_duration_hours = total_distance_km / avg_speed_kmh
+    result = []
+    for hour in range(chart_start, min(chart_end, 23) + 1):
+        if hour < ride_start_hour:
+            target_dist = 0.0
+        elif hour >= ride_start_hour + ride_duration_hours:
+            target_dist = total_distance_km
+        else:
+            hours_riding = hour - ride_start_hour
+            target_dist = min(hours_riding * avg_speed_kmh, total_distance_km)
+
+        _closest_wp, closest_window = min(
+            route_weather,
+            key=lambda pw: abs(pw[0].distance_from_start_km - target_dist),
+        )
+
+        hour_str = f"{hour}:00"
+        hour_weather = next(
+            (h for h in closest_window.hours if h.hour == hour_str),
+            None,
+        )
+        if hour_weather:
+            result.append(hour_weather)
+
+    return result
+
+
+def _collect_route_ride_hours(
+    route_weather: list[tuple],
+    ride_start_h: int,
+    ride_end_h: int,
+) -> list[HourlyForecast]:
+    """Collect ride-window hours from ALL route sample points for worst-case aggregation."""
+    all_hours: list[HourlyForecast] = []
+    for _wp, window in route_weather:
+        for h in window.hours:
+            hour_val = int(h.hour.split(":")[0])
+            if ride_start_h <= hour_val <= ride_end_h:
+                all_hours.append(h)
+    return all_hours
+
+
 async def build_report(
     ride_input: RideInputSchema,
     ws: WeatherService | None = None,
@@ -503,6 +557,14 @@ async def build_report(
                 logger.error("Routing failed: %s", e)
                 # Continue without routing (soft failure)
 
+    # Pre-compute route weather sample points (used for route-aware forecasts)
+    route_sample_points = None
+    if route_geometry and ride_input.distanceKm and ride_input.distanceKm > 0:
+        route_sample_points = sample_weather_points(
+            [(pt[0], pt[1]) for pt in route_geometry],
+            ride_input.distanceKm,
+        )
+
     # Resolve ride duration (explicit > avg speed + distance > auto-estimated > default 2h)
     duration_minutes = resolve_duration_minutes(
         ride_input.durationMinutes,
@@ -622,17 +684,48 @@ async def build_report(
         ride_start_h,
         ride_end_h,
     ) in enumerate(day_locations):
-        # Fetch full day (0-23) for the chart
+        # Fetch full day (0-23) at start/stop location (always needed for sunrise/sunset/UV)
         full_day_window = await ws.fetch_hourly_forecast(
             day_lat, day_lon, date_str, 0, 23, locale=locale
         )
-        # Extract ride-window subset for rules aggregation
-        ride_hours = [
-            h
-            for h in full_day_window.hours
-            if int(h.hour.split(":")[0]) >= ride_start_h
-            and int(h.hour.split(":")[0]) <= ride_end_h
-        ]
+
+        # Route-aware weather: fetch at sample points along route (day 0 only)
+        route_weather_data: list[tuple] | None = None
+        if route_sample_points and day_idx == 0:
+            sem_route = asyncio.Semaphore(5)
+
+            async def _fetch_point_weather(pt, _date=date_str, _locale=locale):
+                async with sem_route:
+                    try:
+                        window = await ws.fetch_hourly_forecast(
+                            pt.lat, pt.lon, _date, 0, 23, locale=_locale
+                        )
+                        return (pt, window)
+                    except Exception:
+                        logger.warning(
+                            "Route weather fetch failed at (%.2f, %.2f)", pt.lat, pt.lon
+                        )
+                        return None
+
+            results = await asyncio.gather(
+                *[_fetch_point_weather(pt) for pt in route_sample_points]
+            )
+            route_weather_data = [r for r in results if r is not None]
+            if not route_weather_data:
+                route_weather_data = None
+
+        # Extract ride-window hours for rules aggregation
+        if route_weather_data:
+            ride_hours = _collect_route_ride_hours(
+                route_weather_data, ride_start_h, ride_end_h
+            )
+        else:
+            ride_hours = [
+                h
+                for h in full_day_window.hours
+                if int(h.hour.split(":")[0]) >= ride_start_h
+                and int(h.hour.split(":")[0]) <= ride_end_h
+            ]
 
         # Compute chart display window
         is_multi_day = ride_input.isMultiDay and ride_input.dayStops
@@ -650,12 +743,22 @@ async def build_report(
             chart_start = min(chart_start, ride_start_h)
             chart_end = max(chart_end, ride_end_h)
 
-        # Filter current-day hours within chart window (capped at 23)
-        chart_hours = [
-            h
-            for h in full_day_window.hours
-            if chart_start <= int(h.hour.split(":")[0]) <= min(chart_end, 23)
-        ]
+        # Build chart hours: route-aware or start-location
+        if route_weather_data and ride_input.distanceKm and avg_speed > 0:
+            chart_hours = _build_route_chart_hours(
+                route_weather_data,
+                ride_input.distanceKm,
+                avg_speed,
+                ride_start_h,
+                chart_start,
+                chart_end,
+            )
+        else:
+            chart_hours = [
+                h
+                for h in full_day_window.hours
+                if chart_start <= int(h.hour.split(":")[0]) <= min(chart_end, 23)
+            ]
 
         # If chart extends past midnight, fetch next-day hours
         if chart_end > 23:
@@ -663,13 +766,13 @@ async def build_report(
                 datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)
             ).strftime("%Y-%m-%d")
             next_day_end = chart_end - 24  # e.g. 25 → 1
+            # For past-midnight hours, use destination (last route point) or start location
+            ext_lat = route_sample_points[-1].lat if route_sample_points else day_lat
+            ext_lon = route_sample_points[-1].lon if route_sample_points else day_lon
             try:
                 next_day_window = await ws.fetch_hourly_forecast(
-                    day_lat, day_lon, next_date, 0, next_day_end, locale=locale
+                    ext_lat, ext_lon, next_date, 0, next_day_end, locale=locale
                 )
-                # Re-label next-day hours as 24:00, 25:00, … so the chart
-                # x-axis stays monotonically increasing (copy to avoid
-                # mutating cached objects)
                 relabeled = [
                     dc_replace(h, hour=f"{int(h.hour.split(':')[0]) + 24}:00")
                     for h in next_day_window.hours

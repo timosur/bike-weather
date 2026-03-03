@@ -117,6 +117,52 @@ def sample_waypoints(
     return waypoints
 
 
+def sample_weather_points(
+    route_geometry: list[tuple[float, float]],
+    total_distance_km: float,
+) -> list[RouteWaypoint]:
+    """Sample route points for weather fetching with adaptive density.
+
+    Shorter routes get fewer points, longer routes get more to capture
+    different weather zones (elevation, regions).
+    """
+    if not route_geometry or total_distance_km <= 0:
+        return []
+
+    if total_distance_km <= 30:
+        step_km = max(total_distance_km / 2, 1.0)
+    elif total_distance_km <= 80:
+        step_km = 20.0
+    elif total_distance_km <= 200:
+        step_km = 30.0
+    else:
+        step_km = 40.0
+
+    points = sample_waypoints(route_geometry, step_km=step_km)
+
+    # Ensure the end point is always included
+    if route_geometry and len(route_geometry) > 1:
+        last_lat, last_lon = route_geometry[-1]
+        if not points or haversine_distance(
+            points[-1].lat, points[-1].lon, last_lat, last_lon
+        ) > 1.0:
+            end_bearing = calculate_bearing(
+                route_geometry[-2][0], route_geometry[-2][1], last_lat, last_lon
+            )
+            points.append(
+                RouteWaypoint(
+                    index=len(points),
+                    lat=last_lat,
+                    lon=last_lon,
+                    distance_from_start_km=total_distance_km,
+                    bearing=end_bearing,
+                    geometry_index=len(route_geometry) - 1,
+                )
+            )
+
+    return points
+
+
 def _angular_diff(a: float, b: float) -> float:
     """Signed angular difference from a to b in degrees, range [-180, 180]."""
     d = (b - a) % 360
