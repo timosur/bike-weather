@@ -65,7 +65,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         >
           {report.rideName}
         </h1>
-        {/* Meta row: location, distance, style, ride window */}
+        {/* Meta row: location, distance, style */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2 text-sm text-stone-500 dark:text-stone-400">
           <span className="inline-flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -84,30 +84,30 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               {t('report.days', { count: report.days.length })}
             </span>
           )}
-          {/* Ride window info inline (single-day) */}
-          {!isMultiDay && activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
-            <>
-              <span className="inline-flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
-                <span className="font-medium text-stone-700 dark:text-stone-300">
-                  {activeDay.rideStartHour.toString().padStart(2, '0')}:00 – {activeDay.rideEndHour.toString().padStart(2, '0')}:00
-                </span>
-              </span>
-              {activeDay.estimatedDurationMinutes != null && activeDay.estimatedDurationMinutes > 0 && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Timer className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
-                  <span>{t('report.rideWindow.duration')}: <span className="font-medium text-stone-700 dark:text-stone-300">{formatDuration(activeDay.estimatedDurationMinutes, t)}</span></span>
-                </span>
-              )}
-              {activeDay.averageSpeedKmh != null && activeDay.averageSpeedKmh > 0 && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Gauge className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
-                  <span>{t('report.rideWindow.avgSpeed')}: <span className="font-medium text-stone-700 dark:text-stone-300">{activeDay.averageSpeedKmh} km/h</span></span>
-                </span>
-              )}
-            </>
-          )}
         </div>
+        {/* Ride window row (single-day) */}
+        {!isMultiDay && activeDay && activeDay.rideStartHour != null && activeDay.rideEndHour != null && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-1.5 text-sm text-stone-500 dark:text-stone-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
+              <span className="font-medium text-stone-700 dark:text-stone-300">
+                {activeDay.rideStartHour.toString().padStart(2, '0')}:00 – {activeDay.rideEndHour.toString().padStart(2, '0')}:00
+              </span>
+            </span>
+            {activeDay.estimatedDurationMinutes != null && activeDay.estimatedDurationMinutes > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Timer className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
+                <span>{t('report.rideWindow.duration')}: <span className="font-medium text-stone-700 dark:text-stone-300">{formatDuration(activeDay.estimatedDurationMinutes, t)}</span></span>
+              </span>
+            )}
+            {activeDay.averageSpeedKmh != null && activeDay.averageSpeedKmh > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Gauge className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
+                <span>{t('report.rideWindow.avgSpeed')}: <span className="font-medium text-stone-700 dark:text-stone-300">{activeDay.averageSpeedKmh} km/h</span></span>
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Desktop action buttons (hidden on mobile — sticky bar used instead) */}
         <div className="hidden md:flex flex-wrap items-center gap-2 mt-3">
