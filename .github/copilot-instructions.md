@@ -93,3 +93,29 @@ For non-trivial changes, follow this sequence:
 - **Reuse what exists.** Search for existing utilities, components, hooks, and helpers before creating new ones. Follow established patterns in the codebase.
 - **Don't hammer.** If an approach fails twice, change strategy instead of retrying the same thing.
 - **Constructive fixes only.** Address root causes — don't disable tests, suppress errors, or remove functionality to make something pass.
+- **Keep the spec in sync.** After making non-trivial code changes (new endpoints, models, features, or architectural changes), invoke the `spec-docs` skill to update the specification documents in `docs/spec/`.
+
+## Parallel Sessions
+
+Multiple Copilot CLI instances can run simultaneously in separate terminals to work on different parts of the project. Guidelines:
+
+### Recommended Session Splits
+
+- **Frontend session** — UI components, pages, i18n, styles. Working directory: `frontend/`.
+- **Backend session** — API routes, services, models, migrations. Working directory: `backend/`.
+- **Agent session** — Product scraper logic. Working directory: `agent/`.
+- **Cross-cutting session** — Docker, CI/CD, docs, root-level config.
+
+### Avoiding Conflicts
+
+- Each session should focus on one service boundary. Avoid editing the same files from multiple sessions.
+- Coordinate database migrations — only one session should create Alembic revisions at a time.
+- If sessions touch shared files (e.g., `docker-compose.yml`, `.env.example`), finish one edit before starting another.
+- Run `git pull --rebase` before committing to pick up changes from other sessions.
+
+### Tips
+
+- Use `/rename` to label each session (e.g., "frontend-auth", "backend-api").
+- Use `/diff` in each session to review changes before committing.
+- Keep sessions focused — one feature or fix per session works best.
+- If a change in one service requires a matching change in another (e.g., new API endpoint + frontend integration), plan the interface first, then implement in parallel.
