@@ -11,7 +11,6 @@ import { ClothingItemCard } from './ClothingItemCard'
 import { TipsList } from './TipsList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 import { RouteMap } from './RouteMap'
-import { WindAnalysis } from './WindAnalysis'
 import { StickyActionBar } from './StickyActionBar'
 import { DayTimeline } from './DayTimeline'
 
@@ -244,15 +243,6 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               className="w-full h-full"
             />
           </div>
-          {report.waypoints && report.waypoints.length > 0 && (
-            <WindAnalysis waypoints={report.waypoints} />
-          )}
-        </section>
-      )}
-      {/* Wind analysis without route map (no destination but has waypoints) */}
-      {!(report.routeGeometry && report.destinationLocation) && report.waypoints && report.waypoints.length > 0 && (
-        <section>
-          <WindAnalysis waypoints={report.waypoints} />
         </section>
       )}
 
