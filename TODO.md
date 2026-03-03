@@ -6,3 +6,5 @@
 - Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
 - Docs: Create a product vision, maybe as part of the documentation
 - Chore: Add Grafana Faro + Alloy for detailed Frontend Metrics
+- Adjustment: Make destination mandatory
+- Adjustment: Add possibiliy of adding waypoints in planner
