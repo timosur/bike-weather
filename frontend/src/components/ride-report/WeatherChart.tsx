@@ -96,8 +96,8 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
       tempTicks.push(v)
     }
 
-    // X-axis ticks (every 3 hours)
-    const xTicks = hours.filter(h => h % 3 === 0)
+    // X-axis ticks (every hour)
+    const xTicks = hours
 
     // Light zone boundaries
     const TWILIGHT_OFFSET = 0.5 // 30 min in fractional hours
@@ -142,7 +142,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
       }
     }
 
-    // Icons at 3-hour x-axis ticks
+    // Weather icons at each hour tick
     const iconTicks = xTicks.map(h => {
       const idx = hours.indexOf(h)
       const icon = idx >= 0 ? hourlyForecast[idx].icon : undefined

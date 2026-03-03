@@ -734,14 +734,9 @@ async def build_report(
             chart_start = 6
             chart_end = 22
         else:
-            # Single-day: centered on ride
-            ride_mid = (ride_start_h + ride_end_h) / 2
-            display_half = 8  # show ~16 hours total
-            chart_start = max(0, int(ride_mid - display_half))
-            chart_end = int(ride_mid + display_half)
-            # Ensure the ride window is always fully visible
-            chart_start = min(chart_start, ride_start_h)
-            chart_end = max(chart_end, ride_end_h)
+            # Single-day: ride window ± 3 hours buffer
+            chart_start = max(0, ride_start_h - 3)
+            chart_end = min(ride_end_h + 3, 23)
 
         # Build chart hours: route-aware or start-location
         if route_weather_data and ride_input.distanceKm and avg_speed > 0:
