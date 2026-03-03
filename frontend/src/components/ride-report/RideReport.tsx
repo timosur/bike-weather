@@ -88,21 +88,19 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         {!isMultiDay && activeDay && activeDay.rideStartTime && activeDay.rideEndTime && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-1.5 text-sm text-stone-500 dark:text-stone-400">
             <span className="inline-flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
-              <span className="font-medium text-stone-700 dark:text-stone-300">
-                {activeDay.rideStartTime} – {activeDay.rideEndTime}
-              </span>
+              <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
+              {activeDay.rideStartTime} – {activeDay.rideEndTime}
             </span>
             {activeDay.estimatedDurationMinutes != null && activeDay.estimatedDurationMinutes > 0 && (
               <span className="inline-flex items-center gap-1.5">
-                <Timer className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
-                <span>{t('report.rideWindow.duration')}: <span className="font-medium text-stone-700 dark:text-stone-300">{formatDuration(activeDay.estimatedDurationMinutes, t)}</span></span>
+                <Timer className="w-3.5 h-3.5" strokeWidth={1.5} />
+                {formatDuration(activeDay.estimatedDurationMinutes, t)}
               </span>
             )}
             {activeDay.averageSpeedKmh != null && activeDay.averageSpeedKmh > 0 && (
               <span className="inline-flex items-center gap-1.5">
-                <Gauge className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" strokeWidth={1.5} />
-                <span>{t('report.rideWindow.avgSpeed')}: <span className="font-medium text-stone-700 dark:text-stone-300">{activeDay.averageSpeedKmh} km/h</span></span>
+                <Gauge className="w-3.5 h-3.5" strokeWidth={1.5} />
+                {activeDay.averageSpeedKmh} km/h
               </span>
             )}
           </div>
