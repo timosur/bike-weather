@@ -102,8 +102,10 @@
   "planner": {
     "heading": "What should I take with me?",
     "subheading": "Enter your ride details — we'll tell you what you need.",
+    "addDestination": "Add destination",
     "label": {
       "startLocation": "Start location",
+      "destination": "Destination",
       "departure": "Departure",
       "bikeType": "Bike type",
       "intensity": "Intensity",
@@ -170,6 +172,7 @@
     },
     "placeholder": {
       "cityOrAddress": "Enter city or address…",
+      "destination": "Enter destination…",
       "egDistance": "e.g. 35",
       "egElevation": "e.g. 800",
       "egDuration": "e.g. 120"
@@ -249,6 +252,12 @@
       "equipment": "Equipment Recommendation",
       "packingList": "Packing List for Entire Tour",
       "tips": "Tips & Safety"
+    },
+    "windAnalysis": {
+      "title": "Wind Analysis",
+      "headwind": "Headwind",
+      "tailwind": "Tailwind",
+      "neutral": "Neutral"
     },
     "noData": {
       "heading": "No ride data",
@@ -614,6 +623,15 @@
     "signedInAs": "Signed in as",
     "admin": "Admin",
     "changePassword": "Change password"
+  },
+  "unsavedChanges": {
+    "heading": "Unsaved Changes",
+    "text": "You have unsaved changes. Are you sure you want to leave?",
+    "textWithSave": "You have unsaved changes. Would you like to save them?",
+    "stay": "Stay",
+    "leave": "Leave",
+    "discard": "Discard",
+    "saveAndLeave": "Save & Leave"
   },
   "shared": {
     "badge": "Shared Ride Report",

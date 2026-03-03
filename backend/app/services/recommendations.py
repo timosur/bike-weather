@@ -2,6 +2,8 @@
 
 import math
 import uuid
+import asyncio
+import logging
 from dataclasses import replace as dc_replace
 from datetime import datetime, timedelta
 
@@ -30,16 +32,25 @@ from app.schemas.report import (
     RideReportSchema,
     TipSchema,
     WeatherDataSchema,
+    RouteWaypointWeather,
+    RouteSegment,
 )
 from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
+from app.services.routing import routing_service
+from app.services.route_waypoints import sample_waypoints
+from app.services.wind_analysis import analyze_wind
 from app.services.weather import (
     HourlyForecast,
     HourlyWeatherWindow,
     WeatherForecast,
     WeatherService,
     weather_service,
+    wmo_to_icon,
+    wmo_to_description,
 )
+
+logger = logging.getLogger(__name__)
 
 # Condition severity ordering for "worst of" calculation
 _CONDITION_ORDER = {"ideal": 0, "good": 1, "caution": 2, "not-recommended": 3}
@@ -295,6 +306,131 @@ async def build_report(
         lat = results[0]["lat"]
         lon = results[0]["lon"]
 
+    # Handle Destination & Routing
+    route_geometry = None
+    waypoints_schema = None
+    route_segments_schema = None
+    destination_addr = None
+
+    if ride_input.destination:
+        dest_lat = ride_input.destination.lat
+        dest_lon = ride_input.destination.lon
+        destination_addr = ride_input.destination.address
+
+        if dest_lat is None or dest_lon is None:
+            results = await geocoding_service.search(ride_input.destination.address, limit=1)
+            if results:
+                dest_lat = results[0]["lat"]
+                dest_lon = results[0]["lon"]
+        
+        if dest_lat and dest_lon:
+            try:
+                # 1. Get Route
+                route_result = await routing_service.get_route(lat, lon, dest_lat, dest_lon)
+                
+                # Override distance if not provided
+                if not ride_input.distanceKm:
+                    ride_input.distanceKm = round(route_result.distance_km)
+                
+                route_geometry = route_result.geometry
+                
+                # 2. Sample Waypoints
+                raw_waypoints = sample_waypoints(route_result.geometry)
+                
+                # 3. Calculate timing & fetch weather
+                # Estimate average speed if not provided
+                avg_speed = ride_input.averageSpeedKmh or 20.0
+                if ride_input.durationMinutes and ride_input.distanceKm:
+                    avg_speed = ride_input.distanceKm / (ride_input.durationMinutes / 60)
+                
+                start_dt = datetime.strptime(f"{ride_input.startDate}T{ride_input.startTime}", "%Y-%m-%dT%H:%M")
+
+                sem = asyncio.Semaphore(5)
+
+                async def _process_waypoint(wp):
+                    async with sem:
+                        hours_travel = wp.distance_from_start_km / avg_speed
+                        arrival_time = start_dt + timedelta(hours=hours_travel)
+                        try:
+                            window = await ws.fetch_hourly_forecast(
+                                wp.lat,
+                                wp.lon,
+                                arrival_time.strftime("%Y-%m-%d"),
+                                arrival_time.hour,
+                                arrival_time.hour,
+                                locale,
+                            )
+                        except Exception:
+                            logger.warning("Weather fetch failed for waypoint %d", wp.index)
+                            return None
+
+                        if not window.hours:
+                            return None
+
+                        weather = window.hours[0]
+                        wind_result = analyze_wind(
+                            bearing_deg=wp.bearing,
+                            wind_speed_kmh=weather.wind_speed,
+                            wind_direction_deg=weather.wind_direction_deg,
+                        )
+                        return {"wp": wp, "weather": weather, "wind": wind_result}
+
+                wp_results = await asyncio.gather(*[_process_waypoint(wp) for wp in raw_waypoints])
+                wp_results = [r for r in wp_results if r is not None]
+                
+                # 4. Build Schemas
+                waypoints_schema = []
+                route_segments_schema = []
+                
+                for i, res in enumerate(wp_results):
+                    wp = res["wp"]
+                    w = res["weather"]
+                    wind = res["wind"]
+                    
+                    waypoints_schema.append(
+                        RouteWaypointWeather(
+                            index=wp.index,
+                            lat=wp.lat,
+                            lon=wp.lon,
+                            distanceKm=wp.distance_from_start_km,
+                            bearing=wp.bearing,
+                            temp=w.temp,
+                            icon=w.icon,
+                            windSpeed=w.wind_speed,
+                            windDirection=w.wind_direction,
+                            headwindComponent=wind.headwind_component,
+                        )
+                    )
+                    
+                    # Create segment from this waypoint to the next
+                    start_idx = wp.geometry_index
+                    end_idx = wp_results[i + 1]["wp"].geometry_index if i < len(wp_results) - 1 else len(route_geometry)
+                    segment_geom = [
+                        list(pt) for pt in route_geometry[start_idx : end_idx + 1]
+                    ]
+
+                    color_map = {
+                        "headwind": "#ef4444",
+                        "tailwind": "#22c55e",
+                        "crosswind": "#eab308",
+                        "calm": "#3b82f6",
+                    }
+                    route_segments_schema.append(
+                        RouteSegment(
+                            startLat=wp.lat,
+                            startLon=wp.lon,
+                            endLat=segment_geom[-1][0] if segment_geom else wp.lat,
+                            endLon=segment_geom[-1][1] if segment_geom else wp.lon,
+                            geometry=segment_geom if len(segment_geom) >= 2 else None,
+                            color=color_map.get(wind.wind_effect, "#94a3b8"),
+                            windEffect=wind.wind_effect,
+                        )
+                    )
+
+            except Exception as e:
+                logger.error("Routing failed: %s", e)
+                # Continue without routing (soft failure)
+
     # Resolve ride duration (explicit > avg speed + distance > auto-estimated > default 2h)
     duration_minutes = resolve_duration_minutes(
         ride_input.durationMinutes,
@@ -462,7 +598,6 @@ async def build_report(
             worst_wcode = max(h.weather_code for h in ride_hours)
             peak_wind_hour = max(ride_hours, key=lambda h: h.wind_speed)
             wind_dir = peak_wind_hour.wind_direction
-            from app.services.weather import wmo_to_icon, wmo_to_description
 
             forecast = WeatherForecast(
                 temp_min=round(min(temps), 1),
@@ -581,4 +716,8 @@ async def build_report(
         mergedClothingItems=merged_clothing,
         mergedEquipment=merged_equipment,
         tips=merged_tips,
+        routeGeometry=[list(pt) for pt in route_geometry] if route_geometry else None,
+        waypoints=waypoints_schema,
+        routeSegments=route_segments_schema,
+        destinationLocation=destination_addr,
     )

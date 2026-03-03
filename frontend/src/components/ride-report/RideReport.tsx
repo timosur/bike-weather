@@ -12,6 +12,8 @@ import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { TipsList } from './TipsList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
+import { RouteMap } from './RouteMap'
+import { WindAnalysis } from './WindAnalysis'
 
 export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, onDaySelect, products, shops, disclosure, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
@@ -188,6 +190,28 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         </div>
       </div>
 
+      {/* Route Map */}
+      {report.routeGeometry && report.destinationLocation && (
+        <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm relative z-0">
+          <RouteMap
+            startLocation={{ 
+              lat: report.routeGeometry[0][0], 
+              lon: report.routeGeometry[0][1], 
+              label: report.startLocation 
+            }}
+            destinationLocation={{
+              lat: report.routeGeometry[report.routeGeometry.length - 1][0],
+              lon: report.routeGeometry[report.routeGeometry.length - 1][1],
+              label: report.destinationLocation
+            }}
+            routeGeometry={report.routeGeometry}
+            routeSegments={report.routeSegments}
+            waypoints={report.waypoints}
+            className="w-full h-full"
+          />
+        </div>
+      )}
+
       {/* Day Tabs — as jump-links for multi-day, tab switch for single-day */}
       <DayTabs days={report.days} activeDayId={activeDayId} onDaySelect={handleDaySelect} />
 
@@ -204,6 +228,13 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             </h2>
             <MultiDayWeatherSummary days={report.days} />
           </section>
+
+          {/* Wind Analysis */}
+          {report.waypoints && report.waypoints.length > 0 && (
+            <section>
+              <WindAnalysis waypoints={report.waypoints} />
+            </section>
+          )}
 
           {/* Continuous weather chart across all days */}
           <section>
@@ -291,6 +322,13 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               rideEndHour={activeDay.rideEndHour}
             />
           </section>
+
+          {/* Wind Analysis */}
+          {report.waypoints && report.waypoints.length > 0 && (
+            <section>
+              <WindAnalysis waypoints={report.waypoints} />
+            </section>
+          )}
 
           {/* Clothing */}
           <section>

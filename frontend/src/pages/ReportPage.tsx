@@ -2,10 +2,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
+import { UnsavedChangesDialog } from '../components/common/UnsavedChangesDialog'
 import { SEO } from '../hooks/useSEO'
 import { useToast } from '../hooks/useToast'
 import { useAuth } from '../contexts/AuthContext'
 import { useRideHistory } from '../hooks/useRideHistory'
+import { useNavigationGuard } from '../hooks/useNavigationGuard'
 import { fetchReport } from '../api/rides'
 import { createRoute, fetchRoute, updateRoute } from '../api/routes'
 // import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
@@ -16,6 +18,7 @@ interface ReportLocationState {
   input: RideInput
   routeId?: string
   originalInput?: RideInput  // For edit mode change detection
+  isEdit?: boolean           // True when returning from edit (skip history entry)
 }
 
 /** Deep comparison of RideInput for change detection (ignores captchaToken) */
@@ -42,6 +45,7 @@ export default function ReportPage() {
   const inputFromState = locationState?.input
   const routeIdFromState = locationState?.routeId ?? urlRouteId
   const originalInputFromState = locationState?.originalInput
+  const isEditFromState = locationState?.isEdit ?? false
 
   // Report state
   const [report, setReport] = useState<RideReportType | null>(null)
@@ -69,8 +73,36 @@ export default function ReportPage() {
     return hasInputChanged(submittedInput, editOriginalInput)
   }, [submittedInput, editOriginalInput])
 
+  // Block navigation when there are unsaved changes
+  const navGuard = useNavigationGuard(hasUnsavedChanges)
+
+  // Handle saving changes when user chooses "Save & Leave"
+  const handleBlockerSave = async () => {
+    if (!currentRouteId || !submittedInput || !report) return
+    
+    setSaveChangesLoading(true)
+    try {
+      await updateRoute(currentRouteId, {
+        name: report.rideName,
+        start_location: report.startLocation,
+        total_distance: report.totalDistance,
+        riding_style: report.ridingStyle,
+        ride_input: submittedInput,
+      })
+      setEditOriginalInput(submittedInput)
+      addToast(t('report.changesSaved'), 'success')
+      navGuard.proceed()
+    } catch {
+      addToast(t('report.saveChangesError'), 'error')
+      // Stay on page after error
+      navGuard.reset()
+    } finally {
+      setSaveChangesLoading(false)
+    }
+  }
+
   // Fetch report
-  const doFetch = useCallback(async (input: RideInput, routeId?: string) => {
+  const doFetch = useCallback(async (input: RideInput, routeId?: string, skipHistory?: boolean) => {
     const currentFetchId = ++fetchIdRef.current
     setReportLoading(true)
     setReportError(null)
@@ -80,8 +112,8 @@ export default function ReportPage() {
       const result = await fetchReport(input, routeId)
       if (fetchIdRef.current !== currentFetchId) return
       setReport(result)
-      // Only add to history for new rides (not saved routes)
-      if (!routeId) {
+      // Only add to history for new rides (not saved routes, not edits)
+      if (!routeId && !skipHistory) {
         addEntry(input, result)
       }
     } catch (err) {
@@ -145,9 +177,9 @@ export default function ReportPage() {
   useEffect(() => {
     if (inputFromState && !hasFetched.current) {
       hasFetched.current = true
-      doFetch(inputFromState, routeIdFromState)
+      doFetch(inputFromState, routeIdFromState, isEditFromState)
     }
-  }, [inputFromState, routeIdFromState, doFetch])
+  }, [inputFromState, routeIdFromState, isEditFromState, doFetch])
 
   // Re-fetch report when language changes
   useEffect(() => {
@@ -302,6 +334,18 @@ export default function ReportPage() {
   return (
     <div className="w-full overflow-x-hidden">
       <SEO titleKey="report" path="/report" noIndex />
+      
+      {/* Unsaved changes dialog */}
+      {navGuard.isBlocked && (
+        <UnsavedChangesDialog
+          canSave={isEditMode && isAuthenticated}
+          onSave={handleBlockerSave}
+          onDiscard={() => navGuard.proceed()}
+          onCancel={() => navGuard.reset()}
+          saving={saveChangesLoading}
+        />
+      )}
+      
       {reportLoading && (
         <div className="w-full max-w-4xl mx-auto px-4 pb-10">
           <RideReportSkeleton />

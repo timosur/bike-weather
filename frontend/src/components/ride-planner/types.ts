@@ -40,6 +40,8 @@ export interface RideInput {
   gravelStyle?: GravelStyle | null;
   /** Per-day overnight stops for multi-day tours (one per night) */
   dayStops: DayStop[];
+  /** Optional destination for route planning */
+  destination?: RideLocation | null;
   /** Turnstile CAPTCHA token (sent when throttle threshold exceeded) */
   captchaToken?: string;
 }
@@ -110,8 +112,14 @@ export interface RidePlannerProps {
   dayStopLocationSuggestions?: LocationSuggestion[];
   /** Called when the user types in a day stop location field */
   onDayStopLocationSearch?: (stopIndex: number, query: string) => void;
+  /** Called when the user types in the destination field */
+  onDestinationSearch?: (query: string) => void;
+  /** Autocomplete suggestions for destination search */
+  destinationSuggestions?: LocationSuggestion[];
   /** Called when the user submits the form with valid input */
   onSubmit: (input: RideInput) => void;
+  /** Called when the form dirty state changes (true = has unsaved changes) */
+  onDirtyChange?: (isDirty: boolean) => void;
   /** Optional slot rendered between presets and the form card (e.g. recent rides) */
   children?: React.ReactNode;
 }

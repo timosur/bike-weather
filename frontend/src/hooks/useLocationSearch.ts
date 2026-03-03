@@ -7,10 +7,12 @@ export function useLocationSearch() {
   const { t } = useTranslation()
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([])
   const [dayStopSuggestions, setDayStopSuggestions] = useState<LocationSuggestion[]>([])
+  const [destinationSuggestions, setDestinationSuggestions] = useState<LocationSuggestion[]>([])
   const [isLocating, setIsLocating] = useState(false)
   const [detectedLocation, setDetectedLocation] = useState<RideLocation | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const dayStopDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const destinationDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const searchLocation = useCallback((query: string) => {
     clearTimeout(debounceRef.current)
@@ -40,6 +42,22 @@ export function useLocationSearch() {
         setDayStopSuggestions(data)
       } catch {
         setDayStopSuggestions([])
+      }
+    }, 300)
+  }, [])
+
+  const searchDestination = useCallback((query: string) => {
+    clearTimeout(destinationDebounceRef.current)
+    if (query.length < 2) {
+      setDestinationSuggestions([])
+      return
+    }
+    destinationDebounceRef.current = setTimeout(async () => {
+      try {
+        const data = await searchLocations(query)
+        setDestinationSuggestions(data)
+      } catch {
+        setDestinationSuggestions([])
       }
     }, 300)
   }, [])
@@ -77,10 +95,12 @@ export function useLocationSearch() {
   return {
     suggestions,
     dayStopSuggestions,
+    destinationSuggestions,
     isLocating,
     detectedLocation,
     searchLocation,
     searchDayStopLocation,
+    searchDestination,
     useCurrentLocation,
     clearDetectedLocation,
     clearSuggestions: () => setSuggestions([]),

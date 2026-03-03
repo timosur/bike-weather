@@ -92,13 +92,40 @@ class DayForecastSchema(BaseModel):
     tips: list[TipSchema] = []
 
 
+class RouteWaypointWeather(BaseModel):
+    index: int
+    lat: float
+    lon: float
+    distanceKm: float
+    bearing: float
+    temp: float
+    icon: str
+    windSpeed: float
+    windDirection: str
+    headwindComponent: float
+
+
+class RouteSegment(BaseModel):
+    startLat: float
+    startLon: float
+    endLat: float
+    endLon: float
+    color: str
+    windEffect: str
+    geometry: list[list[float]] | None = None
+
+
 class RideReportSchema(BaseModel):
     id: str
     rideName: str
     startLocation: str
+    destinationLocation: str | None = None
     ridingStyle: str
     totalDistance: float
     distanceUnit: str = "km"
+    routeGeometry: list[list[float]] | None = None  # [[lat, lon], ...]
+    waypoints: list[RouteWaypointWeather] | None = None
+    routeSegments: list[RouteSegment] | None = None
     overallCondition: str
     overallConditionReasons: list[ConditionReasonSchema] = []
     shareUrl: str = ""

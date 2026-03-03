@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Calendar,
   Clock,
@@ -28,6 +28,8 @@ import type {
 } from './types'
 import { DayLocationList } from './DayLocationList'
 import { LocationPicker } from './LocationPicker'
+import { fetchRoutePreview, type RoutePreview } from '../../api/rides'
+import { RouteMap } from '../ride-report/RouteMap'
 
 const bikeIconMap: Record<string, React.ReactNode> = {
   gauge: <Gauge className="w-4 h-4" strokeWidth={1.5} />,
@@ -60,7 +62,10 @@ export function RidePlanner({
   onLocationSelect,
   dayStopLocationSuggestions = [],
   onDayStopLocationSearch,
+  onDestinationSearch,
+  destinationSuggestions = [],
   onSubmit,
+  onDirtyChange,
   children,
 }: RidePlannerProps) {
   const today = new Date().toISOString().split('T')[0]
@@ -80,13 +85,66 @@ export function RidePlanner({
     averageSpeedKmh: initialValues?.averageSpeedKmh ?? null,
     gravelStyle: initialValues?.gravelStyle ?? ((initialValues?.bikeType ?? 'gravel') === 'gravel' ? 'road' : null),
     dayStops: initialValues?.dayStops ?? [],
+    destination: initialValues?.destination ?? null,
   })
 
   const [durationManuallySet, setDurationManuallySet] = useState(!!initialValues?.durationMinutes)
   const [speedManuallySet, setSpeedManuallySet] = useState(!!initialValues?.averageSpeedKmh)
 
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showDestination, setShowDestination] = useState(!!initialValues?.destination)
+  const [routePreview, setRoutePreview] = useState<RoutePreview | null>(null)
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
+
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Track dirty state (form has been modified by user interaction)
+  const hasInteracted = useRef(false)
+  const [isDirty, setIsDirty] = useState(false)
+
+  // Mark form as dirty on any user-initiated form change
+  const markDirty = () => {
+    if (!hasInteracted.current) {
+      hasInteracted.current = true
+      // Only consider dirty if location is set (minimal interaction threshold)
+      if (form.location !== null) {
+        setIsDirty(true)
+      }
+    }
+  }
+
+  // Update dirty state when location changes after interaction
+  useEffect(() => {
+    if (hasInteracted.current && form.location !== null) {
+      setIsDirty(true)
+    }
+  }, [form.location])
+
+  // Notify parent of dirty state changes
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
+
+  // Route Preview Effect
+  useEffect(() => {
+    if (form.location?.lat && form.location?.lon && form.destination?.lat && form.destination?.lon) {
+      setIsPreviewLoading(true)
+      fetchRoutePreview(form.location.lat, form.location.lon, form.destination.lat, form.destination.lon)
+        .then(preview => {
+          setRoutePreview(preview)
+          setForm(f => ({ ...f, distanceKm: preview.distanceKm }))
+          // Update duration if not manually set?
+          // The autoEstimatedDuration logic will pick up the new distance automatically.
+        })
+        .catch(err => {
+          console.error("Failed to fetch route preview", err)
+          setRoutePreview(null)
+        })
+        .finally(() => setIsPreviewLoading(false))
+    } else {
+      setRoutePreview(null)
+    }
+  }, [form.location?.lat, form.location?.lon, form.destination?.lat, form.destination?.lon])
 
   useEffect(() => {
     if (detectedLocation) setForm(f => ({ ...f, location: detectedLocation }))
@@ -134,11 +192,21 @@ export function RidePlanner({
   }, [autoEstimatedDuration, durationManuallySet])
 
   const handleSelectSuggestion = (suggestion: LocationSuggestion) => {
+    markDirty()
     setForm(f => ({
       ...f,
       location: { address: suggestion.shortText, lat: suggestion.lat, lon: suggestion.lon },
     }))
     onLocationSelect?.(suggestion)
+  }
+
+  const handleSelectDestination = (suggestion: LocationSuggestion) => {
+    markDirty()
+    setForm(f => ({
+      ...f,
+      destination: { address: suggestion.shortText, lat: suggestion.lat, lon: suggestion.lon },
+    }))
+    // We don't have onDestinationSelect prop yet, but onDestinationSearch handles query.
   }
 
   const validate = () => {
@@ -240,6 +308,66 @@ export function RidePlanner({
               />
             </div>
 
+            {/* Destination Picker */}
+            <div className="space-y-1.5">
+              {!showDestination ? (
+                <button
+                  type="button"
+                  onClick={() => setShowDestination(true)}
+                  className="text-sm text-emerald-600 dark:text-emerald-400 font-medium hover:underline flex items-center gap-1 pl-1"
+                >
+                  <span className="text-lg leading-none">+</span> {t('planner.addDestination')}
+                </button>
+              ) : (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                      {t('planner.label.destination')}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowDestination(false)
+                        setForm(f => ({ ...f, destination: null }))
+                        setRoutePreview(null)
+                      }}
+                      className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                    >
+                      {t('common.remove')}
+                    </button>
+                  </div>
+                  <LocationPicker
+                    value={form.destination ?? null}
+                    suggestions={destinationSuggestions}
+                    onSearch={onDestinationSearch}
+                    onSelect={handleSelectDestination}
+                    onClear={() => setForm(f => ({ ...f, destination: null }))}
+                    placeholder={t('planner.placeholder.destination')}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Route Preview Map */}
+            {isPreviewLoading && (
+              <div className="h-48 rounded-xl border border-stone-200 dark:border-stone-700 flex items-center justify-center bg-stone-50 dark:bg-stone-800">
+                <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+              </div>
+            )}
+            {!isPreviewLoading && routePreview && form.location?.lat && form.location?.lon && form.destination?.lat && form.destination?.lon && (
+              <div className="h-48 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-sm relative">
+                <RouteMap
+                  startLocation={{ lat: form.location.lat, lon: form.location.lon, label: 'Start' }}
+                  destinationLocation={{ lat: form.destination.lat, lon: form.destination.lon, label: 'Dest' }}
+                  routeGeometry={routePreview.geometry}
+                  className="w-full h-full"
+                />
+                <div className="absolute bottom-2 right-2 bg-white/90 dark:bg-stone-900/90 backdrop-blur px-2 py-1 rounded text-xs font-medium shadow-sm z-[1000] border border-stone-200 dark:border-stone-700">
+                  {routePreview.distanceKm.toFixed(1)} km • {Math.round(routePreview.durationMinutes)} min
+                </div>
+              </div>
+            )}
+
             {/* Date + Time */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
@@ -289,9 +417,10 @@ export function RidePlanner({
                   min="1"
                   max="999"
                   value={form.distanceKm ?? ''}
-                  onChange={e =>
+                  onChange={e => {
+                    markDirty()
                     setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
-                  }
+                  }}
                   placeholder={t('planner.placeholder.egDistance')}
                   className={`${inputBase} pl-9 pr-12 ${errors.distance ? inputError : inputNormal}`}
                 />
@@ -320,6 +449,7 @@ export function RidePlanner({
                       key={option.value}
                       type="button"
                       onClick={() => {
+                        markDirty()
                         const newBikeType = option.value as BikeType
                         setForm(f => ({
                           ...f,

@@ -91,6 +91,7 @@ class HourlyForecast:
     precipitation_mm: float  # mm
     wind_speed: float  # km/h
     wind_direction: str  # compass label
+    wind_direction_deg: float  # degrees
     wind_gusts: float  # km/h
     humidity: float  # %
     weather_code: int
@@ -432,6 +433,7 @@ class WeatherService:
                         precipitation_mm=hourly["precipitation"][i] or 0,
                         wind_speed=hourly["wind_speed_10m"][i] or 0,
                         wind_direction=_wind_direction_label(wind_dir_deg),
+                        wind_direction_deg=wind_dir_deg,
                         wind_gusts=hourly["wind_gusts_10m"][i] or 0,
                         humidity=hourly["relative_humidity_2m"][i] or 50,
                         weather_code=wcode,

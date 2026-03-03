@@ -102,8 +102,10 @@
   "planner": {
     "heading": "Was soll ich mitnehmen?",
     "subheading": "Gib deine Fahrtdetails ein — wir sagen dir, was du brauchst.",
+    "addDestination": "Zielort hinzufügen",
     "label": {
       "startLocation": "Startort",
+      "destination": "Zielort",
       "departure": "Abfahrt",
       "bikeType": "Fahrradtyp",
       "intensity": "Intensität",
@@ -170,6 +172,7 @@
     },
     "placeholder": {
       "cityOrAddress": "Stadt oder Adresse eingeben…",
+      "destination": "Zielort eingeben…",
       "egDistance": "z.B. 35",
       "egElevation": "z.B. 800",
       "egDuration": "z.B. 120"
@@ -249,6 +252,12 @@
       "equipment": "Equipment-Empfehlung",
       "packingList": "Packliste für die gesamte Tour",
       "tips": "Hinweise & Sicherheit"
+    },
+    "windAnalysis": {
+      "title": "Windanalyse",
+      "headwind": "Gegenwind",
+      "tailwind": "Rückenwind",
+      "neutral": "Neutral"
     },
     "noData": {
       "heading": "Keine Fahrtdaten",
@@ -614,6 +623,15 @@
     "signedInAs": "Angemeldet als",
     "admin": "Admin",
     "changePassword": "Passwort ändern"
+  },
+  "unsavedChanges": {
+    "heading": "Ungespeicherte Änderungen",
+    "text": "Du hast ungespeicherte Änderungen. Willst du wirklich gehen?",
+    "textWithSave": "Du hast ungespeicherte Änderungen. Möchtest du sie speichern?",
+    "stay": "Bleiben",
+    "leave": "Verlassen",
+    "discard": "Verwerfen",
+    "saveAndLeave": "Speichern & Verlassen"
   },
   "shared": {
     "badge": "Geteilter Fahrtbericht",

@@ -2,8 +2,10 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RidePlanner, RecentRides } from '../components/ride-planner'
+import { UnsavedChangesDialog } from '../components/common/UnsavedChangesDialog'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import { useRideHistory } from '../hooks/useRideHistory'
+import { useNavigationGuard } from '../hooks/useNavigationGuard'
 import { usePlannerFormPersistence } from '../hooks/usePlannerFormPersistence'
 import { SEO } from '../hooks/useSEO'
 import { JsonLd } from '../components/seo'
@@ -22,10 +24,12 @@ export default function PlannerPage() {
   const {
     suggestions,
     dayStopSuggestions,
+    destinationSuggestions,
     isLocating,
     detectedLocation,
     searchLocation,
     searchDayStopLocation,
+    searchDestination,
     useCurrentLocation,
     clearSuggestions,
     clearDetectedLocation,
@@ -50,6 +54,13 @@ export default function PlannerPage() {
   const submitTimestamps = useRef<number[]>([])
   const [showPlannerCaptcha, setShowPlannerCaptcha] = useState(false)
   const plannerTurnstile = useTurnstile()
+
+  // Track form dirty state for navigation blocking
+  const [isFormDirty, setIsFormDirty] = useState(false)
+  const isSubmittingRef = useRef(false)
+
+  // Block navigation when form is dirty (but allow if submitting)
+  const navGuard = useNavigationGuard(isFormDirty && !isSubmittingRef.current)
 
   // Check for incoming state from navigation
   interface PlannerLocationState {
@@ -103,17 +114,21 @@ export default function PlannerPage() {
 
   // Submit handler - navigates to /report with input
   const doSubmit = useCallback((input: RideInput, routeId?: string, originalInput?: RideInput) => {
+    isSubmittingRef.current = true
     setIsSubmitting(true)
     saveFormState(input)
     // Navigate to report page with the input
     // Pass originalInput for change detection when editing an existing route
     const targetRouteId = routeId ?? editRouteId
     const targetPath = targetRouteId ? `/report/${targetRouteId}` : '/report'
+    // isEdit=true when we have edit context (prevents duplicate history entry)
+    const isEdit = !!(editRouteId || editOriginalInput || originalInput)
     navigate(targetPath, {
       state: {
         input,
         routeId: targetRouteId,
         originalInput: originalInput ?? editOriginalInput,
+        isEdit,
       }
     })
   }, [navigate, saveFormState, editRouteId, editOriginalInput])
@@ -253,6 +268,16 @@ export default function PlannerPage() {
         applicationCategory: 'WeatherApplication',
         operatingSystem: 'All',
       }} />
+      
+      {/* Unsaved changes dialog */}
+      {navGuard.isBlocked && (
+        <UnsavedChangesDialog
+          canSave={false}
+          onDiscard={() => navGuard.proceed()}
+          onCancel={() => navGuard.reset()}
+        />
+      )}
+      
       {/* Ambient background */}
       <div
         className="fixed inset-0 -z-10"
@@ -279,7 +304,10 @@ export default function PlannerPage() {
         onUseCurrentLocation={useCurrentLocation}
         onLocationSelect={() => { }}
         onDayStopLocationSearch={searchDayStopLocation}
+        onDestinationSearch={searchDestination}
+        destinationSuggestions={destinationSuggestions}
         onSubmit={handleSubmit}
+        onDirtyChange={setIsFormDirty}
       >
         {history.length > 0 && (
           <RecentRides

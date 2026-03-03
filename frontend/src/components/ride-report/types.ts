@@ -128,10 +128,34 @@ export interface DayForecast {
   tips?: Tip[];
 }
 
+export interface RouteWaypointWeather {
+  index: number;
+  lat: number;
+  lon: number;
+  distanceKm: number;
+  bearing: number;
+  temp: number;
+  icon: WeatherIconType;
+  windSpeed: number;
+  windDirection: string;
+  headwindComponent: number;
+}
+
+export interface RouteSegment {
+  startLat: number;
+  startLon: number;
+  endLat: number;
+  endLon: number;
+  color: string;
+  windEffect: "headwind" | "tailwind" | "crosswind" | "calm";
+  geometry?: [number, number][];
+}
+
 export interface RideReport {
   id: string;
   rideName: string;
   startLocation: string;
+  destinationLocation?: string;
   ridingStyle: string;
   totalDistance: number;
   distanceUnit: string;
@@ -142,6 +166,9 @@ export interface RideReport {
   mergedClothingItems?: ClothingItem[];
   mergedEquipment?: EquipmentItem[];
   tips?: Tip[];
+  routeGeometry?: [number, number][];
+  waypoints?: RouteWaypointWeather[];
+  routeSegments?: RouteSegment[];
 }
 
 export interface RideReportProps {

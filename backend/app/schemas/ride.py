@@ -28,4 +28,11 @@ class RideInputSchema(BaseModel):
     durationMinutes: float | None = None
     averageSpeedKmh: float | None = None
     dayStops: list[DayStopSchema] = []
+    destination: RideLocationSchema | None = None
     captcha_token: str | None = None
+
+
+class RoutePreviewSchema(BaseModel):
+    distanceKm: float
+    durationMinutes: float
+    geometry: list[list[float]]

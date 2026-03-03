@@ -11,12 +11,33 @@ from app.models.saved_route import SavedRoute
 from app.models.user import User
 from app.rate_limit import limiter
 from app.schemas.report import RideReportSchema
-from app.schemas.ride import RideInputSchema
+from app.schemas.ride import RideInputSchema, RoutePreviewSchema
 from app.services.recommendations import build_report
+from app.services.routing import routing_service
 from app.services.turnstile import verify_turnstile
 from app.services.weather import WeatherServiceError
 
 router = APIRouter(prefix="/rides", tags=["rides"])
+
+
+@router.get("/preview", response_model=RoutePreviewSchema)
+@limiter.limit("60/minute")
+async def preview_route(
+    startLat: float,
+    startLon: float,
+    destLat: float,
+    destLon: float,
+    request: Request,
+) -> RoutePreviewSchema:
+    try:
+        result = await routing_service.get_route(startLat, startLon, destLat, destLon)
+        return RoutePreviewSchema(
+            distanceKm=round(result.distance_km),
+            durationMinutes=result.duration_minutes,
+            geometry=result.geometry,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=503, detail="Routing unavailable") from e
 
 
 @router.post("/report", response_model=RideReportSchema)
