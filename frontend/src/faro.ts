@@ -1,11 +1,15 @@
-import { getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk'
+import { getWebInstrumentations, initializeFaro, type Faro } from '@grafana/faro-web-sdk'
 import { TracingInstrumentation } from '@grafana/faro-web-tracing'
+import { ReactIntegration, createReactRouterV6Options } from '@grafana/faro-react'
+import { createRoutesFromChildren, matchRoutes, Routes, useLocation, useNavigationType } from 'react-router-dom'
 import { getConfig } from './config'
+
+export let faro: Faro | null = null
 
 const collectorUrl = getConfig('VITE_FARO_COLLECTOR_URL')
 
 if (collectorUrl) {
-  const faro = initializeFaro({
+  faro = initializeFaro({
     url: collectorUrl,
     app: {
       name: 'bike-weather-frontend',
@@ -19,6 +23,15 @@ if (collectorUrl) {
         instrumentationOptions: {
           propagateTraceHeaderCorsUrls: [new RegExp(`${window.location.origin}/api`)],
         },
+      }),
+      new ReactIntegration({
+        router: createReactRouterV6Options({
+          createRoutesFromChildren,
+          matchRoutes,
+          Routes,
+          useLocation,
+          useNavigationType,
+        }),
       }),
     ],
   })
@@ -35,7 +48,7 @@ if (collectorUrl) {
     const tag = clickable.tagName.toLowerCase()
     const href = clickable.getAttribute('href') || undefined
 
-    faro.api.pushEvent('click', {
+    faro!.api.pushEvent('click', {
       tag,
       text,
       path: window.location.pathname,

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, lazy, Suspense } from 'react'
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { FaroErrorBoundary, FaroRoutes } from '@grafana/faro-react'
 import { useTranslation } from 'react-i18next'
 import { AppShell } from './components/shell'
 import type { NavigationItem, FooterSection } from './components/shell'
@@ -153,7 +154,7 @@ function AppContent() {
       onLogout={handleLogout}
       onLanguageChange={(lang) => i18n.changeLanguage(lang)}
     >
-      <Routes>
+      <FaroRoutes>
         <Route path="/" element={<Navigate to="/planner" replace />} />
         <Route path="/planner/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
         <Route path="/planner" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
@@ -185,7 +186,7 @@ function AppContent() {
           <Route path="about" element={<Suspense fallback={null}><AdminAboutPage /></Suspense>} />
           <Route path="contacts" element={<Suspense fallback={null}><AdminContactsPage /></Suspense>} />
         </Route>
-      </Routes>
+      </FaroRoutes>
       <ToastContainer />
     </AppShell>
   )
@@ -193,10 +194,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <AppContent />
-      </ToastProvider>
-    </AuthProvider>
+    <FaroErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </AuthProvider>
+    </FaroErrorBoundary>
   )
 }
