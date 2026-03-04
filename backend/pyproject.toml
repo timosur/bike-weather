@@ -23,6 +23,7 @@ dependencies = [
   "opentelemetry-instrumentation-httpx>=0.41b0",
   "opentelemetry-instrumentation-sqlalchemy>=0.41b0",
   "gpxpy>=1.6.2",
+  "python-multipart>=0.0.22",
 ]
 
 [project.optional-dependencies]
