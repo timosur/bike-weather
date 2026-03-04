@@ -14,6 +14,7 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
   - `"sleep"` — overnight stop (advances the day, shows next-day start time + planned km)
 - The ride is automatically multi-day when ≥1 waypoint has type `"sleep"`
 - OSRM routes through all waypoints (start → W1 → W2 → … → destination)
+- **Optional imported geometry** — when a route is imported (future: GPX/Komoot), the exact polyline is stored and OSRM routing is skipped
 
 ## Backward Compatibility
 - Saved routes store `ride_input` as JSONB — old format (with `isMultiDay`/`dayStops`) must still load correctly.
@@ -31,15 +32,19 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
   class WaypointSchema(BaseModel):
       location: RideLocationSchema
       type: Literal["stop", "sleep"] = "stop"
-      plannedKm: float | None = None        # optional km for next segment
-      startTime: str | None = None           # HH:MM — departure time after sleep
+      name: str | None = None                 # optional label ("Lunch stop", "Mountain pass")
+      plannedKm: float | None = None          # optional km for next segment
+      startTime: str | None = None            # HH:MM — departure time after sleep
   ```
+- Update `RideLocationSchema`:
+  - `address: str | None = None` (make optional — imported routes may only have coordinates)
 - In `RideInputSchema`:
   - `destination: RideLocationSchema` (required, remove `| None = None`)
   - `distanceKm: float | None = None` (stays optional)
   - Replace `dayStops: list[DayStopSchema]` → `waypoints: list[WaypointSchema] = []`
   - Remove `isMultiDay: bool` field
-  - Remove `endDate: str | None` field
+  - Remove `endDate: str | None` field (frontend derives it from startDate + sleep waypoint count)
+  - Add `importedGeometry: list[list[float]] | None = None` (for future GPX/Komoot import — stores exact polyline, skips OSRM when present)
 - Add backward-compat `model_validator` to migrate old `dayStops` + `isMultiDay` → `waypoints`
 
 ### 2. Backend Routing Service — Waypoint Support
@@ -48,6 +53,7 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
 - Update `get_route()` signature to accept `waypoints: list[tuple[float, float]] = []`
 - Build OSRM coordinate string: `start;wp1;wp2;...;dest` (semicolon-separated)
 - Update cache key to include waypoints
+- **Add early-return path**: when `importedGeometry` is provided, skip OSRM call and return geometry directly (calculate distance from coordinate pairs)
 
 ### 3. Backend Route Preview Endpoint — Waypoint Support
 **Files:** `backend/app/api/routes/rides.py`
@@ -80,11 +86,14 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
 ### 6. Frontend Types
 **Files:** `frontend/src/components/ride-planner/types.ts`
 
-- Add `Waypoint` type with `location`, `type`, `plannedKm`, `startTime`
+- Add `Waypoint` type with `location`, `type`, `name`, `plannedKm`, `startTime`
 - Update `RideInput`:
   - `destination: RideLocation` (required, not optional)
   - Remove `isMultiDay`, `endDate`, `dayStops`
   - Add `waypoints: Waypoint[]`
+  - Add `importedGeometry?: number[][]` (for future route import)
+- Update `RideLocation`:
+  - `address` becomes optional (`address?: string`)
 
 ### 7. Frontend RidePlanner — Destination Mandatory + Remove Multi-Day Toggle
 **Files:** `frontend/src/components/ride-planner/RidePlanner.tsx`
@@ -96,7 +105,7 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
 - Remove `DayLocationList` integration
 - Add new `WaypointList` component integration
 - Update route preview effect to include waypoint coordinates
-- Update `endDate` calculation from sleep waypoints
+- Derive `endDate` locally from startDate + count of sleep waypoints (no longer stored in schema)
 
 ### 8. Frontend WaypointList Component (replaces DayLocationList)
 **Files:** `frontend/src/components/ride-planner/WaypointList.tsx` (new)
@@ -105,6 +114,7 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
 - "Add waypoint" button
 - Each waypoint row:
   - Location picker (reuse existing component)
+  - Optional name/label input (placeholder: "Waypoint name")
   - Type toggle: stop 🚩 / sleep 🛏️
   - If sleep: start time input (default 08:00), planned km input
   - Remove button
@@ -127,7 +137,7 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
 **Files:** `frontend/src/i18n/locales/de.json`, `frontend/src/i18n/locales/en.json`
 
 - Remove: `addDestination`, `multiDayTour`, `overnightLocations`
-- Add: waypoint-related keys (addWaypoint, waypointStop, waypointSleep, removeWaypoint, etc.)
+- Add: waypoint-related keys (addWaypoint, waypointStop, waypointSleep, waypointName, removeWaypoint, etc.)
 - Update validation keys (destination now required)
 
 ### 12. Cleanup Old DayLocationList
@@ -140,6 +150,8 @@ Replace the current `isMultiDay` toggle + `dayStops` array + optional `destinati
 - Update existing tests for new schema (destination required, waypoints instead of dayStops)
 - Add test for backward-compat validator (old dayStops → waypoints migration)
 - Add test for routing with waypoints
+- Add test for `importedGeometry` early-return path in routing service
+- Add test for `RideLocationSchema` with missing address (coordinates only)
 
 ### 14. Frontend Build Verification
 - Run `cd frontend && npm run build` to verify TypeScript compiles
