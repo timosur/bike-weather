@@ -11,6 +11,7 @@ interface RuntimeConfig {
   VITE_AUTHENTIK_URL?: string
   VITE_AUTHENTIK_CLIENT_ID?: string
   VITE_TURNSTILE_SITE_KEY?: string
+  VITE_FARO_COLLECTOR_URL?: string
 }
 
 declare global {

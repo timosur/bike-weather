@@ -364,6 +364,14 @@ def main():
                         "matching_mode": "strict",
                         "url": "http://localhost:5173/auth/callback",
                     },
+                    {
+                        "matching_mode": "strict",
+                        "url": "https://bike-weather.com/auth/callback",
+                    },
+                    {
+                        "matching_mode": "strict",
+                        "url": "https://fahrrad-wetter.com/auth/callback",
+                    },
                 ],
                 "signing_key": cert_pk,
                 "access_code_validity": "minutes=10",

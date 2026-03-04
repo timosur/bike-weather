@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getSiteUrl, DOMAINS } from '@/lib/domain'
 
-const SITE_URL = 'https://bike-weather.com'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`
+const DEFAULT_OG_IMAGE_PATH = '/og-image.png'
 
 export interface SEOProps {
   /** i18n key prefix under "seo.*", e.g. "planner" → uses seo.planner.title / seo.planner.description */
@@ -21,12 +21,13 @@ export interface SEOProps {
 export function SEO({ titleKey, path, noIndex, ogImage, ogType = 'website' }: SEOProps) {
   const { t, i18n } = useTranslation()
 
+  const siteUrl = getSiteUrl()
   const title = t(`seo.${titleKey}.title`)
   const description = t(`seo.${titleKey}.description`)
-  const canonicalUrl = `${SITE_URL}${path}`
+  const canonicalUrl = `${siteUrl}${path}`
   const ogLocale = i18n.language === 'en' ? 'en_US' : 'de_DE'
   const ogLocaleAlt = i18n.language === 'en' ? 'de_DE' : 'en_US'
-  const image = ogImage || DEFAULT_OG_IMAGE
+  const image = ogImage || `${siteUrl}${DEFAULT_OG_IMAGE_PATH}`
 
   useEffect(() => {
     document.documentElement.lang = i18n.language
@@ -37,11 +38,11 @@ export function SEO({ titleKey, path, noIndex, ogImage, ogType = 'website' }: SE
       <title>{title}</title>
       <meta name="description" content={description} />
 
-      {/* Canonical & hreflang */}
+      {/* Canonical & cross-domain hreflang */}
       <link rel="canonical" href={canonicalUrl} />
-      <link rel="alternate" hrefLang="de" href={canonicalUrl} />
-      <link rel="alternate" hrefLang="en" href={canonicalUrl} />
-      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+      <link rel="alternate" hrefLang="de" href={`${DOMAINS.de}${path}`} />
+      <link rel="alternate" hrefLang="en" href={`${DOMAINS.en}${path}`} />
+      <link rel="alternate" hrefLang="x-default" href={`${DOMAINS.en}${path}`} />
 
       {/* Robots */}
       {noIndex && <meta name="robots" content="noindex, nofollow" />}

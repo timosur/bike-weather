@@ -13,12 +13,14 @@ from app.database import async_session, engine
 from app.middleware.locale import LocaleMiddleware
 from app.rate_limit import limiter
 from app.seed import run_seed
+from app.telemetry import init_telemetry
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    init_telemetry()
     try:
         async with async_session() as session:
             await run_seed(session)

@@ -2,56 +2,56 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://bike-weather.com/planner</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/planner" />
+    <loc>__SITE_URL__/planner</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/planner" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/planner" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/planner" />
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://bike-weather.com/faq</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/faq" />
+    <loc>__SITE_URL__/faq</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/faq" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/faq" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/faq" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://bike-weather.com/about</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/about" />
+    <loc>__SITE_URL__/about</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/about" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/about" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/about" />
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bike-weather.com/about-me</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/about-me" />
+    <loc>__SITE_URL__/about-me</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/about-me" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/about-me" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/about-me" />
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bike-weather.com/contact</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/contact" />
+    <loc>__SITE_URL__/contact</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/contact" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/contact" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/contact" />
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bike-weather.com/imprint</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/imprint" />
+    <loc>__SITE_URL__/imprint</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/imprint" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/imprint" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/imprint" />
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://bike-weather.com/privacy-policy</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://bike-weather.com/privacy-policy" />
+    <loc>__SITE_URL__/privacy-policy</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://fahrrad-wetter.com/privacy-policy" />
     <xhtml:link rel="alternate" hreflang="en" href="https://bike-weather.com/privacy-policy" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bike-weather.com/privacy-policy" />
     <changefreq>yearly</changefreq>
