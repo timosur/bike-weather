@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Info,
   X,
+  Import,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type {
@@ -58,6 +59,7 @@ export function RidePlanner({
   onWaypointLocationSearch,
   onDestinationSearch,
   destinationSuggestions = [],
+  onGpxImport,
   onSubmit,
   onDirtyChange,
   children,
@@ -78,13 +80,18 @@ export function RidePlanner({
     gravelStyle: initialValues?.gravelStyle ?? ((initialValues?.bikeType ?? 'gravel') === 'gravel' ? 'road' : null),
     waypoints: initialValues?.waypoints ?? [],
     destination: initialValues?.destination ?? null,
+    importedGeometry: initialValues?.importedGeometry,
   })
 
   const [durationManuallySet, setDurationManuallySet] = useState(!!initialValues?.durationMinutes)
   const [speedManuallySet, setSpeedManuallySet] = useState(!!initialValues?.averageSpeedKmh)
 
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [routePreview, setRoutePreview] = useState<RoutePreview | null>(null)
+  const [routePreview, setRoutePreview] = useState<RoutePreview | null>(
+    initialValues?.importedGeometry && initialValues.distanceKm
+      ? { geometry: initialValues.importedGeometry as [number, number][], distanceKm: initialValues.distanceKm, durationMinutes: 0 }
+      : null
+  )
   const [isPreviewLoading, setIsPreviewLoading] = useState(false)
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -122,6 +129,8 @@ export function RidePlanner({
     .map(wp => [wp.location.lat!, wp.location.lon!] as [number, number])
 
   useEffect(() => {
+    // Skip OSRM preview when imported geometry is already set
+    if (form.importedGeometry) return
     if (form.location?.lat && form.location?.lon && form.destination?.lat && form.destination?.lon) {
       setIsPreviewLoading(true)
       fetchRoutePreview(
@@ -240,6 +249,16 @@ export function RidePlanner({
           <p className="text-stone-500 dark:text-stone-400 text-sm">
             {t('planner.subheading')}
           </p>
+          {onGpxImport && (
+            <button
+              type="button"
+              onClick={onGpxImport}
+              className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors"
+            >
+              <Import className="w-3.5 h-3.5" strokeWidth={1.5} />
+              {t('planner.gpxImport.button')}
+            </button>
+          )}
         </div>
 
         {/* Restored from session banner */}

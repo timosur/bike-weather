@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,8 +10,11 @@ from app.database import get_session
 from app.models.saved_route import SavedRoute
 from app.models.user import User
 from app.rate_limit import limiter
+from app.schemas.gpx import GpxImportResponse, GpxLocationResponse
 from app.schemas.report import RideReportSchema
 from app.schemas.ride import RideInputSchema, RoutePreviewRequest, RoutePreviewSchema
+from app.services.geocoding import geocoding_service
+from app.services.gpx_parser import GpxEmptyError, GpxParseError, parse_gpx
 from app.services.recommendations import build_report
 from app.services.routing import routing_service
 from app.services.turnstile import verify_turnstile
@@ -79,3 +82,48 @@ async def create_report(
             await session.commit()
 
     return report
+
+
+@router.post("/import/gpx", response_model=GpxImportResponse)
+@limiter.limit("60/minute")
+async def import_gpx_route(request: Request, file: UploadFile) -> GpxImportResponse:
+    if not file.filename or not file.filename.lower().endswith(".gpx"):
+        raise HTTPException(status_code=422, detail="invalid_file")
+
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=422, detail="file_too_large")
+
+    try:
+        result = parse_gpx(content)
+    except GpxEmptyError:
+        raise HTTPException(status_code=422, detail="empty_gpx")
+    except GpxParseError:
+        raise HTTPException(status_code=422, detail="parse_error")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="internal_error") from e
+
+    start_loc = GpxLocationResponse(lat=result.start_lat, lon=result.start_lon)
+    end_loc = GpxLocationResponse(lat=result.end_lat, lon=result.end_lon)
+
+    try:
+        start_geo = await geocoding_service.reverse(result.start_lat, result.start_lon)
+        if start_geo:
+            start_loc.address = start_geo.get("shortText")
+    except Exception:
+        pass
+
+    try:
+        end_geo = await geocoding_service.reverse(result.end_lat, result.end_lon)
+        if end_geo:
+            end_loc.address = end_geo.get("shortText")
+    except Exception:
+        pass
+
+    return GpxImportResponse(
+        name=result.name,
+        geometry=result.geometry,
+        distanceKm=result.distance_km,
+        startLocation=start_loc,
+        endLocation=end_loc,
+    )

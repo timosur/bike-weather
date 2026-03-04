@@ -22,6 +22,7 @@ dependencies = [
   "opentelemetry-instrumentation-fastapi>=0.41b0",
   "opentelemetry-instrumentation-httpx>=0.41b0",
   "opentelemetry-instrumentation-sqlalchemy>=0.41b0",
+  "gpxpy>=1.6.2",
 ]
 
 [project.optional-dependencies]

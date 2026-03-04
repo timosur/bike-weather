@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { RidePlanner, RecentRides } from '../components/ride-planner'
+import { RidePlanner, RecentRides, GpxImportModal } from '../components/ride-planner'
+import type { GpxImportData } from '../components/ride-planner'
 import { UnsavedChangesDialog } from '../components/common/UnsavedChangesDialog'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import { useRideHistory } from '../hooks/useRideHistory'
@@ -47,6 +48,9 @@ export default function PlannerPage() {
   // Edit mode state (for routes with stored rideInput)
   const [editRouteId, setEditRouteId] = useState<string | null>(null)
   const [editOriginalInput, setEditOriginalInput] = useState<RideInput | null>(null)
+
+  // GPX import modal state
+  const [gpxModalOpen, setGpxModalOpen] = useState(false)
 
   // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
   const THROTTLE_THRESHOLD = 3
@@ -255,6 +259,34 @@ export default function PlannerPage() {
     setResetKey(k => k + 1)
   }
 
+  // GPX import: pre-fill the form with imported route data
+  const handleGpxImport = (data: GpxImportData) => {
+    const today = new Date().toISOString().slice(0, 10)
+    const now = new Date()
+    const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+    const importedInput: Partial<RideInput> = {
+      location: data.startLocation.address
+        ? { address: data.startLocation.address, lat: data.startLocation.lat, lon: data.startLocation.lon }
+        : { address: `${data.startLocation.lat.toFixed(4)}, ${data.startLocation.lon.toFixed(4)}`, lat: data.startLocation.lat, lon: data.startLocation.lon },
+      destination: data.endLocation.address
+        ? { address: data.endLocation.address, lat: data.endLocation.lat, lon: data.endLocation.lon }
+        : { address: `${data.endLocation.lat.toFixed(4)}, ${data.endLocation.lon.toFixed(4)}`, lat: data.endLocation.lat, lon: data.endLocation.lon },
+      distanceKm: Math.round(data.distanceKm * 10) / 10,
+      importedGeometry: data.geometry,
+      startDate: today,
+      startTime,
+    }
+
+    // Clear edit mode, set imported values, remount form
+    setEditRouteId(null)
+    setEditOriginalInput(null)
+    navigate('/planner', { replace: true })
+    setResetKey(k => k + 1)
+    // Store imported input so getInitialValues picks it up after remount
+    setUrlRouteInput(importedInput as RideInput)
+  }
+
   return (
     <div className="">
       <SEO titleKey="planner" path="/planner" />
@@ -307,6 +339,7 @@ export default function PlannerPage() {
         destinationSuggestions={destinationSuggestions}
         onSubmit={handleSubmit}
         onDirtyChange={setIsFormDirty}
+        onGpxImport={() => setGpxModalOpen(true)}
       >
         {history.length > 0 && (
           <RecentRides
@@ -328,6 +361,12 @@ export default function PlannerPage() {
           </div>
         )}
       </RidePlanner>
+
+      <GpxImportModal
+        open={gpxModalOpen}
+        onClose={() => setGpxModalOpen(false)}
+        onImport={handleGpxImport}
+      />
     </div>
   )
 }

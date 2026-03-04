@@ -212,6 +212,23 @@
       "distanceDesc": "Optionale Eingaben, die bei längeren Touren oder großem Höhengewinn zusätzliche Empfehlungen auslösen — etwa Verpflegung, Ersatzkleidung oder Schutz für alpine Bedingungen.",
       "multiDayTitle": "Mehrtagestouren",
       "multiDayDesc": "Du planst eine Tour über mehrere Tage? Du kannst für jeden Übernachtungsstopp einen Ort angeben. Das Wetter wird dann pro Etappe separat berechnet, damit du für jeden Tag die richtige Ausrüstung hast."
+    },
+    "gpxImport": {
+      "button": "GPX importieren",
+      "modalTitle": "GPX-Datei importieren",
+      "dropzone": "GPX-Datei hierher ziehen oder klicken zum Auswählen",
+      "selectedFile": "Ausgewählte Datei",
+      "importButton": "Importieren",
+      "importing": "Route wird geladen…",
+      "apply": "Route übernehmen",
+      "cancel": "Abbrechen",
+      "distance": "Distanz",
+      "errorInvalidFile": "Bitte wähle eine gültige GPX-Datei aus.",
+      "errorParseFailed": "Die GPX-Datei konnte nicht gelesen werden. Bitte überprüfe die Datei.",
+      "errorEmpty": "Die GPX-Datei enthält keine Routendaten.",
+      "errorTooLarge": "Die Datei ist zu groß. Maximal 10 MB erlaubt.",
+      "errorNetwork": "Der Import ist fehlgeschlagen. Bitte versuche es erneut.",
+      "hint": "Exportiere eine Route als GPX aus Komoot, Strava oder einer anderen App."
     }
   },
   "location": {
@@ -228,8 +245,8 @@
     "removeWaypoint": "Wegpunkt entfernen",
     "dayLabel": "Tag {{n}}",
     "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen",
-    "startTimeLabel": "Abfahrt",
-    "plannedKmLabel": "Geplante km"
+    "overnightDivider": "Übernachtung",
+    "departureNextDay": "Weiterfahrt am nächsten Tag um"
   },
   "report": {
     "share": "Teilen",

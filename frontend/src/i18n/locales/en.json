@@ -212,6 +212,23 @@
       "distanceDesc": "Optional inputs that trigger additional recommendations for longer tours or significant elevation gain — such as provisions, spare clothing, or protection for alpine conditions.",
       "multiDayTitle": "Multi-day tours",
       "multiDayDesc": "Planning a tour over several days? You can specify a location for each overnight stop. Weather is then calculated separately per stage, so you have the right gear for every day."
+    },
+    "gpxImport": {
+      "button": "Import GPX",
+      "modalTitle": "Import GPX file",
+      "dropzone": "Drop GPX file here or click to select",
+      "selectedFile": "Selected file",
+      "importButton": "Import",
+      "importing": "Loading route…",
+      "apply": "Apply route",
+      "cancel": "Cancel",
+      "distance": "Distance",
+      "errorInvalidFile": "Please select a valid GPX file.",
+      "errorParseFailed": "Could not read the GPX file. Please check the file.",
+      "errorEmpty": "The GPX file contains no route data.",
+      "errorTooLarge": "The file is too large. Maximum 10 MB allowed.",
+      "errorNetwork": "Import failed. Please try again.",
+      "hint": "Export a route as GPX from Komoot, Strava, or another app."
     }
   },
   "location": {
@@ -228,8 +245,8 @@
     "removeWaypoint": "Remove waypoint",
     "dayLabel": "Day {{n}}",
     "ridingDays": "{{count}} riding days · Weather fetched per day at each start location",
-    "startTimeLabel": "Departure",
-    "plannedKmLabel": "Planned km"
+    "overnightDivider": "Overnight stay",
+    "departureNextDay": "Departure next day at"
   },
   "report": {
     "share": "Share",

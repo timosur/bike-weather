@@ -16,7 +16,6 @@ export interface Waypoint {
   location: RideLocation;
   type: WaypointType;
   name?: string;
-  plannedKm?: number | null;
   startTime?: string;
 }
 
@@ -117,6 +116,8 @@ export interface RidePlannerProps {
   waypointLocationSuggestions?: LocationSuggestion[];
   /** Called when the user types in a waypoint location field */
   onWaypointLocationSearch?: (waypointIndex: number, query: string) => void;
+  /** Called when the user wants to open the GPX import dialog */
+  onGpxImport?: () => void;
   /** Called when the user submits the form with valid input */
   onSubmit: (input: RideInput) => void;
   /** Called when the form dirty state changes (true = has unsaved changes) */
