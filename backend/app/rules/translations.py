@@ -1048,6 +1048,11 @@ DAY_LABELS: dict[str, dict[str, str]] = {
 }
 
 RIDE_NAME_TEMPLATE: dict[str, str] = {
+    "de": "{start} → {end}",
+    "en": "{start} → {end}",
+}
+
+RIDE_NAME_TEMPLATE_NO_DEST: dict[str, str] = {
     "de": "{location} Fahrt",
     "en": "{location} Ride",
 }

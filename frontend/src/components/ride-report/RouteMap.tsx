@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import { LatLngBounds } from 'leaflet'
 import { Map } from '../../components/ui/map'
@@ -105,24 +106,27 @@ export function RouteMap({
         )}
 
       </Map>
-      
-      {/* Legend — only when wind segments are shown */}
-      {hasSegments && (
-        <div className="absolute bottom-4 left-4 right-4 bg-white/90 dark:bg-stone-900/90 backdrop-blur p-2 rounded-lg text-xs flex gap-3 justify-center shadow-sm z-[1000]">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="text-stone-700 dark:text-stone-300">Tailwind</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <span className="text-stone-700 dark:text-stone-300">Crosswind</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <span className="text-stone-700 dark:text-stone-300">Headwind</span>
-          </div>
-        </div>
-      )}
+    </div>
+  )
+}
+
+export function RouteMapLegend({ hasSegments }: { hasSegments: boolean }) {
+  const { t } = useTranslation()
+  if (!hasSegments) return null
+  return (
+    <div className="flex gap-4 justify-center pt-2 text-xs text-stone-400 dark:text-stone-500">
+      <div className="flex items-center gap-1.5">
+        <div className="w-2 h-2 rounded-full bg-green-500" />
+        <span>{t('report.windAnalysis.tailwind')}</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <div className="w-2 h-2 rounded-full bg-yellow-500" />
+        <span>{t('report.windAnalysis.crosswind')}</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <div className="w-2 h-2 rounded-full bg-red-500" />
+        <span>{t('report.windAnalysis.headwind')}</span>
+      </div>
     </div>
   )
 }

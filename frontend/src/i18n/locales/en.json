@@ -275,6 +275,7 @@
       "title": "Route Conditions",
       "headwind": "Headwind",
       "tailwind": "Tailwind",
+      "crosswind": "Crosswind",
       "neutral": "Neutral"
     },
     "noData": {

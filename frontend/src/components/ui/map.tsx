@@ -44,6 +44,7 @@ export function Map({ className, children, ...props }: MapProps) {
         {...props}
         className="w-full h-full"
         zoomControl={false}
+        scrollWheelZoom={false}
       >
         <TileLayer
           key={isDark ? 'dark' : 'light'}

@@ -49,7 +49,6 @@ export function WaypointList({
             ...wp,
             type,
             startTime: type === 'sleep' ? (wp.startTime ?? '08:00') : undefined,
-            plannedKm: type === 'sleep' ? wp.plannedKm : undefined,
           }
         : wp
     )
@@ -70,26 +69,9 @@ export function WaypointList({
     onChange(updated)
   }
 
-  const handleKmChange = (index: number, value: string) => {
-    const updated = waypoints.map((wp, i) =>
-      i === index ? { ...wp, plannedKm: value ? Number(value) : null } : wp
-    )
-    onChange(updated)
-  }
-
   // Calculate day numbers based on sleep waypoints
   const sleepCount = waypoints.filter(wp => wp.type === 'sleep').length
   const totalDays = sleepCount + 1
-
-  // Compute day number for display context
-  let currentDay = 1
-  const dayNumbers = waypoints.map(wp => {
-    if (wp.type === 'sleep') {
-      currentDay++
-      return currentDay
-    }
-    return currentDay
-  })
 
   return (
     <div className="space-y-3">
@@ -105,13 +87,6 @@ export function WaypointList({
           </div>
 
           <div className="flex-1 space-y-1.5">
-            {/* Day label for sleep waypoints */}
-            {wp.type === 'sleep' && (
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 dark:text-indigo-500">
-                {t('waypoints.dayLabel', { n: dayNumbers[index] })}
-              </span>
-            )}
-
             {/* Location picker */}
             <div className="flex items-start gap-2">
               <div className="flex-1">
@@ -166,37 +141,32 @@ export function WaypointList({
               />
             </div>
 
-            {/* Sleep-specific fields: start time + planned km */}
+            {/* Overnight day divider */}
             {wp.type === 'sleep' && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="relative">
-                  <Clock
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-stone-400 dark:text-stone-500 pointer-events-none"
-                    strokeWidth={1.5}
-                  />
-                  <input
-                    type="time"
-                    value={wp.startTime ?? '08:00'}
-                    onChange={e => handleStartTimeChange(index, e.target.value)}
-                    className="w-[110px] rounded-lg text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-1.5 pl-7 pr-2"
-                  />
-                </div>
-                <div className="relative w-24">
-                  <input
-                    type="number"
-                    min="1"
-                    max="999"
-                    value={wp.plannedKm ?? ''}
-                    onChange={e => handleKmChange(index, e.target.value)}
-                    placeholder="km"
-                    className="w-full rounded-lg text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-1.5 pl-3 pr-8"
-                  />
-                  <span
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
-                    style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-                  >
-                    km
+              <div className="mt-2 rounded-lg border border-indigo-200 dark:border-indigo-800/50 bg-indigo-50/50 dark:bg-indigo-950/20 px-3 py-2.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1 h-px bg-indigo-200 dark:bg-indigo-800/50" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 dark:text-indigo-500 flex items-center gap-1">
+                    🛏️ {t('waypoints.overnightDivider')}
                   </span>
+                  <div className="flex-1 h-px bg-indigo-200 dark:bg-indigo-800/50" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-indigo-500 dark:text-indigo-400 whitespace-nowrap">
+                    {t('waypoints.departureNextDay')}
+                  </span>
+                  <div className="relative">
+                    <Clock
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-indigo-400 dark:text-indigo-500 pointer-events-none"
+                      strokeWidth={1.5}
+                    />
+                    <input
+                      type="time"
+                      value={wp.startTime ?? '08:00'}
+                      onChange={e => handleStartTimeChange(index, e.target.value)}
+                      className="w-[110px] rounded-lg text-xs bg-white dark:bg-stone-800 border border-indigo-200 dark:border-indigo-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 focus:border-indigo-400 dark:focus:border-indigo-600 transition-all py-1.5 pl-7 pr-2"
+                    />
+                  </div>
                 </div>
               </div>
             )}

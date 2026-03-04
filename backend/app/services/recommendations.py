@@ -17,6 +17,7 @@ from app.rules.translations import (
     DAY_LABELS,
     INTENSITY_LABELS,
     RIDE_NAME_TEMPLATE,
+    RIDE_NAME_TEMPLATE_NO_DEST,
     RIDING_STYLE_TEMPLATE,
     get_condition_reason_translation,
     get_wmo_description,
@@ -674,8 +675,8 @@ async def build_report(
             day_speeds.append(avg_speed)
             day_start_times.append(wp.startTime or f"{day_start_hour:02d}:00")
     else:
-        # Single-day ride
-        end_hour = min(start_hour + math.ceil(duration_minutes / 60), 23)
+        # Single-day ride (allow >23 for overnight rides crossing midnight)
+        end_hour = start_hour + math.ceil(duration_minutes / 60)
         day_locations.append(
             (
                 ride_input.location.address or "",
@@ -735,16 +736,18 @@ async def build_report(
                 route_weather_data = None
 
         # Extract ride-window hours for rules aggregation
+        # For overnight rides (ride_end_h > 23), collect current-day portion first;
+        # next-day hours are appended after the next-day fetch below.
         if route_weather_data:
             ride_hours = _collect_route_ride_hours(
-                route_weather_data, ride_start_h, ride_end_h
+                route_weather_data, ride_start_h, min(ride_end_h, 23)
             )
         else:
             ride_hours = [
                 h
                 for h in full_day_window.hours
                 if int(h.hour.split(":")[0]) >= ride_start_h
-                and int(h.hour.split(":")[0]) <= ride_end_h
+                and int(h.hour.split(":")[0]) <= min(ride_end_h, 23)
             ]
 
         # Compute chart display window
@@ -754,9 +757,9 @@ async def build_report(
             chart_start = 6
             chart_end = 22
         else:
-            # Single-day: ride window ± 3 hours buffer
+            # Single-day: ride window ± 3 hours buffer (allow >23 for overnight)
             chart_start = max(0, ride_start_h - 3)
-            chart_end = min(ride_end_h + 3, 23)
+            chart_end = ride_end_h + 3
 
         # Build chart hours: route-aware or start-location
         if route_weather_data and ride_input.distanceKm and avg_speed > 0:
@@ -793,6 +796,14 @@ async def build_report(
                     for h in next_day_window.hours
                 ]
                 chart_hours.extend(relabeled)
+                # Extend ride_hours with next-day hours within ride window
+                if ride_end_h > 23:
+                    next_day_ride_end = ride_end_h - 24
+                    ride_hours.extend(
+                        h
+                        for h in next_day_window.hours
+                        if int(h.hour.split(":")[0]) <= next_day_ride_end
+                    )
             except Exception:
                 pass  # gracefully degrade — just show current day
         # Build worst-case summary from ride window hours for rules
@@ -853,7 +864,7 @@ async def build_report(
             forecast,
             distance_km=ride_input.distanceKm,
             ride_start_time=ride_input.startTime,
-            ride_end_time=f"{ride_end_h:02d}:00",
+            ride_end_time=f"{ride_end_h % 24:02d}:00",
             bike_type=ride_input.bikeType,
             intensity=ride_input.intensity,
             locale=locale,
@@ -886,8 +897,12 @@ async def build_report(
             st_total_min = int(st_parts[0]) * 60 + int(st_parts[1])
         except (ValueError, IndexError):
             st_total_min = ride_start_h * 60
-        et_total_min = min(st_total_min + day_durations[day_idx], 23 * 60 + 59)
-        actual_end_time = f"{et_total_min // 60:02d}:{et_total_min % 60:02d}"
+        et_total_min = st_total_min + day_durations[day_idx]
+        et_h = et_total_min // 60
+        et_m = et_total_min % 60
+        if et_h >= 24:
+            et_h -= 24
+        actual_end_time = f"{et_h:02d}:{et_m:02d}"
 
         day_forecasts.append(
             DayForecastSchema(
@@ -962,8 +977,15 @@ async def build_report(
 
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",
-        rideName=RIDE_NAME_TEMPLATE[locale].format(
-            location=ride_input.location.address or ""
+        rideName=(
+            RIDE_NAME_TEMPLATE[locale].format(
+                start=ride_input.location.address or "",
+                end=ride_input.destination.address or "",
+            )
+            if ride_input.destination and ride_input.destination.address
+            else RIDE_NAME_TEMPLATE_NO_DEST[locale].format(
+                location=ride_input.location.address or ""
+            )
         ),
         startLocation=ride_input.location.address or "",
         ridingStyle=RIDING_STYLE_TEMPLATE[locale].format(

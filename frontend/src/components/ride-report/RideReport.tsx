@@ -10,7 +10,7 @@ import { EquipmentList } from './EquipmentList'
 import { ClothingItemCard } from './ClothingItemCard'
 import { TipsList } from './TipsList'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
-import { RouteMap } from './RouteMap'
+import { RouteMap, RouteMapLegend } from './RouteMap'
 import { StickyActionBar } from './StickyActionBar'
 import { DayTimeline } from './DayTimeline'
 
@@ -242,6 +242,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               className="w-full h-full"
             />
           </div>
+          <RouteMapLegend hasSegments={!!(report.routeSegments && report.routeSegments.some(s => s.geometry && s.geometry.length >= 2))} />
         </section>
       )}
 
