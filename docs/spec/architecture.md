@@ -88,6 +88,47 @@ make test-agent     # pytest
 make test-frontend  # Playwright E2E
 ```
 
+## Observability
+
+### Frontend (Grafana Faro)
+
+The frontend includes the Grafana Faro Web SDK (`@grafana/faro-web-sdk` + `@grafana/faro-web-tracing`), initialized in `src/faro.ts` before React renders. When `VITE_FARO_COLLECTOR_URL` is set, Faro captures:
+
+- **Errors:** Uncaught exceptions and promise rejections
+- **Web Vitals:** Core Web Vitals metrics (LCP, FID, CLS)
+- **Console logs:** Captured and forwarded
+- **Traces:** W3C trace context propagated on `/api` requests, linking frontend spans to backend spans
+- **Click events:** Global click handler reports button/link clicks as custom events (tag, text, path, href)
+- **Session tracking:** Automatic session identification
+
+When `VITE_FARO_COLLECTOR_URL` is empty (local dev), Faro is not initialized — zero overhead.
+
+### Backend (OpenTelemetry)
+
+The backend uses OpenTelemetry SDK configured in `app/telemetry.py`, initialized during FastAPI lifespan startup. When `OTEL_EXPORTER_OTLP_ENDPOINT` is set, it configures:
+
+- **TracerProvider** with OTLP gRPC exporter → Grafana Alloy
+- **FastAPI instrumentation** — automatic span creation for HTTP requests
+- **httpx instrumentation** — spans for outbound HTTP calls (weather API, geocoding, etc.)
+- **SQLAlchemy instrumentation** — spans for database queries with SQL commenter
+
+Service name defaults to `bike-weather-backend` (configurable via `OTEL_SERVICE_NAME`). When endpoint is not configured (local dev), telemetry is disabled.
+
+### Telemetry Pipeline (Production)
+
+```
+Browser (Faro SDK)
+  ↓ POST /collect
+Grafana Alloy (monitoring namespace)
+  ├─→ Loki (logs, errors, click events)
+  ├─→ Tempo (traces — browser + backend spans)
+  └─→ Prometheus (Web Vitals, custom metrics)
+
+FastAPI (OTel SDK)
+  ↓ OTLP gRPC
+Alloy → Tempo (correlated backend spans)
+```
+
 ## Key Backend Patterns
 
 - **Route → Service → Model:** Route handlers in `app/api/routes/` call services in `app/services/`, which operate on models in `app/models/`.

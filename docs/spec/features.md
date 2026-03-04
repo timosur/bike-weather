@@ -99,3 +99,11 @@ View submitted contact/feedback messages with search and category filtering.
 ## Agent (CLI Tool)
 
 LLM-powered product scraper that uses OpenAI and Anthropic models to extract cycling product data from configured shop websites and publish it to the database. Runs as a standalone CLI, not part of the web application.
+
+## Observability & Telemetry
+
+- **Frontend error tracking:** Automatic capture of JS errors, unhandled promise rejections via Grafana Faro
+- **Web Vitals monitoring:** Core Web Vitals (LCP, FID, CLS) reported to Grafana
+- **Click tracking:** Global event listener reports button and link clicks as Faro custom events with element tag, text content, page path, and href
+- **Distributed tracing:** W3C trace context propagation links frontend browser spans through backend API calls to database queries
+- **Backend instrumentation:** OpenTelemetry auto-instruments FastAPI routes, httpx calls, and SQLAlchemy queries
