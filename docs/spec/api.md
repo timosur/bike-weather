@@ -26,6 +26,7 @@ All endpoints are mounted under the `/api` prefix. Auth column indicates: 🔓 p
 | Method | Path | Auth | Rate Limit | Description |
 |--------|------|------|------------|-------------|
 | POST | `/api/rides/report` | 🔓 | 20/min | Generate a ride weather report with recommendations. Optional `route_id` query param to update saved route condition. Accepts optional auth token. |
+| POST | `/api/rides/import/gpx` | 🔓 | 60/min | Import a route from a GPX file upload. Parses tracks/routes, extracts geometry, reverse-geocodes start/end. Max 10 MB. |
 
 ## Routes (`/api/routes`)
 

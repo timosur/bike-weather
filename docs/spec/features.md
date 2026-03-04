@@ -11,6 +11,7 @@ The core feature. Users enter ride details (location, date, time, bike type, int
 - **Location search:** Autocomplete via geocoding service (Nominatim)
 - **Reverse geocoding:** "Use my location" button resolves lat/lon to an address
 - **Ride report generation:** Calls weather API, runs rule engine, returns structured recommendations
+- **GPX import:** Upload a `.gpx` file (from Komoot, Strava, etc.) to pre-fill the planner with the route geometry, start/end locations, and distance. Backend parses with `gpxpy`, supports both `<trk>` and `<rte>` elements.
 - **Captcha:** Optional Turnstile verification after a throttle threshold
 
 ### Ride Report (Route: `/report`, `/report/:routeId`)
