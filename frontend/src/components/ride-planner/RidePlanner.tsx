@@ -395,37 +395,6 @@ export function RidePlanner({
               </div>
             </div>
 
-            {/* Distance (optional — auto-filled from routing) */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                {t('planner.label.distance')}
-              </label>
-              <div className="relative">
-                <Route
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
-                  strokeWidth={1.5}
-                />
-                <input
-                  type="number"
-                  min="1"
-                  max="999"
-                  value={form.distanceKm ?? ''}
-                  onChange={e => {
-                    markDirty()
-                    setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
-                  }}
-                  placeholder={t('planner.placeholder.egDistance')}
-                  className={`${inputBase} pl-9 pr-12 ${inputNormal}`}
-                />
-                <span
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
-                  style={{ fontFamily: 'IBM Plex Mono, monospace' }}
-                >
-                  km
-                </span>
-              </div>
-            </div>
-
             {/* Bike Type */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
@@ -562,6 +531,38 @@ export function RidePlanner({
 
               {showAdvanced && (
                 <div className="space-y-3">
+                  {/* Distance (optional — auto-filled from routing or GPX import) */}
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                      {t('planner.label.distance')}
+                    </label>
+                    <div className="relative">
+                      <Route
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                        strokeWidth={1.5}
+                      />
+                      <input
+                        type="number"
+                        min="0.1"
+                        max="999"
+                        step="0.1"
+                        value={form.distanceKm ?? ''}
+                        onChange={e => {
+                          markDirty()
+                          setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
+                        }}
+                        placeholder={t('planner.placeholder.egDistance')}
+                        className={`${inputBase} pl-9 pr-12 ${inputNormal}`}
+                      />
+                      <span
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
+                        style={{ fontFamily: 'IBM Plex Mono, monospace' }}
+                      >
+                        km
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                       {t('planner.label.elevation')}
