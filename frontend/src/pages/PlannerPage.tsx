@@ -51,6 +51,7 @@ export default function PlannerPage() {
 
   // GPX import modal state
   const [gpxModalOpen, setGpxModalOpen] = useState(false)
+  const [gpxImportInput, setGpxImportInput] = useState<Partial<RideInput> | null>(null)
 
   // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
   const THROTTLE_THRESHOLD = 3
@@ -250,9 +251,10 @@ export default function PlannerPage() {
     clearFormState()
     clearSuggestions()
     clearDetectedLocation()
-    // Clear edit mode
+    // Clear edit mode and GPX import
     setEditRouteId(null)
     setEditOriginalInput(null)
+    setGpxImportInput(null)
     // Navigate to clean planner URL (removes routeId from path)
     navigate('/planner', { replace: true, state: { reset: true } })
     // Increment reset key to force RidePlanner remount with fresh defaults
@@ -281,10 +283,9 @@ export default function PlannerPage() {
     // Clear edit mode, set imported values, remount form
     setEditRouteId(null)
     setEditOriginalInput(null)
+    setGpxImportInput(importedInput)
     navigate('/planner', { replace: true })
     setResetKey(k => k + 1)
-    // Store imported input so getInitialValues picks it up after remount
-    setUrlRouteInput(importedInput as RideInput)
   }
 
   return (
@@ -322,7 +323,7 @@ export default function PlannerPage() {
       {/* Planner form with recent rides inside */}
       <RidePlanner
         key={`form-${resetKey}-${editRouteId ?? ''}`}
-        initialValues={resetKey > 0 ? undefined : getInitialValues()}
+        initialValues={gpxImportInput ?? (resetKey > 0 ? undefined : getInitialValues())}
         detectedLocation={detectedLocation}
         locationSuggestions={suggestions}
         waypointLocationSuggestions={waypointSuggestions}
