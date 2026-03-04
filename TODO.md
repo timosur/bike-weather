@@ -2,6 +2,6 @@
 - Feature: Add web insights via Plausible (needs to be hosted in my cluster, too)
 - Chore: Check for e2e tests and maybe just record the most important flows
 - Feature: GPX Import for real route
-- Feature: Import from komoot or strava route
+- Feature: Import from komoot route
 - Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
 - Docs: Create a product vision, maybe as part of the documentation

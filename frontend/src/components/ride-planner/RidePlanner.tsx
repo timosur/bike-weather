@@ -293,6 +293,16 @@ export function RidePlanner({
               />
             </div>
 
+            {/* Waypoints (between start and destination) */}
+            <div className="space-y-1.5">
+              <WaypointList
+                waypoints={form.waypoints}
+                suggestions={waypointLocationSuggestions}
+                onWaypointSearch={onWaypointLocationSearch}
+                onChange={(waypoints: Waypoint[]) => setForm(f => ({ ...f, waypoints }))}
+              />
+            </div>
+
             {/* Destination Picker — always visible (required) */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
@@ -309,19 +319,6 @@ export function RidePlanner({
                 }}
                 placeholder={t('planner.placeholder.destination')}
                 error={errors.destination}
-              />
-            </div>
-
-            {/* Waypoints (between start and destination) */}
-            <div className="space-y-1.5">
-              <WaypointList
-                startLocation={form.location}
-                startDate={form.startDate}
-                startTime={form.startTime}
-                waypoints={form.waypoints}
-                suggestions={waypointLocationSuggestions}
-                onWaypointSearch={onWaypointLocationSearch}
-                onChange={(waypoints: Waypoint[]) => setForm(f => ({ ...f, waypoints }))}
               />
             </div>
 

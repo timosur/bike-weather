@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     TURNSTILE_ENABLED: bool = True
     OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
     OTEL_SERVICE_NAME: str = "bike-weather-backend"
+    APP_VERSION: str = "0.0.0"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

@@ -1,12 +1,9 @@
 import { Plus, Minus, Clock, MapPin, Moon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { RideLocation, Waypoint, WaypointType, LocationSuggestion } from './types'
+import type { Waypoint, WaypointType, LocationSuggestion } from './types'
 import { LocationPicker } from './LocationPicker'
 
 interface WaypointListProps {
-  startLocation: RideLocation | null
-  startDate?: string
-  startTime?: string
   waypoints: Waypoint[]
   suggestions?: LocationSuggestion[]
   onWaypointSearch?: (waypointIndex: number, query: string) => void
@@ -14,9 +11,6 @@ interface WaypointListProps {
 }
 
 export function WaypointList({
-  startLocation,
-  startDate,
-  startTime,
   waypoints,
   suggestions = [],
   onWaypointSearch,
@@ -99,23 +93,6 @@ export function WaypointList({
 
   return (
     <div className="space-y-3">
-      {/* Start location context */}
-      <div className="flex items-center gap-2 text-xs text-stone-400 dark:text-stone-500">
-        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 shrink-0">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        </div>
-        <div className="flex flex-col">
-          <span className="font-medium text-stone-600 dark:text-stone-400">
-            {t('waypoints.dayLabel', { n: 1 })}: {startLocation?.address || t('planner.label.startLocation')}
-          </span>
-          {startDate && (
-            <span className="text-[10px] text-stone-400 dark:text-stone-500">
-              {startDate}{startTime ? ` · ${startTime}` : ''}
-            </span>
-          )}
-        </div>
-      </div>
-
       {/* Waypoints */}
       {waypoints.map((wp, index) => (
         <div key={index} className="flex items-start gap-2">

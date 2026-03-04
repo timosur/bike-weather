@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir .
 # Runtime stage — minimal image without build tools
 FROM python:3.12-slim
 
+ARG APP_VERSION=0.0.0
+ENV APP_VERSION=${APP_VERSION}
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libpq5 && \
     rm -rf /var/lib/apt/lists/* && \

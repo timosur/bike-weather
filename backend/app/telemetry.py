@@ -32,7 +32,7 @@ def init_telemetry() -> None:
     provider.add_span_processor(BatchSpanProcessor(exporter))
     trace.set_tracer_provider(provider)
 
-    FastAPIInstrumentor.instrument()
+    FastAPIInstrumentor().instrument()
     HTTPXClientInstrumentor().instrument()
     SQLAlchemyInstrumentor().instrument(enable_commenter=True)
 
