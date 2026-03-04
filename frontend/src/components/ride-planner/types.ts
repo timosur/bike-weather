@@ -4,19 +4,19 @@ export type RidingIntensity = "gemuetlich" | "moderat" | "sportlich";
 
 export type GravelStyle = "road" | "offroad";
 
+export type WaypointType = "stop" | "sleep";
+
 export interface RideLocation {
-  address: string;
+  address?: string;
   lat?: number;
   lon?: number;
 }
 
-export interface DayStop {
+export interface Waypoint {
   location: RideLocation;
-  /** Planned km for this day (optional) */
+  type: WaypointType;
+  name?: string;
   plannedKm?: number | null;
-  /** Start date for this day (ISO YYYY-MM-DD, auto-calculated from main startDate + index) */
-  startDate?: string;
-  /** Start time for this day (HH:MM, defaults to 08:00) */
   startTime?: string;
 }
 
@@ -24,8 +24,6 @@ export interface RideInput {
   location: RideLocation | null;
   startDate: string; // ISO date string: YYYY-MM-DD
   startTime: string; // HH:MM
-  endDate: string | null; // auto-calculated from number of days, null if single-day
-  isMultiDay: boolean;
   bikeType: BikeType;
   intensity: RidingIntensity;
   /** Optional distance in km */
@@ -38,10 +36,12 @@ export interface RideInput {
   averageSpeedKmh?: number | null;
   /** Gravel riding style — only relevant when bikeType is "gravel" */
   gravelStyle?: GravelStyle | null;
-  /** Per-day overnight stops for multi-day tours (one per night) */
-  dayStops: DayStop[];
-  /** Optional destination for route planning */
-  destination?: RideLocation | null;
+  /** Waypoints between start and destination (stop = pass-through, sleep = overnight) */
+  waypoints: Waypoint[];
+  /** Destination for route planning (required) */
+  destination: RideLocation | null;
+  /** Imported route geometry — when present, OSRM routing is skipped */
+  importedGeometry?: number[][];
   /** Turnstile CAPTCHA token (sent when throttle threshold exceeded) */
   captchaToken?: string;
 }
@@ -69,6 +69,7 @@ export interface RidingIntensityOption {
 
 export interface ValidationErrors {
   location: string | null;
+  destination: string | null;
   startDate: string | null;
   startTime: string | null;
   bikeType: string | null;
@@ -108,14 +109,14 @@ export interface RidePlannerProps {
   onUseCurrentLocation?: () => void;
   /** Called when the user selects a location suggestion */
   onLocationSelect?: (suggestion: LocationSuggestion) => void;
-  /** Autocomplete suggestions for day stop location search */
-  dayStopLocationSuggestions?: LocationSuggestion[];
-  /** Called when the user types in a day stop location field */
-  onDayStopLocationSearch?: (stopIndex: number, query: string) => void;
   /** Called when the user types in the destination field */
   onDestinationSearch?: (query: string) => void;
   /** Autocomplete suggestions for destination search */
   destinationSuggestions?: LocationSuggestion[];
+  /** Autocomplete suggestions for waypoint location search */
+  waypointLocationSuggestions?: LocationSuggestion[];
+  /** Called when the user types in a waypoint location field */
+  onWaypointLocationSearch?: (waypointIndex: number, query: string) => void;
   /** Called when the user submits the form with valid input */
   onSubmit: (input: RideInput) => void;
   /** Called when the form dirty state changes (true = has unsaved changes) */

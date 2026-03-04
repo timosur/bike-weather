@@ -6,12 +6,12 @@ import { searchLocations, reverseGeocode } from '../api/geocoding'
 export function useLocationSearch() {
   const { t } = useTranslation()
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([])
-  const [dayStopSuggestions, setDayStopSuggestions] = useState<LocationSuggestion[]>([])
+  const [waypointSuggestions, setWaypointSuggestions] = useState<LocationSuggestion[]>([])
   const [destinationSuggestions, setDestinationSuggestions] = useState<LocationSuggestion[]>([])
   const [isLocating, setIsLocating] = useState(false)
   const [detectedLocation, setDetectedLocation] = useState<RideLocation | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const dayStopDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const waypointDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const destinationDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const searchLocation = useCallback((query: string) => {
@@ -30,18 +30,18 @@ export function useLocationSearch() {
     }, 300)
   }, [])
 
-  const searchDayStopLocation = useCallback((_stopIndex: number, query: string) => {
-    clearTimeout(dayStopDebounceRef.current)
+  const searchWaypointLocation = useCallback((_waypointIndex: number, query: string) => {
+    clearTimeout(waypointDebounceRef.current)
     if (query.length < 2) {
-      setDayStopSuggestions([])
+      setWaypointSuggestions([])
       return
     }
-    dayStopDebounceRef.current = setTimeout(async () => {
+    waypointDebounceRef.current = setTimeout(async () => {
       try {
         const data = await searchLocations(query)
-        setDayStopSuggestions(data)
+        setWaypointSuggestions(data)
       } catch {
-        setDayStopSuggestions([])
+        setWaypointSuggestions([])
       }
     }, 300)
   }, [])
@@ -94,12 +94,12 @@ export function useLocationSearch() {
 
   return {
     suggestions,
-    dayStopSuggestions,
+    waypointSuggestions,
     destinationSuggestions,
     isLocating,
     detectedLocation,
     searchLocation,
-    searchDayStopLocation,
+    searchWaypointLocation,
     searchDestination,
     useCurrentLocation,
     clearDetectedLocation,

@@ -114,10 +114,7 @@
       "elevation": "Höhenmeter",
       "duration": "Dauer",
       "averageSpeed": "Ø Geschw.",
-      "advancedOptions": "Erweiterte Optionen",
-      "multiDayTour": "Mehrtägige Tour",
-      "overnightLocations": "Übernachtungsorte",
-      "endDate": "Enddatum: {{date}}"
+      "advancedOptions": "Erweiterte Optionen"
     },
     "bikeType": {
       "rennrad": "Rennrad",
@@ -166,6 +163,7 @@
     },
     "validation": {
       "locationRequired": "Bitte gib einen Startort ein",
+      "destinationRequired": "Bitte gib einen Zielort ein",
       "dateRequired": "Datum erforderlich",
       "timeRequired": "Uhrzeit erforderlich",
       "distanceRequired": "Distanz ist erforderlich"
@@ -222,12 +220,16 @@
     "detecting": "Erkennung…",
     "currentLocation": "Aktueller Standort"
   },
-  "dayList": {
+  "waypoints": {
+    "addWaypoint": "Wegpunkt hinzufügen",
+    "waypointStop": "Stopp",
+    "waypointSleep": "Übernachtung",
+    "waypointName": "Wegpunkt-Name",
+    "removeWaypoint": "Wegpunkt entfernen",
     "dayLabel": "Tag {{n}}",
-    "overnightStop": "Übernachtungsstopp {{n}}…",
-    "addStop": "Übernachtungsstopp hinzufügen",
-    "removeDay": "Tag {{n}} entfernen",
-    "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen"
+    "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen",
+    "startTimeLabel": "Abfahrt",
+    "plannedKmLabel": "Geplante km"
   },
   "report": {
     "share": "Teilen",

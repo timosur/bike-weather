@@ -148,12 +148,11 @@ export default function ReportPage() {
               location: { address: route.startLocation },
               startDate: today,
               startTime,
-              endDate: null,
-              isMultiDay: false,
               bikeType: 'rennrad',
               intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
               distanceKm: route.totalDistance,
-              dayStops: [],
+              waypoints: [],
+              destination: null,
             }
             setSubmittedInput(input)
             hasFetched.current = true

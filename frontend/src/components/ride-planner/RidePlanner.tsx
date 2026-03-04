@@ -24,9 +24,9 @@ import type {
   RidingIntensity,
   GravelStyle,
   LocationSuggestion,
-  DayStop,
+  Waypoint,
 } from './types'
-import { DayLocationList } from './DayLocationList'
+import { WaypointList } from './WaypointList'
 import { LocationPicker } from './LocationPicker'
 import { fetchRoutePreview, type RoutePreview } from '../../api/rides'
 import { RouteMap } from '../ride-report/RouteMap'
@@ -36,12 +36,6 @@ const bikeIconMap: Record<string, React.ReactNode> = {
   mountain: <Mountain className="w-4 h-4" strokeWidth={1.5} />,
   trees: <Trees className="w-4 h-4" strokeWidth={1.5} />,
   'building-2': <Building2 className="w-4 h-4" strokeWidth={1.5} />,
-}
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().split('T')[0]
 }
 
 function formatTimeHHMM(date: Date): string {
@@ -60,8 +54,8 @@ export function RidePlanner({
   onLocationSearch,
   onUseCurrentLocation,
   onLocationSelect,
-  dayStopLocationSuggestions = [],
-  onDayStopLocationSearch,
+  waypointLocationSuggestions = [],
+  onWaypointLocationSearch,
   onDestinationSearch,
   destinationSuggestions = [],
   onSubmit,
@@ -69,14 +63,12 @@ export function RidePlanner({
   children,
 }: RidePlannerProps) {
   const today = new Date().toISOString().split('T')[0]
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
 
   const [form, setForm] = useState<RideInput>({
     location: initialValues?.location ?? null,
     startDate: initialValues?.startDate ?? today,
     startTime: initialValues?.startTime ?? formatTimeHHMM(new Date()),
-    endDate: initialValues?.endDate ?? null,
-    isMultiDay: initialValues?.isMultiDay ?? false,
     bikeType: initialValues?.bikeType ?? 'gravel',
     intensity: initialValues?.intensity ?? 'moderat',
     distanceKm: initialValues?.distanceKm ?? null,
@@ -84,7 +76,7 @@ export function RidePlanner({
     durationMinutes: initialValues?.durationMinutes ?? null,
     averageSpeedKmh: initialValues?.averageSpeedKmh ?? null,
     gravelStyle: initialValues?.gravelStyle ?? ((initialValues?.bikeType ?? 'gravel') === 'gravel' ? 'road' : null),
-    dayStops: initialValues?.dayStops ?? [],
+    waypoints: initialValues?.waypoints ?? [],
     destination: initialValues?.destination ?? null,
   })
 
@@ -92,7 +84,6 @@ export function RidePlanner({
   const [speedManuallySet, setSpeedManuallySet] = useState(!!initialValues?.averageSpeedKmh)
 
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [showDestination, setShowDestination] = useState(!!initialValues?.destination)
   const [routePreview, setRoutePreview] = useState<RoutePreview | null>(null)
   const [isPreviewLoading, setIsPreviewLoading] = useState(false)
 
@@ -126,15 +117,21 @@ export function RidePlanner({
   }, [isDirty, onDirtyChange])
 
   // Route Preview Effect
+  const waypointCoords = form.waypoints
+    .filter(wp => wp.location.lat != null && wp.location.lon != null)
+    .map(wp => [wp.location.lat!, wp.location.lon!] as [number, number])
+
   useEffect(() => {
     if (form.location?.lat && form.location?.lon && form.destination?.lat && form.destination?.lon) {
       setIsPreviewLoading(true)
-      fetchRoutePreview(form.location.lat, form.location.lon, form.destination.lat, form.destination.lon)
+      fetchRoutePreview(
+        form.location.lat, form.location.lon,
+        form.destination.lat, form.destination.lon,
+        waypointCoords
+      )
         .then(preview => {
           setRoutePreview(preview)
           setForm(f => ({ ...f, distanceKm: preview.distanceKm }))
-          // Update duration if not manually set?
-          // The autoEstimatedDuration logic will pick up the new distance automatically.
         })
         .catch(err => {
           console.error("Failed to fetch route preview", err)
@@ -144,24 +141,12 @@ export function RidePlanner({
     } else {
       setRoutePreview(null)
     }
-  }, [form.location?.lat, form.location?.lon, form.destination?.lat, form.destination?.lon])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.location?.lat, form.location?.lon, form.destination?.lat, form.destination?.lon, JSON.stringify(waypointCoords)])
 
   useEffect(() => {
     if (detectedLocation) setForm(f => ({ ...f, location: detectedLocation }))
   }, [detectedLocation])
-
-  useEffect(() => {
-    if (form.isMultiDay && form.dayStops.length > 0 && form.startDate) {
-      // Use the last stop's explicit date if available, otherwise calculate from startDate
-      const lastStop = form.dayStops[form.dayStops.length - 1]
-      const calculatedEnd = lastStop.startDate
-        ? lastStop.startDate
-        : addDays(form.startDate, form.dayStops.length)
-      setForm(f => ({ ...f, endDate: calculatedEnd }))
-    } else if (!form.isMultiDay) {
-      setForm(f => ({ ...f, endDate: null }))
-    }
-  }, [form.isMultiDay, form.dayStops, form.startDate])
 
   // Default speed for current bike type + intensity
   const defaultSpeed = (() => {
@@ -212,9 +197,9 @@ export function RidePlanner({
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!form.location) errs.location = t('planner.validation.locationRequired')
+    if (!form.destination) errs.destination = t('planner.validation.destinationRequired')
     if (!form.startDate) errs.startDate = t('planner.validation.dateRequired')
     if (!form.startTime) errs.startTime = t('planner.validation.timeRequired')
-    if (!form.distanceKm || form.distanceKm <= 0) errs.distance = t('planner.validation.distanceRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -308,44 +293,36 @@ export function RidePlanner({
               />
             </div>
 
-            {/* Destination Picker */}
+            {/* Destination Picker — always visible (required) */}
             <div className="space-y-1.5">
-              {!showDestination ? (
-                <button
-                  type="button"
-                  onClick={() => setShowDestination(true)}
-                  className="text-sm text-emerald-600 dark:text-emerald-400 font-medium hover:underline flex items-center gap-1 pl-1"
-                >
-                  <span className="text-lg leading-none">+</span> {t('planner.addDestination')}
-                </button>
-              ) : (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      {t('planner.label.destination')}
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowDestination(false)
-                        setForm(f => ({ ...f, destination: null }))
-                        setRoutePreview(null)
-                      }}
-                      className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
-                    >
-                      {t('common.remove')}
-                    </button>
-                  </div>
-                  <LocationPicker
-                    value={form.destination ?? null}
-                    suggestions={destinationSuggestions}
-                    onSearch={onDestinationSearch}
-                    onSelect={handleSelectDestination}
-                    onClear={() => setForm(f => ({ ...f, destination: null }))}
-                    placeholder={t('planner.placeholder.destination')}
-                  />
-                </div>
-              )}
+              <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                {t('planner.label.destination')} *
+              </label>
+              <LocationPicker
+                value={form.destination ?? null}
+                suggestions={destinationSuggestions}
+                onSearch={onDestinationSearch}
+                onSelect={handleSelectDestination}
+                onClear={() => {
+                  setForm(f => ({ ...f, destination: null }))
+                  setRoutePreview(null)
+                }}
+                placeholder={t('planner.placeholder.destination')}
+                error={errors.destination}
+              />
+            </div>
+
+            {/* Waypoints (between start and destination) */}
+            <div className="space-y-1.5">
+              <WaypointList
+                startLocation={form.location}
+                startDate={form.startDate}
+                startTime={form.startTime}
+                waypoints={form.waypoints}
+                suggestions={waypointLocationSuggestions}
+                onWaypointSearch={onWaypointLocationSearch}
+                onChange={(waypoints: Waypoint[]) => setForm(f => ({ ...f, waypoints }))}
+              />
             </div>
 
             {/* Route Preview Map */}
@@ -402,10 +379,10 @@ export function RidePlanner({
               </div>
             </div>
 
-            {/* Distance (mandatory) */}
+            {/* Distance (optional — auto-filled from routing) */}
             <div className="space-y-1">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                {form.isMultiDay ? t('planner.label.distanceDay1') : t('planner.label.distance')} *
+                {t('planner.label.distance')}
               </label>
               <div className="relative">
                 <Route
@@ -422,7 +399,7 @@ export function RidePlanner({
                     setForm(f => ({ ...f, distanceKm: e.target.value ? Number(e.target.value) : null }))
                   }}
                   placeholder={t('planner.placeholder.egDistance')}
-                  className={`${inputBase} pl-9 pr-12 ${errors.distance ? inputError : inputNormal}`}
+                  className={`${inputBase} pl-9 pr-12 ${inputNormal}`}
                 />
                 <span
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 dark:text-stone-500 pointer-events-none"
@@ -431,9 +408,6 @@ export function RidePlanner({
                   km
                 </span>
               </div>
-              {errors.distance && (
-                <p className="text-[10px] text-red-500 dark:text-red-400">{errors.distance}</p>
-              )}
             </div>
 
             {/* Bike Type */}
@@ -551,61 +525,6 @@ export function RidePlanner({
                   )
                 })}
               </div>
-            </div>
-
-            {/* Multi-day toggle */}
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setForm(f => ({
-                    ...f,
-                    isMultiDay: !f.isMultiDay,
-                    endDate: f.isMultiDay ? null : f.endDate,
-                    dayStops: f.isMultiDay ? [] : f.dayStops,
-                  }))
-                }
-                className="flex items-center gap-2.5 text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
-              >
-                <div
-                  className={`relative w-8 h-[18px] rounded-full transition-colors ${form.isMultiDay ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-700'
-                    }`}
-                >
-                  <div
-                    className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-all ${form.isMultiDay ? 'left-[18px]' : 'left-[2px]'
-                      }`}
-                  />
-                </div>
-                {t('planner.label.multiDayTour')}
-              </button>
-
-              {form.isMultiDay && (
-                <div className="space-y-3">
-                  {form.endDate && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
-                      <Calendar className="w-3.5 h-3.5 text-emerald-500" strokeWidth={1.5} />
-                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                        {t('planner.label.endDate', { date: new Date(form.endDate).toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }) })}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                      {t('planner.label.overnightLocations')}
-                    </label>
-                    <DayLocationList
-                      startLocation={form.location}
-                      startDate={form.startDate}
-                      startTime={form.startTime}
-                      dayStops={form.dayStops}
-                      suggestions={dayStopLocationSuggestions}
-                      onStopSearch={onDayStopLocationSearch}
-                      onChange={(dayStops: DayStop[]) => setForm(f => ({ ...f, dayStops }))}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Divider */}

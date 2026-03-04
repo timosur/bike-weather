@@ -4,11 +4,19 @@ import { LatLngBounds } from 'leaflet'
 import { Map } from '../../components/ui/map'
 import type { RouteSegment } from './types'
 
+interface UserWaypoint {
+  lat: number
+  lon: number
+  type: string  // "stop" | "sleep"
+  name?: string | null
+}
+
 interface RouteMapProps {
   startLocation: { lat: number; lon: number; label: string }
   destinationLocation?: { lat: number; lon: number; label: string }
   routeGeometry?: [number, number][]
   routeSegments?: RouteSegment[]
+  userWaypoints?: UserWaypoint[]
   className?: string
 }
 
@@ -25,6 +33,7 @@ export function RouteMap({
   destinationLocation,
   routeGeometry,
   routeSegments,
+  userWaypoints,
   className,
 }: RouteMapProps) {
   const bounds = useMemo(() => {
@@ -74,6 +83,16 @@ export function RouteMap({
             <div className="text-xs text-stone-500">Start</div>
           </Popup>
         </Marker>
+
+        {/* User Waypoint Markers */}
+        {userWaypoints && userWaypoints.map((wp, i) => (
+          <Marker key={`wp-${i}`} position={[wp.lat, wp.lon]}>
+            <Popup>
+              <div className="font-semibold">{wp.name || (wp.type === 'sleep' ? '🛏️ Overnight' : '🚩 Stop')}</div>
+              <div className="text-xs text-stone-500">{wp.type === 'sleep' ? 'Overnight stop' : 'Waypoint'}</div>
+            </Popup>
+          </Marker>
+        ))}
 
         {/* Destination Marker */}
         {destinationLocation && (

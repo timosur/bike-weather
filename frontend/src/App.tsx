@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, lazy, Suspense } from 'react'
-import { Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { Route, Routes, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { FaroErrorBoundary, FaroRoutes } from '@grafana/faro-react'
+import { faro } from './faro'
 import { useTranslation } from 'react-i18next'
 import { AppShell } from './components/shell'
 import type { NavigationItem, FooterSection } from './components/shell'
@@ -143,6 +144,8 @@ function AppContent() {
     isActive: location.pathname === item.href || location.pathname.startsWith(item.href + '/'),
   }))
 
+  const RoutesWrapper = faro ? FaroRoutes : Routes
+
   return (
     <AppShell
       navigationItems={itemsWithActive}
@@ -154,7 +157,7 @@ function AppContent() {
       onLogout={handleLogout}
       onLanguageChange={(lang) => i18n.changeLanguage(lang)}
     >
-      <FaroRoutes>
+      <RoutesWrapper>
         <Route path="/" element={<Navigate to="/planner" replace />} />
         <Route path="/planner/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
         <Route path="/planner" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
@@ -186,20 +189,20 @@ function AppContent() {
           <Route path="about" element={<Suspense fallback={null}><AdminAboutPage /></Suspense>} />
           <Route path="contacts" element={<Suspense fallback={null}><AdminContactsPage /></Suspense>} />
         </Route>
-      </FaroRoutes>
+      </RoutesWrapper>
       <ToastContainer />
     </AppShell>
   )
 }
 
 export default function App() {
-  return (
-    <FaroErrorBoundary>
-      <AuthProvider>
-        <ToastProvider>
-          <AppContent />
-        </ToastProvider>
-      </AuthProvider>
-    </FaroErrorBoundary>
+  const content = (
+    <AuthProvider>
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
+    </AuthProvider>
   )
+
+  return faro ? <FaroErrorBoundary>{content}</FaroErrorBoundary> : content
 }

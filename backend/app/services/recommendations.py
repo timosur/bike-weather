@@ -31,6 +31,7 @@ from app.schemas.report import (
     HourlyWeatherSchema,
     RideReportSchema,
     TipSchema,
+    UserWaypointSchema,
     WeatherDataSchema,
     RouteWaypointWeather,
     RouteSegment,
@@ -415,6 +416,8 @@ async def build_report(
     lon = ride_input.location.lon
     if lat is None or lon is None:
         # Attempt to geocode the address
+        if not ride_input.location.address:
+            raise ValueError("Location must have either coordinates or an address")
         results = await geocoding_service.search(ride_input.location.address, limit=1)
         if not results:
             raise ValueError(
@@ -435,15 +438,31 @@ async def build_report(
         destination_addr = ride_input.destination.address
 
         if dest_lat is None or dest_lon is None:
-            results = await geocoding_service.search(ride_input.destination.address, limit=1)
-            if results:
-                dest_lat = results[0]["lat"]
-                dest_lon = results[0]["lon"]
+            if ride_input.destination.address:
+                results = await geocoding_service.search(ride_input.destination.address, limit=1)
+                if results:
+                    dest_lat = results[0]["lat"]
+                    dest_lon = results[0]["lon"]
         
         if dest_lat and dest_lon:
             try:
-                # 1. Get Route
-                route_result = await routing_service.get_route(lat, lon, dest_lat, dest_lon)
+                # Collect waypoint coordinates for routing
+                wp_coords: list[tuple[float, float]] = []
+                for wp in ride_input.waypoints:
+                    wp_lat = wp.location.lat
+                    wp_lon = wp.location.lon
+                    if wp_lat is not None and wp_lon is not None:
+                        wp_coords.append((wp_lat, wp_lon))
+
+                # Use imported geometry if available, otherwise call OSRM
+                if ride_input.importedGeometry:
+                    from app.services.routing import RoutingService
+                    route_result = RoutingService.route_from_geometry(ride_input.importedGeometry)
+                else:
+                    route_result = await routing_service.get_route(
+                        lat, lon, dest_lat, dest_lon,
+                        waypoints=wp_coords if wp_coords else None,
+                    )
                 
                 # Override distance if not provided
                 if not ride_input.distanceKm:
@@ -599,12 +618,15 @@ async def build_report(
     day_speeds: list[float] = []
     day_start_times: list[str] = []  # actual HH:MM start times
 
-    if ride_input.isMultiDay and ride_input.dayStops:
+    is_multi_day = any(wp.type == "sleep" for wp in ride_input.waypoints)
+
+    if is_multi_day and ride_input.waypoints:
+        sleep_waypoints = [wp for wp in ride_input.waypoints if wp.type == "sleep"]
         # Day 1: start location
         end_hour_day1 = min(start_hour + math.ceil(duration_minutes / 60), 23)
         day_locations.append(
             (
-                ride_input.location.address,
+                ride_input.location.address or "",
                 lat,
                 lon,
                 ride_input.startDate,
@@ -615,27 +637,21 @@ async def build_report(
         day_durations.append(duration_minutes)
         day_speeds.append(avg_speed)
         day_start_times.append(ride_input.startTime or f"{start_hour:02d}:00")
-        # Subsequent days: day stops — use per-stop date/time when provided
-        for i, stop in enumerate(ride_input.dayStops):
-            # Date: use explicit per-stop date, or fallback to start + (i+1) days
-            if stop.startDate:
-                stop_date = stop.startDate
-            else:
-                stop_date = (start_date + timedelta(days=i + 1)).strftime("%Y-%m-%d")
-            # Start hour: use explicit per-stop time, or default 8:00
+        # Subsequent days: sleep waypoints
+        for i, wp in enumerate(sleep_waypoints):
+            stop_date = (start_date + timedelta(days=i + 1)).strftime("%Y-%m-%d")
             try:
                 day_start_hour = (
-                    int(stop.startTime.split(":")[0]) if stop.startTime else 8
+                    int(wp.startTime.split(":")[0]) if wp.startTime else 8
                 )
             except (ValueError, IndexError):
                 day_start_hour = 8
-            stop_lat = stop.location.lat or lat
-            stop_lon = stop.location.lon or lon
-            # Estimate per-day duration from planned km if available
-            if stop.plannedKm and stop.plannedKm > 0:
+            stop_lat = wp.location.lat or lat
+            stop_lon = wp.location.lon or lon
+            if wp.plannedKm and wp.plannedKm > 0:
                 day_duration = resolve_duration_minutes(
                     None,
-                    stop.plannedKm,
+                    wp.plannedKm,
                     ride_input.bikeType,
                     ride_input.intensity,
                     ride_input.averageSpeedKmh,
@@ -646,7 +662,7 @@ async def build_report(
             day_end_hour = min(day_start_hour + math.ceil(day_duration / 60), 23)
             day_locations.append(
                 (
-                    stop.location.address,
+                    wp.location.address or wp.name or "",
                     stop_lat,
                     stop_lon,
                     stop_date,
@@ -656,13 +672,13 @@ async def build_report(
             )
             day_durations.append(day_duration)
             day_speeds.append(avg_speed)
-            day_start_times.append(stop.startTime or f"{day_start_hour:02d}:00")
+            day_start_times.append(wp.startTime or f"{day_start_hour:02d}:00")
     else:
         # Single-day ride
         end_hour = min(start_hour + math.ceil(duration_minutes / 60), 23)
         day_locations.append(
             (
-                ride_input.location.address,
+                ride_input.location.address or "",
                 lat,
                 lon,
                 ride_input.startDate,
@@ -732,8 +748,8 @@ async def build_report(
             ]
 
         # Compute chart display window
-        is_multi_day = ride_input.isMultiDay and ride_input.dayStops
-        if is_multi_day:
+        is_multi_day_chart = is_multi_day
+        if is_multi_day_chart:
             # Multi-day: fixed 6:00–22:00 window for consistent chart width per day
             chart_start = 6
             chart_end = 22
@@ -794,9 +810,10 @@ async def build_report(
             # Compute wind exposure factor for this day's ride segment
             day_duration = (ride_end_h - ride_start_h) * 60
             day_distance = ride_input.distanceKm
-            if ride_input.isMultiDay and ride_input.dayStops and day_idx > 0:
-                stop = ride_input.dayStops[day_idx - 1]
-                day_distance = stop.plannedKm if stop.plannedKm else ride_input.distanceKm
+            if is_multi_day and day_idx > 0:
+                sleep_wps = [wp for wp in ride_input.waypoints if wp.type == "sleep"]
+                if day_idx - 1 < len(sleep_wps) and sleep_wps[day_idx - 1].plannedKm:
+                    day_distance = sleep_wps[day_idx - 1].plannedKm
             exposure = wind_exposure_factor(day_duration, day_distance)
             effective_wind = round(worst_wind * exposure, 1)
 
@@ -928,12 +945,27 @@ async def build_report(
     if len(day_forecasts) == 1:
         merged_tips = per_day_tips[0] if per_day_tips else []
 
+    # Build user waypoint schemas for the report
+    user_waypoints_schema: list[UserWaypointSchema] | None = None
+    if ride_input.waypoints:
+        uwp = []
+        for wp in ride_input.waypoints:
+            if wp.location.lat is not None and wp.location.lon is not None:
+                uwp.append(UserWaypointSchema(
+                    lat=wp.location.lat,
+                    lon=wp.location.lon,
+                    type=wp.type,
+                    name=wp.name,
+                ))
+        if uwp:
+            user_waypoints_schema = uwp
+
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",
         rideName=RIDE_NAME_TEMPLATE[locale].format(
-            location=ride_input.location.address
+            location=ride_input.location.address or ""
         ),
-        startLocation=ride_input.location.address,
+        startLocation=ride_input.location.address or "",
         ridingStyle=RIDING_STYLE_TEMPLATE[locale].format(
             bike=bike_label, intensity=intensity_label
         ),
@@ -946,6 +978,7 @@ async def build_report(
         tips=merged_tips,
         routeGeometry=[list(pt) for pt in route_geometry] if route_geometry else None,
         waypoints=waypoints_schema,
+        userWaypoints=user_waypoints_schema,
         routeSegments=route_segments_schema,
         destinationLocation=destination_addr,
     )

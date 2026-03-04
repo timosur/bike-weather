@@ -159,6 +159,13 @@ export interface RouteSegment {
   geometry?: [number, number][];
 }
 
+export interface UserWaypoint {
+  lat: number;
+  lon: number;
+  type: string;
+  name?: string;
+}
+
 export interface RideReport {
   id: string;
   rideName: string;
@@ -176,6 +183,7 @@ export interface RideReport {
   tips?: Tip[];
   routeGeometry?: [number, number][];
   waypoints?: RouteWaypointWeather[];
+  userWaypoints?: UserWaypoint[];
   routeSegments?: RouteSegment[];
 }
 

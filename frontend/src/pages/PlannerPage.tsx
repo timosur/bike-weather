@@ -23,12 +23,12 @@ export default function PlannerPage() {
 
   const {
     suggestions,
-    dayStopSuggestions,
+    waypointSuggestions,
     destinationSuggestions,
     isLocating,
     detectedLocation,
     searchLocation,
-    searchDayStopLocation,
+    searchWaypointLocation,
     searchDestination,
     useCurrentLocation,
     clearSuggestions,
@@ -200,12 +200,11 @@ export default function PlannerPage() {
             location: { address: route.startLocation },
             startDate: today,
             startTime,
-            endDate: null,
-            isMultiDay: false,
             bikeType: 'rennrad',
             intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
             distanceKm: route.totalDistance,
-            dayStops: [],
+            waypoints: [],
+            destination: null,
           }
           setUrlRouteInput(input)
           doSubmit(input, urlRouteId)
@@ -294,7 +293,7 @@ export default function PlannerPage() {
         initialValues={resetKey > 0 ? undefined : getInitialValues()}
         detectedLocation={detectedLocation}
         locationSuggestions={suggestions}
-        dayStopLocationSuggestions={dayStopSuggestions}
+        waypointLocationSuggestions={waypointSuggestions}
         bikeTypeOptions={bikeTypeOptions}
         intensityOptions={intensityOptions}
         isLoading={isLocating || isSubmitting}
@@ -303,7 +302,7 @@ export default function PlannerPage() {
         onLocationSearch={searchLocation}
         onUseCurrentLocation={useCurrentLocation}
         onLocationSelect={() => { }}
-        onDayStopLocationSearch={searchDayStopLocation}
+        onWaypointLocationSearch={searchWaypointLocation}
         onDestinationSearch={searchDestination}
         destinationSuggestions={destinationSuggestions}
         onSubmit={handleSubmit}

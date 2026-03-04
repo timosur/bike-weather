@@ -238,6 +238,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
               }}
               routeGeometry={report.routeGeometry}
               routeSegments={report.routeSegments}
+              userWaypoints={report.userWaypoints}
               className="w-full h-full"
             />
           </div>

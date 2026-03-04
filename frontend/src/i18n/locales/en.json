@@ -114,10 +114,7 @@
       "elevation": "Elevation",
       "duration": "Duration",
       "averageSpeed": "Avg. speed",
-      "advancedOptions": "Advanced options",
-      "multiDayTour": "Multi-day tour",
-      "overnightLocations": "Overnight locations",
-      "endDate": "End date: {{date}}"
+      "advancedOptions": "Advanced options"
     },
     "bikeType": {
       "rennrad": "Road bike",
@@ -166,6 +163,7 @@
     },
     "validation": {
       "locationRequired": "Please enter a start location",
+      "destinationRequired": "Please enter a destination",
       "dateRequired": "Date required",
       "timeRequired": "Time required",
       "distanceRequired": "Distance is required"
@@ -222,12 +220,16 @@
     "detecting": "Detecting…",
     "currentLocation": "Current location"
   },
-  "dayList": {
+  "waypoints": {
+    "addWaypoint": "Add waypoint",
+    "waypointStop": "Stop",
+    "waypointSleep": "Overnight",
+    "waypointName": "Waypoint name",
+    "removeWaypoint": "Remove waypoint",
     "dayLabel": "Day {{n}}",
-    "overnightStop": "Overnight stop {{n}}…",
-    "addStop": "Add overnight stop",
-    "removeDay": "Remove day {{n}}",
-    "ridingDays": "{{count}} riding days · Weather fetched per day at each start location"
+    "ridingDays": "{{count}} riding days · Weather fetched per day at each start location",
+    "startTimeLabel": "Departure",
+    "plannedKmLabel": "Planned km"
   },
   "report": {
     "share": "Share",

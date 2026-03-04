@@ -1,4 +1,5 @@
 import logging
+import math
 import time
 import asyncio
 from dataclasses import dataclass
@@ -30,8 +31,19 @@ class RoutingService:
         self._client = client
         self._cache: dict[str, tuple[float, RouteResult]] = {}
 
-    def _cache_key(self, start_lat: float, start_lon: float, dest_lat: float, dest_lon: float) -> str:
-        return f"{start_lat:.5f},{start_lon:.5f};{dest_lat:.5f},{dest_lon:.5f}"
+    def _cache_key(
+        self,
+        start_lat: float,
+        start_lon: float,
+        dest_lat: float,
+        dest_lon: float,
+        waypoints: list[tuple[float, float]] | None = None,
+    ) -> str:
+        key = f"{start_lat:.5f},{start_lon:.5f};{dest_lat:.5f},{dest_lon:.5f}"
+        if waypoints:
+            wp_str = ";".join(f"{lat:.5f},{lon:.5f}" for lat, lon in waypoints)
+            key += f";{wp_str}"
+        return key
 
     def _get_cached(self, key: str) -> RouteResult | None:
         if key in self._cache:
@@ -42,9 +54,14 @@ class RoutingService:
         return None
 
     async def get_route(
-        self, start_lat: float, start_lon: float, dest_lat: float, dest_lon: float
+        self,
+        start_lat: float,
+        start_lon: float,
+        dest_lat: float,
+        dest_lon: float,
+        waypoints: list[tuple[float, float]] | None = None,
     ) -> RouteResult:
-        cache_key = self._cache_key(start_lat, start_lon, dest_lat, dest_lon)
+        cache_key = self._cache_key(start_lat, start_lon, dest_lat, dest_lon, waypoints)
         cached = self._get_cached(cache_key)
         if cached is not None:
             return cached
@@ -58,7 +75,12 @@ class RoutingService:
             owns_client = True
 
         # OSRM expects "lon,lat"
-        coords = f"{start_lon},{start_lat};{dest_lon},{dest_lat}"
+        coord_parts = [f"{start_lon},{start_lat}"]
+        if waypoints:
+            for wp_lat, wp_lon in waypoints:
+                coord_parts.append(f"{wp_lon},{wp_lat}")
+        coord_parts.append(f"{dest_lon},{dest_lat}")
+        coords = ";".join(coord_parts)
         url = f"{OSRM_BASE_URL}/{coords}"
         params = {
             "overview": "full",
@@ -138,6 +160,26 @@ class RoutingService:
 
         self._cache[cache_key] = (time.monotonic(), result)
         return result
+
+    @staticmethod
+    def route_from_geometry(geometry: list[list[float]]) -> RouteResult:
+        """Build a RouteResult from pre-existing geometry (e.g. GPX import) without OSRM."""
+        coords = [(pt[0], pt[1]) for pt in geometry]
+        total_km = 0.0
+        for i in range(1, len(coords)):
+            lat1, lon1 = math.radians(coords[i - 1][0]), math.radians(coords[i - 1][1])
+            lat2, lon2 = math.radians(coords[i][0]), math.radians(coords[i][1])
+            dlat = lat2 - lat1
+            dlon = lon2 - lon1
+            a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+            total_km += 6371.0 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        # Estimate duration assuming 20 km/h average
+        duration_minutes = (total_km / 20.0) * 60 if total_km > 0 else 0
+        return RouteResult(
+            geometry=coords,
+            distance_km=total_km,
+            duration_minutes=duration_minutes,
+        )
 
 
 # Module-level singleton

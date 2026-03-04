@@ -11,7 +11,7 @@ from app.models.saved_route import SavedRoute
 from app.models.user import User
 from app.rate_limit import limiter
 from app.schemas.report import RideReportSchema
-from app.schemas.ride import RideInputSchema, RoutePreviewSchema
+from app.schemas.ride import RideInputSchema, RoutePreviewRequest, RoutePreviewSchema
 from app.services.recommendations import build_report
 from app.services.routing import routing_service
 from app.services.turnstile import verify_turnstile
@@ -20,17 +20,17 @@ from app.services.weather import WeatherServiceError
 router = APIRouter(prefix="/rides", tags=["rides"])
 
 
-@router.get("/preview", response_model=RoutePreviewSchema)
+@router.post("/preview", response_model=RoutePreviewSchema)
 @limiter.limit("60/minute")
 async def preview_route(
-    startLat: float,
-    startLon: float,
-    destLat: float,
-    destLon: float,
+    body: RoutePreviewRequest,
     request: Request,
 ) -> RoutePreviewSchema:
     try:
-        result = await routing_service.get_route(startLat, startLon, destLat, destLon)
+        wp_tuples = [(w[0], w[1]) for w in body.waypoints] if body.waypoints else None
+        result = await routing_service.get_route(
+            body.startLat, body.startLon, body.destLat, body.destLon, waypoints=wp_tuples
+        )
         return RoutePreviewSchema(
             distanceKm=round(result.distance_km),
             durationMinutes=result.duration_minutes,

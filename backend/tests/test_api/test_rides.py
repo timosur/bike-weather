@@ -27,6 +27,7 @@ VALID_RIDE_INPUT = {
     "bikeType": "rennrad",
     "intensity": "moderat",
     "distanceKm": 40,
+    "destination": {"address": "Friedrichshafen", "lat": 47.65, "lon": 9.48},
 }
 
 
@@ -116,3 +117,79 @@ async def test_report_endpoint_weather_unavailable_returns_503(
 
     response = await async_client.post("/api/rides/report", json=VALID_RIDE_INPUT)
     assert response.status_code == 503
+
+
+def test_schema_backward_compat_day_stops_to_waypoints():
+    """Old dayStops + isMultiDay format should auto-migrate to waypoints."""
+    from app.schemas.ride import RideInputSchema
+
+    old_input = {
+        "location": {"address": "Berlin", "lat": 52.52, "lon": 13.40},
+        "startDate": "2026-06-01",
+        "startTime": "08:00",
+        "bikeType": "gravel",
+        "intensity": "moderat",
+        "distanceKm": 80,
+        "isMultiDay": True,
+        "dayStops": [
+            {
+                "location": {"address": "Leipzig", "lat": 51.34, "lon": 12.37},
+                "plannedKm": 90,
+                "startTime": "09:00",
+            }
+        ],
+    }
+    schema = RideInputSchema(**old_input)
+    assert schema.dayStops is None
+    assert schema.isMultiDay is None
+    assert len(schema.waypoints) == 1
+    wp = schema.waypoints[0]
+    assert wp.type == "sleep"
+    assert wp.location.address == "Leipzig"
+    assert wp.plannedKm == 90
+    assert wp.startTime == "09:00"
+
+
+def test_schema_new_waypoints_format():
+    """New waypoints format should be accepted directly."""
+    from app.schemas.ride import RideInputSchema
+
+    new_input = {
+        "location": {"address": "Munich", "lat": 48.14, "lon": 11.58},
+        "startDate": "2026-06-01",
+        "startTime": "08:00",
+        "bikeType": "rennrad",
+        "intensity": "sportlich",
+        "distanceKm": 120,
+        "destination": {"address": "Salzburg", "lat": 47.80, "lon": 13.04},
+        "waypoints": [
+            {
+                "location": {"lat": 47.85, "lon": 12.13},
+                "type": "stop",
+                "name": "Lunch break",
+            },
+            {
+                "location": {"address": "Rosenheim", "lat": 47.86, "lon": 12.13},
+                "type": "sleep",
+                "plannedKm": 60,
+                "startTime": "08:30",
+            },
+        ],
+    }
+    schema = RideInputSchema(**new_input)
+    assert len(schema.waypoints) == 2
+    assert schema.waypoints[0].type == "stop"
+    assert schema.waypoints[0].name == "Lunch break"
+    assert schema.waypoints[1].type == "sleep"
+    assert schema.waypoints[1].plannedKm == 60
+    assert schema.destination is not None
+    assert schema.destination.address == "Salzburg"
+
+
+def test_schema_location_address_optional():
+    """RideLocationSchema should accept coordinates without address."""
+    from app.schemas.ride import RideLocationSchema
+
+    loc = RideLocationSchema(lat=48.14, lon=11.58)
+    assert loc.address is None
+    assert loc.lat == 48.14

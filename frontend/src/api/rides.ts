@@ -12,15 +12,19 @@ export async function fetchRoutePreview(
   startLat: number,
   startLon: number,
   destLat: number,
-  destLon: number
+  destLon: number,
+  waypoints: [number, number][] = []
 ): Promise<RoutePreview> {
-  const query = new URLSearchParams({
-    startLat: startLat.toString(),
-    startLon: startLon.toString(),
-    destLat: destLat.toString(),
-    destLon: destLon.toString(),
+  return apiFetch<RoutePreview>("/rides/preview", {
+    method: "POST",
+    body: JSON.stringify({
+      startLat,
+      startLon,
+      destLat,
+      destLon,
+      waypoints,
+    }),
   });
-  return apiFetch<RoutePreview>(`/rides/preview?${query.toString()}`);
 }
 
 export async function fetchReport(

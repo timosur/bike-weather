@@ -123,6 +123,13 @@ class RouteSegment(BaseModel):
     geometry: list[list[float]] | None = None
 
 
+class UserWaypointSchema(BaseModel):
+    lat: float
+    lon: float
+    type: str  # "stop" | "sleep"
+    name: str | None = None
+
+
 class RideReportSchema(BaseModel):
     id: str
     rideName: str
@@ -133,6 +140,7 @@ class RideReportSchema(BaseModel):
     distanceUnit: str = "km"
     routeGeometry: list[list[float]] | None = None  # [[lat, lon], ...]
     waypoints: list[RouteWaypointWeather] | None = None
+    userWaypoints: list[UserWaypointSchema] | None = None
     routeSegments: list[RouteSegment] | None = None
     overallCondition: str
     overallConditionReasons: list[ConditionReasonSchema] = []
