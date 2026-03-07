@@ -1,18 +1,19 @@
 ---
 name: release
-description: Handles the full release lifecycle for bike-weather services — tagging new versions, waiting for CI to build images, and deploying to Kubernetes via the homelab repository. Use this skill whenever the user mentions releasing, deploying, shipping, tagging, bumping versions, or updating bike-weather — even casually like "ship it", "deploy the latest", "push to prod", "update preview", "release what's changed", "bump frontend", or "tag a new version". Also trigger when the user asks about what's pending deployment, what versions are running, or release status.
+description: Handles the full release lifecycle for bike-weather services — tagging new versions, updating the changelog, and deploying to Kubernetes via the homelab repository. Use this skill whenever the user mentions releasing, deploying, shipping, tagging, bumping versions, or updating bike-weather — even casually like "ship it", "deploy the latest", "push to prod", "update preview", "release what's changed", "bump frontend", or "tag a new version". Also trigger when the user asks about what's pending deployment, what versions are running, or release status.
 ---
 
 # Release Skill
 
-Full release lifecycle for bike-weather: tag → CI build → deploy to Kubernetes.
+Full release lifecycle for bike-weather: changelog → tag → deploy to Kubernetes.
 
 ## Overview
 
-The bike-weather project has three services (`frontend`, `backend`, `agent`), each independently versioned via git tags (`<service>/v<semver>`). The release process has two phases:
+The bike-weather project has three services (`frontend`, `backend`, `agent`), each independently versioned via git tags (`<service>/v<semver>`). The release process has three phases:
 
-1. **Tagging** — Create semver git tags in bike-weather to trigger GitHub Actions CI, which builds and pushes container images to `ghcr.io`.
-2. **Deploying** — Update Kubernetes deployment manifests in the homelab repo so ArgoCD picks up the new images.
+1. **Changelog** — Collect commits since the last tag and append entries to `CHANGELOG.md` in the bike-weather repo.
+2. **Tagging** — Create semver git tags in bike-weather to trigger GitHub Actions CI, which builds and pushes container images to `ghcr.io`.
+3. **Deploying** — Immediately update Kubernetes deployment manifests in the homelab repo so ArgoCD picks up the new images. Do **not** wait for CI to finish — the image will be available by the time ArgoCD reconciles.
 
 The skill auto-detects which services have unreleased changes and handles the full flow.
 
@@ -45,7 +46,53 @@ Each environment has deployment YAMLs with image references:
 
 The `agent` service does not currently have a deployment in homelab (it runs as a CLI job), so skip it for deployment manifest updates — but still report if new agent tags exist.
 
-## Phase 1: Tagging
+## Phase 1: Changelog
+
+### Collecting changes
+
+For each service being released, gather the commit messages since the last tag:
+
+```bash
+cd ~/code/bike-weather
+
+# Get latest stable tag for a service
+LATEST_TAG=$(git tag -l "<service>/v[0-9]*" --sort=-v:refname | grep -E "^<service>/v[0-9]+\.[0-9]+\.[0-9]+$" | head -1)
+
+# List commits since that tag, scoped to the service directory
+git log "${LATEST_TAG}..HEAD" --oneline -- <service>/
+```
+
+### Writing the changelog
+
+The changelog lives at `~/code/bike-weather/CHANGELOG.md`. If it does not exist, create it with a top-level heading.
+
+Prepend a new section for each released service **below** the `# Changelog` heading, keeping the most recent release at the top. Use this format:
+
+```markdown
+## <service> v<version> — <YYYY-MM-DD>
+
+- <commit subject line 1>
+- <commit subject line 2>
+- ...
+```
+
+Rules:
+- Use the current date for the release heading.
+- List each commit as a bullet point using the short commit message (the `--oneline` subject).
+- Group by service when multiple services are released at the same time.
+- Strip any leading conventional-commit scope that duplicates the service name (e.g., `feat(frontend): add map` → `feat: add map` under the frontend heading).
+- After writing the changelog, commit it in the bike-weather repo:
+
+```bash
+cd ~/code/bike-weather
+git add CHANGELOG.md
+git commit -m "docs: update changelog for <service> v<version>"
+git push
+```
+
+Do this **before** creating the git tags so the changelog commit is included in the tagged history.
+
+## Phase 2: Tagging
 
 ### Detecting services that need tagging
 
@@ -98,15 +145,7 @@ git tag -a "<service>/v<version>" -m "release: <service> v<version>"
 git push origin "<service>/v<version>"
 ```
 
-This triggers GitHub Actions to build the container image.
-
-### Waiting for CI
-
-After pushing a tag, GitHub Actions builds the image. Use the GitHub MCP server tools to check workflow status:
-
-1. List workflow runs filtered by the tag push event
-2. Poll until the run completes (check every 30 seconds)
-3. Report success or failure
+This triggers GitHub Actions to build the container image. **Do not wait for CI to finish** — proceed directly to the deploy phase.
 
 The workflow files are:
 - `.github/workflows/frontend.yml` — triggers on `frontend/v*` tags
@@ -115,7 +154,7 @@ The workflow files are:
 
 If stable release: CI checks for an existing preview image with the same base version and retags it instead of rebuilding. This means preview → stable promotion is fast.
 
-## Phase 2: Deploying
+## Phase 3: Deploying
 
 ### Step 1: Detect what needs deploying
 
@@ -179,15 +218,15 @@ chore(bike-weather): deploy frontend 0.0.7, backend 0.0.3-preview.1
 
 ### Step 5: Confirm
 
-Tell the user the push is done and ArgoCD will pick up the changes.
+Tell the user the push is done and ArgoCD will pick up the changes. Note that CI is still running in the background — if it fails, the image won't be available and ArgoCD will show an image-pull error until CI is re-run or fixed.
 
 ## User Intent Handling
 
 | User says | Action |
 |-----------|--------|
-| "release" / "ship it" / "deploy" | Full flow: detect → tag if needed → wait for CI → deploy |
-| "tag frontend patch" / "bump backend minor" | Phase 1 only: create tag, push, wait for CI |
-| "deploy to prod" / "update preview" | Phase 2 only: update homelab manifests for that environment |
+| "release" / "ship it" / "deploy" | Full flow: detect → changelog → tag → deploy |
+| "tag frontend patch" / "bump backend minor" | Phase 1 + 2: changelog + create tag, push |
+| "deploy to prod" / "update preview" | Phase 3 only: update homelab manifests for that environment |
 | "what's deployed?" / "release status" | Show comparison table only, no changes |
 | "release frontend 0.1.0" | Use the specified version, skip auto-detection for that service |
 | "preview release" | Tag with `-preview.N` suffix, deploy to preview environment |
@@ -197,6 +236,7 @@ Tell the user the push is done and ArgoCD will pick up the changes.
 - **No changes detected**: Tell the user everything is up to date. Show the current versions.
 - **User asks for a specific version**: Skip auto-detection for that service and use the requested version.
 - **User says "deploy to preview" or "deploy to prod"**: Only update that environment.
-- **CI fails**: Report the failure with a link to the workflow run. Do not proceed to deploy.
 - **Agent service**: Report tag info but note there's no Kubernetes deployment to update.
 - **No commits since last tag**: Skip that service in the tagging phase — it doesn't need a new release.
+- **CI failure after deploy**: If the image hasn't been built yet, ArgoCD will show an `ImagePullBackOff`. The user should check CI status and re-run the workflow if needed. This is expected and self-healing once CI succeeds.
+- **CHANGELOG.md doesn't exist**: Create it with a `# Changelog` heading before appending entries.
