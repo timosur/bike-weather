@@ -150,7 +150,7 @@ export function RidePlanner({
     } else {
       setRoutePreview(null)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.location?.lat, form.location?.lon, form.destination?.lat, form.destination?.lon, JSON.stringify(waypointCoords)])
 
   useEffect(() => {
@@ -338,6 +338,7 @@ export function RidePlanner({
                 }}
                 placeholder={t('planner.placeholder.destination')}
                 error={errors.destination}
+                hideLocate
               />
             </div>
 
