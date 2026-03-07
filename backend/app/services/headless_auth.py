@@ -35,6 +35,8 @@ USERS_URL = f"{settings.AUTHENTIK_BASE_URL}/api/v3/core/users/"
 
 REDIRECT_URI = f"{settings.FRONTEND_URL}/auth/callback"
 
+_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
+
 
 class HeadlessAuthError(Exception):
     """Raised when authentication fails."""
@@ -165,7 +167,7 @@ async def _exchange_tokens(client: httpx.AsyncClient) -> dict:
 
 async def headless_login(username: str, password: str) -> dict:
     """Authenticate *username* / *password* and return OIDC tokens."""
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         try:
             await _drive_flow(client, username, password)
             return await _exchange_tokens(client)
@@ -191,7 +193,7 @@ async def headless_register(
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         # Check if user already exists
         r = await client.get(
             USERS_URL,
@@ -248,7 +250,7 @@ async def headless_recovery_start(email: str) -> None:
     }
 
     # Look up the user by email to get their username/pk
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         r = await client.get(
             USERS_URL,
             params={"search": email},
@@ -318,7 +320,7 @@ async def headless_recovery_complete(token: str, new_password: str) -> None:
 
     tokens_url = f"{settings.AUTHENTIK_BASE_URL}/api/v3/core/tokens/"
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         # 1. Find the recovery token by checking each verification token's key.
         #    The list endpoint does not include the secret `key` field, so we
         #    must call view_key on each candidate.
@@ -419,7 +421,7 @@ async def headless_change_password(
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         # Look up the Authentik user pk by email
         r = await client.get(
             USERS_URL,
