@@ -60,8 +60,9 @@ export function AppShell({
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-14 gap-6">
             {/* Logo */}
-            <button
-              onClick={() => onNavigate?.('/')}
+            <a
+              href="/"
+              onClick={(e) => { e.preventDefault(); onNavigate?.('/') }}
               className="flex items-center gap-2 shrink-0 group"
             >
               <div className="w-7 h-7 rounded-md bg-emerald-500 flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
@@ -78,7 +79,7 @@ export function AppShell({
               >
                 {t('shell.brand')}
               </span>
-            </button>
+            </a>
 
             {/* Desktop Nav */}
             <MainNav
@@ -101,13 +102,14 @@ export function AppShell({
               {user ? (
                 <UserMenu user={user} isAdmin={isAdmin} onNavigate={onNavigate} onLogout={onLogout} />
               ) : (
-                <button
-                  onClick={() => onNavigate?.('/login')}
+                <a
+                  href="/login"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('/login') }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
                 >
                   <LogIn className="w-3.5 h-3.5" strokeWidth={2} />
                   {t('common.signIn')}
-                </button>
+                </a>
               )}
             </div>
 
@@ -131,19 +133,21 @@ export function AppShell({
           <div className="md:hidden border-t border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 py-3">
             <div className="space-y-1">
               {visibleItems.map(item => (
-                <button
+                <a
                   key={item.href}
-                  onClick={() => {
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault()
                     onNavigate?.(item.href)
                     setMobileMenuOpen(false)
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${item.isActive
+                  className={`block w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${item.isActive
                     ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
                     : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
                     }`}
                 >
                   {item.label}
-                </button>
+                </a>
               ))}
             </div>
             {user ? (
@@ -186,8 +190,10 @@ export function AppShell({
               </div>
             ) : (
               <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800">
-                <button
-                  onClick={() => {
+                <a
+                  href="/login"
+                  onClick={(e) => {
+                    e.preventDefault()
                     onNavigate?.('/login')
                     setMobileMenuOpen(false)
                   }}
@@ -195,7 +201,7 @@ export function AppShell({
                 >
                   <LogIn className="w-3.5 h-3.5" strokeWidth={2} />
                   {t('common.signIn')}
-                </button>
+                </a>
               </div>
             )}
             <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2">
@@ -225,8 +231,9 @@ export function AppShell({
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
               {/* Brand column */}
               <div className="col-span-2 sm:col-span-1 space-y-3">
-                <button
-                  onClick={() => onNavigate?.('/')}
+                <a
+                  href="/"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('/') }}
                   className="flex items-center gap-2 group"
                 >
                   <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
@@ -241,9 +248,9 @@ export function AppShell({
                     className="font-semibold text-stone-900 dark:text-stone-100 text-sm"
                     style={{ fontFamily: 'Outfit, sans-serif' }}
                   >
-                    Fahrrad Wetter
+                    {t('shell.brand')}
                   </span>
-                </button>
+                </a>
                 <p className="text-xs text-stone-400 dark:text-stone-500 leading-relaxed">
                   {t('shell.footer.tagline')}
                 </p>
@@ -258,12 +265,13 @@ export function AppShell({
                   <ul className="space-y-2">
                     {section.links.map(link => (
                       <li key={link.href}>
-                        <button
-                          onClick={() => onNavigate?.(link.href)}
+                        <a
+                          href={link.href}
+                          onClick={(e) => { e.preventDefault(); onNavigate?.(link.href) }}
                           className="text-sm text-stone-600 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                         >
                           {link.label}
-                        </button>
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -285,18 +293,20 @@ export function AppShell({
                   {' · '}
                   <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.attributionMap')}</a>
                 </span>
-                <button
-                  onClick={() => onNavigate?.('/imprint')}
+                <a
+                  href="/imprint"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('/imprint') }}
                   className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 >
                   {t('shell.footer.imprint')}
-                </button>
-                <button
-                  onClick={() => onNavigate?.('/privacy-policy')}
+                </a>
+                <a
+                  href="/privacy-policy"
+                  onClick={(e) => { e.preventDefault(); onNavigate?.('/privacy-policy') }}
                   className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 >
                   {t('shell.footer.privacy')}
-                </button>
+                </a>
               </div>
             </div>
           </div>
