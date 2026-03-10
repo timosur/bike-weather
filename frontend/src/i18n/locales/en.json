@@ -2,7 +2,7 @@
   "seo": {
     "planner": {
       "title": "Bike Weather – Plan Clothing & Gear for Your Ride",
-      "description": "Plan your bike ride and get personalized clothing and gear recommendations based on current weather at your start location."
+      "description": "Plan your bike ride and get personalized clothing and gear recommendations based on the weather along your entire route."
     },
     "report": {
       "title": "Ride Report – Bike Weather",
@@ -199,9 +199,9 @@
     },
     "seo": {
       "heading": "How the Bike Weather Planner works",
-      "intro": "Bike Weather helps you find the right clothing and gear for your next ride — based on real-time weather at your start location. Simply enter your tour details and receive a personalized recommendation.",
+      "intro": "Bike Weather helps you find the right clothing and gear for your next ride — based on real-time weather along your entire route. Simply enter your tour details and receive a personalized recommendation.",
       "startLocationTitle": "Start location",
-      "startLocationDesc": "The location determines which weather data is retrieved. You can search for an address or use your current GPS location. For multi-day tours, weather is fetched for each day at the respective overnight location.",
+      "startLocationDesc": "The starting point of your route. You can search for an address or use your current GPS location. Weather is analyzed along the entire route — for multi-day tours, each stage is evaluated separately.",
       "dateTimeTitle": "Date & Time",
       "dateTimeDesc": "Weather changes significantly throughout the day. The start time determines when the forecast is evaluated — so you get recommendations that match temperature, wind, and precipitation during your ride.",
       "bikeTypeTitle": "Bike type",
@@ -211,7 +211,7 @@
       "distanceTitle": "Distance & Elevation",
       "distanceDesc": "Optional inputs that trigger additional recommendations for longer tours or significant elevation gain — such as provisions, spare clothing, or protection for alpine conditions.",
       "multiDayTitle": "Multi-day tours",
-      "multiDayDesc": "Planning a tour over several days? You can specify a location for each overnight stop. Weather is then calculated separately per stage, so you have the right gear for every day."
+      "multiDayDesc": "Planning a tour over several days? You can specify a location for each overnight stop. Weather is calculated along the route for each stage, so you have the right gear for every day."
     },
     "gpxImport": {
       "button": "Import GPX",
@@ -228,6 +228,27 @@
       "errorTooLarge": "The file is too large. Maximum 10 MB allowed.",
       "errorNetwork": "Import failed. Please try again.",
       "hint": "Export a route as GPX from Komoot, Strava, or another app."
+    },
+    "onboarding": {
+      "title": "Here's how it works",
+      "step1Title": "Plan your route",
+      "step1Desc": "Choose start, destination & ride details",
+      "step2Title": "We check the weather",
+      "step2Desc": "Real-time forecast for your route and timeframe",
+      "step3Title": "Get gear tips",
+      "step3Desc": "Clothing & gear, perfectly matched to the weather",
+      "dismiss": "Got it"
+    },
+    "tooltip": {
+      "startLocation": "Where does your ride begin? Weather is analyzed along your entire route.",
+      "destination": "Where are you headed? We'll calculate route, distance, and weather along the way automatically.",
+      "bikeType": "Different bikes need different gear. This affects clothing and speed recommendations.",
+      "intensity": "How hard do you plan to ride? Affects layering and estimated speed.",
+      "distance": "Auto-calculated from your route. Override manually if you prefer.",
+      "elevation": "Optional — higher elevation means colder temps. Helps refine gear advice.",
+      "averageSpeed": "Auto-estimated from bike type and intensity. Set manually for more precise duration.",
+      "duration": "Auto-estimated from distance and speed. Longer rides may span changing weather.",
+      "waypoints": "Add intermediate stops or overnight stays for multi-day tours."
     }
   },
   "location": {
@@ -243,7 +264,7 @@
     "waypointName": "Waypoint name",
     "removeWaypoint": "Remove waypoint",
     "dayLabel": "Day {{n}}",
-    "ridingDays": "{{count}} riding days · Weather fetched per day at each start location",
+    "ridingDays": "{{count}} riding days · Weather calculated along the route for each stage",
     "overnightDivider": "Overnight stay",
     "departureNextDay": "Departure next day at"
   },

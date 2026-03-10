@@ -2,6 +2,7 @@ import { Plus, Minus, Clock, MapPin, Moon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Waypoint, WaypointType, LocationSuggestion } from './types'
 import { LocationPicker } from './LocationPicker'
+import { InfoTooltip } from '../common/InfoTooltip'
 
 interface WaypointListProps {
   waypoints: Waypoint[]
@@ -46,10 +47,10 @@ export function WaypointList({
     const updated = waypoints.map((wp, i) =>
       i === index
         ? {
-            ...wp,
-            type,
-            startTime: type === 'sleep' ? (wp.startTime ?? '08:00') : undefined,
-          }
+          ...wp,
+          type,
+          startTime: type === 'sleep' ? (wp.startTime ?? '08:00') : undefined,
+        }
         : wp
     )
     onChange(updated)
@@ -110,22 +111,20 @@ export function WaypointList({
                 <button
                   type="button"
                   onClick={() => handleTypeChange(index, 'stop')}
-                  className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium transition-colors ${
-                    wp.type === 'stop'
+                  className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium transition-colors ${wp.type === 'stop'
                       ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
                       : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
-                  }`}
+                    }`}
                 >
                   🚩 {t('waypoints.waypointStop')}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleTypeChange(index, 'sleep')}
-                  className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium border-l border-stone-200 dark:border-stone-700 transition-colors ${
-                    wp.type === 'sleep'
+                  className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium border-l border-stone-200 dark:border-stone-700 transition-colors ${wp.type === 'sleep'
                       ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300'
                       : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
-                  }`}
+                    }`}
                 >
                   🛏️ {t('waypoints.waypointSleep')}
                 </button>
@@ -191,6 +190,7 @@ export function WaypointList({
       >
         <Plus className="w-3 h-3" strokeWidth={2.5} />
         {t('waypoints.addWaypoint')}
+        <InfoTooltip content={t('planner.tooltip.waypoints')} />
       </button>
 
       {sleepCount > 0 && (

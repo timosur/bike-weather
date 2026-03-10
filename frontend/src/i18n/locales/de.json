@@ -2,7 +2,7 @@
   "seo": {
     "planner": {
       "title": "Fahrrad Wetter – Kleidung & Ausrüstung für deine Radtour planen",
-      "description": "Plane deine Radtour und erhalte personalisierte Kleidungs- und Ausrüstungsempfehlungen basierend auf dem aktuellen Wetter an deinem Startort."
+      "description": "Plane deine Radtour und erhalte personalisierte Kleidungs- und Ausrüstungsempfehlungen basierend auf dem Wetter entlang deiner gesamten Route."
     },
     "report": {
       "title": "Fahrtbericht – Fahrrad Wetter",
@@ -199,9 +199,9 @@
     },
     "seo": {
       "heading": "So funktioniert der Fahrrad Wetter Planer",
-      "intro": "Fahrrad Wetter hilft dir, die richtige Kleidung und Ausrüstung für deine nächste Fahrt zu finden — basierend auf Echtzeit-Wetterdaten an deinem Startort. Gib einfach deine Tourdetails ein und erhalte eine persönliche Empfehlung.",
+      "intro": "Fahrrad Wetter hilft dir, die richtige Kleidung und Ausrüstung für deine nächste Fahrt zu finden — basierend auf Echtzeit-Wetterdaten entlang deiner gesamten Route. Gib einfach deine Tourdetails ein und erhalte eine persönliche Empfehlung.",
       "startLocationTitle": "Startort",
-      "startLocationDesc": "Der Standort bestimmt, welche Wetterdaten abgerufen werden. Du kannst eine Adresse suchen oder deinen aktuellen GPS-Standort verwenden. Bei Mehrtagestouren wird das Wetter für jeden Tag am jeweiligen Übernachtungsort abgefragt.",
+      "startLocationDesc": "Der Startort ist der Ausgangspunkt deiner Route. Du kannst eine Adresse suchen oder deinen aktuellen GPS-Standort verwenden. Das Wetter wird entlang der gesamten Strecke berücksichtigt — bei Mehrtagestouren für jede Etappe separat.",
       "dateTimeTitle": "Datum & Uhrzeit",
       "dateTimeDesc": "Das Wetter ändert sich im Tagesverlauf erheblich. Die Startzeit bestimmt, wann die Vorhersage ausgewertet wird — so erhältst du Empfehlungen, die zu Temperatur, Wind und Niederschlag während deiner Fahrt passen.",
       "bikeTypeTitle": "Fahrradtyp",
@@ -211,7 +211,7 @@
       "distanceTitle": "Distanz & Höhenmeter",
       "distanceDesc": "Optionale Eingaben, die bei längeren Touren oder großem Höhengewinn zusätzliche Empfehlungen auslösen — etwa Verpflegung, Ersatzkleidung oder Schutz für alpine Bedingungen.",
       "multiDayTitle": "Mehrtagestouren",
-      "multiDayDesc": "Du planst eine Tour über mehrere Tage? Du kannst für jeden Übernachtungsstopp einen Ort angeben. Das Wetter wird dann pro Etappe separat berechnet, damit du für jeden Tag die richtige Ausrüstung hast."
+      "multiDayDesc": "Du planst eine Tour über mehrere Tage? Du kannst für jeden Übernachtungsstopp einen Ort angeben. Das Wetter wird für jede Etappe entlang der Route berechnet, damit du für jeden Tag die richtige Ausrüstung hast."
     },
     "gpxImport": {
       "button": "GPX importieren",
@@ -228,6 +228,27 @@
       "errorTooLarge": "Die Datei ist zu groß. Maximal 10 MB erlaubt.",
       "errorNetwork": "Der Import ist fehlgeschlagen. Bitte versuche es erneut.",
       "hint": "Exportiere eine Route als GPX aus Komoot, Strava oder einer anderen App."
+    },
+    "onboarding": {
+      "title": "So funktioniert's",
+      "step1Title": "Route planen",
+      "step1Desc": "Wähle Start, Ziel & Fahrtdetails",
+      "step2Title": "Wetter prüfen",
+      "step2Desc": "Echtzeit-Vorhersage für deine Route und Uhrzeit",
+      "step3Title": "Empfehlungen erhalten",
+      "step3Desc": "Kleidung & Ausrüstung, perfekt aufs Wetter abgestimmt",
+      "dismiss": "Verstanden"
+    },
+    "tooltip": {
+      "startLocation": "Wo startet deine Fahrt? Das Wetter wird entlang der gesamten Route analysiert.",
+      "destination": "Wohin geht's? Wir berechnen Route, Distanz und das Wetter entlang der Strecke automatisch.",
+      "bikeType": "Verschiedene Räder brauchen verschiedene Ausrüstung. Beeinflusst Kleidung und Geschwindigkeit.",
+      "intensity": "Wie anstrengend wird's? Beeinflusst Schichtempfehlung und Tempo.",
+      "distance": "Wird automatisch aus der Route berechnet. Kannst du auch manuell anpassen.",
+      "elevation": "Optional — mehr Höhenmeter = kältere Temperaturen. Verfeinert die Empfehlung.",
+      "averageSpeed": "Automatisch geschätzt aus Fahrradtyp und Intensität. Manuell anpassbar.",
+      "duration": "Automatisch aus Distanz und Geschwindigkeit geschätzt. Längere Fahrten können wechselndes Wetter umfassen.",
+      "waypoints": "Füge Zwischenstopps oder Übernachtungen für Mehrtagestouren hinzu."
     }
   },
   "location": {
@@ -243,7 +264,7 @@
     "waypointName": "Wegpunkt-Name",
     "removeWaypoint": "Wegpunkt entfernen",
     "dayLabel": "Tag {{n}}",
-    "ridingDays": "{{count}} Fahrtage · Wetter wird pro Tag am jeweiligen Startort abgerufen",
+    "ridingDays": "{{count}} Fahrtage · Wetter wird pro Etappe entlang der Route berechnet",
     "overnightDivider": "Übernachtung",
     "departureNextDay": "Weiterfahrt am nächsten Tag um"
   },

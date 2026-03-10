@@ -29,6 +29,8 @@ import type {
 } from './types'
 import { WaypointList } from './WaypointList'
 import { LocationPicker } from './LocationPicker'
+import { OnboardingHero } from './OnboardingHero'
+import { InfoTooltip } from '../common/InfoTooltip'
 import { fetchRoutePreview, type RoutePreview } from '../../api/rides'
 import { RouteMap } from '../ride-report/RouteMap'
 
@@ -261,6 +263,9 @@ export function RidePlanner({
           )}
         </div>
 
+        {/* Onboarding hero for first-time visitors */}
+        <OnboardingHero />
+
         {/* Restored from session banner */}
         {formSource && !bannerDismissed && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-800/40">
@@ -297,8 +302,9 @@ export function RidePlanner({
 
             {/* Location */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {t('planner.label.startLocation')}
+                <InfoTooltip content={t('planner.tooltip.startLocation')} />
               </label>
               <LocationPicker
                 value={form.location}
@@ -324,8 +330,9 @@ export function RidePlanner({
 
             {/* Destination Picker — always visible (required) */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                {t('planner.label.destination')} *
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                {t('planner.label.destination')}
+                <InfoTooltip content={t('planner.tooltip.destination')} />
               </label>
               <LocationPicker
                 value={form.destination ?? null}
@@ -398,8 +405,9 @@ export function RidePlanner({
 
             {/* Bike Type */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {t('planner.label.bikeType')}
+                <InfoTooltip content={t('planner.tooltip.bikeType')} />
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {bikeTypeOptions.map(option => {
@@ -476,8 +484,9 @@ export function RidePlanner({
 
             {/* Riding Intensity */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {t('planner.label.intensity')}
+                <InfoTooltip content={t('planner.tooltip.intensity')} />
               </label>
               <div className="grid grid-cols-3 gap-0 rounded-xl border-2 border-stone-200 dark:border-stone-700 overflow-hidden">
                 {intensityOptions.map((option, i) => {
@@ -534,8 +543,9 @@ export function RidePlanner({
                 <div className="space-y-3">
                   {/* Distance (optional — auto-filled from routing or GPX import) */}
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                    <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                       {t('planner.label.distance')}
+                      <InfoTooltip content={t('planner.tooltip.distance')} />
                     </label>
                     <div className="relative">
                       <Route
@@ -565,8 +575,9 @@ export function RidePlanner({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                    <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                       {t('planner.label.elevation')}
+                      <InfoTooltip content={t('planner.tooltip.elevation')} />
                     </label>
                     <div className="relative">
                       <input
@@ -591,8 +602,9 @@ export function RidePlanner({
 
                   {/* Average Speed */}
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                    <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                       {t('planner.label.averageSpeed')}
+                      <InfoTooltip content={t('planner.tooltip.averageSpeed')} />
                     </label>
                     <div className="relative">
                       <Zap
@@ -641,8 +653,9 @@ export function RidePlanner({
 
                   {/* Duration */}
                   <div className="space-y-1">
-                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                    <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                       {t('planner.label.duration')}
+                      <InfoTooltip content={t('planner.tooltip.duration')} />
                     </label>
                     <div className="relative">
                       <Timer
