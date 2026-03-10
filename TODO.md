@@ -1,4 +1,1 @@
-- Feature: Add back products with really proper products and refferal links to amazon in place
-- Chore: Check for e2e tests and maybe just record the most important flows
-- Docs: Create product documentation by creating a whole transcript of what the application currently does, which the agent should take as a basis for implementating new features in the future, to always keep the whole scope of the product in his head
-- Docs: Create a product vision, maybe as part of the documentation
+

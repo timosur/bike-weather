@@ -239,7 +239,7 @@ export function RidePlanner({
 
       <div className="w-full max-w-[480px] space-y-5">
         {/* Header */}
-        <div className="text-center space-y-1">
+        <div className="text-center space-y-2">
           <h1
             className="text-3xl font-bold text-stone-900 dark:text-stone-50 tracking-tight"
             style={{ fontFamily: 'Outfit, sans-serif' }}
@@ -253,7 +253,7 @@ export function RidePlanner({
             <button
               type="button"
               onClick={onGpxImport}
-              className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors"
             >
               <Import className="w-3.5 h-3.5" strokeWidth={1.5} />
               {t('planner.gpxImport.button')}

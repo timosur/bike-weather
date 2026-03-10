@@ -199,7 +199,7 @@
     },
     "seo": {
       "heading": "How the Bike Weather Planner works",
-      "intro": "Fahrrad Wetter helps you find the right clothing and gear for your next ride — based on real-time weather at your start location. Simply enter your tour details and receive a personalized recommendation.",
+      "intro": "Bike Weather helps you find the right clothing and gear for your next ride — based on real-time weather at your start location. Simply enter your tour details and receive a personalized recommendation.",
       "startLocationTitle": "Start location",
       "startLocationDesc": "The location determines which weather data is retrieved. You can search for an address or use your current GPS location. For multi-day tours, weather is fetched for each day at the respective overnight location.",
       "dateTimeTitle": "Date & Time",
@@ -473,7 +473,7 @@
     },
     "googleLogin": "Sign in with Google",
     "or": "or",
-    "noAccountNeeded": "No account needed — you can use Fahrrad Wetter without signing up.",
+    "noAccountNeeded": "No account needed — you can use Bike Weather without signing up.",
     "validation": {
       "usernameRequired": "Username or email required",
       "emailRequired": "Valid email required",
@@ -516,7 +516,7 @@
   },
   "contact": {
     "heading": "Contact & Feedback",
-    "subheading": "Fahrrad Wetter thrives on your feedback. Whether it's a suggestion, bug report, or feature request — I appreciate every message.",
+    "subheading": "Bike Weather thrives on your feedback. Whether it's a suggestion, bug report, or feature request — I appreciate every message.",
     "category": {
       "label": "Category",
       "feedback": "Feedback",
@@ -544,7 +544,7 @@
   },
   "faq": {
     "heading": "Frequently Asked Questions",
-    "subheading": "Everything you need to know about Fahrrad Wetter.",
+    "subheading": "Everything you need to know about Bike Weather.",
     "questionNotListed": "Question not listed?",
     "contactHint": {
       "before": "Write to me on the",
@@ -555,7 +555,7 @@
   "about": {
     "badge": "Rain or shine on the bike",
     "heading": "Hi, I'm Timo",
-    "intro": "Born in '92, passionate software developer and cyclist. I built Fahrrad Wetter because I needed a solution myself.",
+    "intro": "Born in '92, passionate software developer and cyclist. I built Bike Weather because I needed a solution myself.",
     "giveFeedback": "Give feedback"
   },
   "aboutApp": {
