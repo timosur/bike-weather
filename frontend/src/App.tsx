@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next'
 import { AppShell } from './components/shell'
 import type { NavigationItem, FooterSection } from './components/shell'
 import { RidePlannerSkeleton } from './components/ride-planner'
+import { RideReportSkeleton } from './components/ride-report'
 // import { ProductCategoriesSkeleton, ProductCategoryDetailSkeleton } from './components/product-recommendations'
 import { MyRoutesSkeleton } from './components/my-routes'
-import { AuthPageSkeleton } from './components/auth'
+import { AuthPageSkeleton, PasswordPageSkeleton } from './components/auth'
 import { ContentPageSkeleton } from './components/skeleton'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './hooks/useToast'
@@ -161,16 +162,16 @@ function AppContent() {
         <Route path="/" element={<Navigate to="/planner" replace />} />
         <Route path="/planner/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
         <Route path="/planner" element={<Suspense fallback={<RidePlannerSkeleton />}><PlannerPage /></Suspense>} />
-        <Route path="/report/:routeId" element={<Suspense fallback={<RidePlannerSkeleton />}><ReportPage /></Suspense>} />
-        <Route path="/report" element={<Suspense fallback={<RidePlannerSkeleton />}><ReportPage /></Suspense>} />
-        <Route path="/shared/:token" element={<Suspense fallback={<RidePlannerSkeleton />}><SharedReportPage /></Suspense>} />
+        <Route path="/report/:routeId" element={<Suspense fallback={<RideReportSkeleton />}><ReportPage /></Suspense>} />
+        <Route path="/report" element={<Suspense fallback={<RideReportSkeleton />}><ReportPage /></Suspense>} />
+        <Route path="/shared/:token" element={<Suspense fallback={<RideReportSkeleton />}><SharedReportPage /></Suspense>} />
         {/* <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductsPage /></Suspense>} /> */}
         {/* <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} /> */}
         <Route path="/routes" element={<Suspense fallback={<MyRoutesSkeleton />}><RequireAuth><RoutesPage /></RequireAuth></Suspense>} />
         <Route path="/login" element={<Suspense fallback={<AuthPageSkeleton />}><LoginPage /></Suspense>} />
-        <Route path="/forgot-password" element={<Suspense fallback={<AuthPageSkeleton />}><ForgotPasswordPage /></Suspense>} />
-        <Route path="/reset-password" element={<Suspense fallback={<AuthPageSkeleton />}><ResetPasswordPage /></Suspense>} />
-        <Route path="/change-password" element={<Suspense fallback={<AuthPageSkeleton />}><RequireAuth><ChangePasswordPage /></RequireAuth></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<PasswordPageSkeleton />}><ForgotPasswordPage /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<PasswordPageSkeleton />}><ResetPasswordPage /></Suspense>} />
+        <Route path="/change-password" element={<Suspense fallback={<PasswordPageSkeleton />}><RequireAuth><ChangePasswordPage /></RequireAuth></Suspense>} />
         <Route path="/auth/callback" element={<Navigate to="/login" replace />} />
         <Route path="/about-me" element={<Suspense fallback={<ContentPageSkeleton sections={3} />}><AboutMePage /></Suspense>} />
         <Route path="/about" element={<Suspense fallback={<ContentPageSkeleton sections={3} />}><AboutAppPage /></Suspense>} />

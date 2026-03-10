@@ -2,10 +2,10 @@ import { SkeletonBlock, SkeletonLine, SkeletonCard } from '@/components/skeleton
 
 export function MyRoutesSkeleton() {
   return (
-    <div className="max-w-4xl mx-auto space-y-5 py-6 px-4">
+    <div className="max-w-4xl mx-auto space-y-5">
       {/* Title + count badge */}
       <div className="flex items-center gap-3">
-        <SkeletonBlock className="h-8 w-40" />
+        <SkeletonBlock className="h-7 w-40" />
         <SkeletonBlock className="h-6 w-8 rounded-full" />
       </div>
 
