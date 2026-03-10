@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { RideReport, RideReportSkeleton } from '../components/ride-report'
 import { SEO } from '../hooks/useSEO'
 import { fetchSharedReport } from '../api/shared'
-// import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
 import { MapPin, AlertTriangle } from 'lucide-react'
 
@@ -29,13 +28,6 @@ export default function SharedReportPage() {
       .catch(() => setError(t('shared.error')))
       .finally(() => setLoading(false))
   }, [token, t])
-
-  // const handleProductClick = (productId: string) => {
-  //   const product = sampleProducts.find((p) => p.id === productId)
-  //   if (product) {
-  //     window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
-  //   }
-  // }
 
   if (loading) {
     return (
@@ -83,10 +75,6 @@ export default function SharedReportPage() {
 
       <RideReport
         report={report}
-      // products={sampleProducts}
-      // shops={shops}
-      // disclosure={disclosure}
-      // onProductClick={handleProductClick}
       />
 
       {/* CTA */}

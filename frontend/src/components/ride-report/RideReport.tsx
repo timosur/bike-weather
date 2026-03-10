@@ -1,8 +1,7 @@
 import { useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Gauge, Route, Clock, Timer, Share2, Bookmark, BookmarkCheck, PenLine, Plus, Save, Check, Loader2 } from 'lucide-react'
-import type { RideReportProps } from './types'
-import type { Product } from '../product-recommendations/types'
+import type { RideReportProps, MatchedProduct } from './types'
 import { ConditionBadge } from './ConditionBadge'
 import { WeatherPanel } from './WeatherPanel'
 import { MultiDayWeatherChart } from './MultiDayWeatherChart'
@@ -21,16 +20,17 @@ function formatDuration(minutes: number, t: (key: string, opts?: Record<string, 
   return t('report.rideWindow.hoursMinutes', { h, m })
 }
 
-export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, products, shops, disclosure, onProductClick }: RideReportProps) {
+export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, onProductClick }: RideReportProps) {
   const { t } = useTranslation()
   const chartScrollRef = useRef<HTMLDivElement | null>(null)
 
   const isMultiDay = report.days.length > 1
   const activeDay = report.days[0]
 
+  const productRecs = report.productRecommendations
   const shopMap = useMemo(
-    () => (shops ? new Map(shops.map((s) => [s.id, s])) : new Map()),
-    [shops],
+    () => (productRecs ? new Map(productRecs.shops.map((s) => [s.id, s])) : new Map()),
+    [productRecs],
   )
 
   // For multi-day: use merged items; for single-day: use active day items
@@ -46,8 +46,8 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
     ? (report.tips ?? [])
     : (activeDay?.tips ?? [])
 
-  function findItemProduct(itemIcon: string): Product | undefined {
-    return products?.find((p) => p.matchesIcon === itemIcon)
+  function findItemProduct(itemId: string): MatchedProduct | undefined {
+    return productRecs?.matched[itemId]
   }
 
   const handleChartRef = useCallback((el: HTMLDivElement | null) => {
@@ -208,7 +208,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         </section>
       )}
 
-      {/* ── 4. TIPS & SAFETY (moved up) ── */}
+      {/* ── 4. TIPS & SAFETY ── */}
       {tips.length > 0 && (
         <section>
           <h2
@@ -221,32 +221,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         </section>
       )}
 
-      {/* ── 5. ROUTE MAP + WIND ANALYSIS ── */}
-      {report.routeGeometry && report.destinationLocation && (
-        <section className="space-y-4">
-          <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm relative z-0">
-            <RouteMap
-              startLocation={{
-                lat: report.routeGeometry[0][0],
-                lon: report.routeGeometry[0][1],
-                label: report.startLocation
-              }}
-              destinationLocation={{
-                lat: report.routeGeometry[report.routeGeometry.length - 1][0],
-                lon: report.routeGeometry[report.routeGeometry.length - 1][1],
-                label: report.destinationLocation
-              }}
-              routeGeometry={report.routeGeometry}
-              routeSegments={report.routeSegments}
-              userWaypoints={report.userWaypoints}
-              className="w-full h-full"
-            />
-          </div>
-          <RouteMapLegend hasSegments={!!(report.routeSegments && report.routeSegments.some(s => s.geometry && s.geometry.length >= 2))} />
-        </section>
-      )}
-
-      {/* ── 6. WEATHER ── */}
+      {/* ── 5. WEATHER ── */}
       <section>
         <h2
           className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-3"
@@ -272,6 +247,31 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         )}
       </section>
 
+      {/* ── 6. ROUTE MAP + WIND ANALYSIS ── */}
+      {report.routeGeometry && report.destinationLocation && (
+        <section className="space-y-4">
+          <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm relative z-0">
+            <RouteMap
+              startLocation={{
+                lat: report.routeGeometry[0][0],
+                lon: report.routeGeometry[0][1],
+                label: report.startLocation
+              }}
+              destinationLocation={{
+                lat: report.routeGeometry[report.routeGeometry.length - 1][0],
+                lon: report.routeGeometry[report.routeGeometry.length - 1][1],
+                label: report.destinationLocation
+              }}
+              routeGeometry={report.routeGeometry}
+              routeSegments={report.routeSegments}
+              userWaypoints={report.userWaypoints}
+              className="w-full h-full"
+            />
+          </div>
+          <RouteMapLegend hasSegments={!!(report.routeSegments && report.routeSegments.some(s => s.geometry && s.geometry.length >= 2))} />
+        </section>
+      )}
+
       {/* ── 7. CLOTHING ── */}
       <section>
         <h2
@@ -282,18 +282,18 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {clothingItems.map((item) => {
-            const itemProduct = disclosure ? findItemProduct(item.icon) : undefined
+            const itemProduct = productRecs?.disclosure ? findItemProduct(item.id) : undefined
             const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
             return (
               <ClothingItemCard
                 key={item.id}
                 item={item}
                 productLink={
-                  itemProduct && shop && disclosure ? (
+                  itemProduct && shop && productRecs?.disclosure ? (
                     <InlineProductLink
                       product={itemProduct}
                       shop={shop}
-                      disclosure={disclosure}
+                      disclosure={productRecs.disclosure}
                       onProductClick={onProductClick}
                     />
                   ) : undefined

@@ -1,3 +1,23 @@
+/** A single product recommended by the backend for a clothing item */
+export interface MatchedProduct {
+  id: string;
+  name: string;
+  imageUrl: string;
+  price: number;
+  currency: string;
+  shopId: string;
+  affiliateUrl: string;
+  matchesLabel: string;
+  weatherSummary: string;
+}
+
+/** Backend-matched product recommendations keyed by clothing item ID */
+export interface ProductRecommendations {
+  matched: Record<string, MatchedProduct>;
+  shops: { id: string; name: string; logoUrl: string; affiliateTag: string | null }[];
+  disclosure: { badgeLabel: string; disclaimerText: string };
+}
+
 /** Overall ride condition rating */
 export type ConditionRating = "ideal" | "good" | "caution" | "not-recommended";
 
@@ -77,7 +97,7 @@ export interface EquipmentItem {
   id: string;
   name: string;
   reason: string;
-  category?: 'safety' | 'gear' | 'hydration' | 'tools' | 'nutrition';
+  category?: "safety" | "gear" | "hydration" | "tools" | "nutrition";
   contents?: EquipmentSubItem[];
 }
 
@@ -185,6 +205,7 @@ export interface RideReport {
   waypoints?: RouteWaypointWeather[];
   userWaypoints?: UserWaypoint[];
   routeSegments?: RouteSegment[];
+  productRecommendations?: ProductRecommendations;
 }
 
 export interface RideReportProps {
@@ -211,12 +232,6 @@ export interface RideReportProps {
   onNewRide?: () => void;
   onDaySelect?: (dayId: string) => void;
   onSwapClothingItem?: (dayId: string, itemId: string, alternativeId: string) => void;
-  /** Available affiliate products to show inline */
-  products?: import("../product-recommendations/types").Product[];
-  /** Shop list for looking up shop names/logos */
-  shops?: import("../product-recommendations/types").Shop[];
-  /** Affiliate disclosure label and disclaimer text */
-  disclosure?: import("../product-recommendations/types").AffiliateDisclosure;
   /** Called when the user clicks an affiliate product link */
   onProductClick?: (productId: string) => void;
 }

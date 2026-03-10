@@ -32,7 +32,11 @@ async def preview_route(
     try:
         wp_tuples = [(w[0], w[1]) for w in body.waypoints] if body.waypoints else None
         result = await routing_service.get_route(
-            body.startLat, body.startLon, body.destLat, body.destLon, waypoints=wp_tuples
+            body.startLat,
+            body.startLon,
+            body.destLat,
+            body.destLon,
+            waypoints=wp_tuples,
         )
         return RoutePreviewSchema(
             distanceKm=round(result.distance_km),
@@ -57,7 +61,7 @@ async def create_report(
         await verify_turnstile(ride_input.captcha_token, get_remote_address(request))
     locale = get_locale(request)
     try:
-        report = await build_report(ride_input, locale=locale)
+        report = await build_report(ride_input, locale=locale, session=session)
     except WeatherServiceError:
         raise HTTPException(
             status_code=503,

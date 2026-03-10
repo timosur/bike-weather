@@ -33,9 +33,9 @@ Authenticated users can save, edit, and delete their favorite routes. Each saved
 - **Quick check:** Tap a saved route to generate a fresh report
 - **Last condition tracking:** Displays the last weather condition from the most recent report
 
-### Product Recommendations (Route: `/products`, `/products/:categoryId`) ⏸️
+### Product Recommendations (Route: `/products`, `/products/:categoryId`)
 
-*Currently disabled in the UI (routes commented out).* Browse cycling products organized by category, with weather suitability metadata. Products include affiliate links and weather-match labels.
+Browse cycling products organized by category, with weather suitability metadata. Products include affiliate links and weather-match labels. In ride reports, the backend automatically matches products to clothing recommendations by body zone and weather fit, showing inline product links next to each clothing item.
 
 ### Authentication
 

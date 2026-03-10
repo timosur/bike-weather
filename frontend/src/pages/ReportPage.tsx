@@ -10,7 +10,6 @@ import { useRideHistory } from '../hooks/useRideHistory'
 import { useNavigationGuard } from '../hooks/useNavigationGuard'
 import { fetchReport } from '../api/rides'
 import { createRoute, fetchRoute, updateRoute } from '../api/routes'
-// import { products as sampleProducts, shops, disclosure } from '../data/sample-products'
 import type { RideInput } from '../components/ride-planner/types'
 import type { RideReport as RideReportType } from '../components/ride-report/types'
 
@@ -79,7 +78,7 @@ export default function ReportPage() {
   // Handle saving changes when user chooses "Save & Leave"
   const handleBlockerSave = async () => {
     if (!currentRouteId || !submittedInput || !report) return
-    
+
     setSaveChangesLoading(true)
     try {
       await updateRoute(currentRouteId, {
@@ -279,13 +278,6 @@ export default function ReportPage() {
     })
   }
 
-  // const handleProductClick = (productId: string) => {
-  //   const product = sampleProducts.find((p) => p.id === productId)
-  //   if (product) {
-  //     window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer')
-  //   }
-  // }
-
   const handleRetry = () => {
     if (submittedInput) {
       hasFetched.current = false
@@ -333,7 +325,7 @@ export default function ReportPage() {
   return (
     <div className="w-full overflow-x-hidden">
       <SEO titleKey="report" path="/report" noIndex />
-      
+
       {/* Unsaved changes dialog */}
       {navGuard.isBlocked && (
         <UnsavedChangesDialog
@@ -344,7 +336,7 @@ export default function ReportPage() {
           saving={saveChangesLoading}
         />
       )}
-      
+
       {reportLoading && (
         <div className="w-full max-w-4xl mx-auto px-4 pb-10">
           <RideReportSkeleton />
@@ -393,10 +385,6 @@ export default function ReportPage() {
             saveChangesLoading={saveChangesLoading}
             hasUnsavedChanges={hasUnsavedChanges}
             onSwapClothingItem={handleSwapClothingItem}
-          // products={sampleProducts}
-          // shops={shops}
-          // disclosure={disclosure}
-          // onProductClick={handleProductClick}
           />
         </div>
       )}

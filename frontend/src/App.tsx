@@ -7,7 +7,7 @@ import { AppShell } from './components/shell'
 import type { NavigationItem, FooterSection } from './components/shell'
 import { RidePlannerSkeleton } from './components/ride-planner'
 import { RideReportSkeleton } from './components/ride-report'
-// import { ProductCategoriesSkeleton, ProductCategoryDetailSkeleton } from './components/product-recommendations'
+import { ProductCategoriesSkeleton, ProductCategoryDetailSkeleton } from './components/product-recommendations'
 import { MyRoutesSkeleton } from './components/my-routes'
 import { AuthPageSkeleton, PasswordPageSkeleton } from './components/auth'
 import { ContentPageSkeleton } from './components/skeleton'
@@ -18,8 +18,8 @@ import { setAccessTokenProvider } from './api/client'
 
 const PlannerPage = lazy(() => import('./pages/PlannerPage'))
 const ReportPage = lazy(() => import('./pages/ReportPage'))
-// const ProductsPage = lazy(() => import('./pages/ProductsPage'))
-// const ProductCategoryPage = lazy(() => import('./pages/ProductCategoryPage'))
+const ProductsPage = lazy(() => import('./pages/ProductsPage'))
+const ProductCategoryPage = lazy(() => import('./pages/ProductCategoryPage'))
 const RoutesPage = lazy(() => import('./pages/RoutesPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
@@ -47,7 +47,7 @@ function useNavigationItems(): NavigationItem[] {
   const { t } = useTranslation()
   return [
     { label: t('shell.nav.planner'), href: '/planner' },
-    // { label: t('shell.nav.products'), href: '/products' },
+    { label: t('shell.nav.products'), href: '/products' },
     { label: t('shell.nav.myRoutes'), href: '/routes', requiresAuth: true },
     { label: t('shell.nav.aboutApp'), href: '/about' },
   ]
@@ -165,8 +165,8 @@ function AppContent() {
         <Route path="/report/:routeId" element={<Suspense fallback={<RideReportSkeleton />}><ReportPage /></Suspense>} />
         <Route path="/report" element={<Suspense fallback={<RideReportSkeleton />}><ReportPage /></Suspense>} />
         <Route path="/shared/:token" element={<Suspense fallback={<RideReportSkeleton />}><SharedReportPage /></Suspense>} />
-        {/* <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductsPage /></Suspense>} /> */}
-        {/* <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} /> */}
+        <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductsPage /></Suspense>} />
+        <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} />
         <Route path="/routes" element={<Suspense fallback={<MyRoutesSkeleton />}><RequireAuth><RoutesPage /></RequireAuth></Suspense>} />
         <Route path="/login" element={<Suspense fallback={<AuthPageSkeleton />}><LoginPage /></Suspense>} />
         <Route path="/forgot-password" element={<Suspense fallback={<PasswordPageSkeleton />}><ForgotPasswordPage /></Suspense>} />

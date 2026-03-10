@@ -1,5 +1,25 @@
 from pydantic import BaseModel
 
+from app.schemas.product import AffiliateDisclosureResponse, ShopResponse
+
+
+class MatchedProductSchema(BaseModel):
+    id: str
+    name: str
+    imageUrl: str
+    price: float
+    currency: str
+    shopId: str
+    affiliateUrl: str
+    matchesLabel: str
+    weatherSummary: str
+
+
+class ProductRecommendationsSchema(BaseModel):
+    matched: dict[str, MatchedProductSchema]
+    shops: list[ShopResponse]
+    disclosure: AffiliateDisclosureResponse
+
 
 class WeatherDataSchema(BaseModel):
     tempMin: float
@@ -149,3 +169,4 @@ class RideReportSchema(BaseModel):
     mergedClothingItems: list[ClothingItemSchema] = []
     mergedEquipment: list[EquipmentItemSchema] = []
     tips: list[TipSchema] = []
+    productRecommendations: ProductRecommendationsSchema | None = None

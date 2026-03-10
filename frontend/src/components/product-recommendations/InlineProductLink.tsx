@@ -1,7 +1,31 @@
 import { ExternalLink, Store } from 'lucide-react'
-import type { InlineProductProps } from './types'
 
-export function InlineProductLink({ product, shop, disclosure, onProductClick }: InlineProductProps) {
+/** Minimal product shape needed for the inline link */
+interface InlineProduct {
+  id: string;
+  name: string;
+  imageUrl: string;
+  price: number;
+  currency: string;
+  affiliateUrl: string;
+}
+
+interface InlineShop {
+  name: string;
+}
+
+interface InlineDisclosure {
+  badgeLabel: string;
+}
+
+interface InlineProductLinkProps {
+  product: InlineProduct;
+  shop: InlineShop;
+  disclosure: InlineDisclosure;
+  onProductClick?: (productId: string) => void;
+}
+
+export function InlineProductLink({ product, shop, disclosure, onProductClick }: InlineProductLinkProps) {
   const formattedPrice = new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: product.currency,

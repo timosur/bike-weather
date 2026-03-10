@@ -59,7 +59,7 @@ async def get_shared_report(
 
     locale = get_locale(request)
     try:
-        report = await build_report(ride_input, locale=locale)
+        report = await build_report(ride_input, locale=locale, session=session)
     except WeatherServiceError:
         raise HTTPException(
             status_code=503,

@@ -40,8 +40,14 @@ from app.schemas.report import (
 from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
 from app.services.routing import routing_service
-from app.services.route_waypoints import sample_waypoints_by_direction, sample_weather_points
+from app.services.route_waypoints import (
+    sample_waypoints_by_direction,
+    sample_weather_points,
+)
 from app.services.wind_analysis import analyze_wind, wind_exposure_factor
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.services.product_matching import match_products_to_clothing
 from app.services.weather import (
     HourlyForecast,
     HourlyWeatherWindow,
@@ -102,7 +108,9 @@ def _build_weather_summary(forecast: WeatherForecast, locale: str = "de") -> str
 
     # Wind
     ws = forecast.wind_speed
-    wind_key = "wind_light" if ws < 20 else "wind_moderate" if ws < 40 else "wind_strong"
+    wind_key = (
+        "wind_light" if ws < 20 else "wind_moderate" if ws < 40 else "wind_strong"
+    )
     parts.append(
         tpl[wind_key].format(wind_speed=f"{ws:.0f}", wind_dir=forecast.wind_direction)
     )
@@ -409,6 +417,7 @@ async def build_report(
     ride_input: RideInputSchema,
     ws: WeatherService | None = None,
     locale: str = "de",
+    session: AsyncSession | None = None,
 ) -> RideReportSchema:
     """Build a complete ride report from input."""
     ws = ws or weather_service
@@ -440,11 +449,13 @@ async def build_report(
 
         if dest_lat is None or dest_lon is None:
             if ride_input.destination.address:
-                results = await geocoding_service.search(ride_input.destination.address, limit=1)
+                results = await geocoding_service.search(
+                    ride_input.destination.address, limit=1
+                )
                 if results:
                     dest_lat = results[0]["lat"]
                     dest_lon = results[0]["lon"]
-        
+
         if dest_lat and dest_lon:
             try:
                 # Collect waypoint coordinates for routing
@@ -458,29 +469,39 @@ async def build_report(
                 # Use imported geometry if available, otherwise call OSRM
                 if ride_input.importedGeometry:
                     from app.services.routing import RoutingService
-                    route_result = RoutingService.route_from_geometry(ride_input.importedGeometry)
+
+                    route_result = RoutingService.route_from_geometry(
+                        ride_input.importedGeometry
+                    )
                 else:
                     route_result = await routing_service.get_route(
-                        lat, lon, dest_lat, dest_lon,
+                        lat,
+                        lon,
+                        dest_lat,
+                        dest_lon,
                         waypoints=wp_coords if wp_coords else None,
                     )
-                
+
                 # Override distance if not provided
                 if not ride_input.distanceKm:
                     ride_input.distanceKm = round(route_result.distance_km)
-                
+
                 route_geometry = route_result.geometry
-                
+
                 # 2. Sample Waypoints
                 raw_waypoints = sample_waypoints_by_direction(route_result.geometry)
-                
+
                 # 3. Calculate timing & fetch weather
                 # Estimate average speed if not provided
                 avg_speed = ride_input.averageSpeedKmh or 20.0
                 if ride_input.durationMinutes and ride_input.distanceKm:
-                    avg_speed = ride_input.distanceKm / (ride_input.durationMinutes / 60)
-                
-                start_dt = datetime.strptime(f"{ride_input.startDate}T{ride_input.startTime}", "%Y-%m-%dT%H:%M")
+                    avg_speed = ride_input.distanceKm / (
+                        ride_input.durationMinutes / 60
+                    )
+
+                start_dt = datetime.strptime(
+                    f"{ride_input.startDate}T{ride_input.startTime}", "%Y-%m-%dT%H:%M"
+                )
 
                 sem = asyncio.Semaphore(5)
 
@@ -498,7 +519,9 @@ async def build_report(
                                 locale,
                             )
                         except Exception:
-                            logger.warning("Weather fetch failed for waypoint %d", wp.index)
+                            logger.warning(
+                                "Weather fetch failed for waypoint %d", wp.index
+                            )
                             return None
 
                         if not window.hours:
@@ -512,18 +535,20 @@ async def build_report(
                         )
                         return {"wp": wp, "weather": weather, "wind": wind_result}
 
-                wp_results = await asyncio.gather(*[_process_waypoint(wp) for wp in raw_waypoints])
+                wp_results = await asyncio.gather(
+                    *[_process_waypoint(wp) for wp in raw_waypoints]
+                )
                 wp_results = [r for r in wp_results if r is not None]
-                
+
                 # 4. Build Schemas
                 waypoints_schema = []
                 route_segments_schema = []
-                
+
                 for i, res in enumerate(wp_results):
                     wp = res["wp"]
                     w = res["weather"]
                     wind = res["wind"]
-                    
+
                     waypoints_schema.append(
                         RouteWaypointWeather(
                             index=wp.index,
@@ -539,17 +564,34 @@ async def build_report(
                             segmentStartKm=wp.segment_start_km,
                             segmentEndKm=wp.segment_end_km,
                             segmentDurationMinutes=(
-                                round((wp.segment_end_km - wp.segment_start_km) / avg_speed * 60, 1)
-                                if wp.segment_start_km is not None and wp.segment_end_km is not None and avg_speed > 0
+                                round(
+                                    (wp.segment_end_km - wp.segment_start_km)
+                                    / avg_speed
+                                    * 60,
+                                    1,
+                                )
+                                if wp.segment_start_km is not None
+                                and wp.segment_end_km is not None
+                                and avg_speed > 0
                                 else None
                             ),
                         )
                     )
-                    
+
                     # Create segment using the segment's boundary geometry indices
-                    start_idx = wp.segment_start_geom_idx if wp.segment_start_geom_idx is not None else wp.geometry_index
-                    end_idx = wp.segment_end_geom_idx if wp.segment_end_geom_idx is not None else (
-                        wp_results[i + 1]["wp"].geometry_index if i < len(wp_results) - 1 else len(route_geometry) - 1
+                    start_idx = (
+                        wp.segment_start_geom_idx
+                        if wp.segment_start_geom_idx is not None
+                        else wp.geometry_index
+                    )
+                    end_idx = (
+                        wp.segment_end_geom_idx
+                        if wp.segment_end_geom_idx is not None
+                        else (
+                            wp_results[i + 1]["wp"].geometry_index
+                            if i < len(wp_results) - 1
+                            else len(route_geometry) - 1
+                        )
                     )
                     segment_geom = [
                         list(pt) for pt in route_geometry[start_idx : end_idx + 1]
@@ -642,9 +684,7 @@ async def build_report(
         for i, wp in enumerate(sleep_waypoints):
             stop_date = (start_date + timedelta(days=i + 1)).strftime("%Y-%m-%d")
             try:
-                day_start_hour = (
-                    int(wp.startTime.split(":")[0]) if wp.startTime else 8
-                )
+                day_start_hour = int(wp.startTime.split(":")[0]) if wp.startTime else 8
             except (ValueError, IndexError):
                 day_start_hour = 8
             stop_lat = wp.location.lat or lat
@@ -966,14 +1006,31 @@ async def build_report(
         uwp = []
         for wp in ride_input.waypoints:
             if wp.location.lat is not None and wp.location.lon is not None:
-                uwp.append(UserWaypointSchema(
-                    lat=wp.location.lat,
-                    lon=wp.location.lon,
-                    type=wp.type,
-                    name=wp.name,
-                ))
+                uwp.append(
+                    UserWaypointSchema(
+                        lat=wp.location.lat,
+                        lon=wp.location.lon,
+                        type=wp.type,
+                        name=wp.name,
+                    )
+                )
         if uwp:
             user_waypoints_schema = uwp
+
+    # Match products to clothing items (best-fit by zone + weather)
+    product_recs = None
+    if session:
+        # Use the clothing items that will appear in the report
+        final_clothing = clothing  # last day's raw dicts; available for single-day
+        if merged_clothing:
+            # Multi-day: convert merged ClothingItemSchema back to dicts for matching
+            final_clothing = [{"id": c.id, "icon": c.icon} for c in merged_clothing]
+        try:
+            product_recs = await match_products_to_clothing(
+                session, final_clothing, forecast
+            )
+        except Exception:
+            logger.warning("Product matching failed, continuing without", exc_info=True)
 
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",
@@ -1003,4 +1060,5 @@ async def build_report(
         userWaypoints=user_waypoints_schema,
         routeSegments=route_segments_schema,
         destinationLocation=destination_addr,
+        productRecommendations=product_recs,
     )
