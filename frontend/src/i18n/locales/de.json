@@ -70,7 +70,8 @@
       "imprint": "Impressum",
       "privacy": "Datenschutz",
       "attributionWeather": "Wetter: Open-Meteo",
-      "attributionMap": "Kartendaten: © OpenStreetMap-Mitwirkende"
+      "attributionMap": "Kartendaten: © OpenStreetMap-Mitwirkende",
+      "attributionGeocoding": "Geokodierung: Google Maps"
     },
     "nav": {
       "planner": "Routenplaner",
@@ -654,8 +655,8 @@
         "navTitle": "Drittanbieter",
         "weatherApi": "Wetterdaten (Open-Meteo):",
         "weatherApiText": "Zum Abruf von Wettervorhersagen wird dein gewählter Standort (Koordinaten) an Open-Meteo (open-meteo.com) übermittelt. Open-Meteo ist eine kostenlose, quelloffene Wetter-API. Es werden keine personenbezogenen Daten durch diesen Dienst gespeichert.",
-        "nominatim": "Standortsuche (OpenStreetMap / Nominatim):",
-        "nominatimText": "Für die Adresssuche und Rückwärtsgeokodierung werden deine Suchanfrage oder GPS-Koordinaten an Nominatim übermittelt, einen Geocodierungsdienst auf Basis von OpenStreetMap-Daten (openstreetmap.org). Die Daten stehen unter der Open Database License (ODbL). Es werden keine personenbezogenen Daten gespeichert.",
+        "nominatim": "Standortsuche (Google Maps):",
+        "nominatimText": "Für die Adresssuche und Rückwärtsgeokodierung werden deine Suchanfrage oder GPS-Koordinaten an Google Maps Platform (maps.google.com) übermittelt. Die Daten werden gemäß der Datenschutzerklärung von Google (policies.google.com/privacy) verarbeitet. Es werden durch unsere Anwendung keine personenbezogenen Daten über die Suchanfrage hinaus gespeichert.",
         "turnstile": "Bot-Schutz (Cloudflare Turnstile):",
         "turnstileText": "Zum Schutz von Formularen (Anmeldung, Registrierung, Kontakt) vor automatisiertem Missbrauch wird Cloudflare Turnstile eingesetzt. Dabei werden technische Daten (z. B. Browser-Merkmale) an Cloudflare, Inc. übermittelt. Informationen: cloudflare.com/privacypolicy.",
         "affiliateLinks": "Affiliate-Links:",

@@ -1,26 +1,28 @@
 import type { LocationSuggestion } from "../components/ride-planner/types";
-
-const API_BASE = "/api";
+import { apiFetch } from "./client";
 
 export async function searchLocations(
   query: string,
-  limit: number = 5
+  limit: number = 5,
 ): Promise<LocationSuggestion[]> {
   const params = new URLSearchParams({ q: query, limit: String(limit) });
-  const response = await fetch(`${API_BASE}/geocoding/search?${params}`);
-  if (!response.ok) return [];
-  return response.json() as Promise<LocationSuggestion[]>;
+  try {
+    return await apiFetch<LocationSuggestion[]>(`/geocoding/search?${params}`, { method: "GET" });
+  } catch {
+    return [];
+  }
 }
 
-export async function reverseGeocode(
-  lat: number,
-  lon: number
-): Promise<LocationSuggestion | null> {
+export async function reverseGeocode(lat: number, lon: number): Promise<LocationSuggestion | null> {
   const params = new URLSearchParams({
     lat: String(lat),
     lon: String(lon),
   });
-  const response = await fetch(`${API_BASE}/geocoding/reverse?${params}`);
-  if (!response.ok) return null;
-  return response.json() as Promise<LocationSuggestion | null>;
+  try {
+    return await apiFetch<LocationSuggestion | null>(`/geocoding/reverse?${params}`, {
+      method: "GET",
+    });
+  } catch {
+    return null;
+  }
 }

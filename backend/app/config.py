@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     OTEL_SERVICE_NAME: str = "bike-weather-backend"
     APP_VERSION: str = "0.0.0"
     AGENT_SERVICE_URL: str = "http://localhost:8001"
+    GOOGLE_MAPS_API_KEY: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

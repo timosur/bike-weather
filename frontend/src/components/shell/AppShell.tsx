@@ -292,6 +292,8 @@ export function AppShell({
                   <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.attributionWeather')}</a>
                   {' · '}
                   <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.attributionMap')}</a>
+                  {' · '}
+                  <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">{t('shell.footer.attributionGeocoding')}</a>
                 </span>
                 <a
                   href="/imprint"

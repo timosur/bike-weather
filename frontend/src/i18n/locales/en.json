@@ -70,7 +70,8 @@
       "imprint": "Imprint",
       "privacy": "Privacy",
       "attributionWeather": "Weather: Open-Meteo",
-      "attributionMap": "Map data: © OpenStreetMap contributors"
+      "attributionMap": "Map data: © OpenStreetMap contributors",
+      "attributionGeocoding": "Geocoding: Google Maps"
     },
     "nav": {
       "planner": "Planner",
@@ -654,8 +655,8 @@
         "navTitle": "Third parties",
         "weatherApi": "Weather data (Open-Meteo):",
         "weatherApiText": "To retrieve weather forecasts, your selected location (coordinates) is transmitted to Open-Meteo (open-meteo.com). Open-Meteo is a free, open-source weather API. No personal data is stored by this service.",
-        "nominatim": "Location search (OpenStreetMap / Nominatim):",
-        "nominatimText": "For address search and reverse geocoding, your search query or GPS coordinates are transmitted to Nominatim, a geocoding service based on OpenStreetMap data (openstreetmap.org). The data is licensed under the Open Database License (ODbL). No personal data is stored.",
+        "nominatim": "Location search (Google Maps):",
+        "nominatimText": "For address search and reverse geocoding, your search query or GPS coordinates are transmitted to Google Maps Platform (maps.google.com). The data is processed according to Google's Privacy Policy (policies.google.com/privacy). No personal data beyond the search query is stored by our application.",
         "turnstile": "Bot protection (Cloudflare Turnstile):",
         "turnstileText": "To protect forms (login, registration, contact) from automated abuse, Cloudflare Turnstile is used. During the check, technical data (e.g. browser characteristics) is transmitted to Cloudflare, Inc. Information: cloudflare.com/privacypolicy.",
         "affiliateLinks": "Affiliate links:",
