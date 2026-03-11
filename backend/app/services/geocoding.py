@@ -118,11 +118,9 @@ def _parse_places_result(place: dict) -> dict:
     location = place.get("location", {})
     display_name = place.get("displayName", {}).get("text", "")
     formatted = place.get("formattedAddress", display_name)
-    short = place.get("shortFormattedAddress", "")
-    if not short:
-        # Fallback: first two comma-separated parts of formatted address
-        parts = formatted.split(",")
-        short = ", ".join(p.strip() for p in parts[:2])
+    # Use the place name as the short/title text so landmarks and cities
+    # show their actual name instead of just an address fragment.
+    short = display_name or formatted.split(",")[0].strip()
     return {
         "id": place.get("id", ""),
         "displayText": formatted,

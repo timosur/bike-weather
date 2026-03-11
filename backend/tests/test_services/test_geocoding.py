@@ -53,7 +53,7 @@ async def test_search_returns_parsed_suggestions() -> None:
     assert len(results) == 2
     assert results[0]["id"] == "ChIJAVkDPzdOqEcRcDteW0YgIQQ"
     assert results[0]["displayText"] == "Berlin, Germany"
-    assert results[0]["shortText"] == "Berlin, Germany"
+    assert results[0]["shortText"] == "Berlin"
     assert results[0]["lat"] == 52.52
     assert results[0]["lon"] == 13.405
 
