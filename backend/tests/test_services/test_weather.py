@@ -31,6 +31,12 @@ MOCK_OPEN_METEO_RESPONSE = {
     }
 }
 
+MOCK_AIR_QUALITY_RESPONSE = {
+    "hourly": {
+        "european_aqi": [15.0 + i for i in range(24)],
+    }
+}
+
 
 def _make_hourly_response(start_hour: int = 8, end_hour: int = 12) -> dict:
     """Build a mock Open-Meteo response with both hourly and daily data."""
@@ -47,6 +53,9 @@ def _make_hourly_response(start_hour: int = 8, end_hour: int = 12) -> dict:
             "wind_gusts_10m": [15 + i * 0.4 for i in range(hours)],
             "relative_humidity_2m": [60 for _ in range(hours)],
             "is_day": [0 if i < 6 or i > 20 else 1 for i in range(hours)],
+            "uv_index": [
+                0.0 if i < 6 or i > 20 else 3.0 + i * 0.2 for i in range(hours)
+            ],
         },
         "daily": {
             "uv_index_max": [5.0],
@@ -54,6 +63,9 @@ def _make_hourly_response(start_hour: int = 8, end_hour: int = 12) -> dict:
             "sunset": ["2026-03-15T18:31"],
         },
     }
+
+
+MOCK_AQI_HOURLY = MOCK_AIR_QUALITY_RESPONSE["hourly"]["european_aqi"]
 
 
 def _mock_transport(response_data=None, status_code: int = 200):
@@ -65,9 +77,15 @@ def _mock_transport(response_data=None, status_code: int = 200):
     return httpx.MockTransport(handler)
 
 
+def _patch_aqi(service: WeatherService) -> None:
+    """Replace fetch_air_quality with a mock returning test data."""
+    service.fetch_air_quality = AsyncMock(return_value=list(MOCK_AQI_HOURLY))
+
+
 async def test_fetch_forecast_parses_response() -> None:
     client = httpx.AsyncClient(transport=_mock_transport())
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     forecast = await service.fetch_forecast(47.66, 9.17, "2026-03-15")
     assert isinstance(forecast, WeatherForecast)
@@ -83,6 +101,7 @@ async def test_fetch_forecast_parses_response() -> None:
     assert forecast.sunset == "18:31"
     assert forecast.icon == "cloud-sun"
     assert forecast.weather_code == 2
+    assert forecast.air_quality_index == max(MOCK_AQI_HOURLY)
 
 
 async def test_fetch_forecast_caches_result() -> None:
@@ -95,6 +114,7 @@ async def test_fetch_forecast_caches_result() -> None:
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(counting_handler))
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     await service.fetch_forecast(47.66, 9.17, "2026-03-15")
     await service.fetch_forecast(47.66, 9.17, "2026-03-15")
@@ -111,6 +131,7 @@ async def test_fetch_forecast_cache_expires() -> None:
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(counting_handler))
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     await service.fetch_forecast(47.66, 9.17, "2026-03-15")
     # Manually expire the cache
@@ -148,6 +169,7 @@ async def test_fetch_forecast_retries_on_504_then_succeeds(mock_sleep) -> None:
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(flaky_handler))
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     forecast = await service.fetch_forecast(47.66, 9.17, "2026-03-15")
     assert isinstance(forecast, WeatherForecast)
@@ -207,12 +229,9 @@ def test_wmo_code_mapping_covers_all_codes() -> None:
 
 async def test_fetch_hourly_forecast_parses_response() -> None:
     mock_data = _make_hourly_response()
-
-    async def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json=mock_data)
-
-    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    client = httpx.AsyncClient(transport=_mock_transport(response_data=mock_data))
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     result = await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
     assert isinstance(result, HourlyWeatherWindow)
@@ -230,12 +249,9 @@ async def test_fetch_hourly_forecast_parses_response() -> None:
 
 async def test_fetch_hourly_forecast_summary_uses_worst_case() -> None:
     mock_data = _make_hourly_response()
-
-    async def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json=mock_data)
-
-    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    client = httpx.AsyncClient(transport=_mock_transport(response_data=mock_data))
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     result = await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
     summary = result.summary
@@ -260,6 +276,7 @@ async def test_fetch_hourly_forecast_caches_result() -> None:
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(counting_handler))
     service = WeatherService(client=client)
+    _patch_aqi(service)
 
     await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)
     await service.fetch_hourly_forecast(47.66, 9.17, "2026-03-15", 8, 12)

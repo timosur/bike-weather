@@ -5,6 +5,7 @@ import {
   Wind,
   Eye,
   Calendar,
+  CloudHail,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { DayForecast } from './types'
@@ -52,6 +53,7 @@ export function MultiDayWeatherSummary({ days }: MultiDayWeatherSummaryProps) {
     const windMax = Math.max(...allWeather.map(w => w.windSpeed))
     const humidityMax = Math.max(...allWeather.map(w => w.humidity))
     const uvMax = Math.max(...allWeather.map(w => w.uvIndex))
+    const aqiMax = Math.max(...allWeather.map(w => w.airQualityIndex ?? 0))
 
     // Find the "worst" weather icon across days
     const iconPriority: Record<string, number> = {
@@ -69,6 +71,7 @@ export function MultiDayWeatherSummary({ days }: MultiDayWeatherSummaryProps) {
       windMax,
       humidityMax,
       uvMax,
+      aqiMax,
       worstIcon: worstIcon.icon,
       worstDescription: worstIcon.description,
       tempUnit: allWeather[0].tempUnit,
@@ -146,6 +149,19 @@ export function MultiDayWeatherSummary({ days }: MultiDayWeatherSummaryProps) {
           label={t('report.weather.uvIndex')}
           value={`${summary.uvMax}`}
           subValue={summary.uvMax >= 6 ? t('report.weather.uvHigh') : summary.uvMax >= 3 ? t('report.weather.uvMedium') : t('report.weather.uvLow')}
+        />
+        <WeatherStat
+          icon={<CloudHail className="w-4 h-4" />}
+          label={t('report.weather.airQuality')}
+          value={`${summary.aqiMax}`}
+          subValue={
+            summary.aqiMax > 100 ? t('report.weather.aqiExtreme')
+              : summary.aqiMax > 80 ? t('report.weather.aqiVeryPoor')
+                : summary.aqiMax > 60 ? t('report.weather.aqiPoor')
+                  : summary.aqiMax > 40 ? t('report.weather.aqiModerate')
+                    : summary.aqiMax > 20 ? t('report.weather.aqiFair')
+                      : t('report.weather.aqiGood')
+          }
         />
       </div>
     </div>

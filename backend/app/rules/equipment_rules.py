@@ -44,6 +44,7 @@ def get_equipment_items(
         "temp_range": temp_range_str(weather.temp_min, weather.temp_max),
         "precip": precip,
         "uv_index": weather.uv_index,
+        "air_quality_index": weather.air_quality_index,
         "sunrise": weather.sunrise,
         "sunset": weather.sunset,
         "ride_start": ride_start_time or "",
@@ -74,6 +75,12 @@ def get_equipment_items(
     # UV protection
     if weather.uv_index >= 3:
         items.append(_make_eq_item("eq-sunscreen", locale, fvars, category="gear"))
+
+    # Air quality protection
+    if weather.air_quality_index > 60:
+        items.append(
+            _make_eq_item("eq-face-mask-air", locale, fvars, category="safety")
+        )
 
     # Lights: if ride falls outside daylight hours
     if ride_start_time and weather.sunrise and weather.sunset:

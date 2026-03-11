@@ -60,6 +60,8 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
     const precip = hourlyForecast.map(h => h.precipitationProbability)
     const wind = hourlyForecast.map(h => h.windSpeed)
     const isDay = hourlyForecast.map(h => h.isDay)
+    const uvIndex = hourlyForecast.map(h => h.uvIndex ?? 0)
+    const aqi = hourlyForecast.map(h => h.airQualityIndex ?? 0)
 
     // Temperature scale (shared for temp + feels-like)
     const allTemps = [...temps, ...feelsLike]
@@ -79,11 +81,21 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
       const maxWind = Math.max(50, ...wind)
       return PADDING.top + PLOT_H - (val / maxWind) * PLOT_H
     }
+    const uvScale = (val: number) => {
+      const maxUv = Math.max(12, ...uvIndex)
+      return PADDING.top + PLOT_H - (val / maxUv) * PLOT_H
+    }
+    const aqiScale = (val: number) => {
+      const maxAqi = Math.max(100, ...aqi)
+      return PADDING.top + PLOT_H - (val / maxAqi) * PLOT_H
+    }
 
     const tempPoints = hours.map((h, i) => ({ x: xScale(h), y: tempScale(temps[i]) }))
     const feelsPoints = hours.map((h, i) => ({ x: xScale(h), y: tempScale(feelsLike[i]) }))
     const precipPoints = hours.map((h, i) => ({ x: xScale(h), y: precipScale(precip[i]) }))
     const windPoints = hours.map((h, i) => ({ x: xScale(h), y: windScale(wind[i]) }))
+    const uvPoints = hours.map((h, i) => ({ x: xScale(h), y: uvScale(uvIndex[i]) }))
+    const aqiPoints = hours.map((h, i) => ({ x: xScale(h), y: aqiScale(aqi[i]) }))
 
     // Ride window highlight
     const rideX0 = rideStartHour != null ? xScale(rideStartHour) : null
@@ -150,10 +162,10 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
     }).filter(t => t.icon != null) as { hour: number; x: number; icon: WeatherIconType }[]
 
     return {
-      hours, temps, feelsLike, precip, wind, isDay,
+      hours, temps, feelsLike, precip, wind, isDay, uvIndex, aqi,
       tempMin, tempMax, minHour, maxHour,
-      xScale, tempScale, precipScale, windScale,
-      tempPoints, feelsPoints, precipPoints, windPoints,
+      xScale, tempScale, precipScale, windScale, uvScale, aqiScale,
+      tempPoints, feelsPoints, precipPoints, windPoints, uvPoints, aqiPoints,
       rideX0, rideX1, tempTicks, xTicks, iconTicks,
       lightZones, sunriseH, sunsetH,
     }
@@ -468,6 +480,26 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
             opacity={0.6}
           />
 
+          {/* UV index line */}
+          <path
+            d={buildPath(data.uvPoints)}
+            fill="none"
+            className="stroke-purple-500 dark:stroke-purple-400"
+            strokeWidth={1.5}
+            strokeDasharray="3,2"
+            opacity={0.7}
+          />
+
+          {/* Air quality index line */}
+          <path
+            d={buildPath(data.aqiPoints)}
+            fill="none"
+            className="stroke-teal-500 dark:stroke-teal-400"
+            strokeWidth={1.5}
+            strokeDasharray="2,2"
+            opacity={0.7}
+          />
+
           {/* Feels-like line */}
           <path
             d={buildPath(feelsPoints)}
@@ -569,6 +601,8 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
             const feels = data.feelsLike[hoverIdx]
             const prec = data.precip[hoverIdx]
             const wnd = data.wind[hoverIdx]
+            const uv = data.uvIndex[hoverIdx]
+            const aqiVal = data.aqi[hoverIdx]
             // Tooltip dimensions
             // Check if lights-needed row will be shown
             const hourIsDay = data.isDay[hoverIdx]
@@ -579,7 +613,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
             )
             const showLights = !hourIsDay || inTwilightCheck
             const tw = 130
-            const th = showLights ? 93 : 80
+            const th = showLights ? 119 : 106
             const tp = 8
             // Position tooltip to left or right of crosshair depending on space
             const tooltipX = hx + tw + tp > CHART_WIDTH - PADDING.right
@@ -604,6 +638,10 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
                   className="fill-blue-400 dark:fill-blue-500 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
                 <circle cx={hx} cy={data.windPoints[hoverIdx].y} r={3}
                   className="fill-stone-400 dark:fill-stone-500 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                <circle cx={hx} cy={data.uvPoints[hoverIdx].y} r={3}
+                  className="fill-purple-500 dark:fill-purple-400 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                <circle cx={hx} cy={data.aqiPoints[hoverIdx].y} r={3}
+                  className="fill-teal-500 dark:fill-teal-400 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
                 {/* Tooltip background */}
                 <rect
                   x={tooltipX} y={tooltipY}
@@ -635,6 +673,14 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
                   className="fill-stone-500 dark:fill-stone-400" pointerEvents="none">
                   {t('report.weather.legend.wind')}: {wnd.toFixed(1)} km/h
                 </text>
+                <text x={tooltipX + 8} y={tooltipY + 82} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-purple-500 dark:fill-purple-400" pointerEvents="none">
+                  {t('report.weather.legend.uvIndex')}: {uv.toFixed(1)}
+                </text>
+                <text x={tooltipX + 8} y={tooltipY + 95} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-teal-500 dark:fill-teal-400" pointerEvents="none">
+                  {t('report.weather.legend.airQuality')}: {aqiVal.toFixed(0)}
+                </text>
                 {/* Lights needed indicator */}
                 {(() => {
                   const hourIsDay = data.isDay[hoverIdx]
@@ -645,7 +691,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
                   )
                   if (!hourIsDay || inTwilight) {
                     return (
-                      <text x={tooltipX + 8} y={tooltipY + 82} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                      <text x={tooltipX + 8} y={tooltipY + 108} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
                         className="fill-amber-500 dark:fill-amber-400" pointerEvents="none">
                         🔦 {t('report.weather.chart.lightsNeeded')}
                       </text>
@@ -675,6 +721,14 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-stone-400 rounded-full" style={{ borderBottom: '1px dashed' }} />
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.wind')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 bg-purple-500 dark:bg-purple-400 rounded-full" style={{ borderBottom: '1px dashed' }} />
+            <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.uvIndex')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 bg-teal-500 dark:bg-teal-400 rounded-full" style={{ borderBottom: '1px dotted' }} />
+            <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.airQuality')}</span>
           </div>
           {(rideX0 != null) && (
             <div className="flex items-center gap-1.5">

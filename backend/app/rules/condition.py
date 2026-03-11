@@ -78,6 +78,14 @@ def compute_condition(
         )
         return "not-recommended", reasons
 
+    if weather.air_quality_index > 100:
+        reasons.append(
+            ConditionReason(
+                "extreme_air_quality", "☣️", weather.air_quality_index, 100, "AQI"
+            )
+        )
+        return "not-recommended", reasons
+
     # --- CAUTION checks (collect all matching) ---
     caution_reasons: list[ConditionReason] = []
 
@@ -99,6 +107,13 @@ def compute_condition(
     if weather.wind_speed > 30:
         caution_reasons.append(
             ConditionReason("high_wind", "💨", weather.wind_speed, 30, "km/h")
+        )
+
+    if weather.air_quality_index > 60:
+        caution_reasons.append(
+            ConditionReason(
+                "poor_air_quality", "😷", weather.air_quality_index, 60, "AQI"
+            )
         )
 
     if caution_reasons:

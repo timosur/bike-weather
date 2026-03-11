@@ -67,6 +67,7 @@ export interface WeatherData {
   windDirection: string;
   humidity: number;
   uvIndex: number;
+  airQualityIndex: number;
   sunrise: string;
   sunset: string;
   icon: WeatherIconType;
@@ -124,6 +125,8 @@ export interface HourlyWeather {
   windDirection: string;
   windGusts: number;
   humidity: number;
+  uvIndex: number;
+  airQualityIndex: number;
   weatherCode: number;
   icon: WeatherIconType;
   description: string;

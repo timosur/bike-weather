@@ -3,8 +3,8 @@ import {
   Droplets,
   Wind,
   Eye,
-  Sunrise,
-  Sunset,
+  SunDim,
+  CloudHail,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WeatherData, HourlyWeather } from './types'
@@ -124,14 +124,22 @@ export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHo
           subValue={weather.uvIndex >= 6 ? t('report.weather.uvHigh') : weather.uvIndex >= 3 ? t('report.weather.uvMedium') : t('report.weather.uvLow')}
         />
         <WeatherStat
-          icon={<Sunrise className="w-4 h-4" />}
-          label={t('report.weather.sunrise')}
-          value={weather.sunrise}
+          icon={<CloudHail className="w-4 h-4" />}
+          label={t('report.weather.airQuality')}
+          value={`${weather.airQualityIndex}`}
+          subValue={
+            weather.airQualityIndex > 100 ? t('report.weather.aqiExtreme')
+              : weather.airQualityIndex > 80 ? t('report.weather.aqiVeryPoor')
+                : weather.airQualityIndex > 60 ? t('report.weather.aqiPoor')
+                  : weather.airQualityIndex > 40 ? t('report.weather.aqiModerate')
+                    : weather.airQualityIndex > 20 ? t('report.weather.aqiFair')
+                      : t('report.weather.aqiGood')
+          }
         />
         <WeatherStat
-          icon={<Sunset className="w-4 h-4" />}
-          label={t('report.weather.sunset')}
-          value={weather.sunset}
+          icon={<SunDim className="w-4 h-4" />}
+          label={`${t('report.weather.sunrise')} / ${t('report.weather.sunset')}`}
+          value={`${weather.sunrise} / ${weather.sunset}`}
         />
       </div>
     </div>

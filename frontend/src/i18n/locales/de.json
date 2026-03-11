@@ -333,6 +333,13 @@
       "uvHigh": "Hoch",
       "uvMedium": "Mittel",
       "uvLow": "Niedrig",
+      "airQuality": "Luftqualität",
+      "aqiGood": "Gut",
+      "aqiFair": "Akzeptabel",
+      "aqiModerate": "Mäßig",
+      "aqiPoor": "Schlecht",
+      "aqiVeryPoor": "Sehr schlecht",
+      "aqiExtreme": "Extrem schlecht",
       "sunrise": "Sonnenaufgang",
       "sunset": "Sonnenuntergang",
       "hourlyForecast": "Stündliche Vorhersage ({{start}} – {{end}})",
@@ -342,7 +349,9 @@
         "feelsLike": "Gefühlt",
         "precip": "Niederschlag",
         "wind": "Wind",
-        "rideWindow": "Deine Fahrt"
+        "rideWindow": "Deine Fahrt",
+        "uvIndex": "UV-Index",
+        "airQuality": "Luftqualität (AQI)"
       },
       "chart": {
         "sunrise": "Sonnenaufgang",

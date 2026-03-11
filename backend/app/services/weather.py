@@ -8,6 +8,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+OPEN_METEO_AIR_QUALITY_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 CACHE_TTL_SECONDS = 1800  # 30 minutes
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 1.0  # seconds
@@ -78,6 +79,7 @@ class WeatherForecast:
     weather_code: int
     icon: str
     description: str
+    air_quality_index: float = 0  # European AQI (0-100+)
 
 
 @dataclass
@@ -98,6 +100,8 @@ class HourlyForecast:
     icon: str
     description: str
     is_day: bool
+    uv_index: float = 0
+    air_quality_index: float = 0  # European AQI
 
 
 @dataclass
@@ -117,6 +121,7 @@ class WeatherService:
         self._client = client
         self._cache: dict[str, tuple[float, WeatherForecast]] = {}
         self._hourly_cache: dict[str, tuple[float, HourlyWeatherWindow]] = {}
+        self._aqi_cache: dict[str, tuple[float, list[float]]] = {}
 
     def _cache_key(self, lat: float, lon: float, date: str) -> str:
         return f"{lat:.2f},{lon:.2f},{date}"
@@ -133,6 +138,59 @@ class WeatherService:
                 return forecast
             del self._cache[key]
         return None
+
+    async def fetch_air_quality(self, lat: float, lon: float, date: str) -> list[float]:
+        """Fetch hourly European AQI for a date. Returns 24 floats (one per hour).
+
+        On failure returns 24 zeros so weather data is still usable.
+        Uses a dedicated short-timeout client to avoid blocking weather requests.
+        """
+        aqi_key = f"aqi:{lat:.2f},{lon:.2f},{date}"
+        if aqi_key in self._aqi_cache:
+            ts, cached = self._aqi_cache[aqi_key]
+            if time.monotonic() - ts < CACHE_TTL_SECONDS:
+                return cached
+            del self._aqi_cache[aqi_key]
+
+        params = {
+            "latitude": str(lat),
+            "longitude": str(lon),
+            "hourly": "european_aqi",
+            "start_date": date,
+            "end_date": date,
+            "timezone": "auto",
+        }
+
+        # Use a dedicated client with aggressive timeouts so AQI never blocks weather
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=3.0, read=5.0, write=3.0, pool=3.0)
+        ) as aqi_client:
+            try:
+                response = await aqi_client.get(
+                    OPEN_METEO_AIR_QUALITY_URL, params=params
+                )
+                response.raise_for_status()
+                data = response.json()
+            except Exception as e:
+                logger.warning(
+                    "Air quality API request failed: %s (%s)",
+                    e,
+                    type(e).__name__,
+                )
+                return [0.0] * 24
+
+        try:
+            raw = data["hourly"]["european_aqi"]
+            hourly_aqi = [float(v) if v is not None else 0.0 for v in raw[:24]]
+            # Pad to 24 if fewer values returned
+            while len(hourly_aqi) < 24:
+                hourly_aqi.append(0.0)
+        except (KeyError, TypeError) as e:
+            logger.warning("Failed to parse air quality response: %s", e)
+            return [0.0] * 24
+
+        self._aqi_cache[aqi_key] = (time.monotonic(), hourly_aqi)
+        return hourly_aqi
 
     async def fetch_forecast(
         self, lat: float, lon: float, date: str
@@ -240,6 +298,10 @@ class WeatherService:
             daily = data["daily"]
             idx = 0  # Single day request
 
+            # Fetch air quality data (graceful degradation — zeros on failure)
+            hourly_aqi = await self.fetch_air_quality(lat, lon, date)
+            max_aqi = max(hourly_aqi) if hourly_aqi else 0
+
             temp_max = daily["temperature_2m_max"][idx]
             temp_min = daily["temperature_2m_min"][idx]
             app_max = daily["apparent_temperature_max"][idx]
@@ -275,6 +337,7 @@ class WeatherService:
                 weather_code=weather_code,
                 icon=wmo_to_icon(weather_code),
                 description=wmo_to_description(weather_code),
+                air_quality_index=max_aqi,
             )
         except (KeyError, IndexError, TypeError) as e:
             logger.error("Failed to parse Open-Meteo response: %s", e)
@@ -330,6 +393,7 @@ class WeatherService:
                     "wind_gusts_10m",
                     "relative_humidity_2m",
                     "is_day",
+                    "uv_index",
                 ]
             ),
             "daily": ",".join(
@@ -409,6 +473,9 @@ class WeatherService:
             hourly = data["hourly"]
             daily = data["daily"]
 
+            # Fetch air quality data (graceful degradation — zeros on failure)
+            hourly_aqi = await self.fetch_air_quality(lat, lon, date)
+
             # Parse daily-only fields
             uv_index = daily["uv_index_max"][0] or 0
             sunrise_raw = daily["sunrise"][0]
@@ -440,6 +507,8 @@ class WeatherService:
                         icon=wmo_to_icon(wcode),
                         description=wmo_to_description(wcode, locale),
                         is_day=bool(hourly["is_day"][i]),
+                        uv_index=hourly["uv_index"][i] or 0,
+                        air_quality_index=hourly_aqi[i] if i < len(hourly_aqi) else 0,
                     )
                 )
 
@@ -458,6 +527,8 @@ class WeatherService:
             # For wind direction, use the direction at peak wind speed
             peak_wind_hour = max(hours, key=lambda h: h.wind_speed) if hours else None
             wind_dir = peak_wind_hour.wind_direction if peak_wind_hour else "N"
+            # Worst AQI across the ride window
+            worst_aqi = max(h.air_quality_index for h in hours) if hours else 0
 
             summary = WeatherForecast(
                 temp_min=round(min(temps), 1) if temps else 0,
@@ -473,6 +544,7 @@ class WeatherService:
                 weather_code=worst_wcode,
                 icon=wmo_to_icon(worst_wcode),
                 description=wmo_to_description(worst_wcode, locale),
+                air_quality_index=worst_aqi,
             )
 
             result = HourlyWeatherWindow(hours=hours, summary=summary)

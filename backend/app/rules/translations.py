@@ -794,6 +794,14 @@ EQUIPMENT_TRANSLATIONS: dict[tuple[str, str], ItemTranslation] = {
         "name": "Sunscreen SPF 30+",
         "reason": "UV index {uv_index:.0f} — sun protection recommended for multi-hour rides.",
     },
+    ("eq-face-mask-air", "de"): {
+        "name": "Atemschutzmaske (FFP2)",
+        "reason": "Luftqualitätsindex {air_quality_index:.0f} — Atemschutz bei schlechter Luftqualität empfohlen.",
+    },
+    ("eq-face-mask-air", "en"): {
+        "name": "Face Mask (FFP2)",
+        "reason": "Air quality index {air_quality_index:.0f} — respiratory protection recommended for poor air quality.",
+    },
     ("eq-lights-before-sunrise", "de"): {
         "name": "Fahrradlichter (vorne + hinten)",
         "reason": "Start um {ride_start} vor Sonnenaufgang ({sunrise}) — Beleuchtung nötig.",
@@ -1178,6 +1186,23 @@ CONDITION_REASON_TRANSLATIONS: dict[tuple[str, str], ConditionReasonTranslation]
         "label": "Calm wind",
         "detail": "Wind: {actual:.0f} km/h (limit: {threshold:.0f} km/h)",
     },
+    # --- AIR QUALITY ---
+    ("extreme_air_quality", "de"): {
+        "label": "Extreme Luftverschmutzung",
+        "detail": "Luftqualitätsindex: {actual:.0f} (Grenze: {threshold:.0f})",
+    },
+    ("extreme_air_quality", "en"): {
+        "label": "Extreme air pollution",
+        "detail": "Air quality index: {actual:.0f} (limit: {threshold:.0f})",
+    },
+    ("poor_air_quality", "de"): {
+        "label": "Schlechte Luftqualität",
+        "detail": "Luftqualitätsindex: {actual:.0f} (Grenze: {threshold:.0f})",
+    },
+    ("poor_air_quality", "en"): {
+        "label": "Poor air quality",
+        "detail": "Air quality index: {actual:.0f} (limit: {threshold:.0f})",
+    },
 }
 
 
@@ -1235,6 +1260,22 @@ TIP_TRANSLATIONS: dict[tuple[str, str], str] = {
         "tip-wind-endurance",
         "en",
     ): "Long ride in wind: pace yourself, plan sheltered rest stops. Draft behind others when possible.",
+    (
+        "tip-air-quality-moderate",
+        "de",
+    ): "Mäßige Luftqualität: Intensives Training kann die Atemwege belasten. Pausen an schattenreichen Plätzen einlegen.",
+    (
+        "tip-air-quality-moderate",
+        "en",
+    ): "Moderate air quality: intense exercise may strain your airways. Take breaks in sheltered areas.",
+    (
+        "tip-air-quality-poor",
+        "de",
+    ): "Schlechte Luftqualität: Atemschutzmaske empfohlen. Route abseits stark befahrener Straßen wählen oder Training verschieben.",
+    (
+        "tip-air-quality-poor",
+        "en",
+    ): "Poor air quality: face mask recommended. Choose routes away from heavy traffic or consider postponing your ride.",
 }
 
 

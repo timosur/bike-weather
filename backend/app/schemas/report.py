@@ -31,6 +31,7 @@ class WeatherDataSchema(BaseModel):
     windDirection: str
     humidity: float
     uvIndex: float
+    airQualityIndex: float = 0
     sunrise: str
     sunset: str
     icon: str
@@ -48,6 +49,8 @@ class HourlyWeatherSchema(BaseModel):
     windDirection: str
     windGusts: float
     humidity: float
+    uvIndex: float = 0
+    airQualityIndex: float = 0
     weatherCode: int
     icon: str
     description: str

@@ -89,6 +89,8 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
     const precip = flatHours.map(h => h.data.precipitationProbability)
     const wind = flatHours.map(h => h.data.windSpeed)
     const isDay = flatHours.map(h => h.data.isDay)
+    const uvIndex = flatHours.map(h => h.data.uvIndex ?? 0)
+    const aqi = flatHours.map(h => h.data.airQualityIndex ?? 0)
 
     // Temperature scale
     const allTemps = [...temps, ...feelsLike]
@@ -106,10 +108,20 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
       const maxWind = Math.max(50, ...wind)
       return PADDING.top + PLOT_H - (val / maxWind) * PLOT_H
     }
+    const uvScale = (val: number) => {
+      const maxUv = Math.max(12, ...uvIndex)
+      return PADDING.top + PLOT_H - (val / maxUv) * PLOT_H
+    }
+    const aqiScale = (val: number) => {
+      const maxAqi = Math.max(100, ...aqi)
+      return PADDING.top + PLOT_H - (val / maxAqi) * PLOT_H
+    }
 
     const tempPoints = flatHours.map((_, i) => ({ x: xScale(i), y: tempScale(temps[i]) }))
     const feelsPoints = flatHours.map((_, i) => ({ x: xScale(i), y: tempScale(feelsLike[i]) }))
     const windPoints = flatHours.map((_, i) => ({ x: xScale(i), y: windScale(wind[i]) }))
+    const uvPoints = flatHours.map((_, i) => ({ x: xScale(i), y: uvScale(uvIndex[i]) }))
+    const aqiPoints = flatHours.map((_, i) => ({ x: xScale(i), y: aqiScale(aqi[i]) }))
 
     // Temp Y-axis ticks
     const tempTicks: number[] = []
@@ -174,15 +186,21 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
       precip,
       wind,
       isDay,
+      uvIndex,
+      aqi,
       tempMin,
       tempMax,
       xScale,
       tempScale,
       precipScale,
       windScale,
+      uvScale,
+      aqiScale,
       tempPoints,
       feelsPoints,
       windPoints,
+      uvPoints,
+      aqiPoints,
       tempTicks,
       dayBoundaries,
       dayMeta,
@@ -236,6 +254,8 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
     tempPoints,
     feelsPoints,
     windPoints,
+    uvPoints,
+    aqiPoints,
     tempTicks,
     dayBoundaries,
     dayMeta,
@@ -487,6 +507,26 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
             opacity={0.6}
           />
 
+          {/* UV index line */}
+          <path
+            d={buildPath(uvPoints)}
+            fill="none"
+            className="stroke-purple-500 dark:stroke-purple-400"
+            strokeWidth={1.5}
+            strokeDasharray="3,2"
+            opacity={0.7}
+          />
+
+          {/* Air quality index line */}
+          <path
+            d={buildPath(aqiPoints)}
+            fill="none"
+            className="stroke-teal-500 dark:stroke-teal-400"
+            strokeWidth={1.5}
+            strokeDasharray="2,2"
+            opacity={0.7}
+          />
+
           {/* Feels-like line */}
           <path
             d={buildPath(feelsPoints)}
@@ -575,8 +615,10 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
             const feels = fh.data.tempFeelsLike
             const prec = fh.data.precipitationProbability
             const wnd = fh.data.windSpeed
+            const uv = chartData.uvIndex[hoverIdx]
+            const aqiVal = chartData.aqi[hoverIdx]
             const tw = 140
-            const th = 93
+            const th = 119
             const tp = 8
             const tooltipX = hx + tw + tp > CHART_WIDTH - PADDING.right
               ? hx - tw - tp
@@ -598,6 +640,10 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
                   className="fill-blue-400 dark:fill-blue-500 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
                 <circle cx={hx} cy={windPoints[hoverIdx].y} r={3}
                   className="fill-stone-400 dark:fill-stone-500 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                <circle cx={hx} cy={uvPoints[hoverIdx].y} r={3}
+                  className="fill-purple-500 dark:fill-purple-400 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
+                <circle cx={hx} cy={aqiPoints[hoverIdx].y} r={3}
+                  className="fill-teal-500 dark:fill-teal-400 stroke-white dark:stroke-stone-900" strokeWidth={1.5} pointerEvents="none" />
                 <rect
                   x={tooltipX} y={tooltipY}
                   width={tw} height={th}
@@ -631,6 +677,14 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
                   className="fill-stone-500 dark:fill-stone-400" pointerEvents="none">
                   {t('report.weather.legend.wind')}: {wnd.toFixed(1)} km/h
                 </text>
+                <text x={tooltipX + 8} y={tooltipY + 94} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-purple-500 dark:fill-purple-400" pointerEvents="none">
+                  {t('report.weather.legend.uvIndex')}: {uv.toFixed(1)}
+                </text>
+                <text x={tooltipX + 8} y={tooltipY + 107} style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
+                  className="fill-teal-500 dark:fill-teal-400" pointerEvents="none">
+                  {t('report.weather.legend.airQuality')}: {aqiVal.toFixed(0)}
+                </text>
               </>
             )
           })()}
@@ -653,6 +707,14 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-stone-400 rounded-full" style={{ borderBottom: '1px dashed' }} />
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.wind')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 bg-purple-500 dark:bg-purple-400 rounded-full" style={{ borderBottom: '1px dashed' }} />
+            <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.uvIndex')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 bg-teal-500 dark:bg-teal-400 rounded-full" style={{ borderBottom: '1px dotted' }} />
+            <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.airQuality')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 bg-emerald-500/20 border border-dashed border-emerald-500 rounded-sm" />

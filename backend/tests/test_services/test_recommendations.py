@@ -1,8 +1,20 @@
+from unittest.mock import AsyncMock
+
 import httpx
 
 from app.schemas.ride import RideInputSchema, RideLocationSchema, DayStopSchema
 from app.services.recommendations import build_report
 from app.services.weather import WeatherService
+
+
+MOCK_AIR_QUALITY_RESPONSE = {
+    "hourly": {
+        "european_aqi": [15.0 + i for i in range(24)],
+    }
+}
+
+
+MOCK_AQI_HOURLY = MOCK_AIR_QUALITY_RESPONSE["hourly"]["european_aqi"]
 
 
 def _make_hourly_response_good() -> dict:
@@ -20,6 +32,7 @@ def _make_hourly_response_good() -> dict:
             "wind_gusts_10m": [18 for _ in range(hours)],
             "relative_humidity_2m": [55 for _ in range(hours)],
             "is_day": [0 if i < 6 or i > 20 else 1 for i in range(hours)],
+            "uv_index": [0.0 if i < 6 or i > 20 else 3.0 for i in range(hours)],
         },
         "daily": {
             "uv_index_max": [4.0],
@@ -44,6 +57,7 @@ def _make_hourly_response_bad() -> dict:
             "wind_gusts_10m": [50 for _ in range(hours)],
             "relative_humidity_2m": [85 for _ in range(hours)],
             "is_day": [0 if i < 6 or i > 20 else 1 for i in range(hours)],
+            "uv_index": [0.0 if i < 6 or i > 20 else 1.0 for i in range(hours)],
         },
         "daily": {
             "uv_index_max": [1.0],
@@ -64,7 +78,9 @@ def _make_service(responses: list[dict]) -> WeatherService:
         return httpx.Response(200, json=resp)
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    return WeatherService(client=client)
+    service = WeatherService(client=client)
+    service.fetch_air_quality = AsyncMock(return_value=list(MOCK_AQI_HOURLY))
+    return service
 
 
 async def test_single_day_report_structure() -> None:

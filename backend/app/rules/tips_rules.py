@@ -96,4 +96,26 @@ def get_tips(
             }
         )
 
+    # Air quality moderate — informational advice
+    if weather.air_quality_index > 40:
+        tips.append(
+            {
+                "id": "tip-air-quality-moderate",
+                "category": "safety",
+                "message": get_tip_translation("tip-air-quality-moderate", locale),
+                "severity": "info",
+            }
+        )
+
+    # Air quality poor — warning
+    if weather.air_quality_index > 60:
+        tips.append(
+            {
+                "id": "tip-air-quality-poor",
+                "category": "safety",
+                "message": get_tip_translation("tip-air-quality-poor", locale),
+                "severity": "warning",
+            }
+        )
+
     return tips
