@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 
 import httpx
@@ -113,13 +114,20 @@ class GeocodingService:
         return result
 
 
+# Google sometimes returns truncated postal-code prefixes (e.g. "45 Essen, Germany")
+# at the start of formattedAddress.  Strip a leading bare 1-5 digit number.
+_LEADING_POSTAL_RE = re.compile(r"^\d{1,5}\s+")
+
+
+def _clean_formatted_address(address: str) -> str:
+    return _LEADING_POSTAL_RE.sub("", address)
+
+
 def _parse_places_result(place: dict) -> dict:
     """Parse a Google Places (New) searchText result into our location format."""
     location = place.get("location", {})
     display_name = place.get("displayName", {}).get("text", "")
-    formatted = place.get("formattedAddress", display_name)
-    # Use the place name as the short/title text so landmarks and cities
-    # show their actual name instead of just an address fragment.
+    formatted = _clean_formatted_address(place.get("formattedAddress", display_name))
     short = display_name or formatted.split(",")[0].strip()
     return {
         "id": place.get("id", ""),
@@ -132,7 +140,7 @@ def _parse_places_result(place: dict) -> dict:
 
 def _parse_geocode_result(result: dict) -> dict:
     """Parse a Google Geocoding API reverse result."""
-    formatted = result.get("formatted_address", "")
+    formatted = _clean_formatted_address(result.get("formatted_address", ""))
     parts = formatted.split(",")
     short = ", ".join(p.strip() for p in parts[:2])
     location = result.get("geometry", {}).get("location", {})

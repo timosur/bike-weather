@@ -138,3 +138,24 @@ async def test_reverse_cache_prevents_duplicate_requests() -> None:
     await service.reverse(52.5219, 13.4132)
     await service.reverse(52.5219, 13.4132)
     assert call_count == 1  # Second call should use cache
+
+
+async def test_search_strips_truncated_postal_code() -> None:
+    """Google sometimes returns e.g. '45 Essen, Germany' — the leading '45' should be stripped."""
+    places_response = {
+        "places": [
+            {
+                "id": "ChIJOfarlrfCuEcRnSytpBHhAGo",
+                "displayName": {"text": "Essen", "languageCode": "de"},
+                "formattedAddress": "45 Essen, Germany",
+                "location": {"latitude": 51.4576, "longitude": 7.0225},
+            }
+        ]
+    }
+    client = httpx.AsyncClient(transport=_mock_transport(places_response))
+    service = GeocodingService(client=client)
+
+    results = await service.search("Essen")
+    assert len(results) == 1
+    assert results[0]["displayText"] == "Essen, Germany"
+    assert results[0]["shortText"] == "Essen"
