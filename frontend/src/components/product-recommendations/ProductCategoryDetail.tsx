@@ -54,13 +54,15 @@ export function ProductCategoryDetail({
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
-        <button
-          onClick={() => onBack?.()}
-          className="inline-flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-4"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
-          {t('products.allCategories')}
-        </button>
+        {onBack && (
+          <button
+            onClick={() => onBack()}
+            className="inline-flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-4"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
+            {t('products.allCategories')}
+          </button>
+        )}
 
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -90,11 +92,10 @@ export function ProductCategoryDetail({
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 ${
-                isActive
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 ${isActive
                   ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white shadow-sm'
                   : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 ring-1 ring-stone-200 dark:ring-stone-700 hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:text-emerald-700 dark:hover:text-emerald-400'
-              }`}
+                }`}
             >
               {filter.icon}
               {t(filter.labelKey)}

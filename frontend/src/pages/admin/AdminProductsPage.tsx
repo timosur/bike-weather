@@ -34,7 +34,8 @@ export default function AdminProductsPage() {
   // Form state
   const [form, setForm] = useState({
     id: '', name: '', categoryId: '', imageUrl: '',
-    shopId: '', affiliateUrl: '', matchesZone: '', matchesLabel: '',
+    shopId: '', affiliateUrl: '', matchesZone: '', matchesItemId: '', matchesLabel: '',
+    bikeTypes: [] as string[],
     weatherTempMin: '', weatherTempMax: '', weatherPrecipitation: 'none',
     weatherWind: 'none', weatherSummary: '', isPublished: true,
   })
@@ -69,7 +70,8 @@ export default function AdminProductsPage() {
     setEditingProduct(null)
     setForm({
       id: '', name: '', categoryId: categories[0]?.id ?? '', imageUrl: '',
-      shopId: shops[0]?.id ?? '', affiliateUrl: '', matchesZone: '', matchesLabel: '',
+      shopId: shops[0]?.id ?? '', affiliateUrl: '', matchesZone: '', matchesItemId: '', matchesLabel: '',
+      bikeTypes: [],
       weatherTempMin: '', weatherTempMax: '', weatherPrecipitation: 'none',
       weatherWind: 'none', weatherSummary: '', isPublished: true,
     })
@@ -86,7 +88,9 @@ export default function AdminProductsPage() {
       shopId: product.shopId,
       affiliateUrl: product.affiliateUrl,
       matchesZone: product.matchesZone ?? '',
+      matchesItemId: product.matchesItemId ?? '',
       matchesLabel: product.matchesLabel,
+      bikeTypes: product.bikeTypes ?? [],
       weatherTempMin: product.weatherTempMin?.toString() ?? '',
       weatherTempMax: product.weatherTempMax?.toString() ?? '',
       weatherPrecipitation: product.weatherPrecipitation,
@@ -102,6 +106,7 @@ export default function AdminProductsPage() {
       const payload = {
         ...form,
         matchesZone: form.matchesZone || null,
+        matchesItemId: form.matchesItemId || null,
         weatherTempMin: form.weatherTempMin ? parseFloat(form.weatherTempMin) : null,
         weatherTempMax: form.weatherTempMax ? parseFloat(form.weatherTempMax) : null,
       }
@@ -246,6 +251,29 @@ export default function AdminProductsPage() {
           </FormField>
           <FormField label="Matches Zone">
             <TextInput value={form.matchesZone} onChange={(e) => setForm({ ...form, matchesZone: e.target.value })} />
+          </FormField>
+          <FormField label="Matches Item ID">
+            <TextInput value={form.matchesItemId} onChange={(e) => setForm({ ...form, matchesItemId: e.target.value })} placeholder="e.g. cl-rain-jacket" />
+          </FormField>
+          <FormField label="Bike Types">
+            <div className="flex flex-wrap gap-2">
+              {['rennrad', 'gravel', 'mtb', 'city'].map((bt) => (
+                <label key={bt} className="inline-flex items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.bikeTypes.includes(bt)}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...form.bikeTypes, bt]
+                        : form.bikeTypes.filter((b) => b !== bt)
+                      setForm({ ...form, bikeTypes: next })
+                    }}
+                    className="rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  {bt}
+                </label>
+              ))}
+            </div>
           </FormField>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Temp Min (°C)">

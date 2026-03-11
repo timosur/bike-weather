@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import require_admin
 from app.database import get_session
 from app.models.product import Product
+from app.models.product_bike_type import ProductBikeType
 from app.models.product_category import ProductCategory
 from app.models.shop import Shop
 from app.models.user import User
@@ -29,6 +30,21 @@ from app.schemas.product import (
 router = APIRouter()
 
 OUTDATED_DAYS = 30
+
+
+async def _load_bike_types(
+    session: AsyncSession, product_ids: list[str]
+) -> dict[str, list[str]]:
+    if not product_ids:
+        return {}
+    result = await session.execute(
+        select(ProductBikeType).where(ProductBikeType.product_id.in_(product_ids))
+    )
+    mapping: dict[str, list[str]] = {}
+    for row in result.scalars().all():
+        mapping.setdefault(row.product_id, []).append(row.bike_type)
+    return mapping
+
 
 CATEGORY_ZONE: dict[str, str] = {
     "cat-rain-jackets": "upperBody",
@@ -144,8 +160,15 @@ async def list_products(
     )
     products = result.scalars().all()
 
+    # Load bike types for all products
+    product_ids = [p.id for p in products]
+    bt_map = await _load_bike_types(session, product_ids)
+
     return PaginatedResponse(
-        items=[ProductAdminResponse.from_model(p) for p in products],
+        items=[
+            ProductAdminResponse.from_model(p, bike_types=bt_map.get(p.id))
+            for p in products
+        ],
         total=total,
         page=page,
         pageSize=page_size,
@@ -162,7 +185,8 @@ async def get_product(
     product = result.scalars().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    return ProductAdminResponse.from_model(product)
+    bt_map = await _load_bike_types(session, [product.id])
+    return ProductAdminResponse.from_model(product, bike_types=bt_map.get(product.id))
 
 
 @router.post(
@@ -184,6 +208,7 @@ async def create_product(
         shop_id=data.shopId,
         affiliate_url=data.affiliateUrl,
         matches_zone=data.matchesZone,
+        matches_item_id=data.matchesItemId,
         matches_label=data.matchesLabel,
         weather_temp_min=data.weatherTempMin,
         weather_temp_max=data.weatherTempMax,
@@ -195,9 +220,13 @@ async def create_product(
         updated_at=now,
     )
     session.add(product)
+    if data.bikeTypes:
+        for bt in data.bikeTypes:
+            session.add(ProductBikeType(product_id=product.id, bike_type=bt))
     await session.commit()
     await session.refresh(product)
-    return ProductAdminResponse.from_model(product)
+    bt_map = await _load_bike_types(session, [product.id])
+    return ProductAdminResponse.from_model(product, bike_types=bt_map.get(product.id))
 
 
 @router.put("/products/{product_id}", response_model=ProductAdminResponse)
@@ -213,12 +242,14 @@ async def update_product(
         raise HTTPException(status_code=404, detail="Product not found")
 
     update_data = data.model_dump(exclude_unset=True)
+    bike_types = update_data.pop("bikeTypes", None)
     field_map = {
         "categoryId": "category_id",
         "imageUrl": "image_url",
         "shopId": "shop_id",
         "affiliateUrl": "affiliate_url",
         "matchesZone": "matches_zone",
+        "matchesItemId": "matches_item_id",
         "matchesLabel": "matches_label",
         "weatherTempMin": "weather_temp_min",
         "weatherTempMax": "weather_temp_max",
@@ -234,9 +265,21 @@ async def update_product(
     for key, value in update_data.items():
         setattr(product, key, value)
     product.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    if bike_types is not None:
+        # Replace bike types
+        existing_bt = await session.execute(
+            select(ProductBikeType).where(ProductBikeType.product_id == product_id)
+        )
+        for bt_row in existing_bt.scalars().all():
+            await session.delete(bt_row)
+        for bt in bike_types:
+            session.add(ProductBikeType(product_id=product_id, bike_type=bt))
+
     await session.commit()
     await session.refresh(product)
-    return ProductAdminResponse.from_model(product)
+    bt_map = await _load_bike_types(session, [product.id])
+    return ProductAdminResponse.from_model(product, bike_types=bt_map.get(product.id))
 
 
 @router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -290,6 +333,7 @@ async def bulk_import_products(
                 existing.shop_id = item.shopId
                 existing.affiliate_url = item.affiliateUrl
                 existing.matches_zone = item.matchesZone
+                existing.matches_item_id = item.matchesItemId
                 existing.matches_label = item.matchesLabel
                 existing.weather_temp_min = item.weatherTempMin
                 existing.weather_temp_max = item.weatherTempMax
@@ -298,6 +342,19 @@ async def bulk_import_products(
                 existing.weather_summary = item.weatherSummary
                 existing.is_published = item.isPublished
                 existing.updated_at = now
+                # Update bike types
+                if item.bikeTypes is not None:
+                    old_bt = await session.execute(
+                        select(ProductBikeType).where(
+                            ProductBikeType.product_id == existing.id
+                        )
+                    )
+                    for bt_row in old_bt.scalars().all():
+                        await session.delete(bt_row)
+                    for bt in item.bikeTypes:
+                        session.add(
+                            ProductBikeType(product_id=existing.id, bike_type=bt)
+                        )
                 updated += 1
             else:
                 product = Product(
@@ -308,6 +365,7 @@ async def bulk_import_products(
                     shop_id=item.shopId,
                     affiliate_url=item.affiliateUrl,
                     matches_zone=item.matchesZone,
+                    matches_item_id=item.matchesItemId,
                     matches_label=item.matchesLabel,
                     weather_temp_min=item.weatherTempMin,
                     weather_temp_max=item.weatherTempMax,
@@ -319,6 +377,11 @@ async def bulk_import_products(
                     updated_at=now,
                 )
                 session.add(product)
+                if item.bikeTypes:
+                    for bt in item.bikeTypes:
+                        session.add(
+                            ProductBikeType(product_id=product.id, bike_type=bt)
+                        )
                 created += 1
         except Exception as e:
             errors.append(f"Error processing product {item.id}: {e!s}")

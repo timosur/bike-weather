@@ -5,6 +5,7 @@ from .contact_message import ContactMessage
 from .content_translation import ContentTranslation
 from .faq_item import FaqItem
 from .product import Product
+from .product_bike_type import ProductBikeType
 from .product_category import ProductCategory
 from .saved_route import SavedRoute
 from .shop import Shop
@@ -18,6 +19,7 @@ __all__ = [
     "ContentTranslation",
     "FaqItem",
     "Product",
+    "ProductBikeType",
     "ProductCategory",
     "SavedRoute",
     "Shop",

@@ -35,7 +35,9 @@ class ProductResponse(BaseModel):
     shopId: str
     affiliateUrl: str
     matchesZone: str | None
+    matchesItemId: str | None
     matchesLabel: str
+    bikeTypes: list[str]
     weather: WeatherSuitabilityResponse
 
 
@@ -65,6 +67,35 @@ class CategoryDetailResponse(BaseModel):
     disclosure: AffiliateDisclosureResponse | None
 
 
+# --- Hierarchical navigation schemas ---
+
+
+class BikeTypeResponse(BaseModel):
+    id: str
+    name: str
+
+
+class ZoneCategoryResponse(BaseModel):
+    id: str
+    name: str
+    icon: str
+    productCount: int
+
+
+class ZoneResponse(BaseModel):
+    id: str
+    name: str
+    productCount: int
+    categories: list[ZoneCategoryResponse]
+
+
+class ZoneCategoryDetailResponse(BaseModel):
+    category: ProductCategoryResponse
+    products: list[ProductResponse]
+    shops: list[ShopResponse]
+    disclosure: AffiliateDisclosureResponse | None
+
+
 # --- Admin schemas ---
 
 
@@ -76,7 +107,9 @@ class ProductCreate(BaseModel):
     shopId: str
     affiliateUrl: str
     matchesZone: str | None = None
+    matchesItemId: str | None = None
     matchesLabel: str
+    bikeTypes: list[str] = []
     weatherTempMin: float | None = None
     weatherTempMax: float | None = None
     weatherPrecipitation: str = "none"
@@ -92,7 +125,9 @@ class ProductUpdate(BaseModel):
     shopId: str | None = None
     affiliateUrl: str | None = None
     matchesZone: str | None = None
+    matchesItemId: str | None = None
     matchesLabel: str | None = None
+    bikeTypes: list[str] | None = None
     weatherTempMin: float | None = None
     weatherTempMax: float | None = None
     weatherPrecipitation: str | None = None
@@ -109,7 +144,9 @@ class ProductAdminResponse(BaseModel):
     shopId: str
     affiliateUrl: str
     matchesZone: str | None
+    matchesItemId: str | None
     matchesLabel: str
+    bikeTypes: list[str]
     weatherTempMin: float | None
     weatherTempMax: float | None
     weatherPrecipitation: str
@@ -120,7 +157,9 @@ class ProductAdminResponse(BaseModel):
     updatedAt: datetime
 
     @classmethod
-    def from_model(cls, obj: object) -> "ProductAdminResponse":
+    def from_model(
+        cls, obj: object, bike_types: list[str] | None = None
+    ) -> "ProductAdminResponse":
         return cls(
             id=getattr(obj, "id"),
             name=getattr(obj, "name"),
@@ -129,7 +168,9 @@ class ProductAdminResponse(BaseModel):
             shopId=getattr(obj, "shop_id"),
             affiliateUrl=getattr(obj, "affiliate_url"),
             matchesZone=getattr(obj, "matches_zone"),
+            matchesItemId=getattr(obj, "matches_item_id", None),
             matchesLabel=getattr(obj, "matches_label"),
+            bikeTypes=bike_types if bike_types is not None else [],
             weatherTempMin=getattr(obj, "weather_temp_min"),
             weatherTempMax=getattr(obj, "weather_temp_max"),
             weatherPrecipitation=getattr(obj, "weather_precipitation"),
@@ -215,7 +256,9 @@ class BulkProductItem(BaseModel):
     shopId: str
     affiliateUrl: str
     matchesZone: str | None = None
+    matchesItemId: str | None = None
     matchesLabel: str
+    bikeTypes: list[str] | None = None
     weatherTempMin: float | None = None
     weatherTempMax: float | None = None
     weatherPrecipitation: str = "none"

@@ -18,7 +18,9 @@ import { setAccessTokenProvider } from './api/client'
 
 const PlannerPage = lazy(() => import('./pages/PlannerPage'))
 const ReportPage = lazy(() => import('./pages/ReportPage'))
-const ProductsPage = lazy(() => import('./pages/ProductsPage'))
+const BikeTypePage = lazy(() => import('./pages/BikeTypePage'))
+const ProductZonePage = lazy(() => import('./pages/ProductZonePage'))
+const ZoneCategoryProductsPage = lazy(() => import('./pages/ZoneCategoryProductsPage'))
 const ProductCategoryPage = lazy(() => import('./pages/ProductCategoryPage'))
 const RoutesPage = lazy(() => import('./pages/RoutesPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -166,8 +168,10 @@ function AppContent() {
         <Route path="/report/:routeId" element={<Suspense fallback={<RideReportSkeleton />}><ReportPage /></Suspense>} />
         <Route path="/report" element={<Suspense fallback={<RideReportSkeleton />}><ReportPage /></Suspense>} />
         <Route path="/shared/:token" element={<Suspense fallback={<RideReportSkeleton />}><SharedReportPage /></Suspense>} />
-        <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductsPage /></Suspense>} />
-        <Route path="/products/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} />
+        <Route path="/products" element={<Suspense fallback={<ProductCategoriesSkeleton />}><BikeTypePage /></Suspense>} />
+        <Route path="/products/:bikeType" element={<Suspense fallback={<ProductCategoriesSkeleton />}><ProductZonePage /></Suspense>} />
+        <Route path="/products/:bikeType/:zone/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ZoneCategoryProductsPage /></Suspense>} />
+        <Route path="/products/legacy/:categoryId" element={<Suspense fallback={<ProductCategoryDetailSkeleton />}><ProductCategoryPage /></Suspense>} />
         <Route path="/routes" element={<Suspense fallback={<MyRoutesSkeleton />}><RequireAuth><RoutesPage /></RequireAuth></Suspense>} />
         <Route path="/login" element={<Suspense fallback={<AuthPageSkeleton />}><LoginPage /></Suspense>} />
         <Route path="/forgot-password" element={<Suspense fallback={<PasswordPageSkeleton />}><ForgotPasswordPage /></Suspense>} />

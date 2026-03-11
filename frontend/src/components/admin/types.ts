@@ -15,7 +15,9 @@ export interface AdminProduct {
   shopId: string;
   affiliateUrl: string;
   matchesZone: string | null;
+  matchesItemId: string | null;
   matchesLabel: string;
+  bikeTypes: string[];
   weatherTempMin: number | null;
   weatherTempMax: number | null;
   weatherPrecipitation: string;

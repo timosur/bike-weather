@@ -19,7 +19,14 @@ export type CategoryIcon =
   | "accessories";
 
 /** Clothing zone this product matches (from Ride Report) */
-export type ClothingZoneId = "head" | "eyes" | "neck" | "upperBody" | "lowerBody" | "hands" | "feet";
+export type ClothingZoneId =
+  | "head"
+  | "eyes"
+  | "neck"
+  | "upperBody"
+  | "lowerBody"
+  | "hands"
+  | "feet";
 
 export interface Shop {
   id: string;
@@ -64,8 +71,10 @@ export interface Product {
   shopId: string;
   affiliateUrl: string;
   matchesZone: ClothingZoneId | null;
+  matchesItemId: string | null;
   matchesLabel: string;
   matchesIcon?: string;
+  bikeTypes: string[];
   weather: WeatherSuitability;
 }
 
@@ -73,6 +82,36 @@ export interface Product {
 export interface AffiliateDisclosure {
   badgeLabel: string;
   disclaimerText: string;
+}
+
+/** Bike type for hierarchical navigation */
+export interface BikeType {
+  id: string;
+  name: string;
+}
+
+/** Category within a zone */
+export interface ZoneCategory {
+  id: string;
+  name: string;
+  icon: CategoryIcon;
+  productCount: number;
+}
+
+/** Body zone with its categories */
+export interface Zone {
+  id: string;
+  name: string;
+  productCount: number;
+  categories: ZoneCategory[];
+}
+
+/** Zone category detail with products */
+export interface ZoneCategoryDetail {
+  category: ProductCategory;
+  products: Product[];
+  shops: Shop[];
+  disclosure: AffiliateDisclosure | null;
 }
 
 /** Props for inline product link shown next to a clothing recommendation */

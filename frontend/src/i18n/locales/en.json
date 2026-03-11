@@ -454,6 +454,31 @@
       "none": "No protection",
       "lightWind": "Light wind",
       "strongWind": "Windproof"
+    },
+    "bikeTypes": {
+      "heading": "Products",
+      "subheading": "Choose your bike type to discover matching gear.",
+      "rennrad": "Road bike",
+      "gravel": "Gravel",
+      "mtb": "Mountain bike",
+      "city": "City / Commuter"
+    },
+    "zones": {
+      "heading": "Body zones",
+      "subheading": "Gear by body zone for {{bikeType}}.",
+      "head": "Head",
+      "eyes": "Eyes",
+      "neck": "Neck & Face",
+      "upperBody": "Upper body",
+      "lowerBody": "Lower body",
+      "hands": "Hands",
+      "feet": "Feet",
+      "equipment": "Equipment",
+      "emptyZone": "No products yet"
+    },
+    "browse": {
+      "backToBikeTypes": "Back to bike types",
+      "backToZones": "Back to body zones"
     }
   },
   "routes": {

@@ -456,6 +456,31 @@
       "none": "Kein Schutz",
       "lightWind": "Leichter Windschutz",
       "strongWind": "Winddicht"
+    },
+    "bikeTypes": {
+      "heading": "Produkte",
+      "subheading": "Wähle deinen Radtyp, um passende Ausrüstung zu entdecken.",
+      "rennrad": "Rennrad",
+      "gravel": "Gravel",
+      "mtb": "Mountainbike",
+      "city": "City / Pendler"
+    },
+    "zones": {
+      "heading": "Körperzonen",
+      "subheading": "Ausrüstung nach Körperzone für {{bikeType}}.",
+      "head": "Kopf",
+      "eyes": "Augen",
+      "neck": "Hals & Gesicht",
+      "upperBody": "Oberkörper",
+      "lowerBody": "Unterkörper",
+      "hands": "Hände",
+      "feet": "Füße",
+      "equipment": "Ausrüstung",
+      "emptyZone": "Noch keine Produkte"
+    },
+    "browse": {
+      "backToBikeTypes": "Zurück zur Radtypauswahl",
+      "backToZones": "Zurück zu Körperzonen"
     }
   },
   "routes": {

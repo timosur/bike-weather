@@ -13,6 +13,7 @@ class Product(SQLModel, table=True):
     shop_id: str = Field(foreign_key="shops.id", index=True)
     affiliate_url: str
     matches_zone: str | None = Field(default=None)
+    matches_item_id: str | None = Field(default=None, index=True)
     matches_label: str
     weather_temp_min: float | None = Field(default=None)
     weather_temp_max: float | None = Field(default=None)
