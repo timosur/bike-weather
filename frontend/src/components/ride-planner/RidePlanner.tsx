@@ -251,16 +251,6 @@ export function RidePlanner({
           <p className="text-stone-500 dark:text-stone-400 text-sm">
             {t('planner.subheading')}
           </p>
-          {onGpxImport && (
-            <button
-              type="button"
-              onClick={onGpxImport}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors"
-            >
-              <Import className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {t('planner.gpxImport.button')}
-            </button>
-          )}
         </div>
 
         {/* Onboarding hero for first-time visitors */}
@@ -301,7 +291,7 @@ export function RidePlanner({
           <div className="p-6 space-y-5">
 
             {/* Location */}
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {t('planner.label.startLocation')}
                 <InfoTooltip content={t('planner.tooltip.startLocation')} />
@@ -319,7 +309,7 @@ export function RidePlanner({
             </div>
 
             {/* Waypoints (between start and destination) */}
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <WaypointList
                 waypoints={form.waypoints}
                 suggestions={waypointLocationSuggestions}
@@ -329,7 +319,7 @@ export function RidePlanner({
             </div>
 
             {/* Destination Picker — always visible (required) */}
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {t('planner.label.destination')}
                 <InfoTooltip content={t('planner.tooltip.destination')} />
@@ -347,6 +337,16 @@ export function RidePlanner({
                 error={errors.destination}
                 hideLocate
               />
+              {onGpxImport && (
+                <button
+                  type="button"
+                  onClick={onGpxImport}
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  <Import className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  {t('planner.gpxImport.orImport')}
+                </button>
+              )}
             </div>
 
             {/* Route Preview Map */}

@@ -216,6 +216,7 @@
     },
     "gpxImport": {
       "button": "GPX importieren",
+      "orImport": "oder Route aus GPX importieren",
       "title": "GPX-Datei importieren",
       "selectFile": "GPX-Datei hierher ziehen oder klicken zum Auswählen",
       "maxSize": "Maximal 10 MB",

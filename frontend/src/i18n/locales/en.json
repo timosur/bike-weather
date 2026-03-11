@@ -215,8 +215,7 @@
       "multiDayDesc": "Planning a tour over several days? You can specify a location for each overnight stop. Weather is calculated along the route for each stage, so you have the right gear for every day."
     },
     "gpxImport": {
-      "button": "Import GPX",
-      "title": "Import GPX file",
+      "button": "Import GPX",      "orImport": "or import route from GPX",      "title": "Import GPX file",
       "selectFile": "Drop GPX file here or click to select",
       "maxSize": "Maximum 10 MB",
       "upload": "Import",
