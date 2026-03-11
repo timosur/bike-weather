@@ -5,9 +5,10 @@ import { ImportConfigForm } from '@/components/admin/product-import/ImportConfig
 import { ImportProgress } from '@/components/admin/product-import/ImportProgress'
 import { ImportReviewTable } from '@/components/admin/product-import/ImportReviewTable'
 import { ImportResultSummary } from '@/components/admin/product-import/ImportResultSummary'
-import { startImportJob, fetchJobStatus, approveImport } from '@/api/admin/agent'
+import { JobHistory } from '@/components/admin/product-import/JobHistory'
+import { startImportJob, startUrlImportJob, fetchJobStatus, approveImport } from '@/api/admin/agent'
 import { useToast } from '@/hooks/useToast'
-import type { AgentBulkProduct, BulkProductResponse } from '@/components/admin/types'
+import type { AgentBulkProduct, BulkProductResponse, AgentJob } from '@/components/admin/types'
 
 type Stage = 'config' | 'progress' | 'review' | 'result'
 
@@ -25,6 +26,17 @@ export default function AdminProductImportPage() {
   const handleStart = useCallback(async (shop: string, category: string, maxProducts: number) => {
     try {
       const { jobId: id } = await startImportJob({ shop, category, maxProducts })
+      setJobId(id)
+      setJobParams({ shop, category, categoryId: '' })
+      setStage('progress')
+    } catch {
+      addToast(t('admin.import.errorStart'), 'error')
+    }
+  }, [addToast, t])
+
+  const handleStartUrls = useCallback(async (shop: string, category: string, urls: string[]) => {
+    try {
+      const { jobId: id } = await startUrlImportJob({ shop, category, urls })
       setJobId(id)
       setJobParams({ shop, category, categoryId: '' })
       setStage('progress')
@@ -88,6 +100,15 @@ export default function AdminProductImportPage() {
     setResult(null)
   }, [])
 
+  const handleSelectJob = useCallback((job: AgentJob) => {
+    if (job.products && job.products.length > 0) {
+      setJobId(job.jobId)
+      setJobParams({ shop: job.shop, category: job.category, categoryId: job.products[0]?.categoryId || '' })
+      setProducts(job.products)
+      setStage('review')
+    }
+  }, [])
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -106,7 +127,10 @@ export default function AdminProductImportPage() {
       {/* Stage content */}
       <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
         {stage === 'config' && (
-          <ImportConfigForm onStart={handleStart} />
+          <div className="space-y-6">
+            <ImportConfigForm onStart={handleStart} onStartUrls={handleStartUrls} />
+            <JobHistory onSelectJob={handleSelectJob} currentJobId={jobId} />
+          </div>
         )}
 
         {stage === 'progress' && jobId && (

@@ -104,6 +104,12 @@ class JobManager:
         async with self._lock:
             return self._jobs.get(job_id)
 
+    async def list_jobs(self) -> list[Job]:
+        """Return all jobs sorted by creation time (newest first)."""
+        async with self._lock:
+            jobs = list(self._jobs.values())
+        return sorted(jobs, key=lambda j: j.created_at, reverse=True)
+
     async def cleanup_old_jobs(self) -> int:
         now = time.time()
         removed = 0

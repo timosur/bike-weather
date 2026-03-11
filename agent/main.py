@@ -252,6 +252,75 @@ async def run_category(
     return result
 
 
+async def run_urls(
+    urls: list[str],
+    category: str,
+    shop_name: str,
+    *,
+    progress: ProgressCallback | None = None,
+) -> list[ProductData]:
+    """Fetch specific product URLs, extract text, and send to LLM for extraction.
+
+    This allows users to manually specify product URLs instead of relying on search.
+    Returns a list of ProductData without publishing (for review workflow).
+    """
+    on_progress = progress or _cli_progress
+
+    shop = get_shop(shop_name)
+    category_id = _resolve_category_id(category)
+
+    on_progress(
+        "init",
+        f"Manual URL import: {len(urls)} URL(s) | Shop: {shop.name} | Category: {category}",
+        {
+            "shop": shop.name,
+            "shopId": shop.shop_id,
+            "category": category,
+            "categoryId": category_id,
+            "urlCount": len(urls),
+        },
+    )
+
+    all_products: list[ProductData] = []
+
+    for i, url in enumerate(urls):
+        on_progress("scraping", f"Fetching URL {i + 1}/{len(urls)}: {url[:80]}...")
+        try:
+            html = await fetch_page(url)
+        except Exception as e:
+            on_progress("scraping", f"Failed to fetch {url}: {e}")
+            continue
+
+        text = extract_text(html)
+        if not text.strip():
+            on_progress("scraping", f"No text extracted from {url}. Skipping.")
+            continue
+
+        on_progress("extracting", f"Extracting product data from URL {i + 1}...")
+        products = await extract_products(text, category, shop.name)
+
+        if products:
+            # Inject affiliate tags and take first product per page (usually one product per URL)
+            for p in products[:1]:  # Limit to 1 product per URL
+                p.affiliate_url = shop.inject_affiliate_tag(p.affiliate_url or url)
+                all_products.append(p)
+            on_progress("extracting", f"Extracted product: {products[0].name}")
+        else:
+            on_progress("extracting", f"No product extracted from {url}")
+
+        # Small delay between requests
+        if i < len(urls) - 1:
+            await asyncio.sleep(1)
+
+    on_progress(
+        "completed",
+        f"Extraction complete — {len(all_products)} products ready for review.",
+        {"productCount": len(all_products)},
+    )
+
+    return all_products
+
+
 async def run_all(
     shop_name: str,
     *,

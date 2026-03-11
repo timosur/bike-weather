@@ -82,12 +82,33 @@ class StartJobRequest(BaseModel):
     maxProducts: int = Field(default=5, ge=1, le=50)
 
 
+class StartUrlJobRequest(BaseModel):
+    shop: str
+    category: str
+    urls: list[str] = Field(..., min_length=1, max_length=20)
+
+
+@router.get("/jobs")
+async def list_agent_jobs(
+    _admin: User = Depends(require_admin),
+) -> list:
+    return await _agent_get("/jobs")
+
+
 @router.post("/jobs")
 async def start_agent_job(
     request: StartJobRequest,
     _admin: User = Depends(require_admin),
 ) -> dict:
     return await _agent_post("/jobs", request.model_dump())
+
+
+@router.post("/jobs/urls")
+async def start_agent_url_job(
+    request: StartUrlJobRequest,
+    _admin: User = Depends(require_admin),
+) -> dict:
+    return await _agent_post("/jobs/urls", request.model_dump())
 
 
 @router.get("/jobs/{job_id}")

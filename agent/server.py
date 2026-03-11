@@ -10,7 +10,13 @@ from sse_starlette.sse import EventSourceResponse
 
 from agent.extractor import ProductData, _generate_product_id
 from agent.job_manager import Job, JobManager, JobStatus, job_manager
-from agent.main import ALL_CATEGORIES, CATEGORY_MAP, _resolve_category_id, run_category
+from agent.main import (
+    ALL_CATEGORIES,
+    CATEGORY_MAP,
+    _resolve_category_id,
+    run_category,
+    run_urls,
+)
 from agent.publisher import CATEGORY_ZONE_MAP
 from agent.shops import get_shop, list_shops
 
@@ -26,6 +32,12 @@ class StartJobRequest(BaseModel):
     shop: str
     category: str
     maxProducts: int = Field(default=5, ge=1, le=50)
+
+
+class StartUrlJobRequest(BaseModel):
+    shop: str
+    category: str
+    urls: list[str] = Field(..., min_length=1, max_length=20)
 
 
 class StartJobResponse(BaseModel):
@@ -126,6 +138,56 @@ async def _run_job(job: Job) -> None:
         job.notify_done()
 
 
+async def _run_url_job(job: Job, urls: list[str]) -> None:
+    """Execute the URL-based extract pipeline in the background."""
+    try:
+        job.status = JobStatus.SCRAPING
+        job.add_progress("scraping", f"Starting URL import for {len(urls)} URL(s)…")
+
+        def progress_callback(
+            stage: str, message: str, data: dict | None = None
+        ) -> None:
+            if stage in ("scraping", "extracting", "completed", "failed"):
+                job.status = (
+                    JobStatus(stage)
+                    if stage != "completed" and stage != "failed"
+                    else job.status
+                )
+            job.add_progress(stage, message, data)
+
+        shop = get_shop(job.shop)
+        category_id = _resolve_category_id(job.category)
+
+        products = await run_urls(
+            urls,
+            job.category,
+            job.shop,
+            progress=progress_callback,
+        )
+
+        if products:
+            job.products = _products_to_bulk_payload(
+                products, category_id, shop.shop_id
+            )
+            job.status = JobStatus.COMPLETED
+            job.add_progress(
+                "completed",
+                f"Extraction complete — {len(products)} products ready for review.",
+                {"productCount": len(products)},
+            )
+        else:
+            job.status = JobStatus.COMPLETED
+            job.products = []
+            job.add_progress("completed", "No products extracted from provided URLs.")
+    except Exception as e:
+        logger.exception("URL job %s failed", job.id)
+        job.status = JobStatus.FAILED
+        job.error = str(e)
+        job.add_progress("failed", f"URL import failed: {e}")
+    finally:
+        job.notify_done()
+
+
 # --- Background cleanup ---
 
 
@@ -169,6 +231,13 @@ async def get_categories() -> list[CategoryInfo]:
     return categories
 
 
+@app.get("/jobs")
+async def list_jobs() -> list[dict]:
+    """Return all jobs (newest first)."""
+    jobs = await job_manager.list_jobs()
+    return [job.to_dict() for job in jobs]
+
+
 @app.post("/jobs", response_model=StartJobResponse)
 async def start_job(request: StartJobRequest) -> StartJobResponse:
     # Validate shop exists
@@ -189,6 +258,33 @@ async def start_job(request: StartJobRequest) -> StartJobResponse:
         request.shop, request.category, request.maxProducts
     )
     asyncio.create_task(_run_job(job))
+    return StartJobResponse(jobId=job.id, status=job.status.value)
+
+
+@app.post("/jobs/urls", response_model=StartJobResponse)
+async def start_url_job(request: StartUrlJobRequest) -> StartJobResponse:
+    """Start a job that extracts products from specific URLs."""
+    # Validate shop exists
+    try:
+        get_shop(request.shop)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Validate category
+    if request.category not in CATEGORY_MAP and not request.category.startswith("cat-"):
+        valid = list(ALL_CATEGORIES)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown category '{request.category}'. Valid: {valid}",
+        )
+
+    # Validate URLs
+    valid_urls = [u.strip() for u in request.urls if u.strip().startswith("http")]
+    if not valid_urls:
+        raise HTTPException(status_code=400, detail="No valid URLs provided")
+
+    job = await job_manager.create_job(request.shop, request.category, len(valid_urls))
+    asyncio.create_task(_run_url_job(job, valid_urls))
     return StartJobResponse(jobId=job.id, status=job.status.value)
 
 

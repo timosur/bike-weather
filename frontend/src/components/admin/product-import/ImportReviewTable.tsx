@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, X, Pencil } from 'lucide-react'
+import { Check, X, Pencil, ExternalLink } from 'lucide-react'
 import type { AgentBulkProduct } from '../types'
 import { TextInput } from '../shared/FormComponents'
 
@@ -71,11 +71,11 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                     className="rounded border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
                   />
                 </th>
-                <th className="px-3 py-2.5 text-left font-medium text-stone-600 dark:text-stone-400 w-12" />
+                <th className="px-3 py-2.5 text-left font-medium text-stone-600 dark:text-stone-400 w-14">{t('admin.import.colImage')}</th>
                 <th className="px-3 py-2.5 text-left font-medium text-stone-600 dark:text-stone-400">{t('admin.import.colName')}</th>
                 <th className="px-3 py-2.5 text-left font-medium text-stone-600 dark:text-stone-400 w-36">{t('admin.import.colLabel')}</th>
                 <th className="px-3 py-2.5 text-left font-medium text-stone-600 dark:text-stone-400 w-32">{t('admin.import.colWeather')}</th>
-                <th className="px-3 py-2.5 text-center font-medium text-stone-600 dark:text-stone-400 w-16">{t('admin.import.colEdit')}</th>
+                <th className="px-3 py-2.5 text-center font-medium text-stone-600 dark:text-stone-400 w-24">{t('admin.import.colActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
@@ -93,14 +93,34 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                     />
                   </td>
                   <td className="px-3 py-2.5">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt=""
-                        className="w-10 h-10 object-cover rounded border border-stone-200 dark:border-stone-700"
-                      />
+                    {editingIdx === idx ? (
+                      <div className="space-y-1">
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt=""
+                            className="w-10 h-10 object-cover rounded border border-stone-200 dark:border-stone-700"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700" />
+                        )}
+                        <TextInput
+                          value={product.imageUrl || ''}
+                          onChange={(e) => updateProduct(idx, 'imageUrl', e.target.value)}
+                          placeholder="Image URL"
+                          className="text-[10px] w-24"
+                        />
+                      </div>
                     ) : (
-                      <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700" />
+                      product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt=""
+                          className="w-10 h-10 object-cover rounded border border-stone-200 dark:border-stone-700"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700" />
+                      )
                     )}
                   </td>
                   <td className="px-3 py-2.5">
@@ -143,13 +163,26 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                     </div>
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <button
-                      onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
-                      className="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
-                      title={editingIdx === idx ? 'Done' : 'Edit'}
-                    >
-                      {editingIdx === idx ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
-                    </button>
+                    <div className="flex items-center justify-center gap-1">
+                      {product.affiliateUrl && (
+                        <a
+                          href={product.affiliateUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          title={t('admin.import.viewProduct')}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
+                        className="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+                        title={editingIdx === idx ? t('admin.import.doneEditing') : t('admin.import.edit')}
+                      >
+                        {editingIdx === idx ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

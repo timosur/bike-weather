@@ -39,11 +39,15 @@ async def _fetch_with_playwright(url: str) -> str:
             viewport={"width": 1280, "height": 900},
         )
         page = await context.new_page()
+        # Use domcontentloaded instead of networkidle — heavy sites like Amazon
+        # never settle due to continuous background network activity (ads, tracking)
         await page.goto(
-            url, wait_until="networkidle", timeout=int(settings.request_timeout * 1000)
+            url,
+            wait_until="domcontentloaded",
+            timeout=int(settings.request_timeout * 1000),
         )
-        # Give any lazy-loaded product tiles a moment to appear
-        await page.wait_for_timeout(2000)
+        # Give JS-rendered product tiles time to appear
+        await page.wait_for_timeout(3000)
         html = await page.content()
         await browser.close()
     return html

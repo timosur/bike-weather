@@ -17,12 +17,27 @@ export function fetchAgentCategories(): Promise<AgentCategory[]> {
   return apiFetch("/admin/agent/categories");
 }
 
+export function fetchJobList(): Promise<AgentJob[]> {
+  return apiFetch("/admin/agent/jobs");
+}
+
 export function startImportJob(params: {
   shop: string;
   category: string;
   maxProducts: number;
 }): Promise<{ jobId: string; status: string }> {
   return apiFetch("/admin/agent/jobs", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
+export function startUrlImportJob(params: {
+  shop: string;
+  category: string;
+  urls: string[];
+}): Promise<{ jobId: string; status: string }> {
+  return apiFetch("/admin/agent/jobs/urls", {
     method: "POST",
     body: JSON.stringify(params),
   });

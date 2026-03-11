@@ -748,6 +748,12 @@
       "categoryPlaceholder": "Select category…",
       "maxProducts": "Max products",
       "startImport": "Start Import",
+      "modeSearch": "Search shop",
+      "modeUrls": "Enter URLs",
+      "productUrls": "Product URLs",
+      "urlsPlaceholder": "https://www.amazon.de/dp/...\nhttps://www.amazon.de/dp/...",
+      "urlsHint": "{{count}} URL(s) detected",
+      "startUrlImport": "Import {{count}} URL(s)",
       "loadingShops": "Loading shops…",
       "configLoadError": "Failed to load configuration.",
       "stage": {
@@ -760,10 +766,14 @@
       "waiting": "Waiting for data…",
       "reviewDescription": "{{count}} products found. Select the products you want to import.",
       "selected": "selected",
+      "colImage": "Image",
       "colName": "Name",
       "colLabel": "Label",
       "colWeather": "Weather",
-      "colEdit": "Edit",
+      "colActions": "Actions",
+      "viewProduct": "View product",
+      "edit": "Edit",
+      "doneEditing": "Done",
       "approve": "Import {{count}} products",
       "approving": "Importing…",
       "discard": "Discard",
@@ -777,7 +787,9 @@
       "errorFetch": "Failed to fetch results.",
       "errorApprove": "Failed to approve import.",
       "noProducts": "No products found.",
-      "errorLoadShops": "Failed to load shops."
+      "errorLoadShops": "Failed to load shops.",
+      "jobHistory": "Previous imports",
+      "productsFound": "products"
     }
   }
 }

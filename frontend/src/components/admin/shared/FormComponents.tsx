@@ -1,11 +1,12 @@
 interface FormFieldProps {
   label: string
   error?: string
+  hint?: string
   required?: boolean
   children: React.ReactNode
 }
 
-export function FormField({ label, error, required, children }: FormFieldProps) {
+export function FormField({ label, error, hint, required, children }: FormFieldProps) {
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">
@@ -13,6 +14,7 @@ export function FormField({ label, error, required, children }: FormFieldProps) 
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
+      {hint && !error && <p className="text-xs text-stone-500 dark:text-stone-400">{hint}</p>}
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   )
@@ -45,6 +47,9 @@ export function TextArea({ error, className, ...props }: TextAreaProps) {
     />
   )
 }
+
+// Alias for consistency with other input components
+export const TextAreaInput = TextArea
 
 interface SelectInputProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: { value: string; label: string }[]

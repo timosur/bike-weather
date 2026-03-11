@@ -750,6 +750,12 @@
       "categoryPlaceholder": "Kategorie wählen…",
       "maxProducts": "Max. Produkte",
       "startImport": "Import starten",
+      "modeSearch": "Shop durchsuchen",
+      "modeUrls": "URLs eingeben",
+      "productUrls": "Produkt-URLs",
+      "urlsPlaceholder": "https://www.amazon.de/dp/...\nhttps://www.amazon.de/dp/...",
+      "urlsHint": "{{count}} URL(s) erkannt",
+      "startUrlImport": "{{count}} URL(s) importieren",
       "loadingShops": "Shops werden geladen…",
       "configLoadError": "Konfiguration konnte nicht geladen werden.",
       "stage": {
@@ -762,10 +768,14 @@
       "waiting": "Warte auf Daten…",
       "reviewDescription": "{{count}} Produkte gefunden. Wähle die Produkte aus, die importiert werden sollen.",
       "selected": "ausgewählt",
+      "colImage": "Bild",
       "colName": "Name",
       "colLabel": "Label",
       "colWeather": "Wetter",
-      "colEdit": "Bearbeiten",
+      "colActions": "Aktionen",
+      "viewProduct": "Produkt ansehen",
+      "edit": "Bearbeiten",
+      "doneEditing": "Fertig",
       "approve": "{{count}} Produkte importieren",
       "approving": "Wird importiert…",
       "discard": "Verwerfen",
@@ -779,7 +789,9 @@
       "errorFetch": "Ergebnisse konnten nicht abgerufen werden.",
       "errorApprove": "Import konnte nicht genehmigt werden.",
       "noProducts": "Keine Produkte gefunden.",
-      "errorLoadShops": "Shops konnten nicht geladen werden."
+      "errorLoadShops": "Shops konnten nicht geladen werden.",
+      "jobHistory": "Vorherige Imports",
+      "productsFound": "Produkte"
     }
   }
 }
