@@ -25,14 +25,33 @@ class BulkResult(BaseModel):
 
 
 # Category ID → body zone mapping (deterministic, no LLM needed)
-CATEGORY_ZONE_MAP: dict[str, str] = {
-    "cat-jackets": "upperBody",
-    "cat-gloves": "hands",
-    "cat-pants": "lowerBody",
+CATEGORY_ZONE_MAP: dict[str, str | None] = {
+    # Upper body
+    "cat-rain-jackets": "upperBody",
+    "cat-wind-jackets": "upperBody",
+    "cat-thermal-jackets": "upperBody",
+    "cat-jerseys": "upperBody",
+    "cat-base-layers": "upperBody",
+    "cat-vests": "upperBody",
+    # Lower body
+    "cat-thermal-tights": "lowerBody",
+    "cat-cycling-shorts": "lowerBody",
+    "cat-rain-pants": "lowerBody",
+    # Hands
+    "cat-winter-gloves": "hands",
+    "cat-summer-gloves": "hands",
+    # Head
     "cat-headwear": "head",
-    "cat-shoes": "feet",
-    "cat-lights": None,  # type: ignore[dict-item]
-    "cat-accessories": None,  # type: ignore[dict-item]
+    # Feet
+    "cat-shoe-covers": "feet",
+    "cat-cycling-shoes": "feet",
+    # Eyes
+    "cat-eyewear": "eyes",
+    # Neck / Face
+    "cat-neck-face": "neck",
+    # Equipment (no body zone)
+    "cat-lights": None,
+    "cat-accessories": None,
 }
 
 
@@ -54,8 +73,6 @@ def _build_bulk_payload(
                 "name": p.name,
                 "categoryId": category_id,
                 "imageUrl": p.image_url,
-                "price": p.price,
-                "currency": p.currency,
                 "shopId": shop_id,
                 "affiliateUrl": p.affiliate_url,
                 "matchesZone": matches_zone,
@@ -134,7 +151,6 @@ def _display_products_table(products: list[ProductData]) -> None:
     table = Table(title="Extracted Products", show_lines=True)
     table.add_column("#", style="dim", width=4)
     table.add_column("Name", style="bold", max_width=40)
-    table.add_column("Price", justify="right", width=10)
     table.add_column("Description", max_width=50)
     table.add_column("URL", max_width=40)
 
@@ -142,7 +158,6 @@ def _display_products_table(products: list[ProductData]) -> None:
         table.add_row(
             str(i),
             p.name,
-            f"{p.price:.2f} {p.currency}",
             p.description[:50] + ("…" if len(p.description) > 50 else ""),
             p.affiliate_url[:40] + ("…" if len(p.affiliate_url) > 40 else ""),
         )

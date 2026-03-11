@@ -1,4 +1,4 @@
-"""Match published products to clothing items by body zone and weather fit."""
+"""Match published products to clothing/equipment items by body zone and weather fit."""
 
 import logging
 
@@ -13,11 +13,16 @@ from app.services.weather import WeatherForecast
 logger = logging.getLogger(__name__)
 
 # Clothing icon → product zone mapping.
-# Icons that don't map to a product zone (sunglasses, arm-warmers, etc.) are omitted.
 ICON_TO_ZONE: dict[str, str] = {
     # Head
     "headband": "head",
     "helmet-cover": "head",
+    # Eyes
+    "sunglasses": "eyes",
+    "glasses": "eyes",
+    # Neck / Face
+    "neck-gaiter": "neck",
+    "face-mask": "neck",
     # Upper body
     "base-layer": "upperBody",
     "jersey": "upperBody",
@@ -25,6 +30,7 @@ ICON_TO_ZONE: dict[str, str] = {
     "vest": "upperBody",
     "jacket": "upperBody",
     "rain-jacket": "upperBody",
+    "arm-warmers": "upperBody",
     # Lower body
     "pants-short": "lowerBody",
     "pants-long": "lowerBody",
@@ -38,6 +44,15 @@ ICON_TO_ZONE: dict[str, str] = {
     "shoes": "feet",
     "shoe-covers": "feet",
     "socks": "feet",
+}
+
+# Equipment item ID prefix → product category mapping.
+EQUIPMENT_TO_CATEGORY: dict[str, str] = {
+    "eq-lights": "cat-lights",
+    "eq-mudguards": "cat-accessories",
+    "eq-dry-bag": "cat-accessories",
+    "eq-sunscreen": "cat-accessories",
+    "eq-repair-kit": "cat-accessories",
 }
 
 # Precipitation severity ordering for scoring.
@@ -171,8 +186,6 @@ async def match_products_to_clothing(
                 id=best_product.id,
                 name=best_product.name,
                 imageUrl=best_product.image_url,
-                price=best_product.price,
-                currency=best_product.currency,
                 shopId=best_product.shop_id,
                 affiliateUrl=best_product.affiliate_url,
                 matchesLabel=best_product.matches_label,
@@ -204,4 +217,118 @@ async def match_products_to_clothing(
         matched=matched,
         shops=shops_response,
         disclosure=disclosure_response,
+    )
+
+
+async def match_products_to_equipment(
+    session: AsyncSession,
+    equipment_items: list[dict],
+    weather: WeatherForecast,
+) -> dict[str, MatchedProductSchema] | None:
+    """Match the best product to each equipment item by category + weather fit.
+
+    Args:
+        session: DB session.
+        equipment_items: List of equipment item dicts with at least ``id`` key.
+        weather: Current weather conditions for scoring.
+
+    Returns:
+        A dict of equipment item ID → MatchedProductSchema, or None if no matches.
+    """
+    # Fetch all published products in equipment categories
+    equipment_cat_ids = list(set(EQUIPMENT_TO_CATEGORY.values()))
+    result = await session.execute(
+        select(Product).where(
+            Product.is_published == True,  # noqa: E712
+            Product.category_id.in_(equipment_cat_ids),
+        )
+    )
+    products = list(result.scalars().all())
+    if not products:
+        return None
+
+    # Group products by category
+    cat_products: dict[str, list[Product]] = {}
+    for p in products:
+        cat_products.setdefault(p.category_id, []).append(p)
+
+    # Fetch shops for lookup
+    shop_ids = {p.shop_id for p in products}
+    shops_result = await session.execute(select(Shop).where(Shop.id.in_(shop_ids)))
+    shop_map = {s.id: s for s in shops_result.scalars().all()}
+
+    matched: dict[str, MatchedProductSchema] = {}
+
+    for item in equipment_items:
+        item_id = item.get("id", "")
+        # Find the matching category by prefix
+        target_cat = None
+        for prefix, cat_id in EQUIPMENT_TO_CATEGORY.items():
+            if item_id.startswith(prefix):
+                target_cat = cat_id
+                break
+        if not target_cat:
+            continue
+
+        candidates = cat_products.get(target_cat, [])
+        if not candidates:
+            continue
+
+        # Score and pick best
+        best_product: Product | None = None
+        best_score = -1.0
+        for p in candidates:
+            s = _weather_score(p, weather)
+            if s > best_score:
+                best_score = s
+                best_product = p
+
+        if best_product and best_product.shop_id in shop_map:
+            matched[item_id] = MatchedProductSchema(
+                id=best_product.id,
+                name=best_product.name,
+                imageUrl=best_product.image_url,
+                shopId=best_product.shop_id,
+                affiliateUrl=best_product.affiliate_url,
+                matchesLabel=best_product.matches_label,
+                weatherSummary=best_product.weather_summary,
+            )
+
+    return matched if matched else None
+
+
+async def _build_product_recs_scaffold(
+    session: AsyncSession,
+    matched: dict[str, MatchedProductSchema],
+) -> ProductRecommendationsSchema | None:
+    """Build a ProductRecommendationsSchema from an equipment-only matched dict."""
+    shop_ids = {m.shopId for m in matched.values()}
+    shops_result = await session.execute(select(Shop).where(Shop.id.in_(shop_ids)))
+    shop_map = {s.id: s for s in shops_result.scalars().all()}
+
+    disc_result = await session.execute(
+        select(AffiliateDisclosure).where(AffiliateDisclosure.is_active == True)  # noqa: E712
+    )
+    disc = disc_result.scalars().first()
+    if not disc:
+        return None
+
+    shops_response = [
+        ShopResponse(
+            id=s.id,
+            name=s.name,
+            logoUrl=s.logo_url,
+            affiliateTag=s.affiliate_tag,
+        )
+        for sid in shop_ids
+        if (s := shop_map.get(sid))
+    ]
+
+    return ProductRecommendationsSchema(
+        matched=matched,
+        shops=shops_response,
+        disclosure=AffiliateDisclosureResponse(
+            badgeLabel=disc.badge_label,
+            disclaimerText=disc.disclaimer_text,
+        ),
     )

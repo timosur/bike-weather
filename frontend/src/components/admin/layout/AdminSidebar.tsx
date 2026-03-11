@@ -7,6 +7,7 @@ import {
   HelpCircle,
   FileText,
   MessageSquare,
+  Download,
   ChevronLeft,
   Bike,
 } from 'lucide-react'
@@ -25,6 +26,7 @@ const sidebarItems: SidebarItem[] = [
   { label: 'FAQ', href: '/admin/faq', icon: <HelpCircle className="w-5 h-5" /> },
   { label: 'About', href: '/admin/about', icon: <FileText className="w-5 h-5" /> },
   { label: 'Messages', href: '/admin/contacts', icon: <MessageSquare className="w-5 h-5" /> },
+  { label: 'Product Import', href: '/admin/import', icon: <Download className="w-5 h-5" /> },
 ]
 
 interface AdminSidebarProps {
@@ -68,8 +70,8 @@ export function AdminSidebar({ collapsed, onToggle, onNavigate }: AdminSidebarPr
             key={item.href}
             onClick={() => onNavigate(item.href)}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
-                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
+              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+              : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             title={collapsed ? item.label : undefined}
           >

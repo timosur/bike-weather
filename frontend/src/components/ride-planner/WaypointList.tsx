@@ -112,8 +112,8 @@ export function WaypointList({
                   type="button"
                   onClick={() => handleTypeChange(index, 'stop')}
                   className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium transition-colors ${wp.type === 'stop'
-                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                      : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
                     }`}
                 >
                   🚩 {t('waypoints.waypointStop')}
@@ -122,8 +122,8 @@ export function WaypointList({
                   type="button"
                   onClick={() => handleTypeChange(index, 'sleep')}
                   className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium border-l border-stone-200 dark:border-stone-700 transition-colors ${wp.type === 'sleep'
-                      ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300'
-                      : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300'
+                    : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
                     }`}
                 >
                   🛏️ {t('waypoints.waypointSleep')}
@@ -183,15 +183,17 @@ export function WaypointList({
         </div>
       ))}
 
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors ml-7"
-      >
-        <Plus className="w-3 h-3" strokeWidth={2.5} />
-        {t('waypoints.addWaypoint')}
+      <span className="flex items-center gap-1.5 ml-7">
+        <button
+          type="button"
+          onClick={handleAdd}
+          className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+        >
+          <Plus className="w-3 h-3" strokeWidth={2.5} />
+          {t('waypoints.addWaypoint')}
+        </button>
         <InfoTooltip content={t('planner.tooltip.waypoints')} />
-      </button>
+      </span>
 
       {sleepCount > 0 && (
         <p className="text-[11px] text-stone-400 dark:text-stone-500 ml-7">

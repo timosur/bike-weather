@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { AdminDataTable, type Column } from '@/components/admin/shared/AdminDataTable'
 import { SearchFilterBar } from '@/components/admin/shared/SearchFilterBar'
 import { SlidePanel } from '@/components/admin/shared/SlidePanel'
 import { StatusBadge } from '@/components/admin/shared/StatusBadge'
 import { ConfirmDialog } from '@/components/admin/shared/ConfirmDialog'
-import { FormField, TextInput, TextArea, NumberInput, SelectInput, ToggleSwitch } from '@/components/admin/shared/FormComponents'
+import { FormField, TextInput, TextArea, SelectInput, ToggleSwitch } from '@/components/admin/shared/FormComponents'
 import { useToast } from '@/hooks/useToast'
 import { fetchAdminProducts, createProduct, updateProduct, deleteProduct, fetchAdminCategories, fetchAdminShops } from '@/api/admin/products'
 import type { AdminProduct, AdminCategory, AdminShop, PaginatedResponse } from '@/components/admin/types'
@@ -13,13 +14,14 @@ import { useEffect } from 'react'
 
 export default function AdminProductsPage() {
   const { addToast } = useToast()
+  const [searchParams] = useSearchParams()
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const pageSize = 50
   const [search, setSearch] = useState('')
-  const [filterCategory, setFilterCategory] = useState('')
+  const [filterCategory, setFilterCategory] = useState(searchParams.get('category') ?? '')
   const [filterShop, setFilterShop] = useState('')
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [shops, setShops] = useState<AdminShop[]>([])
@@ -31,7 +33,7 @@ export default function AdminProductsPage() {
 
   // Form state
   const [form, setForm] = useState({
-    id: '', name: '', categoryId: '', imageUrl: '', price: 0, currency: 'EUR',
+    id: '', name: '', categoryId: '', imageUrl: '',
     shopId: '', affiliateUrl: '', matchesZone: '', matchesLabel: '',
     weatherTempMin: '', weatherTempMax: '', weatherPrecipitation: 'none',
     weatherWind: 'none', weatherSummary: '', isPublished: true,
@@ -66,7 +68,7 @@ export default function AdminProductsPage() {
   const openCreate = () => {
     setEditingProduct(null)
     setForm({
-      id: '', name: '', categoryId: categories[0]?.id ?? '', imageUrl: '', price: 0, currency: 'EUR',
+      id: '', name: '', categoryId: categories[0]?.id ?? '', imageUrl: '',
       shopId: shops[0]?.id ?? '', affiliateUrl: '', matchesZone: '', matchesLabel: '',
       weatherTempMin: '', weatherTempMax: '', weatherPrecipitation: 'none',
       weatherWind: 'none', weatherSummary: '', isPublished: true,
@@ -81,8 +83,6 @@ export default function AdminProductsPage() {
       name: product.name,
       categoryId: product.categoryId,
       imageUrl: product.imageUrl,
-      price: product.price,
-      currency: product.currency,
       shopId: product.shopId,
       affiliateUrl: product.affiliateUrl,
       matchesZone: product.matchesZone ?? '',
@@ -138,7 +138,6 @@ export default function AdminProductsPage() {
     { key: 'name', header: 'Name', render: (p) => <span className="font-medium">{p.name}</span> },
     { key: 'category', header: 'Category', render: (p) => <StatusBadge variant="neutral">{categoryName(p.categoryId)}</StatusBadge> },
     { key: 'shop', header: 'Shop', render: (p) => shopName(p.shopId) },
-    { key: 'price', header: 'Price', render: (p) => `${p.price.toFixed(2)} ${p.currency}` },
     { key: 'published', header: 'Published', render: (p) => <StatusBadge variant={p.isPublished ? 'success' : 'warning'}>{p.isPublished ? 'Published' : 'Draft'}</StatusBadge> },
     { key: 'updated', header: 'Updated', render: (p) => new Date(p.updatedAt).toLocaleDateString() },
     {
@@ -239,14 +238,6 @@ export default function AdminProductsPage() {
           {form.imageUrl && (
             <img src={form.imageUrl} alt="Preview" className="w-20 h-20 object-cover rounded-lg border border-stone-200 dark:border-stone-700" />
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Price" required>
-              <NumberInput value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} step="0.01" min="0" />
-            </FormField>
-            <FormField label="Currency">
-              <TextInput value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
-            </FormField>
-          </div>
           <FormField label="Affiliate URL" required>
             <TextInput value={form.affiliateUrl} onChange={(e) => setForm({ ...form, affiliateUrl: e.target.value })} placeholder="https://..." />
           </FormField>

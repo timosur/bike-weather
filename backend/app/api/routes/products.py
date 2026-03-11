@@ -28,8 +28,6 @@ def _product_to_response(p: Product) -> ProductResponse:
         name=p.name,
         categoryId=p.category_id,
         imageUrl=p.image_url,
-        price=p.price,
-        currency=p.currency,
         shopId=p.shop_id,
         affiliateUrl=p.affiliate_url,
         matchesZone=p.matches_zone,
@@ -58,7 +56,8 @@ async def list_categories(
         )
         .outerjoin(
             Product,
-            (Product.category_id == ProductCategory.id) & (Product.is_published == True),  # noqa: E712
+            (Product.category_id == ProductCategory.id)
+            & (Product.is_published == True),  # noqa: E712
         )
         .group_by(ProductCategory.id)
         .order_by(ProductCategory.display_order)
@@ -66,7 +65,9 @@ async def list_categories(
     result = await session.execute(stmt)
     rows = result.all()
     cat_ids = [row.id for row in rows]
-    trans = await get_translations(session, "product_category", cat_ids, locale, ["name"])
+    trans = await get_translations(
+        session, "product_category", cat_ids, locale, ["name"]
+    )
     return [
         ProductCategoryResponse(
             id=row.id,
@@ -90,7 +91,9 @@ async def get_category_detail(
         raise HTTPException(status_code=404, detail="Category not found")
 
     products_result = await session.execute(
-        select(Product).where(Product.category_id == category_id, Product.is_published == True)  # noqa: E712
+        select(Product).where(
+            Product.category_id == category_id, Product.is_published == True
+        )  # noqa: E712
     )
     products = products_result.scalars().all()
 
@@ -101,19 +104,31 @@ async def get_category_detail(
         shops = list(shops_result.scalars().all())
 
     disclosure_result = await session.execute(
-        select(AffiliateDisclosure).where(AffiliateDisclosure.is_active == True).limit(1)  # noqa: E712
+        select(AffiliateDisclosure)
+        .where(AffiliateDisclosure.is_active == True)
+        .limit(1)  # noqa: E712
     )
     disclosure = disclosure_result.scalars().first()
 
     product_count = len(products)
 
     # Fetch translations for category, products, and disclosure
-    cat_trans = await get_translations(session, "product_category", [category.id], locale, ["name"])
+    cat_trans = await get_translations(
+        session, "product_category", [category.id], locale, ["name"]
+    )
     prod_ids = [p.id for p in products]
-    prod_trans = await get_translations(session, "product", prod_ids, locale, ["matches_label", "weather_summary"])
+    prod_trans = await get_translations(
+        session, "product", prod_ids, locale, ["matches_label", "weather_summary"]
+    )
     disc_trans = {}
     if disclosure:
-        disc_trans_map = await get_translations(session, "affiliate_disclosure", ["default"], locale, ["badge_label", "disclaimer_text"])
+        disc_trans_map = await get_translations(
+            session,
+            "affiliate_disclosure",
+            ["default"],
+            locale,
+            ["badge_label", "disclaimer_text"],
+        )
         disc_trans = disc_trans_map.get("default", {})
 
     def _translated_product(p: Product) -> ProductResponse:
@@ -134,12 +149,17 @@ async def get_category_detail(
         ),
         products=[_translated_product(p) for p in products],
         shops=[
-            ShopResponse(id=s.id, name=s.name, logoUrl=s.logo_url, affiliateTag=s.affiliate_tag) for s in shops
+            ShopResponse(
+                id=s.id, name=s.name, logoUrl=s.logo_url, affiliateTag=s.affiliate_tag
+            )
+            for s in shops
         ],
         disclosure=(
             AffiliateDisclosureResponse(
                 badgeLabel=disc_trans.get("badge_label", disclosure.badge_label),
-                disclaimerText=disc_trans.get("disclaimer_text", disclosure.disclaimer_text),
+                disclaimerText=disc_trans.get(
+                    "disclaimer_text", disclosure.disclaimer_text
+                ),
             )
             if disclosure
             else None

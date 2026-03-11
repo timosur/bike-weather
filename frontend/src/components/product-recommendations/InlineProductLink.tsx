@@ -5,8 +5,6 @@ interface InlineProduct {
   id: string;
   name: string;
   imageUrl: string;
-  price: number;
-  currency: string;
   affiliateUrl: string;
 }
 
@@ -26,10 +24,6 @@ interface InlineProductLinkProps {
 }
 
 export function InlineProductLink({ product, shop, disclosure, onProductClick }: InlineProductLinkProps) {
-  const formattedPrice = new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: product.currency,
-  }).format(product.price)
 
   return (
     <a
@@ -51,7 +45,7 @@ export function InlineProductLink({ product, shop, disclosure, onProductClick }:
           {product.name}
         </p>
         <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
-          {formattedPrice} via {shop.name}
+          via {shop.name}
         </p>
       </div>
 

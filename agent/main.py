@@ -4,12 +4,14 @@ import argparse
 import asyncio
 import logging
 import sys
+from collections.abc import Callable
+from typing import Any
 
 from rich.console import Console
 from rich.logging import RichHandler
 
 from agent.config import settings
-from agent.extractor import extract_products
+from agent.extractor import ProductData, extract_products
 from agent.publisher import BulkResult, publish_products, publish_with_review
 from agent.scraper import extract_text, fetch_page
 from agent.shops import get_shop, list_shops
@@ -18,36 +20,105 @@ console = Console()
 
 # Known category slug → category_id mapping (matches backend seed data)
 CATEGORY_MAP: dict[str, str] = {
-    "cycling-jackets": "cat-jackets",
-    "jackets": "cat-jackets",
-    "cycling-gloves": "cat-gloves",
-    "gloves": "cat-gloves",
-    "cycling-tights": "cat-pants",
-    "tights": "cat-pants",
-    "pants": "cat-pants",
+    # Rain jackets
+    "rain-jackets": "cat-rain-jackets",
+    "rain-gear": "cat-rain-jackets",
+    # Wind jackets
+    "wind-jackets": "cat-wind-jackets",
+    "softshell-jackets": "cat-wind-jackets",
+    # Thermal jackets
+    "thermal-jackets": "cat-thermal-jackets",
+    "winter-jackets": "cat-thermal-jackets",
+    # Jerseys
+    "jerseys": "cat-jerseys",
+    "cycling-jerseys": "cat-jerseys",
+    # Base layers
+    "base-layers": "cat-base-layers",
+    "baselayers": "cat-base-layers",
+    "underwear": "cat-base-layers",
+    # Vests
+    "vests": "cat-vests",
+    "cycling-vests": "cat-vests",
+    # Thermal tights
+    "thermal-tights": "cat-thermal-tights",
+    "winter-tights": "cat-thermal-tights",
+    # Cycling shorts
+    "cycling-shorts": "cat-cycling-shorts",
+    "bib-shorts": "cat-cycling-shorts",
+    # Rain pants
+    "rain-pants": "cat-rain-pants",
+    "waterproof-pants": "cat-rain-pants",
+    # Winter gloves
+    "winter-gloves": "cat-winter-gloves",
+    "thermal-gloves": "cat-winter-gloves",
+    # Summer gloves
+    "summer-gloves": "cat-summer-gloves",
+    "cycling-gloves": "cat-summer-gloves",
+    "gloves": "cat-summer-gloves",
+    # Headwear
+    "headwear": "cat-headwear",
     "hats-caps": "cat-headwear",
-    "cycling-shoes-overshoes": "cat-shoes",
-    "shoes": "cat-shoes",
-    "overshoes": "cat-shoes",
+    "caps": "cat-headwear",
+    # Shoe covers
+    "shoe-covers": "cat-shoe-covers",
+    "overshoes": "cat-shoe-covers",
+    # Cycling shoes
+    "cycling-shoes": "cat-cycling-shoes",
+    "shoes": "cat-cycling-shoes",
+    "cycling-shoes-overshoes": "cat-cycling-shoes",
+    # Eyewear
+    "eyewear": "cat-eyewear",
+    "sunglasses": "cat-eyewear",
+    "cycling-glasses": "cat-eyewear",
+    # Neck & face
+    "neck-face": "cat-neck-face",
+    "neck-warmers": "cat-neck-face",
+    "balaclavas": "cat-neck-face",
+    # Lights
     "bike-lights": "cat-lights",
     "lights": "cat-lights",
+    # Accessories
     "accessories-gear": "cat-accessories",
     "accessories": "cat-accessories",
-    "rain-gear": "cat-jackets",  # rain gear defaults to jackets category
+    # --- Backward-compat aliases for old generic categories ---
+    "cycling-jackets": "cat-rain-jackets",
+    "jackets": "cat-rain-jackets",
+    "cycling-tights": "cat-thermal-tights",
+    "tights": "cat-thermal-tights",
+    "pants": "cat-thermal-tights",
 }
 
 # Canonical list: one slug per unique backend category (used by --all)
 ALL_CATEGORIES: list[str] = [
-    "cycling-jackets",
-    "cycling-gloves",
-    "cycling-tights",
-    "hats-caps",
-    "cycling-shoes-overshoes",
+    "rain-jackets",
+    "wind-jackets",
+    "thermal-jackets",
+    "jerseys",
+    "base-layers",
+    "vests",
+    "thermal-tights",
+    "cycling-shorts",
+    "rain-pants",
+    "winter-gloves",
+    "summer-gloves",
+    "headwear",
+    "shoe-covers",
+    "cycling-shoes",
+    "eyewear",
+    "neck-face",
     "bike-lights",
     "accessories-gear",
 ]
 
 DEFAULT_MAX_PRODUCTS = 5
+
+# Type for progress callbacks used by the server
+ProgressCallback = Callable[[str, str, dict[str, Any] | None], None]
+
+
+def _cli_progress(stage: str, message: str, data: dict[str, Any] | None = None) -> None:
+    """Default progress callback that prints via Rich console."""
+    console.print(f"[dim]{message}[/dim]")
 
 
 def _resolve_category_id(category: str) -> str:
@@ -88,50 +159,68 @@ async def run_category(
     max_products: int = DEFAULT_MAX_PRODUCTS,
     review: bool = False,
     publish: bool = True,
-) -> BulkResult:
+    progress: ProgressCallback | None = None,
+    extract_only: bool = False,
+) -> BulkResult | list[ProductData]:
     """Run the full scrape → extract → publish pipeline for a single category.
 
-    Returns a BulkResult with created/updated/error counts.
+    If *extract_only* is True, returns the list of ProductData without publishing
+    (used by the HTTP server for the review workflow).
+    Otherwise returns a BulkResult with created/updated/error counts.
     """
+    on_progress = progress or _cli_progress
+
     shop = get_shop(shop_name)
     category_id = _resolve_category_id(category)
     search_query = _build_search_query(category)
     search_url = shop.search_url(search_query)
 
-    console.print(f"[bold]Shop:[/bold] {shop.name}")
-    console.print(f"[bold]Category:[/bold] {category} → {category_id}")
-    console.print(f"[bold]Search URL:[/bold] {search_url}")
-    console.print(f"[bold]Max products:[/bold] {max_products}")
-    console.print()
+    on_progress(
+        "init",
+        f"Shop: {shop.name} | Category: {category} → {category_id}",
+        {
+            "shop": shop.name,
+            "shopId": shop.shop_id,
+            "category": category,
+            "categoryId": category_id,
+            "searchUrl": search_url,
+        },
+    )
 
     # 1. Fetch search results page
-    console.print("[dim]Fetching search results…[/dim]")
+    on_progress("scraping", "Fetching search results…")
     try:
         html = await fetch_page(search_url)
     except Exception as e:
-        console.print(f"[red]Failed to fetch page: {e}[/red]")
+        on_progress("failed", f"Failed to fetch page: {e}")
+        if extract_only:
+            return []
         return BulkResult(errors=[f"Fetch failed for {category}: {e}"])
 
     # 2. Extract text from HTML
-    console.print("[dim]Extracting text from HTML…[/dim]")
+    on_progress("scraping", "Extracting text from HTML…")
     text = extract_text(html)
     if not text.strip():
-        console.print("[yellow]No text extracted from page. Skipping.[/yellow]")
+        on_progress("failed", "No text extracted from page. Skipping.")
+        if extract_only:
+            return []
         return BulkResult()
-    console.print(f"[dim]Extracted {len(text)} chars of text.[/dim]")
+    on_progress("scraping", f"Extracted {len(text)} chars of text.")
 
     # 3. Send to LLM for product extraction
-    console.print("[dim]Sending to LLM for product extraction…[/dim]")
+    on_progress("extracting", "Sending to LLM for product extraction…")
     products = await extract_products(text, category, shop.name)
 
     if not products:
-        console.print("[yellow]No products extracted. Skipping.[/yellow]")
+        on_progress("extracting", "No products extracted. Skipping.")
+        if extract_only:
+            return []
         return BulkResult()
 
     # 4. Limit to max_products
     if len(products) > max_products:
-        console.print(
-            f"[dim]Trimming {len(products)} products to {max_products}.[/dim]"
+        on_progress(
+            "extracting", f"Trimming {len(products)} products to {max_products}."
         )
         products = products[:max_products]
 
@@ -139,9 +228,18 @@ async def run_category(
     for p in products:
         p.affiliate_url = shop.inject_affiliate_tag(p.affiliate_url)
 
-    console.print(f"[green]Extracted {len(products)} product(s).[/green]")
+    on_progress("extracting", f"Extracted {len(products)} product(s).")
 
-    # 5. Publish or review
+    # If extract_only, return raw products for review workflow
+    if extract_only:
+        on_progress(
+            "completed",
+            f"Extraction complete — {len(products)} products ready for review.",
+        )
+        return products
+
+    # 5. Publish or review (CLI flow)
+    on_progress("publishing", "Publishing products…")
     if review:
         result = await publish_with_review(
             products, category_id, shop.shop_id, publish=publish
@@ -176,6 +274,8 @@ async def run_all(
             review=False,
             publish=publish,
         )
+        # run_category returns BulkResult when extract_only=False (default)
+        assert isinstance(result, BulkResult)
 
         total.created += result.created
         total.updated += result.updated
@@ -220,6 +320,8 @@ async def run(args: argparse.Namespace) -> None:
         review=args.review,
         publish=not args.draft,
     )
+    # CLI mode always gets BulkResult
+    assert isinstance(result, BulkResult)
     _print_result(result)
 
 
@@ -244,7 +346,26 @@ def main() -> None:
         description="LLM-powered product agent for Bike Weather",
     )
 
-    cat_group = parser.add_mutually_exclusive_group(required=True)
+    # Server mode
+    parser.add_argument(
+        "--serve",
+        action="store_true",
+        default=False,
+        help="Start the agent as an HTTP server instead of running a scrape",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8001,
+        help="Port for the HTTP server (default: 8001, only used with --serve)",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host for the HTTP server (default: 127.0.0.1, only used with --serve)",
+    )
+
+    cat_group = parser.add_mutually_exclusive_group(required=False)
     cat_group.add_argument(
         "--category",
         help="Product category slug (e.g. 'cycling-jackets', 'gloves')",
@@ -258,7 +379,6 @@ def main() -> None:
 
     parser.add_argument(
         "--shop",
-        required=True,
         choices=list_shops(),
         help="Shop to search (e.g. 'bike-components')",
     )
@@ -290,6 +410,24 @@ def main() -> None:
     args = parser.parse_args()
 
     _setup_logging(args.verbose)
+
+    # Server mode: start HTTP server and return
+    if args.serve:
+        import uvicorn
+
+        from agent.server import app as server_app
+
+        console.print(
+            f"[bold green]Starting agent HTTP server on {args.host}:{args.port}[/bold green]"
+        )
+        uvicorn.run(server_app, host=args.host, port=args.port, log_level="info")
+        return
+
+    # CLI mode: validate required args
+    if not args.category and not args.all:
+        parser.error("--category or --all is required (unless using --serve)")
+    if not args.shop:
+        parser.error("--shop is required (unless using --serve)")
 
     # Validate settings
     if not settings.llm_api_key:

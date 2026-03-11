@@ -41,6 +41,7 @@ const AdminShopsPage = lazy(() => import('./pages/admin/AdminShopsPage'))
 const AdminFaqPage = lazy(() => import('./pages/admin/AdminFaqPage'))
 const AdminAboutPage = lazy(() => import('./pages/admin/AdminAboutPage'))
 const AdminContactsPage = lazy(() => import('./pages/admin/AdminContactsPage'))
+const AdminProductImportPage = lazy(() => import('./pages/admin/AdminProductImportPage'))
 const SharedReportPage = lazy(() => import('./pages/SharedReportPage'))
 
 function useNavigationItems(): NavigationItem[] {
@@ -189,6 +190,7 @@ function AppContent() {
           <Route path="faq" element={<Suspense fallback={null}><AdminFaqPage /></Suspense>} />
           <Route path="about" element={<Suspense fallback={null}><AdminAboutPage /></Suspense>} />
           <Route path="contacts" element={<Suspense fallback={null}><AdminContactsPage /></Suspense>} />
+          <Route path="import" element={<Suspense fallback={null}><AdminProductImportPage /></Suspense>} />
         </Route>
       </RoutesWrapper>
       <ToastContainer />

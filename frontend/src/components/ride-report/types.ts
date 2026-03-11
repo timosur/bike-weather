@@ -3,8 +3,6 @@ export interface MatchedProduct {
   id: string;
   name: string;
   imageUrl: string;
-  price: number;
-  currency: string;
   shopId: string;
   affiliateUrl: string;
   matchesLabel: string;

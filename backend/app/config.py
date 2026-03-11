@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
     OTEL_SERVICE_NAME: str = "bike-weather-backend"
     APP_VERSION: str = "0.0.0"
+    AGENT_SERVICE_URL: str = "http://localhost:8001"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

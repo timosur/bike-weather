@@ -20,26 +20,21 @@ class TestProductData:
         p = ProductData(
             name="Test Jacket",
             description="A warm cycling jacket",
-            price=99.99,
-            currency="EUR",
             image_url="https://example.com/img.jpg",
             affiliate_url="https://example.com/product/1",
         )
         assert p.name == "Test Jacket"
-        assert p.price == 99.99
 
     def test_name_required(self):
         with pytest.raises(Exception):
             ProductData(name="", description="test")
 
     def test_name_stripped(self):
-        p = ProductData(name="  Padded name  ", price=10.0)
+        p = ProductData(name="  Padded name  ")
         assert p.name == "Padded name"
 
     def test_defaults(self):
         p = ProductData(name="Minimal")
-        assert p.price == 0.0
-        assert p.currency == "EUR"
         assert p.image_url == ""
         assert p.affiliate_url == ""
 
@@ -93,16 +88,12 @@ SAMPLE_LLM_RESPONSE = json.dumps(
         {
             "name": "Gore Wear C5 Shakedry Jacket",
             "description": "Ultralight waterproof jacket with breathability.",
-            "price": 179.99,
-            "currency": "EUR",
             "image_url": "https://example.com/gore.jpg",
             "affiliate_url": "https://www.bike-components.de/en/Product/12345",
         },
         {
             "name": "Castelli Perfetto RoS 2 Jacket",
             "description": "Wind and water-resistant cycling jacket.",
-            "price": 229.99,
-            "currency": "EUR",
             "image_url": "https://example.com/castelli.jpg",
             "affiliate_url": "https://www.bike-components.de/en/Product/67890",
         },
@@ -119,13 +110,12 @@ class TestExtractProducts:
 
             products = await extract_products(
                 "Some product listing text...",
-                "cycling-jackets",
+                "rain-jackets",
                 "bike-components.de",
             )
 
             assert len(products) == 2
             assert products[0].name == "Gore Wear C5 Shakedry Jacket"
-            assert products[0].price == 179.99
             assert products[1].name == "Castelli Perfetto RoS 2 Jacket"
             mock_llm.assert_called_once()
 

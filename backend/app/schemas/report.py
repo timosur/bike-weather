@@ -7,8 +7,6 @@ class MatchedProductSchema(BaseModel):
     id: str
     name: str
     imageUrl: str
-    price: float
-    currency: str
     shopId: str
     affiliateUrl: str
     matchesLabel: str

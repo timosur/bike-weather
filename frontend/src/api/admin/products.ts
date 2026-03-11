@@ -5,9 +5,14 @@ import type {
   AdminCategory,
   AdminShop,
   BulkProductResponse,
+  CategoryOverviewItem,
 } from "@/components/admin/types";
 
 // --- Products ---
+
+export function fetchProductOverview(): Promise<CategoryOverviewItem[]> {
+  return apiFetch("/admin/products/overview");
+}
 
 export function fetchAdminProducts(
   page = 1,

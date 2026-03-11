@@ -21,8 +21,6 @@ Shop: {shop}
 Extract ALL products you can find from the following text. For each product return:
 - name: Full product name
 - description: Key features as a short description (1-2 sentences)
-- price: Numeric price (float). If unavailable set to 0.0
-- currency: Currency code (default "EUR")
 - image_url: Product image URL if available, otherwise empty string
 - affiliate_url: Product page URL / link
 - matches_label: A short product-type description (e.g. "Waterproof Cycling Jacket", "Thermal Cycling Tights", "Light Cycling Gloves"). Describe what kind of product it is.
@@ -37,8 +35,6 @@ Return a JSON array of objects. Example:
   {{
     "name": "Gore Wear C5 Gore-Tex Shakedry Jacket",
     "description": "Ultralight waterproof cycling jacket with excellent breathability.",
-    "price": 179.99,
-    "currency": "EUR",
     "image_url": "https://example.com/image.jpg",
     "affiliate_url": "https://example.com/product/123",
     "matches_label": "Waterproof Cycling Jacket",
@@ -68,8 +64,6 @@ class ProductData(BaseModel):
 
     name: str
     description: str = ""
-    price: float = 0.0
-    currency: str = "EUR"
     image_url: str = ""
     affiliate_url: str = ""
     matches_label: str = "Cycling Product"

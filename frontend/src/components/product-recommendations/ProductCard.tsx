@@ -23,13 +23,7 @@ const windTranslationKeys: Record<string, string> = {
 }
 
 export function ProductCard({ product, shop, disclosure, onProductClick }: ProductCardProps) {
-  const { t, i18n } = useTranslation()
-
-  const priceLocale = i18n.language === 'de' ? 'de-DE' : 'en-US'
-  const formattedPrice = new Intl.NumberFormat(priceLocale, {
-    style: 'currency',
-    currency: product.currency,
-  }).format(product.price)
+  const { t } = useTranslation()
 
   const { weather } = product
 
@@ -94,12 +88,6 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
 
         <div className="mt-auto flex items-end justify-between gap-2">
           <div>
-            <p
-              className="text-lg font-bold text-stone-900 dark:text-stone-100 tracking-tight"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
-            >
-              {formattedPrice}
-            </p>
             <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
               via {shop.name} *
             </p>

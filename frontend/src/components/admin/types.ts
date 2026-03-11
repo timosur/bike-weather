@@ -12,8 +12,6 @@ export interface AdminProduct {
   name: string;
   categoryId: string;
   imageUrl: string;
-  price: number;
-  currency: string;
   shopId: string;
   affiliateUrl: string;
   matchesZone: string | null;
@@ -79,4 +77,66 @@ export interface BulkProductResponse {
   created: number;
   updated: number;
   errors: string[];
+}
+
+export interface CategoryOverviewItem {
+  categoryId: string;
+  categoryName: string;
+  icon: string;
+  zone: string;
+  totalProducts: number;
+  publishedProducts: number;
+  unpublishedProducts: number;
+  newestProductAt: string | null;
+  oldestProductAt: string | null;
+  status: "ok" | "outdated" | "empty";
+}
+
+// --- Agent types ---
+
+export interface AgentShop {
+  id: string;
+  name: string;
+}
+
+export interface AgentCategory {
+  slug: string;
+  categoryId: string;
+  label: string;
+}
+
+export interface AgentProgressEvent {
+  stage: string;
+  message: string;
+  data?: Record<string, unknown>;
+  timestamp?: number;
+}
+
+export interface AgentBulkProduct {
+  id: string;
+  name: string;
+  categoryId: string;
+  imageUrl: string;
+  shopId: string;
+  affiliateUrl: string;
+  matchesZone: string | null;
+  matchesLabel: string;
+  weatherTempMin: number | null;
+  weatherTempMax: number | null;
+  weatherPrecipitation: string;
+  weatherWind: string;
+  weatherSummary: string;
+  isPublished: boolean;
+}
+
+export interface AgentJob {
+  jobId: string;
+  shop: string;
+  category: string;
+  maxProducts: number;
+  status: "pending" | "scraping" | "extracting" | "completed" | "failed";
+  progress: AgentProgressEvent[];
+  products?: AgentBulkProduct[];
+  error: string | null;
+  createdAt: number;
 }

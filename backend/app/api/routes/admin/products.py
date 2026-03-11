@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
@@ -15,6 +15,7 @@ from app.schemas.product import (
     BulkProductResponse,
     CategoryAdminResponse,
     CategoryCreate,
+    CategoryOverviewItem,
     CategoryUpdate,
     PaginatedResponse,
     ProductAdminResponse,
@@ -26,6 +27,84 @@ from app.schemas.product import (
 )
 
 router = APIRouter()
+
+OUTDATED_DAYS = 30
+
+CATEGORY_ZONE: dict[str, str] = {
+    "cat-rain-jackets": "upperBody",
+    "cat-wind-jackets": "upperBody",
+    "cat-thermal-jackets": "upperBody",
+    "cat-jerseys": "upperBody",
+    "cat-base-layers": "upperBody",
+    "cat-vests": "upperBody",
+    "cat-thermal-tights": "lowerBody",
+    "cat-cycling-shorts": "lowerBody",
+    "cat-rain-pants": "lowerBody",
+    "cat-winter-gloves": "hands",
+    "cat-summer-gloves": "hands",
+    "cat-headwear": "head",
+    "cat-shoe-covers": "feet",
+    "cat-cycling-shoes": "feet",
+    "cat-eyewear": "eyes",
+    "cat-neck-face": "neck",
+    "cat-lights": "equipment",
+    "cat-accessories": "equipment",
+}
+
+
+# --- Product Overview ---
+
+
+@router.get("/products/overview", response_model=list[CategoryOverviewItem])
+async def product_overview(
+    _admin: User = Depends(require_admin),
+    session: AsyncSession = Depends(get_session),
+) -> list[CategoryOverviewItem]:
+    categories_result = await session.execute(
+        select(ProductCategory).order_by(ProductCategory.display_order)
+    )
+    categories = categories_result.scalars().all()
+
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
+        days=OUTDATED_DAYS
+    )
+    items: list[CategoryOverviewItem] = []
+
+    for cat in categories:
+        stats = await session.execute(
+            select(
+                func.count(Product.id),
+                func.count(Product.id).filter(Product.is_published.is_(True)),
+                func.max(Product.updated_at),
+                func.min(Product.updated_at),
+            ).where(Product.category_id == cat.id)
+        )
+        row = stats.one()
+        total, published, newest, oldest = row[0], row[1], row[2], row[3]
+
+        if total == 0:
+            status_val = "empty"
+        elif newest and newest < cutoff:
+            status_val = "outdated"
+        else:
+            status_val = "ok"
+
+        items.append(
+            CategoryOverviewItem(
+                categoryId=cat.id,
+                categoryName=cat.name,
+                icon=cat.icon,
+                zone=CATEGORY_ZONE.get(cat.id, "other"),
+                totalProducts=total,
+                publishedProducts=published,
+                unpublishedProducts=total - published,
+                newestProductAt=newest,
+                oldestProductAt=oldest,
+                status=status_val,
+            )
+        )
+
+    return items
 
 
 # --- Products ---
@@ -102,8 +181,6 @@ async def create_product(
         name=data.name,
         category_id=data.categoryId,
         image_url=data.imageUrl,
-        price=data.price,
-        currency=data.currency,
         shop_id=data.shopId,
         affiliate_url=data.affiliateUrl,
         matches_zone=data.matchesZone,
@@ -210,8 +287,6 @@ async def bulk_import_products(
                 existing.name = item.name
                 existing.category_id = item.categoryId
                 existing.image_url = item.imageUrl
-                existing.price = item.price
-                existing.currency = item.currency
                 existing.shop_id = item.shopId
                 existing.affiliate_url = item.affiliateUrl
                 existing.matches_zone = item.matchesZone
@@ -230,8 +305,6 @@ async def bulk_import_products(
                     name=item.name,
                     category_id=item.categoryId,
                     image_url=item.imageUrl,
-                    price=item.price,
-                    currency=item.currency,
                     shop_id=item.shopId,
                     affiliate_url=item.affiliateUrl,
                     matches_zone=item.matchesZone,

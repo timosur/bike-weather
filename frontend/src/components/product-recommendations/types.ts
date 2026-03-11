@@ -1,15 +1,25 @@
 /** Icon identifier for product categories */
 export type CategoryIcon =
   | "jacket"
-  | "gloves"
-  | "pants"
+  | "rain-jacket"
+  | "jersey"
+  | "base-layer"
+  | "vest"
+  | "pants-long"
+  | "pants-short"
+  | "overpants"
+  | "gloves-waterproof"
+  | "gloves-light"
   | "headwear"
   | "shoes"
+  | "shoe-covers"
+  | "eyewear"
+  | "neck-gaiter"
   | "light"
   | "accessories";
 
 /** Clothing zone this product matches (from Ride Report) */
-export type ClothingZoneId = "head" | "upperBody" | "lowerBody" | "hands" | "feet";
+export type ClothingZoneId = "head" | "eyes" | "neck" | "upperBody" | "lowerBody" | "hands" | "feet";
 
 export interface Shop {
   id: string;
@@ -51,8 +61,6 @@ export interface Product {
   name: string;
   categoryId: string;
   imageUrl: string;
-  price: number;
-  currency: string;
   shopId: string;
   affiliateUrl: string;
   matchesZone: ClothingZoneId | null;

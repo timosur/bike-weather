@@ -11,17 +11,12 @@ function groupByCategory(products: Product[]): Record<string, Product[]> {
   return groups
 }
 
-function CompactProductCard({ product, shop, badgeLabel, onProductClick, priceLocale }: {
+function CompactProductCard({ product, shop, badgeLabel, onProductClick }: {
   product: Product
   shop: Shop | undefined
   badgeLabel: string
   onProductClick?: (id: string) => void
-  priceLocale: string
 }) {
-  const formattedPrice = new Intl.NumberFormat(priceLocale, {
-    style: 'currency',
-    currency: product.currency,
-  }).format(product.price)
 
   return (
     <a
@@ -51,9 +46,6 @@ function CompactProductCard({ product, shop, badgeLabel, onProductClick, priceLo
           {product.matchesLabel} &middot; {product.weather.summary}
         </p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-sm font-semibold text-stone-900 dark:text-stone-100" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            {formattedPrice}
-          </span>
           {shop && (
             <span className="text-[11px] text-stone-400 dark:text-stone-500">via {shop.name} *</span>
           )}
@@ -66,21 +58,31 @@ function CompactProductCard({ product, shop, badgeLabel, onProductClick, priceLo
 }
 
 const categoryTranslationKeys: Record<string, string> = {
-  'cat-jackets': 'products.category.jackets',
-  'cat-gloves': 'products.category.gloves',
-  'cat-pants': 'products.category.pants',
+  'cat-rain-jackets': 'products.category.rainJackets',
+  'cat-wind-jackets': 'products.category.windJackets',
+  'cat-thermal-jackets': 'products.category.thermalJackets',
+  'cat-jerseys': 'products.category.jerseys',
+  'cat-base-layers': 'products.category.baseLayers',
+  'cat-vests': 'products.category.vests',
+  'cat-thermal-tights': 'products.category.thermalTights',
+  'cat-cycling-shorts': 'products.category.cyclingShorts',
+  'cat-rain-pants': 'products.category.rainPants',
+  'cat-winter-gloves': 'products.category.winterGloves',
+  'cat-summer-gloves': 'products.category.summerGloves',
   'cat-headwear': 'products.category.headwear',
-  'cat-shoes': 'products.category.shoes',
+  'cat-shoe-covers': 'products.category.shoeCovers',
+  'cat-cycling-shoes': 'products.category.cyclingShoes',
+  'cat-eyewear': 'products.category.eyewear',
+  'cat-neck-face': 'products.category.neckFace',
   'cat-lights': 'products.category.lights',
   'cat-accessories': 'products.category.accessories',
 }
 
 export function ReportProducts({ products, shops, disclosure, onProductClick }: ReportProductsProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
 
   if (products.length === 0) return null
 
-  const priceLocale = i18n.language === 'de' ? 'de-DE' : 'en-US'
   const shopMap = new Map(shops.map((s) => [s.id, s]))
   const grouped = groupByCategory(products)
 
@@ -106,7 +108,6 @@ export function ReportProducts({ products, shops, disclosure, onProductClick }: 
                 shop={shopMap.get(product.shopId)}
                 badgeLabel={disclosure.badgeLabel}
                 onProductClick={onProductClick}
-                priceLocale={priceLocale}
               />
             ))}
           </div>

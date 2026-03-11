@@ -47,7 +47,7 @@ from app.services.route_waypoints import (
 from app.services.wind_analysis import analyze_wind, wind_exposure_factor
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.product_matching import match_products_to_clothing
+from app.services.product_matching import match_products_to_clothing, match_products_to_equipment
 from app.services.weather import (
     HourlyForecast,
     HourlyWeatherWindow,
@@ -1017,7 +1017,7 @@ async def build_report(
         if uwp:
             user_waypoints_schema = uwp
 
-    # Match products to clothing items (best-fit by zone + weather)
+    # Match products to clothing + equipment items (best-fit by zone + weather)
     product_recs = None
     if session:
         # Use the clothing items that will appear in the report
@@ -1031,6 +1031,23 @@ async def build_report(
             )
         except Exception:
             logger.warning("Product matching failed, continuing without", exc_info=True)
+
+        # Equipment product matching
+        final_equipment = equipment  # last day's raw dicts
+        if merged_equipment:
+            final_equipment = [{"id": e.id} for e in merged_equipment]
+        try:
+            eq_matched = await match_products_to_equipment(
+                session, final_equipment, forecast
+            )
+            if eq_matched and product_recs:
+                product_recs.matched.update(eq_matched)
+            elif eq_matched and not product_recs:
+                # Build a minimal ProductRecommendationsSchema for equipment-only
+                from app.services.product_matching import _build_product_recs_scaffold
+                product_recs = await _build_product_recs_scaffold(session, eq_matched)
+        except Exception:
+            logger.warning("Equipment product matching failed, continuing without", exc_info=True)
 
     return RideReportSchema(
         id=f"report-{uuid.uuid4().hex[:8]}",

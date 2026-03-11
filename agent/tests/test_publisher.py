@@ -14,8 +14,6 @@ def _make_product(**kwargs) -> ProductData:
     defaults = {
         "name": "Test Product",
         "description": "Test description",
-        "price": 49.99,
-        "currency": "EUR",
         "image_url": "https://example.com/img.jpg",
         "affiliate_url": "https://example.com/product/1",
     }
@@ -26,18 +24,18 @@ def _make_product(**kwargs) -> ProductData:
 class TestBuildBulkPayload:
     def test_builds_correct_structure(self):
         products = [_make_product(name="Jacket A"), _make_product(name="Jacket B")]
-        payload = _build_bulk_payload(products, "cat-jackets", "shop-bike-components")
+        payload = _build_bulk_payload(products, "cat-rain-jackets", "shop-bike-components")
 
         assert len(payload) == 2
         item = payload[0]
         assert item["name"] == "Jacket A"
-        assert item["categoryId"] == "cat-jackets"
+        assert item["categoryId"] == "cat-rain-jackets"
         assert item["shopId"] == "shop-bike-components"
         assert item["isPublished"] is True  # published by default
         assert item["id"].startswith("agent-")
 
     def test_empty_products(self):
-        payload = _build_bulk_payload([], "cat-jackets", "shop-bike-components")
+        payload = _build_bulk_payload([], "cat-rain-jackets", "shop-bike-components")
         assert payload == []
 
 
@@ -61,7 +59,7 @@ class TestPublishProducts:
 
             result = await publish_products(
                 products,
-                "cat-jackets",
+                "cat-rain-jackets",
                 "shop-bike-components",
                 api_url="http://test/api/admin",
                 token="test-token",
@@ -70,7 +68,7 @@ class TestPublishProducts:
             mock_client.post.assert_called_once()
             call_args = mock_client.post.call_args
             assert "products/bulk" in call_args[0][0]
-            assert "replaceCategory=cat-jackets" in call_args[0][0]
+            assert "replaceCategory=cat-rain-jackets" in call_args[0][0]
             assert call_args[1]["headers"]["Authorization"] == "Bearer test-token"
 
             assert result.created == 1
@@ -96,7 +94,7 @@ class TestPublishProducts:
             # Should not raise
             result = await publish_products(
                 products,
-                "cat-jackets",
+                "cat-rain-jackets",
                 "shop-bike-components",
                 api_url="http://test/api/admin",
                 token="test-token",
@@ -127,7 +125,7 @@ class TestPublishProducts:
 
             result = await publish_products(
                 products,
-                "cat-jackets",
+                "cat-rain-jackets",
                 "shop-bike-components",
                 api_url="http://test/api/admin",
                 token="test-token",
@@ -141,6 +139,6 @@ class TestPublishProducts:
     @pytest.mark.asyncio
     async def test_publish_empty_list(self):
         """Publishing empty list returns immediately."""
-        result = await publish_products([], "cat-jackets", "shop-bike-components")
+        result = await publish_products([], "cat-rain-jackets", "shop-bike-components")
         assert result.created == 0
         assert result.updated == 0

@@ -32,8 +32,6 @@ class ProductResponse(BaseModel):
     name: str
     categoryId: str
     imageUrl: str
-    price: float
-    currency: str
     shopId: str
     affiliateUrl: str
     matchesZone: str | None
@@ -75,8 +73,6 @@ class ProductCreate(BaseModel):
     name: str
     categoryId: str
     imageUrl: str
-    price: float
-    currency: str = "EUR"
     shopId: str
     affiliateUrl: str
     matchesZone: str | None = None
@@ -93,8 +89,6 @@ class ProductUpdate(BaseModel):
     name: str | None = None
     categoryId: str | None = None
     imageUrl: str | None = None
-    price: float | None = None
-    currency: str | None = None
     shopId: str | None = None
     affiliateUrl: str | None = None
     matchesZone: str | None = None
@@ -112,8 +106,6 @@ class ProductAdminResponse(BaseModel):
     name: str
     categoryId: str
     imageUrl: str
-    price: float
-    currency: str
     shopId: str
     affiliateUrl: str
     matchesZone: str | None
@@ -134,8 +126,6 @@ class ProductAdminResponse(BaseModel):
             name=getattr(obj, "name"),
             categoryId=getattr(obj, "category_id"),
             imageUrl=getattr(obj, "image_url"),
-            price=getattr(obj, "price"),
-            currency=getattr(obj, "currency"),
             shopId=getattr(obj, "shop_id"),
             affiliateUrl=getattr(obj, "affiliate_url"),
             matchesZone=getattr(obj, "matches_zone"),
@@ -222,8 +212,6 @@ class BulkProductItem(BaseModel):
     name: str
     categoryId: str
     imageUrl: str
-    price: float
-    currency: str = "EUR"
     shopId: str
     affiliateUrl: str
     matchesZone: str | None = None
@@ -241,3 +229,16 @@ class BulkProductResponse(BaseModel):
     updated: int
     deleted: int = 0
     errors: list[str]
+
+
+class CategoryOverviewItem(BaseModel):
+    categoryId: str
+    categoryName: str
+    icon: str
+    zone: str
+    totalProducts: int
+    publishedProducts: int
+    unpublishedProducts: int
+    newestProductAt: datetime | None
+    oldestProductAt: datetime | None
+    status: str  # "ok", "outdated", "empty"

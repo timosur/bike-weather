@@ -6,7 +6,6 @@ from app.models import (
     AffiliateDisclosure,
     AppInfoContent,
     FaqItem,
-    Product,
     ProductCategory,
     Shop,
 )
@@ -46,6 +45,12 @@ async def _seed_shops(session: AsyncSession) -> None:
             logo_url="/logos/bike-components.svg",
             affiliate_tag=None,
         ),
+        Shop(
+            id="shop-amazon",
+            name="Amazon.de",
+            logo_url="/logos/amazon.svg",
+            affiliate_tag="bikeweather-21",
+        ),
     ]
     for shop in shops:
         existing = await session.get(Shop, shop.id)
@@ -55,239 +60,150 @@ async def _seed_shops(session: AsyncSession) -> None:
 
 async def _seed_categories(session: AsyncSession) -> None:
     categories = [
+        # --- Clothing: Upper body ---
         ProductCategory(
-            id="cat-jackets",
-            name="Fahrradjacken",
-            slug="cycling-jackets",
-            icon="jacket",
+            id="cat-rain-jackets",
+            name="Regenjacken",
+            slug="rain-jackets",
+            icon="rain-jacket",
             display_order=0,
         ),
         ProductCategory(
-            id="cat-gloves",
-            name="Radhandschuhe",
-            slug="cycling-gloves",
-            icon="gloves",
+            id="cat-wind-jackets",
+            name="Wind- & Softshelljacken",
+            slug="wind-jackets",
+            icon="jacket",
             display_order=1,
         ),
         ProductCategory(
-            id="cat-pants",
-            name="Radhosen",
-            slug="cycling-tights",
-            icon="pants",
+            id="cat-thermal-jackets",
+            name="Thermojacken",
+            slug="thermal-jackets",
+            icon="jacket",
             display_order=2,
         ),
+        ProductCategory(
+            id="cat-jerseys",
+            name="Radtrikots",
+            slug="jerseys",
+            icon="jersey",
+            display_order=3,
+        ),
+        ProductCategory(
+            id="cat-base-layers",
+            name="Baselayer & Unterwäsche",
+            slug="base-layers",
+            icon="base-layer",
+            display_order=4,
+        ),
+        ProductCategory(
+            id="cat-vests",
+            name="Radwesten",
+            slug="vests",
+            icon="vest",
+            display_order=5,
+        ),
+        # --- Clothing: Lower body ---
+        ProductCategory(
+            id="cat-thermal-tights",
+            name="Thermo-Radhosen",
+            slug="thermal-tights",
+            icon="pants-long",
+            display_order=6,
+        ),
+        ProductCategory(
+            id="cat-cycling-shorts",
+            name="Radshorts & Radhosen",
+            slug="cycling-shorts",
+            icon="pants-short",
+            display_order=7,
+        ),
+        ProductCategory(
+            id="cat-rain-pants",
+            name="Regenhosen",
+            slug="rain-pants",
+            icon="overpants",
+            display_order=8,
+        ),
+        # --- Clothing: Hands ---
+        ProductCategory(
+            id="cat-winter-gloves",
+            name="Winterhandschuhe",
+            slug="winter-gloves",
+            icon="gloves-waterproof",
+            display_order=9,
+        ),
+        ProductCategory(
+            id="cat-summer-gloves",
+            name="Sommerhandschuhe",
+            slug="summer-gloves",
+            icon="gloves-light",
+            display_order=10,
+        ),
+        # --- Clothing: Head ---
         ProductCategory(
             id="cat-headwear",
             name="Kopfbedeckung",
             slug="headwear",
             icon="headwear",
-            display_order=3,
+            display_order=11,
+        ),
+        # --- Clothing: Feet ---
+        ProductCategory(
+            id="cat-shoe-covers",
+            name="Überschuhe",
+            slug="shoe-covers",
+            icon="shoe-covers",
+            display_order=12,
         ),
         ProductCategory(
-            id="cat-shoes",
-            name="Radschuhe & Überschuhe",
-            slug="cycling-shoes-overshoes",
+            id="cat-cycling-shoes",
+            name="Radschuhe",
+            slug="cycling-shoes",
             icon="shoes",
-            display_order=4,
+            display_order=13,
         ),
+        # --- Clothing: Eyes ---
+        ProductCategory(
+            id="cat-eyewear",
+            name="Radbrillen",
+            slug="eyewear",
+            icon="eyewear",
+            display_order=14,
+        ),
+        # --- Clothing: Neck/Face ---
+        ProductCategory(
+            id="cat-neck-face",
+            name="Hals- & Gesichtsschutz",
+            slug="neck-face",
+            icon="neck-gaiter",
+            display_order=15,
+        ),
+        # --- Equipment ---
         ProductCategory(
             id="cat-lights",
             name="Fahrradlichter",
             slug="bike-lights",
             icon="light",
-            display_order=5,
+            display_order=16,
         ),
         ProductCategory(
             id="cat-accessories",
             name="Zubehör & Ausrüstung",
             slug="accessories-gear",
             icon="accessories",
-            display_order=6,
+            display_order=17,
         ),
     ]
     for cat in categories:
         existing = await session.get(ProductCategory, cat.id)
-        if not existing:
+        if existing:
+            existing.name = cat.name
+            existing.slug = cat.slug
+            existing.icon = cat.icon
+            existing.display_order = cat.display_order
+        else:
             session.add(cat)
-
-
-async def _seed_products(session: AsyncSession) -> None:
-    products = [
-        Product(
-            id="prod-001",
-            name="Gore Wear C5 Gore-Tex Shakedry Jacket",
-            category_id="cat-jackets",
-            image_url="/products/gore-shakedry.jpg",
-            price=179.99,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B07XYZ1234?tag=bikeweather-21",
-            matches_zone="upperBody",
-            matches_label="Wasserdichte Radjacke",
-            weather_temp_min=-5,
-            weather_temp_max=15,
-            weather_precipitation="heavy-rain",
-            weather_wind="strong-wind",
-            weather_summary="-5\u201315 \u00b0C, wasserdicht, winddicht",
-        ),
-        Product(
-            id="prod-002",
-            name="Castelli Perfetto RoS 2 Long-sleeve Jersey",
-            category_id="cat-jackets",
-            image_url="/products/castelli-perfetto.jpg",
-            price=219.95,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B09ABC5678?tag=bikeweather-21",
-            matches_zone="upperBody",
-            matches_label="Langarm-Radtrikot",
-            weather_temp_min=8,
-            weather_temp_max=18,
-            weather_precipitation="light-rain",
-            weather_wind="strong-wind",
-            weather_summary="8\u201318 \u00b0C, wasserabweisend, winddicht",
-        ),
-        Product(
-            id="prod-003",
-            name="GripGrab Ride Windproof Winter Gloves",
-            category_id="cat-gloves",
-            image_url="/products/gripgrab-winter.jpg",
-            price=54.95,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B08DEF9012?tag=bikeweather-21",
-            matches_zone="hands",
-            matches_label="Wasserdichte Winterhandschuhe",
-            weather_temp_min=-10,
-            weather_temp_max=5,
-            weather_precipitation="heavy-rain",
-            weather_wind="strong-wind",
-            weather_summary="-10\u20135 \u00b0C, wasserdicht, winddicht",
-        ),
-        Product(
-            id="prod-004",
-            name="Roeckl Illano Summer Gloves",
-            category_id="cat-gloves",
-            image_url="/products/roeckl-illano.jpg",
-            price=34.90,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B07GHI3456?tag=bikeweather-21",
-            matches_zone="hands",
-            matches_label="Leichte Radhandschuhe",
-            weather_temp_min=15,
-            weather_temp_max=35,
-            weather_precipitation="none",
-            weather_wind="none",
-            weather_summary="15\u201335 \u00b0C, trocken, Polsterung & Grip",
-        ),
-        Product(
-            id="prod-005",
-            name="Assos Mille GT Thermo Cycling Tights",
-            category_id="cat-pants",
-            image_url="/products/assos-mille-thermo.jpg",
-            price=189.00,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B09JKL7890?tag=bikeweather-21",
-            matches_zone="lowerBody",
-            matches_label="Thermo-Radhose",
-            weather_temp_min=-5,
-            weather_temp_max=10,
-            weather_precipitation="light-rain",
-            weather_wind="light-wind",
-            weather_summary="-5\u201310 \u00b0C, leicht wasserabweisend, Thermofutter",
-        ),
-        Product(
-            id="prod-006",
-            name="Sigma Aura 80 / Blaze Light Set",
-            category_id="cat-lights",
-            image_url="/products/sigma-aura80.jpg",
-            price=59.99,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B08MNO1234?tag=bikeweather-21",
-            matches_zone=None,
-            matches_label="Fahrradlichter (vorne + hinten)",
-            weather_temp_min=None,
-            weather_temp_max=None,
-            weather_precipitation="heavy-rain",
-            weather_wind="none",
-            weather_summary="Alle Temperaturen, wetterfest, IPX4",
-        ),
-        Product(
-            id="prod-007",
-            name="Buff Merino Lightweight Headband",
-            category_id="cat-headwear",
-            image_url="/products/buff-merino.jpg",
-            price=24.95,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B06PQR5678?tag=bikeweather-21",
-            matches_zone="head",
-            matches_label="Leichtes Stirnband",
-            weather_temp_min=5,
-            weather_temp_max=18,
-            weather_precipitation="none",
-            weather_wind="light-wind",
-            weather_summary="5\u201318 \u00b0C, leichter Windschutz, atmungsaktiv",
-        ),
-        Product(
-            id="prod-008",
-            name="Vaude Luminum Rain Pants",
-            category_id="cat-pants",
-            image_url="/products/vaude-luminum.jpg",
-            price=99.95,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B07STU9012?tag=bikeweather-21",
-            matches_zone="lowerBody",
-            matches_label="Wasserdichte Überhose",
-            weather_temp_min=0,
-            weather_temp_max=20,
-            weather_precipitation="heavy-rain",
-            weather_wind="strong-wind",
-            weather_summary="0\u201320 \u00b0C, wasserdicht, winddicht, reflektierend",
-        ),
-        Product(
-            id="prod-009",
-            name="Shimano S-Phyre Tall Overshoes",
-            category_id="cat-shoes",
-            image_url="/products/shimano-overshoes.jpg",
-            price=69.95,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B08VWX3456?tag=bikeweather-21",
-            matches_zone="feet",
-            matches_label="Wasserdichte Überschuhe",
-            weather_temp_min=-5,
-            weather_temp_max=10,
-            weather_precipitation="heavy-rain",
-            weather_wind="strong-wind",
-            weather_summary="-5\u201310 \u00b0C, wasserdicht, winddicht",
-        ),
-        Product(
-            id="prod-010",
-            name="Ortlieb Dry Bag PS10 1.5L",
-            category_id="cat-accessories",
-            image_url="/products/ortlieb-drybag.jpg",
-            price=14.95,
-            currency="EUR",
-            shop_id="shop-bike-components",
-            affiliate_url="https://www.amazon.de/dp/B01YZA7890?tag=bikeweather-21",
-            matches_zone=None,
-            matches_label="Dry Bag für Wertsachen",
-            weather_temp_min=None,
-            weather_temp_max=None,
-            weather_precipitation="heavy-rain",
-            weather_wind="none",
-            weather_summary="Alle Temperaturen, 100% wasserdicht (IP67)",
-        ),
-    ]
-    for product in products:
-        existing = await session.get(Product, product.id)
-        if not existing:
-            session.add(product)
 
 
 async def _seed_disclosure(session: AsyncSession) -> None:
@@ -1147,7 +1063,6 @@ async def run_seed(session: AsyncSession) -> None:
     await _seed_admin_user(session)
     await _seed_shops(session)
     await _seed_categories(session)
-    await _seed_products(session)
     await _seed_disclosure(session)
     await _seed_faq(session)
     await _seed_about(session)
