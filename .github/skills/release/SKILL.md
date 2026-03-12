@@ -231,6 +231,16 @@ Tell the user the push is done and ArgoCD will pick up the changes. Note that CI
 | "release frontend 0.1.0" | Use the specified version, skip auto-detection for that service |
 | "preview release" | Tag with `-preview.N` suffix, deploy to preview environment |
 
+## Feature Tracking
+
+After a successful release, update feature tracking if the release includes work on a tracked feature:
+
+1. Read `features/INDEX.md` to check if any features are "In Review"
+2. For features included in this release, update their spec file:
+   - Append or update the "## Deployment" section with version, date, and environment
+3. Update `features/INDEX.md` status from "In Review" → "Deployed"
+4. After making non-trivial changes, suggest running the `spec-docs` skill to update technical docs
+
 ## Edge Cases
 
 - **No changes detected**: Tell the user everything is up to date. Show the current versions.

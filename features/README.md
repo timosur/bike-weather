@@ -1,0 +1,45 @@
+# Feature Tracking
+
+All features in Bike Weather are tracked using feature specs in this directory.
+
+## Feature IDs
+
+Features use sequential IDs: `BIKE-1`, `BIKE-2`, etc. Check this directory for the next available number before creating a new feature.
+
+## Statuses
+
+| Status          | Meaning                             |
+| --------------- | ----------------------------------- |
+| **Planned**     | Spec written, not yet started       |
+| **In Progress** | Active development                  |
+| **In Review**   | Implementation done, QA in progress |
+| **Deployed**    | Live in production                  |
+
+## Feature Spec Format
+
+Each feature spec file follows the template in `.github/skills/requirements/template.md` and contains:
+
+1. **Header** — ID, status, created date, dependencies
+2. **Description** — What this feature does and why
+3. **Scope** — Which sub-features and files it covers
+4. **User Stories** — As a [role], I want [action], so that [benefit]
+5. **Acceptance Criteria** — Testable conditions for completion
+6. **Edge Cases** — Boundary conditions and error scenarios
+7. **Tech Design** _(appended by architecture skill)_ — Component design, data model, API
+8. **QA Results** _(appended by QA skill)_ — Test results, bugs found, security audit
+9. **Deployment** _(appended by release skill)_ — Version, date, environment
+
+## Workflow
+
+1. **New feature idea** → invoke the `requirements` skill to create a spec
+2. **Design** → invoke the `architecture` skill to append tech design
+3. **Implement** → invoke the `implementation` skill to build it
+4. **Test** → invoke the `qa` skill to test against acceptance criteria
+5. **Ship** → invoke the `release` skill to tag, deploy, and update status
+
+Every skill reads `features/INDEX.md` at the start and updates it when done.
+
+## Naming Convention
+
+- File: `features/BIKE-X-short-name.md`
+- Commit: `feat(BIKE-X): description` / `fix(BIKE-X): description`

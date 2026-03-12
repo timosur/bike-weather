@@ -104,3 +104,12 @@ Content organized with tables, lists, or prose as appropriate.
 3. **Be precise about auth** — clearly mark which endpoints require authentication and which roles are needed.
 4. **Track deletions** — if something documented in the spec no longer exists in code, remove it from the spec.
 5. **Preserve manual additions** — if a human has added notes or context to spec files (marked with `<!-- manual -->` comments), preserve them during updates.
+
+## Integration with Feature Workflow
+
+This skill is part of the Bike Weather development workflow. It should be invoked:
+- After the `implementation` skill makes non-trivial changes (new endpoints, models, features, architecture changes)
+- After the `release` skill deploys changes to production
+- Whenever someone asks to refresh or update the documentation
+
+The `docs/spec/` files complement the feature tracking system in `features/` — specs describe the current state of the codebase, while feature files track planned and in-progress work.

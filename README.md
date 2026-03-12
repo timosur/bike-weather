@@ -41,9 +41,33 @@ Run `make help` to see all available targets.
 ├── frontend/        # React SPA (Vite + Tailwind)
 ├── backend/         # FastAPI REST API
 ├── agent/           # LLM product scraper agent
+├── features/        # Feature specs and tracking (BIKE-X)
+├── docs/            # PRD, technical specs
 ├── scripts/         # Setup & utility scripts
 └── docker-compose.yml
 ```
+
+## Development Workflow
+
+Features are developed using a structured, skill-based pipeline. Each phase is a Copilot skill:
+
+```
+requirements → architecture → implementation → qa → release
+```
+
+| Skill            | Purpose                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `requirements`   | Create feature specs with user stories and acceptance criteria |
+| `architecture`   | Design tech architecture (PM-friendly, no code)                |
+| `implementation` | Build the feature across frontend/backend/agent                |
+| `qa`             | Test against acceptance criteria + security audit              |
+| `release`        | Tag, deploy, update changelog                                  |
+| `spec-docs`      | Update technical spec docs in `docs/spec/`                     |
+| `help`           | Check project status and get next-step guidance                |
+
+**Feature tracking:** All features are tracked in `features/INDEX.md` with specs in `features/BIKE-X-name.md`. See `features/README.md` for the full workflow.
+
+**Product context:** See `docs/PRD.md` for product vision, target users, and roadmap.
 
 ## Testing
 

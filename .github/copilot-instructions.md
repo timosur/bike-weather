@@ -38,41 +38,59 @@ Three independent services in one repo, each with its own dependency management:
 - **`backend/`** — FastAPI REST API. `uv` + `pyproject.toml`. Alembic for DB migrations.
 - **`agent/`** — LLM-powered product scraper (OpenAI + Anthropic). `uv` + `pyproject.toml`. Standalone CLI.
 
-### Backend structure
-
-All API routes mount under `/api` via `app.api.api_router`. Route → service → model pattern:
-- `app/api/routes/` — FastAPI route handlers
-- `app/services/` — business logic (weather, recommendations, auth, geocoding)
-- `app/models/` — SQLModel ORM models (also serve as Pydantic schemas)
-- `app/schemas/` — request/response schemas when they differ from models
-- `app/rules/` — rule-based recommendation engine (clothing, equipment, safety, tips by weather conditions)
-
-Auth is Authentik (self-hosted OIDC). JWT validation in `app/api/dependencies.py`. Backend seeds default data on startup via `app/seed.py`.
-
-### Frontend structure
-
-All pages lazy-loaded in `App.tsx` with React Router v7. Import alias `@/*` → `src/*`.
-
-- `src/pages/` — page components (default exports, one per route)
-- `src/components/` — organized by feature domain (`shell/`, `ride-planner/`, `admin/`, etc.)
-- `src/api/` — API client modules, one per backend resource. All use `apiFetch()` from `client.ts`.
-- `src/contexts/AuthContext.tsx` — OIDC auth state via `oidc-client-ts`
-- `src/i18n/` — i18next with German (default) and English. Keys in `locales/de.json` and `locales/en.json`.
-
-### Infrastructure
-
-Docker Compose runs PostgreSQL 16 + Authentik (OIDC server + worker + Redis + its own Postgres). Backend reads `.env` for config via `pydantic-settings`.
+Service-specific conventions and patterns are in `.github/instructions/`:
+- `backend.instructions.md` — route/service/model patterns, migrations, auth
+- `frontend.instructions.md` — React patterns, Tailwind, i18n, API client
+- `agent.instructions.md` — LLM extraction, shop config, publisher architecture
+- `security.instructions.md` — JWT, rate limiting, secrets, input validation
 
 ## Conventions
 
-- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) — `feat(scope):`, `fix(scope):`, etc.
+- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) — `feat(BIKE-X):`, `fix(BIKE-X):`, etc. Use the feature ID when working on a tracked feature.
 - **TypeScript:** Strict mode with `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`.
 - **Python tests:** `asyncio_mode = "auto"` in pytest config — test functions can be `async def` without decorators.
-- **Frontend API pattern:** Each backend resource has a matching `src/api/<resource>.ts` module that wraps `apiFetch()`.
-- **i18n:** All user-facing strings go through `useTranslation()`. German is the fallback language. Backend sends `Accept-Language` header via the API client.
-- **Styling:** Tailwind with class-based dark mode. Fonts: Outfit (headings), Inter (body), IBM Plex Mono (mono).
-- **Route guards:** `RequireAuth` and `RequireAdmin` wrappers in `App.tsx` protect routes.
 - **Backend migrations:** Alembic in `backend/alembic/`. Run `cd backend && uv run alembic revision --autogenerate -m "description"` to create new migrations.
+
+## Feature Tracking
+
+All features are tracked in `features/INDEX.md` with specs in `features/BIKE-X-name.md`. Read `features/README.md` for the full workflow.
+
+**Before starting any work:**
+1. Read `features/INDEX.md` to understand current feature landscape
+2. If the work relates to an existing feature, read its spec
+3. If it's a new feature not yet tracked, create a spec first (use the `requirements` skill)
+
+**After completing work:**
+1. Update the feature spec with what was built and any deviations
+2. Update `features/INDEX.md` status if applicable (Planned → In Progress → In Review → Deployed)
+3. Actually edit the files — don't just describe changes. Re-read after editing to verify.
+
+**Feature IDs:** Sequential `BIKE-1`, `BIKE-2`, etc. Check INDEX.md for the next available number.
+
+## Product Context
+
+See `docs/PRD.md` for product vision, target users, and roadmap.
+See `docs/spec/` for technical specifications (maintained by the `spec-docs` skill).
+
+## Development Workflow (Skills)
+
+Use specialized skills for structured feature development:
+
+```
+requirements → architecture → implementation → qa → release
+```
+
+| Skill | Purpose |
+|-------|---------|
+| `requirements` | Create feature specs with user stories and acceptance criteria |
+| `architecture` | Design tech architecture (PM-friendly, no code) |
+| `implementation` | Build the feature across frontend/backend/agent |
+| `qa` | Test against acceptance criteria + security audit |
+| `release` | Tag, deploy, update changelog |
+| `spec-docs` | Update technical spec docs in `docs/spec/` |
+| `help` | Check project status and get next-step guidance |
+
+Each skill reads `features/INDEX.md` at start and suggests the next skill on completion. Handoffs are user-initiated — a skill never auto-proceeds to the next phase.
 
 ## Agent Behavior
 
