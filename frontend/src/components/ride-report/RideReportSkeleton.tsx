@@ -27,11 +27,6 @@ export function RideReportSkeleton() {
       {/* Condition badge */}
       <SkeletonBlock className="h-12 w-full rounded-2xl" />
 
-      {/* Route map */}
-      <div className="space-y-4">
-        <SkeletonBlock className="h-64 sm:h-80 w-full rounded-2xl" />
-      </div>
-
       {/* Weather panel */}
       <div className="bg-white dark:bg-stone-900 rounded-2xl ring-1 ring-stone-200 dark:ring-stone-800 p-5 space-y-4">
         <SkeletonLine className="h-3 w-16" />
@@ -50,6 +45,11 @@ export function RideReportSkeleton() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Route map */}
+      <div className="space-y-4">
+        <SkeletonBlock className="h-64 sm:h-80 w-full rounded-2xl" />
       </div>
 
       {/* Clothing items */}
