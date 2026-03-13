@@ -19,9 +19,9 @@ NEVER write code or show implementation details:
 
 ## Before Starting
 
-1. Read `features/INDEX.md` for project context
-2. Read the feature spec the user references (`features/BIKE-X-*.md`)
-3. Read `docs/spec/architecture.md` for current system architecture
+1. Read `project/features/INDEX.md` for project context
+2. Read the feature spec the user references (`project/features/BIKE-X-*.md`)
+3. Read `project/spec/architecture.md` for current system architecture
 4. Check what already exists:
    - `ls backend/app/api/routes/` — existing API routes
    - `ls backend/app/services/` — existing services
@@ -91,10 +91,54 @@ Explain WHY specific approaches are chosen in plain language.
 List any new packages or external services needed.
 
 ### 4. Add Design to Feature Spec
-Append a "## Tech Design" section to the feature spec file (`features/BIKE-X-*.md`).
+Append a "## Tech Design" section to the feature spec file (`project/features/BIKE-X-*.md`).
 
-### 5. User Review
-Present the design for review. Wait for approval before suggesting handoff.
+### 5. Create Implementation Plan
+
+After the tech design is approved, create a plan file at `project/plans/BIKE-X-plan.md`. This is a **first-class artifact** that tracks implementation progress through phases with checkboxes.
+
+#### Plan Structure
+
+Break the implementation into **phases** (2–5 phases typical). Each phase groups related tasks that can be verified together. End every phase with a manual verification checkpoint.
+
+Use this format:
+
+```markdown
+# Plan: BIKE-X — Feature Name
+
+> Status: Not Started
+> Feature spec: [BIKE-X](../features/BIKE-X-feature-name.md)
+> Created: YYYY-MM-DD
+
+## Phase 1: [Phase Name]
+
+- [ ] Task 1 description
+- [ ] Task 2 description
+- [ ] **Checkpoint**: Manual verification — [describe what to verify]
+
+## Phase 2: [Phase Name]
+
+- [ ] Task 3 description
+- [ ] Task 4 description
+- [ ] **Checkpoint**: Manual verification — [describe what to verify]
+
+## Phase 3: [Phase Name]
+
+- [ ] Final integration tasks
+- [ ] Run tests (`make test-backend` / `make test-frontend`)
+- [ ] **Checkpoint**: Manual verification — full feature walkthrough
+```
+
+#### Plan Rules
+
+- **Phase order matters.** Later phases may depend on earlier ones. The implementation skill will execute them in order.
+- **Tasks are atomic.** Each checkbox = one concrete action (create a file, add an endpoint, write a test). Not vague ("set up backend").
+- **Checkpoints are mandatory.** Every phase ends with a `**Checkpoint**` task where the implementation skill pauses and asks the user to verify before proceeding.
+- **Status line tracks progress.** The implementation skill updates the `> Status:` line to `In Progress (Phase N)` or `Complete`.
+- **Dependency order.** Within a phase, list tasks in dependency order (models → migrations → services → routes → components → pages).
+
+### 6. User Review
+Present the design and plan for review. Wait for approval before suggesting handoff.
 
 ## Checklist Before Completion
 
@@ -107,10 +151,12 @@ Present the design for review. Wait for approval before suggesting handoff.
 - [ ] Tech decisions justified
 - [ ] Dependencies listed
 - [ ] Design appended to feature spec file
-- [ ] User has reviewed and approved
-- [ ] `features/INDEX.md` status updated to "In Progress"
+- [ ] Implementation plan created at `project/plans/BIKE-X-plan.md`
+- [ ] Plan has phased tasks with manual verification checkpoints
+- [ ] User has reviewed and approved both design and plan
+- [ ] `project/features/INDEX.md` status updated to "In Progress"
 
 ## Handoff
 
 After approval:
-> "Design is ready! Next step: Run the `implementation` skill to build this feature."
+> "Design and plan are ready! Next step: Run the `implementation` skill to build this feature. It will follow the plan at `project/plans/BIKE-X-plan.md` and check off tasks as it goes."

@@ -36,6 +36,10 @@ _Which sub-features and areas this spec covers._
 
 _To be filled by the architecture skill._
 
+## Implementation Plan
+
+_See `project/plans/BIKE-X-plan.md` (created by the architecture skill)._
+
 <!-- Appended by QA skill -->
 
 ## QA Results

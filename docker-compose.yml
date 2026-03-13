@@ -64,7 +64,7 @@ services:
       - "9000:9000"
     volumes:
       - authentik_media:/media
-      - ./custom-templates:/templates
+      - ./authentik/custom-templates:/templates
     depends_on:
       authentik-db:
         condition: service_healthy
@@ -91,7 +91,7 @@ services:
       AUTHENTIK_EMAIL__TIMEOUT: "10"
     volumes:
       - authentik_media:/media
-      - ./custom-templates:/templates
+      - ./authentik/custom-templates:/templates
     depends_on:
       authentik-db:
         condition: service_healthy

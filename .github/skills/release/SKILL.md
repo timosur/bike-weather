@@ -235,10 +235,10 @@ Tell the user the push is done and ArgoCD will pick up the changes. Note that CI
 
 After a successful release, update feature tracking if the release includes work on a tracked feature:
 
-1. Read `features/INDEX.md` to check if any features are "In Review"
+1. Read `project/features/INDEX.md` to check if any features are "In Review"
 2. For features included in this release, update their spec file:
    - Append or update the "## Deployment" section with version, date, and environment
-3. Update `features/INDEX.md` status from "In Review" → "Deployed"
+3. Update `project/features/INDEX.md` status from "In Review" → "Deployed"
 4. After making non-trivial changes, suggest running the `spec-docs` skill to update technical docs
 
 ## Edge Cases

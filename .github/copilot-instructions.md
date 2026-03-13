@@ -53,24 +53,28 @@ Service-specific conventions and patterns are in `.github/instructions/`:
 
 ## Feature Tracking
 
-All features are tracked in `features/INDEX.md` with specs in `features/BIKE-X-name.md`. Read `features/README.md` for the full workflow.
+All features are tracked in `project/features/INDEX.md` with specs in `project/features/BIKE-X-name.md`. Read `project/features/README.md` for the full workflow.
+
+**Implementation plans** live in `project/plans/BIKE-X-plan.md` — phased task checklists with manual verification checkpoints. Created by the `architecture` skill, executed by the `implementation` skill.
 
 **Before starting any work:**
-1. Read `features/INDEX.md` to understand current feature landscape
+1. Read `project/features/INDEX.md` to understand current feature landscape
 2. If the work relates to an existing feature, read its spec
-3. If it's a new feature not yet tracked, create a spec first (use the `requirements` skill)
+3. Check `project/plans/` for an existing implementation plan
+4. If it's a new feature not yet tracked, create a spec first (use the `requirements` skill)
 
 **After completing work:**
 1. Update the feature spec with what was built and any deviations
-2. Update `features/INDEX.md` status if applicable (Planned → In Progress → In Review → Deployed)
-3. Actually edit the files — don't just describe changes. Re-read after editing to verify.
+2. Update `project/features/INDEX.md` status if applicable (Planned → In Progress → In Review → Deployed)
+3. Update `project/plans/BIKE-X-plan.md` — check off completed tasks and update the status line
+4. Actually edit the files — don't just describe changes. Re-read after editing to verify.
 
 **Feature IDs:** Sequential `BIKE-1`, `BIKE-2`, etc. Check INDEX.md for the next available number.
 
 ## Product Context
 
-See `docs/PRD.md` for product vision, target users, and roadmap.
-See `docs/spec/` for technical specifications (maintained by the `spec-docs` skill).
+See `project/PRD.md` for product vision, target users, and roadmap.
+See `project/spec/` for technical specifications (maintained by the `spec-docs` skill).
 
 ## Development Workflow (Skills)
 
@@ -83,14 +87,14 @@ requirements → architecture → implementation → qa → release
 | Skill | Purpose |
 |-------|---------|
 | `requirements` | Create feature specs with user stories and acceptance criteria |
-| `architecture` | Design tech architecture (PM-friendly, no code) |
-| `implementation` | Build the feature across frontend/backend/agent |
+| `architecture` | Design tech architecture + create implementation plan (`project/plans/BIKE-X-plan.md`) |
+| `implementation` | Build the feature, following the plan with phase-gated checkpoints |
 | `qa` | Test against acceptance criteria + security audit |
 | `release` | Tag, deploy, update changelog |
-| `spec-docs` | Update technical spec docs in `docs/spec/` |
-| `help` | Check project status and get next-step guidance |
+| `spec-docs` | Update technical spec docs in `project/spec/` |
+| `help` | Check project status, plan progress, and get next-step guidance |
 
-Each skill reads `features/INDEX.md` at start and suggests the next skill on completion. Handoffs are user-initiated — a skill never auto-proceeds to the next phase.
+Each skill reads `project/features/INDEX.md` at start and suggests the next skill on completion. Handoffs are user-initiated — a skill never auto-proceeds to the next phase.
 
 ## Agent Behavior
 
@@ -111,7 +115,7 @@ For non-trivial changes, follow this sequence:
 - **Reuse what exists.** Search for existing utilities, components, hooks, and helpers before creating new ones. Follow established patterns in the codebase.
 - **Don't hammer.** If an approach fails twice, change strategy instead of retrying the same thing.
 - **Constructive fixes only.** Address root causes — don't disable tests, suppress errors, or remove functionality to make something pass.
-- **Keep the spec in sync.** After making non-trivial code changes (new endpoints, models, features, or architectural changes), invoke the `spec-docs` skill to update the specification documents in `docs/spec/`.
+- **Keep the spec in sync.** After making non-trivial code changes (new endpoints, models, features, or architectural changes), invoke the `spec-docs` skill to update the specification documents in `project/spec/`.
 
 ## Parallel Sessions
 

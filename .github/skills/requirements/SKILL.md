@@ -11,11 +11,11 @@ You are an experienced Requirements Engineer for the Bike Weather project. Your 
 
 ## Before Starting
 
-1. Read `docs/PRD.md` to understand the product context
-2. Read `features/INDEX.md` to see existing features and find the next available ID
-3. Read `features/README.md` for the feature spec format
+1. Read `project/PRD.md` to understand the product context
+2. Read `project/features/INDEX.md` to see existing features and find the next available ID
+3. Read `project/features/README.md` for the feature spec format
 
-**If `docs/PRD.md` does not exist or is empty:**
+**If `project/PRD.md` does not exist or is empty:**
 → Go to **Init Mode** (new project setup)
 
 **If the PRD is already filled out:**
@@ -36,7 +36,7 @@ Ask the user interactive questions:
 - What are the constraints? (timeline, budget, team size)
 
 ### Phase 2: Create the PRD
-Fill out `docs/PRD.md` with:
+Fill out `project/PRD.md` with:
 - **Vision:** Clear 2-3 sentence description
 - **Target Users:** Who they are, needs, pain points
 - **Core Features (Roadmap):** Prioritized table (P0 = MVP, P1 = next, P2 = later)
@@ -55,11 +55,11 @@ Present the breakdown for user review.
 ### Phase 4: Create Feature Specs
 For each feature (after user approval):
 - Create a spec file using the template at `.github/skills/requirements/template.md`
-- Save to `features/BIKE-X-feature-name.md`
+- Save to `project/features/BIKE-X-feature-name.md`
 - Include user stories, acceptance criteria, and edge cases
 
 ### Phase 5: Update Tracking
-- Update `features/INDEX.md` with all new features
+- Update `project/features/INDEX.md` with all new features
 - Verify the PRD roadmap matches the feature specs
 
 ### Init Mode Handoff
@@ -72,7 +72,7 @@ For each feature (after user approval):
 Use this mode when the PRD exists and the user wants to add a new feature.
 
 ### Phase 1: Understand the Feature
-1. Check existing features in `features/INDEX.md` — ensure no duplicates
+1. Check existing features in `project/features/INDEX.md` — ensure no duplicates
 2. Check existing code structure:
    - `ls backend/app/api/routes/` — existing API routes
    - `ls frontend/src/pages/` — existing pages
@@ -93,8 +93,8 @@ Ask about edge cases:
 
 ### Phase 3: Write Feature Spec
 - Use the template from `.github/skills/requirements/template.md`
-- Assign the next available `BIKE-X` ID from `features/INDEX.md`
-- Save to `features/BIKE-X-feature-name.md`
+- Assign the next available `BIKE-X` ID from `project/features/INDEX.md`
+- Save to `project/features/BIKE-X-feature-name.md`
 
 ### Phase 4: User Review
 Present the spec and ask for approval:
@@ -102,8 +102,8 @@ Present the spec and ask for approval:
 - "Changes needed" → Iterate
 
 ### Phase 5: Update Tracking
-- Add the new feature to `features/INDEX.md` with status **Planned**
-- Add the feature to the PRD roadmap table in `docs/PRD.md`
+- Add the new feature to `project/features/INDEX.md` with status **Planned**
+- Add the feature to the PRD roadmap table in `project/PRD.md`
 
 ### Feature Mode Handoff
 > "Feature spec is ready! Next step: Run the `architecture` skill to design the technical approach."
@@ -147,7 +147,7 @@ Each feature file = ONE testable, deployable unit.
 - [ ] At least 3-5 edge cases documented
 - [ ] Services affected are identified (frontend/backend/agent)
 - [ ] Feature ID assigned (`BIKE-X`)
-- [ ] File saved to `features/BIKE-X-feature-name.md`
-- [ ] `features/INDEX.md` updated
-- [ ] `docs/PRD.md` roadmap updated
+- [ ] File saved to `project/features/BIKE-X-feature-name.md`
+- [ ] `project/features/INDEX.md` updated
+- [ ] `project/PRD.md` roadmap updated
 - [ ] User has reviewed and approved

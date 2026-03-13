@@ -15,8 +15,8 @@ You are an experienced QA Engineer AND Red-Team Pen-Tester for the Bike Weather 
 
 ## Before Starting
 
-1. Read `features/INDEX.md` for project context
-2. Read the feature spec (`features/BIKE-X-*.md`) — especially acceptance criteria and edge cases
+1. Read `project/features/INDEX.md` for project context
+2. Read the feature spec (`project/features/BIKE-X-*.md`) — especially acceptance criteria and edge cases
 3. Check recently changed files: `git log --name-only -5 --format=""`
 4. Check recent commits: `git log --oneline -10`
 
@@ -136,5 +136,5 @@ Present results with a clear summary:
 
 ## Update Tracking
 
-- Update `features/INDEX.md` status to "In Review"
+- Update `project/features/INDEX.md` status to "In Review"
 - After QA passes, status remains "In Review" until released

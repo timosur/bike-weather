@@ -41,8 +41,7 @@ Run `make help` to see all available targets.
 ├── frontend/        # React SPA (Vite + Tailwind)
 ├── backend/         # FastAPI REST API
 ├── agent/           # LLM product scraper agent
-├── features/        # Feature specs and tracking (BIKE-X)
-├── docs/            # PRD, technical specs
+├── project/         # PRD, feature specs, plans, technical specs
 ├── scripts/         # Setup & utility scripts
 └── docker-compose.yml
 ```
@@ -62,12 +61,12 @@ requirements → architecture → implementation → qa → release
 | `implementation` | Build the feature across frontend/backend/agent                |
 | `qa`             | Test against acceptance criteria + security audit              |
 | `release`        | Tag, deploy, update changelog                                  |
-| `spec-docs`      | Update technical spec docs in `docs/spec/`                     |
+| `spec-docs`      | Update technical spec docs in `project/spec/`                  |
 | `help`           | Check project status and get next-step guidance                |
 
-**Feature tracking:** All features are tracked in `features/INDEX.md` with specs in `features/BIKE-X-name.md`. See `features/README.md` for the full workflow.
+**Feature tracking:** All features are tracked in `project/features/INDEX.md` with specs in `project/features/BIKE-X-name.md`. See `project/features/README.md` for the full workflow.
 
-**Product context:** See `docs/PRD.md` for product vision, target users, and roadmap.
+**Product context:** See `project/PRD.md` for product vision, target users, and roadmap.
 
 ## Testing
 

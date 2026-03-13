@@ -1,6 +1,6 @@
 ---
 name: spec-docs
-description: Generates and maintains the project's technical and functional specification documents under docs/spec/. Use this skill when the user mentions updating specs, refreshing documentation, generating spec, syncing docs, documenting the application, or says things like "update spec", "refresh docs", "document the app", "what does the app do", or "update technical docs". Also invoke after making non-trivial code changes to keep the spec in sync.
+description: Generates and maintains the project's technical and functional specification documents under project/spec/. Use this skill when the user mentions updating specs, refreshing documentation, generating spec, syncing docs, documenting the application, or says things like "update spec", "refresh docs", "document the app", "what does the app do", or "update technical docs". Also invoke after making non-trivial code changes to keep the spec in sync.
 ---
 
 # Spec Documentation Skill
@@ -9,13 +9,13 @@ Generate and maintain high-level technical and functional specification document
 
 ## Overview
 
-This skill produces a set of spec files under `docs/spec/` that describe the application at a high level. These docs serve as persistent context for future agent sessions and as living documentation for the team.
+This skill produces a set of spec files under `project/spec/` that describe the application at a high level. These docs serve as persistent context for future agent sessions and as living documentation for the team.
 
 The spec is **high-level** — architecture, features, API surface, data models, and auth flow. Not exhaustive API reference docs.
 
 ## Output Files
 
-All files live in `docs/spec/` at the repository root:
+All files live in `project/spec/` at the repository root:
 
 | File | Purpose |
 |------|---------|
@@ -29,7 +29,7 @@ All files live in `docs/spec/` at the repository root:
 
 ### Step 1: Read the current spec (if it exists)
 
-Check if `docs/spec/` exists and read all existing spec files to understand what's already documented.
+Check if `project/spec/` exists and read all existing spec files to understand what's already documented.
 
 ### Step 2: Scan the codebase
 
@@ -112,4 +112,4 @@ This skill is part of the Bike Weather development workflow. It should be invoke
 - After the `release` skill deploys changes to production
 - Whenever someone asks to refresh or update the documentation
 
-The `docs/spec/` files complement the feature tracking system in `features/` — specs describe the current state of the codebase, while feature files track planned and in-progress work.
+The `project/spec/` files complement the feature tracking system in `project/features/` — specs describe the current state of the codebase, while feature files track planned and in-progress work.

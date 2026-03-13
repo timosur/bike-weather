@@ -26,20 +26,21 @@ Each feature spec file follows the template in `.github/skills/requirements/temp
 5. **Acceptance Criteria** — Testable conditions for completion
 6. **Edge Cases** — Boundary conditions and error scenarios
 7. **Tech Design** _(appended by architecture skill)_ — Component design, data model, API
-8. **QA Results** _(appended by QA skill)_ — Test results, bugs found, security audit
-9. **Deployment** _(appended by release skill)_ — Version, date, environment
+8. **Implementation Plan** — Link to `project/plans/BIKE-X-plan.md` (phased task checklist with verification checkpoints, created by architecture skill)
+9. **QA Results** _(appended by QA skill)_ — Test results, bugs found, security audit
+10. **Deployment** _(appended by release skill)_ — Version, date, environment
 
 ## Workflow
 
 1. **New feature idea** → invoke the `requirements` skill to create a spec
-2. **Design** → invoke the `architecture` skill to append tech design
-3. **Implement** → invoke the `implementation` skill to build it
+2. **Design** → invoke the `architecture` skill to append tech design and create implementation plan
+3. **Implement** → invoke the `implementation` skill to build it (follows `project/plans/BIKE-X-plan.md`)
 4. **Test** → invoke the `qa` skill to test against acceptance criteria
 5. **Ship** → invoke the `release` skill to tag, deploy, and update status
 
-Every skill reads `features/INDEX.md` at the start and updates it when done.
+Every skill reads `project/features/INDEX.md` at the start and updates it when done.
 
 ## Naming Convention
 
-- File: `features/BIKE-X-short-name.md`
+- File: `project/features/BIKE-X-short-name.md`
 - Commit: `feat(BIKE-X): description` / `fix(BIKE-X): description`

@@ -14,25 +14,34 @@ You are a project assistant for the Bike Weather project. You analyze the curren
 ### 1. Read Project State
 
 Read these files to understand the current state:
-- `docs/PRD.md` — does it exist and is it filled out?
-- `features/INDEX.md` — what features exist and what are their statuses?
-- `docs/spec/features.md` — current feature documentation
+- `project/PRD.md` — does it exist and is it filled out?
+- `project/features/INDEX.md` — what features exist and what are their statuses?
+- `project/spec/features.md` — current feature documentation
+- `project/plans/` directory — check for active implementation plans
 
-### 2. Analyze State
+### 2. Read Active Plans
+
+List files in `project/plans/`. For any `BIKE-X-plan.md` file:
+- Read the `> Status:` line to determine plan state
+- Count checked `[x]` vs unchecked `[ ]` tasks to determine progress
+- Note which phase is currently active
+- Note if any checkpoints are pending user verification
+
+### 3. Analyze State
 
 Check each feature's status and determine the overall project state:
 
 | State | Condition | Next Action |
 |-------|-----------|-------------|
-| **No PRD** | `docs/PRD.md` doesn't exist or is empty | Run the `requirements` skill with a project description |
-| **No features** | `features/INDEX.md` is empty | Run the `requirements` skill to create feature specs |
+| **No PRD** | `project/PRD.md` doesn't exist or is empty | Run the `requirements` skill with a project description |
+| **No features** | `project/features/INDEX.md` is empty | Run the `requirements` skill to create feature specs |
 | **Feature is Planned** | Has spec but no tech design | Run the `architecture` skill for that feature |
 | **Feature has design** | Has tech design section in spec | Run the `implementation` skill to build it |
 | **Feature is In Progress** | Implementation underway | Continue with the `implementation` skill or run `qa` if done |
 | **Feature is In Review** | QA in progress or done | Check QA results; run `release` if ready, `implementation` if bugs found |
 | **All Deployed** | Everything shipped | Consider new features or improvements |
 
-### 3. Present Status
+### 4. Present Status
 
 Output format:
 
@@ -48,6 +57,17 @@ Output format:
 |----|---------|--------|-------------|
 | BIKE-1 | Name | Deployed | — |
 | BIKE-16 | Name | Planned | Run `architecture` skill |
+
+### Active Implementation Plans
+
+For each active plan (status is not "Complete" or "Not Started"):
+
+| Feature | Plan Status | Progress | Current Phase | Next Task |
+|---------|-------------|----------|---------------|-----------|
+| BIKE-18 | In Progress (Phase 2) | 7/12 tasks | Phase 2: Core Components | Migrate Dialog component |
+
+If a checkpoint is pending user verification, highlight it:
+> ⏸ **BIKE-18** is waiting for manual verification at the end of Phase 1. Review and confirm to proceed.
 
 ### Recommended Next Step
 
@@ -68,5 +88,5 @@ Output format:
 ## Tips
 
 - If multiple features are in different states, recommend the one closest to completion
-- If no features need work, suggest reviewing `docs/PRD.md` for the next priority
+- If no features need work, suggest reviewing `project/PRD.md` for the next priority
 - Always mention the specific feature ID (BIKE-X) in recommendations
