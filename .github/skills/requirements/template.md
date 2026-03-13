@@ -41,9 +41,3 @@ _To be filled by the architecture skill._
 ## QA Results
 
 _To be filled by the QA skill._
-
-<!-- Appended by release skill -->
-
-## Deployment
-
-_To be filled by the release skill._

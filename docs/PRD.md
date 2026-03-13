@@ -30,6 +30,7 @@ Bike Weather helps cyclists dress right for every ride. It combines real weather
 | P1       | Observability                    | Grafana Faro (frontend), OpenTelemetry (backend), distributed tracing                  |
 | P2       | Search-based product import      | Replace category scraping with search-term-driven import and direct item matching      |
 | P2       | Test contracts & CI hardening    | CI test gating, OpenAPI contract tests, generated TypeScript types                     |
+| P2       | shadcn/ui component migration    | Replace self-built primitives with shadcn/ui; upgrade Tailwind v3 → v4                 |
 | P2       | Air quality in reports           | Include air conditions and pollutions in ride reports                                  |
 
 ## Success Metrics
