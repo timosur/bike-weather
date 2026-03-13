@@ -54,7 +54,7 @@ Sub-features and areas covered:
 
 ## Tech Design
 
-_Retroactive — see `project/spec/architecture.md` and `project/spec/api.md`._
+_Retroactive — see `project/ARCHITECTURE.md`._
 
 ## QA Results
 

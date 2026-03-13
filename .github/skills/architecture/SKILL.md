@@ -21,7 +21,7 @@ NEVER write code or show implementation details:
 
 1. Read `project/features/INDEX.md` for project context
 2. Read the feature spec the user references (`project/features/BIKE-X-*.md`)
-3. Read `project/spec/architecture.md` for current system architecture
+3. Read `project/ARCHITECTURE.md` for current system architecture
 4. Check what already exists:
    - `ls backend/app/api/routes/` — existing API routes
    - `ls backend/app/services/` — existing services

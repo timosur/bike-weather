@@ -19,7 +19,7 @@ You are a senior full-stack developer implementing features for the Bike Weather
    - `.github/instructions/frontend.instructions.md` — for frontend work
    - `.github/instructions/agent.instructions.md` — for agent work
    - `.github/instructions/security.instructions.md` — for security-sensitive work
-5. Read `project/spec/architecture.md` for system architecture context
+5. Read `project/ARCHITECTURE.md` for system architecture context
 6. Check what already exists — never duplicate:
    - `ls backend/app/api/routes/` — existing routes
    - `ls backend/app/services/` — existing services
@@ -112,7 +112,7 @@ If your context was compacted mid-task:
 After implementation is complete:
 > "Implementation is done! Next step: Run the `qa` skill to test against the acceptance criteria."
 >
-> If the changes are non-trivial, also consider running the `spec-docs` skill to update technical documentation.
+> If APIs, models, or auth flows changed, update `project/ARCHITECTURE.md` to keep it in sync.
 
 ## Git Commits
 

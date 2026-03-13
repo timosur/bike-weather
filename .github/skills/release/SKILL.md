@@ -239,7 +239,7 @@ After a successful release, update feature tracking if the release includes work
 2. For features included in this release, update their spec file:
    - Append or update the "## Deployment" section with version, date, and environment
 3. Update `project/features/INDEX.md` status from "In Review" → "Deployed"
-4. After making non-trivial changes, suggest running the `spec-docs` skill to update technical docs
+4. After making non-trivial changes, update `project/ARCHITECTURE.md` if APIs, models, or auth changed
 
 ## Edge Cases
 

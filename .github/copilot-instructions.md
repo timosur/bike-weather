@@ -74,7 +74,7 @@ All features are tracked in `project/features/INDEX.md` with specs in `project/f
 ## Product Context
 
 See `project/PRD.md` for product vision, target users, and roadmap.
-See `project/spec/` for technical specifications (maintained by the `spec-docs` skill).
+See `project/ARCHITECTURE.md` for system architecture, API endpoints, data models, and auth flow.
 
 ## Development Workflow (Skills)
 
@@ -91,7 +91,6 @@ requirements → architecture → implementation → qa → release
 | `implementation` | Build the feature, following the plan with phase-gated checkpoints |
 | `qa` | Test against acceptance criteria + security audit |
 | `release` | Tag, deploy, update changelog |
-| `spec-docs` | Update technical spec docs in `project/spec/` |
 | `help` | Check project status, plan progress, and get next-step guidance |
 
 Each skill reads `project/features/INDEX.md` at start and suggests the next skill on completion. Handoffs are user-initiated — a skill never auto-proceeds to the next phase.
@@ -115,7 +114,7 @@ For non-trivial changes, follow this sequence:
 - **Reuse what exists.** Search for existing utilities, components, hooks, and helpers before creating new ones. Follow established patterns in the codebase.
 - **Don't hammer.** If an approach fails twice, change strategy instead of retrying the same thing.
 - **Constructive fixes only.** Address root causes — don't disable tests, suppress errors, or remove functionality to make something pass.
-- **Keep the spec in sync.** After making non-trivial code changes (new endpoints, models, features, or architectural changes), invoke the `spec-docs` skill to update the specification documents in `project/spec/`.
+- **Keep architecture docs in sync.** After making non-trivial code changes (new endpoints, models, or auth changes), update `project/ARCHITECTURE.md`.
 
 ## Parallel Sessions
 

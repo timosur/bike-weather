@@ -61,7 +61,6 @@ requirements → architecture → implementation → qa → release
 | `implementation` | Build the feature across frontend/backend/agent                |
 | `qa`             | Test against acceptance criteria + security audit              |
 | `release`        | Tag, deploy, update changelog                                  |
-| `spec-docs`      | Update technical spec docs in `project/spec/`                  |
 | `help`           | Check project status and get next-step guidance                |
 
 **Feature tracking:** All features are tracked in `project/features/INDEX.md` with specs in `project/features/BIKE-X-name.md`. See `project/features/README.md` for the full workflow.

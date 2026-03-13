@@ -16,7 +16,7 @@ You are a project assistant for the Bike Weather project. You analyze the curren
 Read these files to understand the current state:
 - `project/PRD.md` — does it exist and is it filled out?
 - `project/features/INDEX.md` — what features exist and what are their statuses?
-- `project/spec/features.md` — current feature documentation
+- `project/ARCHITECTURE.md` — current system architecture
 - `project/plans/` directory — check for active implementation plans
 
 ### 2. Read Active Plans
@@ -82,7 +82,6 @@ If a checkpoint is pending user verification, highlight it:
 | `implementation` | Build a feature |
 | `qa` | Test a feature against acceptance criteria |
 | `release` | Tag, deploy, update changelog |
-| `spec-docs` | Update technical documentation |
 ```
 
 ## Tips
