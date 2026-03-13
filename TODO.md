@@ -1,2 +1,0 @@
-- Include air conditions and pollutions in report
--
