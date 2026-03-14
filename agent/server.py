@@ -17,7 +17,6 @@ from agent.main import (
     run_category,
     run_urls,
 )
-from agent.publisher import CATEGORY_ZONE_MAP
 from agent.shops import get_shop, list_shops
 
 logger = logging.getLogger(__name__)
@@ -57,6 +56,36 @@ class CategoryInfo(BaseModel):
 
 
 # --- Helpers ---
+
+# Category ID → body zone mapping (deterministic, no LLM needed)
+CATEGORY_ZONE_MAP: dict[str, str | None] = {
+    # Upper body
+    "cat-rain-jackets": "upperBody",
+    "cat-wind-jackets": "upperBody",
+    "cat-thermal-jackets": "upperBody",
+    "cat-jerseys": "upperBody",
+    "cat-base-layers": "upperBody",
+    "cat-vests": "upperBody",
+    # Lower body
+    "cat-thermal-tights": "lowerBody",
+    "cat-cycling-shorts": "lowerBody",
+    "cat-rain-pants": "lowerBody",
+    # Hands
+    "cat-winter-gloves": "hands",
+    "cat-summer-gloves": "hands",
+    # Head
+    "cat-headwear": "head",
+    # Feet
+    "cat-shoe-covers": "feet",
+    "cat-cycling-shoes": "feet",
+    # Eyes
+    "cat-eyewear": "eyes",
+    # Neck / Face
+    "cat-neck-face": "neck",
+    # Equipment (no body zone)
+    "cat-lights": None,
+    "cat-accessories": None,
+}
 
 
 def _products_to_bulk_payload(
@@ -112,12 +141,10 @@ async def _run_job(job: Job) -> None:
             job.category,
             job.shop,
             max_products=job.max_products,
-            extract_only=True,
             progress=progress_callback,
         )
 
-        # result is list[ProductData] in extract_only mode
-        if isinstance(result, list):
+        if result:
             job.products = _products_to_bulk_payload(result, category_id, shop.shop_id)
             job.status = JobStatus.COMPLETED
             job.add_progress(
