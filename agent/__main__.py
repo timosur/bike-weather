@@ -1,5 +1,5 @@
-"""Allow running as `python -m agent`."""
+"""Allow running as `python -m agent` — starts the FastAPI server."""
 
-from agent.main import main
+import uvicorn
 
-main()
+uvicorn.run("agent.server:app", host="127.0.0.1", port=8001, log_level="info")

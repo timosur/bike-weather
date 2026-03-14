@@ -35,4 +35,4 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
 
 USER appuser
 
-ENTRYPOINT ["python", "-m", "agent"]
+ENTRYPOINT ["uvicorn", "agent.server:app", "--host", "0.0.0.0", "--port", "8001"]

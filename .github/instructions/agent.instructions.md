@@ -6,13 +6,12 @@ applyTo: "agent/**"
 
 ## Structure
 
-The agent is an LLM-powered product scraper that extracts cycling product data from configured shops and publishes to PostgreSQL.
+The agent is an LLM-powered product scraper that extracts cycling product data from configured shops and returns structured data via HTTP.
 
-- `agent/main.py` — CLI entry point
+- `agent/server.py` — FastAPI HTTP server (sole entry point)
+- `agent/main.py` — Core extraction pipeline (`run_category()`, `run_urls()`)
 - `agent/scraper.py` — Web scraping logic
 - `agent/extractor.py` — LLM-based product data extraction (OpenAI + Anthropic)
-- `agent/publisher.py` — Publishes extracted products to the database
-- `agent/server.py` — HTTP server for admin proxy endpoints (status, trigger)
 - `agent/config.py` — Configuration
 - `agent/job_manager.py` — Job orchestration
 - `agent/shops/` — Shop-specific configurations
@@ -21,8 +20,8 @@ The agent is an LLM-powered product scraper that extracts cycling product data f
 
 - **LLM extraction** uses both OpenAI and Anthropic models — check which is used for what before adding new logic
 - **Shop configuration** is per-shop — each shop has specific selectors and extraction rules in `agent/shops/`
-- **Publishing** writes directly to PostgreSQL (not through the backend API)
-- **HTTP server** exposes agent status and trigger endpoints consumed by the backend admin proxy
+- **No publishing** — the agent is a stateless extraction service; the backend handles persistence on admin approval
+- **HTTP server** exposes extraction job endpoints consumed by the backend admin proxy
 
 ## Testing
 

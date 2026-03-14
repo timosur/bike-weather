@@ -34,10 +34,11 @@ Bike Weather is a web application that gives cyclists personalized clothing and 
 
 ### Agent (`agent/`)
 
-- **Type:** LLM-powered product scraper CLI
+- **Type:** LLM-powered product extraction microservice
+- **Framework:** FastAPI
 - **LLMs:** OpenAI + Anthropic
 - **Package manager:** uv
-- **Purpose:** Scrapes cycling product data from configured shops and publishes to the backend database
+- **Purpose:** Stateless extraction service — receives scrape requests via HTTP, fetches pages, runs LLM extraction, and returns structured product data. No database access or publishing.
 
 ## Infrastructure (Docker Compose)
 
@@ -66,16 +67,17 @@ Volumes: `pgdata_dev`, `authentik_pgdata`, `authentik_redis`, `authentik_media`.
                                   │   (9000)     │
                                   └─────────────┘
 
-┌─────────────┐     Direct DB write
-│   Agent      │ ──────────────────────────────────────────────▶ │ PostgreSQL │
-│  (CLI/LLM)   │                                                 │   (5432)   │
-└─────────────┘
+┌─────────────┐     HTTP proxy    ┌─────────────┐
+│   Backend   │ ───────────────▶ │    Agent    │
+│  (FastAPI)  │  /api/admin/     │  (FastAPI)  │
+└─────────────┘  agent/*         └─────────────┘
 ```
 
 - **Frontend → Backend:** All API calls go through `/api/*` prefix. The Vite dev server proxies these to `localhost:8000`.
 - **Backend → PostgreSQL:** Async connections via asyncpg + SQLAlchemy async engine.
 - **Backend → Authentik:** JWKS endpoint fetched to validate JWT access tokens. Headless auth API used for login/register/password flows.
-- **Agent → PostgreSQL:** Directly writes scraped product data to the database.
+- **Backend → Agent:** HTTP proxy for extraction jobs. Backend forwards admin panel requests to agent's FastAPI endpoints (`/jobs`, `/shops`, `/categories`). On approval, backend bulk-imports the extracted products directly.
+- **Agent → External:** Fetches product pages via httpx/Playwright, sends text to LLM APIs (OpenAI/Anthropic) for extraction. No database access.
 
 ## Key Backend Patterns
 

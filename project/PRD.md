@@ -33,6 +33,7 @@ Bike Weather helps cyclists dress right for every ride. It combines real weather
 | P2       | shadcn/ui component migration    | Replace self-built primitives with shadcn/ui; upgrade Tailwind v3 → v4                 |
 | P2       | Air quality in reports           | Include air conditions and pollutions in ride reports                                  |
 | P1       | Agent service refactor           | Refactor agent to pure FastAPI extraction service; remove CLI and publishing            |
+| P1       | URL-based product import         | Paste any product URL → LLM extracts data → admin reviews → saved to catalog           |
 
 ## Success Metrics
 

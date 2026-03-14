@@ -6,11 +6,6 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Configuration for the product agent."""
 
-    # Backend admin API
-    admin_api_url: str = "http://localhost:8000/api/admin"
-    admin_token: str = ""
-    admin_dev_email: str = ""  # For local dev: set to an admin user's email (uses X-Dev-User-Email bypass when backend DEBUG=True)
-
     # LLM settings
     llm_provider: str = "openai"  # "openai" or "anthropic"
     llm_model: str = "gpt-3.5-turbo"
