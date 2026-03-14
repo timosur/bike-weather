@@ -11,6 +11,7 @@ from app.models.product_bike_type import ProductBikeType
 from app.models.product_category import ProductCategory
 from app.models.shop import Shop
 from app.models.user import User
+from app.rules.translations import CLOTHING_TRANSLATIONS
 from app.schemas.product import (
     BulkProductItem,
     BulkProductResponse,
@@ -517,3 +518,29 @@ async def update_shop(
     await session.commit()
     await session.refresh(shop)
     return ShopAdminResponse.from_model(shop)
+
+
+# --- Clothing Items ---
+
+# Bike-type suffixes to filter out (we only want generic items)
+_BIKE_SUFFIXES = ("-rennrad", "-gravel", "-mtb", "-city")
+
+
+@router.get("/clothing-items")
+async def list_clothing_items(
+    _admin: User = Depends(require_admin),
+    locale: str = Query("de", pattern="^(de|en)$"),
+) -> list[dict[str, str]]:
+    """Return generic clothing item IDs with translated names for the given locale."""
+    seen: set[str] = set()
+    items: list[dict[str, str]] = []
+    for (item_id, loc), trans in CLOTHING_TRANSLATIONS.items():
+        if loc != locale:
+            continue
+        if any(item_id.endswith(s) for s in _BIKE_SUFFIXES):
+            continue
+        if item_id in seen:
+            continue
+        seen.add(item_id)
+        items.append({"id": item_id, "name": trans["name"]})
+    return items

@@ -98,3 +98,9 @@ export function updateShop(id: string, data: Partial<AdminShop>): Promise<AdminS
     body: JSON.stringify(data),
   });
 }
+
+// --- Clothing Items ---
+
+export function fetchClothingItems(locale: string = "de"): Promise<{ id: string; name: string }[]> {
+  return apiFetch(`/admin/clothing-items?locale=${encodeURIComponent(locale)}`);
+}

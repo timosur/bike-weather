@@ -851,7 +851,7 @@
         "successMessage": "Produkt wurde erfolgreich importiert!",
         "shopCreated": "Shop neu angelegt",
         "matchesItemIdLabel": "Kleidungsstück-ID",
-        "matchesItemIdPlaceholder": "z.B. cl-rain-jacket",
+        "matchesItemIdNone": "— Nicht zugewiesen —",
         "bikeTypesLabel": "Fahrradtypen",
         "bikeType": {
           "rennrad": "Rennrad",

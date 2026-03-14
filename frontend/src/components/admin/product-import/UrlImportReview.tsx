@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, X, AlertTriangle, ExternalLink, Plus } from 'lucide-react'
 import { FormField, TextInput, TextArea, SelectInput } from '../shared/FormComponents'
-import { fetchAdminCategories, fetchAdminShops } from '@/api/admin/products'
+import { fetchAdminCategories, fetchAdminShops, fetchClothingItems } from '@/api/admin/products'
 import type { AdminCategory, AdminShop, SuggestedShop, ExtractedUrlProduct } from '../types'
 
 interface UrlImportReviewProps {
@@ -42,7 +42,7 @@ export function UrlImportReview({
   onDiscard,
   approving,
 }: UrlImportReviewProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   // Product fields
   const [name, setName] = useState(product.name)
@@ -61,6 +61,7 @@ export function UrlImportReview({
   // Category & shop
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [shops, setShops] = useState<AdminShop[]>([])
+  const [clothingItems, setClothingItems] = useState<{ id: string; name: string }[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState(suggestedCategoryId || '')
   const [shopMode, setShopMode] = useState<'existing' | 'new'>(suggestedShop?.isNew ? 'new' : 'existing')
   const [selectedShopId, setSelectedShopId] = useState(suggestedShop?.isNew ? '' : (suggestedShop?.id || ''))
@@ -71,10 +72,11 @@ export function UrlImportReview({
     let cancelled = false
     async function load() {
       try {
-        const [cats, shps] = await Promise.all([fetchAdminCategories(), fetchAdminShops()])
+        const [cats, shps, clItems] = await Promise.all([fetchAdminCategories(), fetchAdminShops(), fetchClothingItems(i18n.language)])
         if (cancelled) return
         setCategories(cats)
         setShops(shps)
+        setClothingItems(clItems)
 
         // Set category from suggestion
         if (suggestedCategoryId && cats.some(c => c.id === suggestedCategoryId)) {
@@ -264,10 +266,13 @@ export function UrlImportReview({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField label={t('admin.import.urlImport.matchesItemIdLabel')}>
-            <TextInput
+            <SelectInput
               value={matchesItemId}
               onChange={(e) => setMatchesItemId(e.target.value)}
-              placeholder={t('admin.import.urlImport.matchesItemIdPlaceholder')}
+              options={[
+                { value: '', label: t('admin.import.urlImport.matchesItemIdNone') },
+                ...clothingItems.map((ci) => ({ value: ci.id, label: `${ci.name} (${ci.id})` })),
+              ]}
             />
           </FormField>
 
