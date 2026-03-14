@@ -20,5 +20,5 @@
 | BIKE-16 | Search-Based Product Import   | Planned     | [BIKE-16](BIKE-16-search-product-import.md) | 2025-01-01 |
 | BIKE-17 | Test Contracts & CI Hardening | Planned     | [BIKE-17](BIKE-17-test-contracts.md)        | 2025-01-01 |
 | BIKE-18 | shadcn/ui Component Migration | In Progress | [BIKE-18](BIKE-18-shadcn-migration.md)      | 2026-03-12 |
-| BIKE-19 | Agent Service Refactor        | In Review   | [BIKE-19](BIKE-19-agent-service-refactor.md) | 2026-03-13 |
-| BIKE-20 | URL-Based Product Import      | Planned     | [BIKE-20](BIKE-20-url-product-import.md)     | 2026-03-14 |
+| BIKE-19 | Agent Service Refactor        | Deployed    | [BIKE-19](BIKE-19-agent-service-refactor.md) | 2026-03-13 |
+| BIKE-20 | URL-Based Product Import      | Deployed    | [BIKE-20](BIKE-20-url-product-import.md)     | 2026-03-14 |

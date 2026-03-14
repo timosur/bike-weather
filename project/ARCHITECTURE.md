@@ -203,6 +203,21 @@ All admin endpoints require `require_admin` dependency.
 | GET | `/api/admin/contacts` | List (paginated, filterable) |
 | GET | `/api/admin/contacts/{id}` | Get single message |
 
+#### Agent Import Proxy (`/api/admin/agent/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/admin/agent/shops` | List agent shop configs |
+| GET | `/api/admin/agent/categories` | List agent category configs |
+| POST | `/api/admin/agent/jobs` | Start category-based extraction job |
+| POST | `/api/admin/agent/jobs/urls` | Start URL-list extraction job |
+| POST | `/api/admin/agent/jobs/extract-url` | Start single-URL extraction job (BIKE-20) |
+| GET | `/api/admin/agent/jobs` | List recent jobs |
+| GET | `/api/admin/agent/jobs/{id}` | Get job status + products (enriched with shop detection for extract-url) |
+| GET | `/api/admin/agent/jobs/{id}/stream` | SSE progress stream |
+| POST | `/api/admin/agent/jobs/{id}/approve` | Approve bulk import |
+| POST | `/api/admin/agent/jobs/{id}/approve-url` | Approve single-URL import (BIKE-20) |
+
 ---
 
 ## Data Models
@@ -247,12 +262,11 @@ Auto-created on first OIDC login via `_find_or_create_user`.
 | `name` | str | Product name |
 | `category_id` | str (FK → product_categories) | Category |
 | `image_url` | str | Product image URL |
-| `price` | float | Price |
-| `currency` | str | Currency (default: "EUR") |
 | `shop_id` | str (FK → shops) | Shop |
 | `affiliate_url` | str | Affiliate link |
-| `matches_zone` | str? | Weather zone label |
-| `matches_label` | str | Match description |
+| `matches_zone` | str? | Clothing zone (head, upperBody, etc.) |
+| `matches_item_id` | str? | Clothing item ID (e.g. `cl-rain-jacket`) for direct product matching |
+| `matches_label` | str | Product-type description |
 | `weather_temp_min/max` | float? | Temperature range |
 | `weather_precipitation` | str | Precipitation suitability |
 | `weather_wind` | str | Wind suitability |
@@ -279,6 +293,14 @@ Auto-created on first OIDC login via `_find_or_create_user`.
 | `name` | str | Display name |
 | `logo_url` | str | Logo URL |
 | `affiliate_tag` | str? | Affiliate tracking tag |
+| `base_url` | str? | Shop domain (e.g. `bike-components.de`) for URL-based shop detection |
+
+### ProductBikeType (`product_bike_types`)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `product_id` | str (PK, FK → products) | Product |
+| `bike_type` | str (PK) | Bike type: `rennrad` \| `gravel` \| `mtb` \| `city` |
 
 ### FaqItem (`faq_items`)
 
