@@ -34,6 +34,7 @@ class Job:
     progress: list[ProgressEvent] = field(default_factory=list)
     products: list[dict[str, Any]] | None = None
     error: str | None = None
+    extra: dict[str, Any] | None = None
     created_at: float = field(default_factory=time.time)
     _subscribers: list[asyncio.Queue[ProgressEvent | None]] = field(
         default_factory=list, repr=False
@@ -80,6 +81,8 @@ class Job:
         }
         if self.products is not None:
             result["products"] = self.products
+        if self.extra is not None:
+            result.update(self.extra)
         return result
 
 

@@ -5,6 +5,7 @@ import type {
   AgentCategory,
   AgentJob,
   AgentBulkProduct,
+  ApproveUrlImportResponse,
 } from "@/components/admin/types";
 
 // --- Agent service proxy endpoints ---
@@ -64,5 +65,40 @@ export function approveImport(
   return apiFetch(`/admin/agent/jobs/${jobId}/approve`, {
     method: "POST",
     body: JSON.stringify({ products, categoryId, shopId, replaceCategory }),
+  });
+}
+
+// --- URL Import (BIKE-20) ---
+
+export function startExtractUrlJob(url: string): Promise<{ jobId: string; status: string }> {
+  return apiFetch("/admin/agent/jobs/extract-url", {
+    method: "POST",
+    body: JSON.stringify({ url }),
+  });
+}
+
+export function approveUrlImport(
+  jobId: string,
+  data: {
+    product: {
+      name: string;
+      description?: string;
+      imageUrl?: string;
+      affiliateUrl?: string;
+      matchesLabel?: string;
+      weatherTempMin?: number | null;
+      weatherTempMax?: number | null;
+      weatherPrecipitation?: string;
+      weatherWind?: string;
+      weatherSummary?: string;
+    };
+    categoryId: string;
+    shopId?: string | null;
+    newShop?: { name: string } | null;
+  },
+): Promise<ApproveUrlImportResponse> {
+  return apiFetch(`/admin/agent/jobs/${jobId}/approve-url`, {
+    method: "POST",
+    body: JSON.stringify(data),
   });
 }

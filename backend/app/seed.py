@@ -44,12 +44,14 @@ async def _seed_shops(session: AsyncSession) -> None:
             name="bike-components.de",
             logo_url="/logos/bike-components.svg",
             affiliate_tag=None,
+            base_url="bike-components.de",
         ),
         Shop(
             id="shop-amazon",
             name="Amazon.de",
             logo_url="/logos/amazon.svg",
             affiliate_tag="bikeweather-21",
+            base_url="amazon.de",
         ),
     ]
     for shop in shops:

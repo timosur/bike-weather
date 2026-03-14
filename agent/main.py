@@ -5,7 +5,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
-from agent.extractor import ProductData, extract_products
+from agent.extractor import ProductData, extract_products, extract_product_with_category
 from agent.scraper import extract_text, fetch_page
 from agent.shops import get_shop
 
@@ -107,7 +107,9 @@ DEFAULT_MAX_PRODUCTS = 5
 ProgressCallback = Callable[[str, str, dict[str, Any] | None], None]
 
 
-def _noop_progress(stage: str, message: str, data: dict[str, Any] | None = None) -> None:
+def _noop_progress(
+    stage: str, message: str, data: dict[str, Any] | None = None
+) -> None:
     """Default no-op progress callback."""
 
 
@@ -274,3 +276,71 @@ async def run_urls(
     )
 
     return all_products
+
+
+async def extract_single_url(
+    url: str,
+    categories: list[dict[str, str]],
+    *,
+    progress: ProgressCallback | None = None,
+) -> tuple[ProductData | None, str | None]:
+    """Fetch a single URL, extract product data, and suggest a category.
+
+    Unlike run_urls(), this does not require a shop or category upfront.
+    The LLM determines the best category from the provided list.
+
+    Returns (product, suggested_category_id) or (None, None) on failure.
+    """
+    on_progress = progress or _noop_progress
+
+    on_progress(
+        "init",
+        f"URL extraction: {url[:80]}",
+        {"url": url, "categoryCount": len(categories)},
+    )
+
+    # 1. Fetch page
+    on_progress("scraping", f"Fetching page: {url[:80]}…")
+    try:
+        html = await fetch_page(url)
+    except Exception as e:
+        on_progress("failed", f"Failed to fetch page: {e}")
+        return None, None
+
+    # 2. Extract text
+    on_progress("scraping", "Extracting text from HTML…")
+    text = extract_text(html)
+    if not text.strip():
+        on_progress("failed", "No text extracted from page.")
+        return None, None
+    on_progress("scraping", f"Extracted {len(text)} chars of text.")
+
+    # 3. LLM extraction with category suggestion
+    on_progress(
+        "extracting", "Sending to LLM for product extraction + category suggestion…"
+    )
+    product, suggested_category_id = await extract_product_with_category(
+        text, url, categories
+    )
+
+    if not product:
+        on_progress("failed", "Could not extract product information from this URL.")
+        return None, None
+
+    # Ensure affiliate_url is set (use the original URL if LLM didn't find one)
+    if not product.affiliate_url:
+        product.affiliate_url = url
+
+    on_progress(
+        "extracting",
+        f"Extracted product: {product.name}",
+        {"suggestedCategoryId": suggested_category_id},
+    )
+
+    on_progress(
+        "completed",
+        "Extraction complete — 1 product ready for review.",
+        {"productCount": 1, "suggestedCategoryId": suggested_category_id},
+    )
+
+    return product, suggested_category_id

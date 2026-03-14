@@ -141,4 +141,39 @@ export interface AgentJob {
   products?: AgentBulkProduct[];
   error: string | null;
   createdAt: number;
+  // Extract-URL job fields
+  suggestedCategoryId?: string | null;
+  url?: string;
+  suggestedShop?: SuggestedShop | null;
+  duplicateOf?: { id: string; name: string } | null;
+}
+
+export interface SuggestedShop {
+  id: string | null;
+  name: string | null;
+  isNew: boolean;
+  hasAffiliateTag: boolean;
+  baseUrl: string | null;
+}
+
+export interface ExtractedUrlProduct {
+  id: string;
+  name: string;
+  imageUrl: string;
+  affiliateUrl: string;
+  matchesLabel: string;
+  matchesItemId: string | null;
+  bikeTypes: string[];
+  description: string;
+  weatherTempMin: number | null;
+  weatherTempMax: number | null;
+  weatherPrecipitation: string;
+  weatherWind: string;
+  weatherSummary: string;
+  isPublished: boolean;
+}
+
+export interface ApproveUrlImportResponse {
+  product: AdminProduct;
+  shopCreated: boolean;
 }

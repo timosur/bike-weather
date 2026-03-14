@@ -224,12 +224,14 @@ class ShopCreate(BaseModel):
     name: str
     logoUrl: str
     affiliateTag: str | None = None
+    baseUrl: str | None = None
 
 
 class ShopUpdate(BaseModel):
     name: str | None = None
     logoUrl: str | None = None
     affiliateTag: str | None = None
+    baseUrl: str | None = None
 
 
 class ShopAdminResponse(BaseModel):
@@ -237,6 +239,7 @@ class ShopAdminResponse(BaseModel):
     name: str
     logoUrl: str
     affiliateTag: str | None
+    baseUrl: str | None
 
     @classmethod
     def from_model(cls, obj: object) -> "ShopAdminResponse":
@@ -245,6 +248,7 @@ class ShopAdminResponse(BaseModel):
             name=getattr(obj, "name"),
             logoUrl=getattr(obj, "logo_url"),
             affiliateTag=getattr(obj, "affiliate_tag"),
+            baseUrl=getattr(obj, "base_url", None),
         )
 
 

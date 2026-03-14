@@ -215,7 +215,9 @@
       "multiDayDesc": "Planning a tour over several days? You can specify a location for each overnight stop. Weather is calculated along the route for each stage, so you have the right gear for every day."
     },
     "gpxImport": {
-      "button": "Import GPX",      "orImport": "or import route from GPX",      "title": "Import GPX file",
+      "button": "Import GPX",
+      "orImport": "or import route from GPX",
+      "title": "Import GPX file",
       "selectFile": "Drop GPX file here or click to select",
       "maxSize": "Maximum 10 MB",
       "upload": "Import",
@@ -814,7 +816,50 @@
       "noProducts": "No products found.",
       "errorLoadShops": "Failed to load shops.",
       "jobHistory": "Previous imports",
-      "productsFound": "products"
+      "productsFound": "products",
+      "urlImport": {
+        "tabCategory": "Category Import",
+        "tabUrl": "Import by URL",
+        "description": "Paste a product URL. The agent will automatically extract the product data.",
+        "urlLabel": "Product URL",
+        "urlPlaceholder": "https://www.bike-components.de/en/...",
+        "invalidUrl": "Please enter a valid URL.",
+        "extract": "Extract Product",
+        "shopLabel": "Shop",
+        "existingShop": "Existing shop",
+        "newShop": "New shop",
+        "shopNamePlaceholder": "Enter shop name",
+        "productDetails": "Product Details",
+        "descriptionLabel": "Description",
+        "imageUrlLabel": "Image URL",
+        "affiliateUrlLabel": "Affiliate URL",
+        "tempMin": "Min temperature (°C)",
+        "tempMax": "Max temperature (°C)",
+        "precipLabel": "Precipitation",
+        "precipNone": "None",
+        "precipLightRain": "Light rain",
+        "precipHeavyRain": "Heavy rain",
+        "precipSnow": "Snow",
+        "windLabel": "Wind",
+        "windNone": "None",
+        "windLight": "Light",
+        "windStrong": "Strong",
+        "weatherSummaryLabel": "Weather Summary",
+        "approveProduct": "Import Product",
+        "duplicateWarning": "Possible duplicate: \"{{name}}\" already exists.",
+        "noAffiliateTag": "No affiliate tag is configured for this shop. The affiliate link will be used as-is.",
+        "successMessage": "Product imported successfully!",
+        "shopCreated": "New shop created",
+        "matchesItemIdLabel": "Clothing Item ID",
+        "matchesItemIdPlaceholder": "e.g. cl-rain-jacket",
+        "bikeTypesLabel": "Bike Types",
+        "bikeType": {
+          "rennrad": "Road",
+          "gravel": "Gravel",
+          "mtb": "MTB",
+          "city": "City"
+        }
+      }
     }
   }
 }

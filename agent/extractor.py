@@ -184,3 +184,125 @@ async def extract_products(
 
     logger.info("Extracted %d valid products from LLM response", len(products))
     return products
+
+
+SINGLE_URL_EXTRACTION_PROMPT = """\
+You are a product data extraction assistant. Given text from a single product \
+page, extract the product's structured information.
+
+Product URL: {url}
+
+Extract the product and return:
+- name: Full product name
+- description: Key features as a short description (1-2 sentences)
+- image_url: Product image URL if available, otherwise empty string
+- affiliate_url: Product page URL / link (use the URL above if not found in text)
+- matches_label: A short product-type description (e.g. "Waterproof Cycling Jacket", "Thermal Cycling Tights"). Describe what kind of product it is.
+- temp_min: Minimum temperature (°C) this product is suitable for (integer). Infer from product features. null if unknown.
+- temp_max: Maximum temperature (°C) this product is suitable for (integer). Infer from product features. null if unknown.
+- precipitation: Rain/weather protection level. One of: "none", "light-rain", "heavy-rain", "snow".
+- wind: Wind protection level. One of: "none", "light-wind", "strong-wind".
+- weather_summary: A 1-sentence summary of what weather conditions this product is best for.
+- suggested_category_id: The ID of the best-matching category from the list below. null if none match.
+
+Available categories:
+{categories}
+
+Return a JSON object (NOT an array). Example:
+{{
+  "name": "Gore Wear C5 Gore-Tex Shakedry Jacket",
+  "description": "Ultralight waterproof cycling jacket with excellent breathability.",
+  "image_url": "https://example.com/image.jpg",
+  "affiliate_url": "https://example.com/product/123",
+  "matches_label": "Waterproof Cycling Jacket",
+  "temp_min": -5,
+  "temp_max": 10,
+  "precipitation": "heavy-rain",
+  "wind": "strong-wind",
+  "weather_summary": "Best for cold, rainy and windy winter rides.",
+  "suggested_category_id": "cat-rain-jackets"
+}}
+
+IMPORTANT:
+- Return ONLY the JSON object, no other text.
+- If the page does not contain a product, return: {{"error": "no product found"}}
+- Do not invent data. Only extract what is present in the text.
+- For weather fields, make reasonable inferences from product features.
+- For suggested_category_id, pick the single best-matching category from the list. Use null if unsure.
+
+Text to extract from:
+---
+{text}
+---
+"""
+
+
+async def extract_product_with_category(
+    text: str,
+    url: str,
+    categories: list[dict[str, str]],
+) -> tuple["ProductData | None", str | None]:
+    """Extract a single product from page text with category suggestion.
+
+    Returns (ProductData, suggested_category_id) or (None, None) on failure.
+    """
+    cat_lines = "\n".join(f"- {c['id']}: {c['name']}" for c in categories)
+    prompt = SINGLE_URL_EXTRACTION_PROMPT.format(
+        url=url, categories=cat_lines, text=text[:15000]
+    )
+
+    raw = await _call_llm(prompt)
+    logger.debug("LLM single-URL raw response: %s", raw[:500])
+
+    try:
+        data = _parse_single_object(raw)
+    except (json.JSONDecodeError, ValueError):
+        logger.warning("LLM returned unparseable JSON for single URL, retrying")
+        correction = (
+            "Your previous response was not valid JSON. "
+            "Please return ONLY a single JSON object with the product fields. "
+            f"Previous response:\n{raw[:2000]}"
+        )
+        raw2 = await _call_llm(correction)
+        try:
+            data = _parse_single_object(raw2)
+        except (json.JSONDecodeError, ValueError):
+            logger.error("LLM retry also failed for single URL extraction.")
+            return None, None
+
+    if not isinstance(data, dict):
+        logger.error("LLM response is not a dict, got %s", type(data))
+        return None, None
+
+    if "error" in data:
+        logger.info("LLM reported no product: %s", data["error"])
+        return None, None
+
+    suggested_category_id = data.pop("suggested_category_id", None)
+
+    try:
+        product = ProductData.model_validate(data)
+    except Exception as e:
+        logger.warning("Invalid product data from single URL extraction: %s", e)
+        return None, None
+
+    logger.info(
+        "Extracted product '%s' with suggested category '%s'",
+        product.name,
+        suggested_category_id,
+    )
+    return product, suggested_category_id
+
+
+def _parse_single_object(raw: str) -> dict[str, Any]:
+    """Parse a single JSON object from LLM response."""
+    text = raw.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        lines = [l for l in lines if not l.strip().startswith("```")]
+        text = "\n".join(lines)
+    result = json.loads(text)
+    # If LLM returned an array with one item, unwrap it
+    if isinstance(result, list) and len(result) == 1:
+        return result[0]
+    return result

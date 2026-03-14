@@ -816,7 +816,50 @@
       "noProducts": "Keine Produkte gefunden.",
       "errorLoadShops": "Shops konnten nicht geladen werden.",
       "jobHistory": "Vorherige Imports",
-      "productsFound": "Produkte"
+      "productsFound": "Produkte",
+      "urlImport": {
+        "tabCategory": "Kategorie-Import",
+        "tabUrl": "Per URL importieren",
+        "description": "Füge eine Produkt-URL ein. Der Agent extrahiert die Produktdaten automatisch.",
+        "urlLabel": "Produkt-URL",
+        "urlPlaceholder": "https://www.bike-components.de/de/...",
+        "invalidUrl": "Bitte gib eine gültige URL ein.",
+        "extract": "Produkt extrahieren",
+        "shopLabel": "Shop",
+        "existingShop": "Bestehender Shop",
+        "newShop": "Neuer Shop",
+        "shopNamePlaceholder": "Shop-Name eingeben",
+        "productDetails": "Produktdetails",
+        "descriptionLabel": "Beschreibung",
+        "imageUrlLabel": "Bild-URL",
+        "affiliateUrlLabel": "Affiliate-URL",
+        "tempMin": "Min. Temperatur (°C)",
+        "tempMax": "Max. Temperatur (°C)",
+        "precipLabel": "Niederschlag",
+        "precipNone": "Keiner",
+        "precipLightRain": "Leichter Regen",
+        "precipHeavyRain": "Starker Regen",
+        "precipSnow": "Schnee",
+        "windLabel": "Wind",
+        "windNone": "Keiner",
+        "windLight": "Leicht",
+        "windStrong": "Stark",
+        "weatherSummaryLabel": "Wetterübersicht",
+        "approveProduct": "Produkt importieren",
+        "duplicateWarning": "Mögliches Duplikat: \"{{name}}\" existiert bereits.",
+        "noAffiliateTag": "Für diesen Shop ist kein Affiliate-Tag konfiguriert. Der Affiliate-Link wird unverändert übernommen.",
+        "successMessage": "Produkt wurde erfolgreich importiert!",
+        "shopCreated": "Shop neu angelegt",
+        "matchesItemIdLabel": "Kleidungsstück-ID",
+        "matchesItemIdPlaceholder": "z.B. cl-rain-jacket",
+        "bikeTypesLabel": "Fahrradtypen",
+        "bikeType": {
+          "rennrad": "Rennrad",
+          "gravel": "Gravel",
+          "mtb": "MTB",
+          "city": "City"
+        }
+      }
     }
   }
 }

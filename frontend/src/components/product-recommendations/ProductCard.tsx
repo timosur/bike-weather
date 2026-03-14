@@ -11,15 +11,15 @@ interface ProductCardProps {
 
 const precipitationTranslationKeys: Record<string, string> = {
   none: 'products.precipitation.none',
-  'light-rain': 'products.precipitation.lightRain',
-  'heavy-rain': 'products.precipitation.heavyRain',
+  'light': 'products.precipitation.lightRain',
+  'heavy': 'products.precipitation.heavyRain',
   snow: 'products.precipitation.snow',
 }
 
 const windTranslationKeys: Record<string, string> = {
   none: 'products.wind.none',
-  'light-wind': 'products.wind.lightWind',
-  'strong-wind': 'products.wind.strongWind',
+  'light': 'products.wind.lightWind',
+  'strong': 'products.wind.strongWind',
 }
 
 export function ProductCard({ product, shop, disclosure, onProductClick }: ProductCardProps) {
@@ -35,9 +35,11 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
       onClick={() => onProductClick?.(product.id)}
       className="group relative flex flex-col rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:shadow-md transition-all duration-200"
     >
-      <span className="absolute top-2.5 left-2.5 z-10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
-        {disclosure.badgeLabel}
-      </span>
+      {shop.affiliateTag && (
+        <span className="absolute top-2.5 left-2.5 z-10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
+          {disclosure.badgeLabel}
+        </span>
+      )}
 
       <div className="aspect-[4/3] bg-stone-100 dark:bg-stone-800 flex items-center justify-center overflow-hidden">
         {product.imageUrl ? (
@@ -89,7 +91,7 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
         <div className="mt-auto flex items-end justify-between gap-2">
           <div>
             <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
-              via {shop.name} *
+              via {shop.name}{shop.affiliateTag ? ' *' : ''}
             </p>
           </div>
           <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/40 transition-colors">

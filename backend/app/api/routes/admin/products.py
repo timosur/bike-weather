@@ -483,6 +483,7 @@ async def create_shop(
         name=data.name,
         logo_url=data.logoUrl,
         affiliate_tag=data.affiliateTag,
+        base_url=data.baseUrl,
     )
     session.add(shop)
     await session.commit()
@@ -503,7 +504,11 @@ async def update_shop(
         raise HTTPException(status_code=404, detail="Shop not found")
 
     update_data = data.model_dump(exclude_unset=True)
-    field_map = {"logoUrl": "logo_url", "affiliateTag": "affiliate_tag"}
+    field_map = {
+        "logoUrl": "logo_url",
+        "affiliateTag": "affiliate_tag",
+        "baseUrl": "base_url",
+    }
     for camel, snake in field_map.items():
         if camel in update_data:
             update_data[snake] = update_data.pop(camel)

@@ -10,6 +10,7 @@ from agent.extractor import (
     _generate_product_id,
     _parse_llm_response,
     extract_products,
+    extract_product_with_category,
 )
 
 
@@ -171,3 +172,87 @@ class TestExtractProducts:
 
             products = await extract_products("text", "jackets", "bike-components.de")
             assert products == []
+
+
+SAMPLE_SINGLE_URL_LLM_RESPONSE = json.dumps(
+    {
+        "name": "Gore Wear C5 Gore-Tex Shakedry Jacket",
+        "description": "Ultralight waterproof cycling jacket.",
+        "image_url": "https://example.com/gore.jpg",
+        "affiliate_url": "https://www.bike-components.de/en/Product/12345",
+        "matches_label": "Waterproof Cycling Jacket",
+        "temp_min": -5,
+        "temp_max": 10,
+        "precipitation": "heavy-rain",
+        "wind": "strong-wind",
+        "weather_summary": "Best for cold, rainy and windy winter rides.",
+        "suggested_category_id": "cat-rain-jackets",
+    }
+)
+
+SAMPLE_CATEGORIES = [
+    {"id": "cat-rain-jackets", "name": "Rain Jackets"},
+    {"id": "cat-jerseys", "name": "Jerseys"},
+    {"id": "cat-cycling-shorts", "name": "Cycling Shorts"},
+]
+
+
+class TestExtractProductWithCategory:
+    @pytest.mark.asyncio
+    async def test_extract_product_with_category_suggestion(self):
+        with patch("agent.extractor._call_llm", new_callable=AsyncMock) as mock_llm:
+            mock_llm.return_value = SAMPLE_SINGLE_URL_LLM_RESPONSE
+
+            product, category_id = await extract_product_with_category(
+                "Some product page text...",
+                "https://example.com/product/123",
+                SAMPLE_CATEGORIES,
+            )
+
+            assert product is not None
+            assert product.name == "Gore Wear C5 Gore-Tex Shakedry Jacket"
+            assert product.precipitation == "heavy-rain"
+            assert category_id == "cat-rain-jackets"
+            mock_llm.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_extract_returns_none_on_error(self):
+        with patch("agent.extractor._call_llm", new_callable=AsyncMock) as mock_llm:
+            mock_llm.return_value = json.dumps({"error": "no product found"})
+
+            product, category_id = await extract_product_with_category(
+                "Not a product page", "https://example.com/blog", SAMPLE_CATEGORIES
+            )
+
+            assert product is None
+            assert category_id is None
+
+    @pytest.mark.asyncio
+    async def test_extract_unwraps_single_item_array(self):
+        """LLM returns [product] instead of product — still works."""
+        with patch("agent.extractor._call_llm", new_callable=AsyncMock) as mock_llm:
+            mock_llm.return_value = json.dumps(
+                [json.loads(SAMPLE_SINGLE_URL_LLM_RESPONSE)]
+            )
+
+            product, category_id = await extract_product_with_category(
+                "text", "https://example.com/p/1", SAMPLE_CATEGORIES
+            )
+
+            assert product is not None
+            assert product.name == "Gore Wear C5 Gore-Tex Shakedry Jacket"
+            assert category_id == "cat-rain-jackets"
+
+    @pytest.mark.asyncio
+    async def test_extract_handles_null_category(self):
+        response = json.loads(SAMPLE_SINGLE_URL_LLM_RESPONSE)
+        response["suggested_category_id"] = None
+        with patch("agent.extractor._call_llm", new_callable=AsyncMock) as mock_llm:
+            mock_llm.return_value = json.dumps(response)
+
+            product, category_id = await extract_product_with_category(
+                "text", "https://example.com/p/1", SAMPLE_CATEGORIES
+            )
+
+            assert product is not None
+            assert category_id is None

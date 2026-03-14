@@ -14,6 +14,7 @@ from agent.main import (
     ALL_CATEGORIES,
     CATEGORY_MAP,
     _resolve_category_id,
+    extract_single_url,
     run_category,
     run_urls,
 )
@@ -37,6 +38,17 @@ class StartUrlJobRequest(BaseModel):
     shop: str
     category: str
     urls: list[str] = Field(..., min_length=1, max_length=20)
+
+
+class ExtractUrlCategory(BaseModel):
+    id: str
+    name: str
+    slug: str
+
+
+class StartExtractUrlRequest(BaseModel):
+    url: str
+    categories: list[ExtractUrlCategory] = Field(default_factory=list)
 
 
 class StartJobResponse(BaseModel):
@@ -215,6 +227,77 @@ async def _run_url_job(job: Job, urls: list[str]) -> None:
         job.notify_done()
 
 
+async def _run_extract_url_job(
+    job: Job, url: str, categories: list[dict[str, str]]
+) -> None:
+    """Execute the single-URL extraction pipeline in the background."""
+    try:
+        job.status = JobStatus.SCRAPING
+
+        def progress_callback(
+            stage: str, message: str, data: dict | None = None
+        ) -> None:
+            if stage in ("scraping", "extracting", "completed", "failed"):
+                job.status = (
+                    JobStatus(stage)
+                    if stage != "completed" and stage != "failed"
+                    else job.status
+                )
+            job.add_progress(stage, message, data)
+
+        product, suggested_category_id = await extract_single_url(
+            url, categories, progress=progress_callback
+        )
+
+        if product:
+            product_id = _generate_product_id(product.affiliate_url, product.name)
+            item = {
+                "id": product_id,
+                "name": product.name,
+                "imageUrl": product.image_url,
+                "affiliateUrl": product.affiliate_url,
+                "matchesLabel": product.matches_label or "Cycling Product",
+                "matchesItemId": None,
+                "bikeTypes": [],
+                "weatherTempMin": product.temp_min,
+                "weatherTempMax": product.temp_max,
+                "weatherPrecipitation": product.precipitation or "none",
+                "weatherWind": product.wind or "none",
+                "weatherSummary": product.weather_summary or product.description,
+                "description": product.description,
+                "isPublished": True,
+            }
+            job.products = [item]
+            job.extra = {
+                "suggestedCategoryId": suggested_category_id,
+                "url": url,
+            }
+            job.status = JobStatus.COMPLETED
+            job.add_progress(
+                "completed",
+                f"Extraction complete — product: {product.name}",
+                {
+                    "productCount": 1,
+                    "suggestedCategoryId": suggested_category_id,
+                },
+            )
+        else:
+            job.status = JobStatus.COMPLETED
+            job.products = []
+            job.extra = {"suggestedCategoryId": None, "url": url}
+            job.add_progress(
+                "completed",
+                "Could not extract product information from this URL.",
+            )
+    except Exception as e:
+        logger.exception("Extract-URL job %s failed", job.id)
+        job.status = JobStatus.FAILED
+        job.error = str(e)
+        job.add_progress("failed", f"URL extraction failed: {e}")
+    finally:
+        job.notify_done()
+
+
 # --- Background cleanup ---
 
 
@@ -312,6 +395,25 @@ async def start_url_job(request: StartUrlJobRequest) -> StartJobResponse:
 
     job = await job_manager.create_job(request.shop, request.category, len(valid_urls))
     asyncio.create_task(_run_url_job(job, valid_urls))
+    return StartJobResponse(jobId=job.id, status=job.status.value)
+
+
+@app.post("/jobs/extract-url", response_model=StartJobResponse)
+async def start_extract_url_job(request: StartExtractUrlRequest) -> StartJobResponse:
+    """Start a job that extracts a single product from any URL (no shop/category required)."""
+    url = request.url.strip()
+    if not url.startswith("http"):
+        raise HTTPException(
+            status_code=400, detail="URL must start with http:// or https://"
+        )
+
+    categories = [
+        {"id": c.id, "name": c.name, "slug": c.slug} for c in request.categories
+    ]
+
+    # Create job with placeholder shop/category (resolved later by backend)
+    job = await job_manager.create_job("_url_import", "_auto", 1)
+    asyncio.create_task(_run_extract_url_job(job, url, categories))
     return StartJobResponse(jobId=job.id, status=job.status.value)
 
 

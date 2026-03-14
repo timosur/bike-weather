@@ -10,6 +10,7 @@ interface InlineProduct {
 
 interface InlineShop {
   name: string;
+  affiliateTag?: string | null;
 }
 
 interface InlineDisclosure {
@@ -45,14 +46,16 @@ export function InlineProductLink({ product, shop, disclosure, onProductClick }:
           {product.name}
         </p>
         <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
-          via {shop.name}
+          via {shop.name}{shop.affiliateTag ? ' *' : ''}
         </p>
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
-          {disclosure.badgeLabel}
-        </span>
+        {shop.affiliateTag && (
+          <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
+            {disclosure.badgeLabel}
+          </span>
+        )}
         <ExternalLink className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 group-hover:text-emerald-500 transition-colors" strokeWidth={2} />
       </div>
     </a>

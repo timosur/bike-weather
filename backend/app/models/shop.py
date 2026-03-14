@@ -8,3 +8,4 @@ class Shop(SQLModel, table=True):
     name: str
     logo_url: str
     affiliate_tag: str | None = Field(default=None)
+    base_url: str | None = Field(default=None)

@@ -38,16 +38,18 @@ function CompactProductCard({ product, shop, badgeLabel, onProductClick }: {
           <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
             {product.name}
           </p>
-          <span className="px-1 py-px text-[8px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 shrink-0">
-            {badgeLabel}
-          </span>
+          {shop?.affiliateTag && (
+            <span className="px-1 py-px text-[8px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 shrink-0">
+              {badgeLabel}
+            </span>
+          )}
         </div>
         <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
           {product.matchesLabel} &middot; {product.weather.summary}
         </p>
         <div className="flex items-center gap-2 mt-1">
           {shop && (
-            <span className="text-[11px] text-stone-400 dark:text-stone-500">via {shop.name} *</span>
+            <span className="text-[11px] text-stone-400 dark:text-stone-500">via {shop.name}{shop?.affiliateTag ? ' *' : ''}</span>
           )}
         </div>
       </div>
