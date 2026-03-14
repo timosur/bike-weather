@@ -15,43 +15,47 @@
 - [ ] Run migration: `cd backend && uv run alembic upgrade head`
 - [ ] **Checkpoint**: Manual verification — `GET /api/admin/shops` returns shops with `baseUrl` field; existing shops have correct domain values
 
-## Phase 2: Agent — `POST /extract-url` Endpoint
+## Phase 2: Agent — `POST /jobs/extract-url` Job Type
 
 - [ ] Add `extract_single_url()` function in `agent/main.py` — takes a URL + category list, fetches page, runs LLM extraction, returns one `ProductData` + suggested category ID
 - [ ] Extend the LLM extraction prompt in `agent/extractor.py` to accept an optional category list and return a `suggested_category_id` field alongside the product data
-- [ ] Add `POST /extract-url` endpoint in `agent/server.py` — accepts `{ url, categories: [{ id, name, slug }] }`, calls `extract_single_url()`, returns `{ product, suggestedCategoryId }`
-- [ ] Handle errors: invalid URL (422), fetch failure (502), LLM error (500) — return structured error responses
+- [ ] Add `POST /jobs/extract-url` endpoint in `agent/server.py` — accepts `{ url, categories: [{ id, name, slug }] }`, creates a job, spawns async `_run_extract_url_job()` task, returns `{ jobId, status }`
+- [ ] Implement `_run_extract_url_job()` in `agent/server.py` — runs `extract_single_url()`, stores product + `suggestedCategoryId` on job, sends progress events via SSE (scraping → extracting → completed/failed)
+- [ ] Ensure `GET /jobs/{jobId}` returns `suggestedCategoryId` and `url` fields for extract-url jobs
+- [ ] Ensure `GET /jobs/{jobId}/stream` works for extract-url jobs (reuses existing SSE infrastructure)
 - [ ] Add agent test for `extract_single_url()` with mocked LLM response
-- [ ] **Checkpoint**: Manual verification — `curl -X POST http://localhost:8001/extract-url -d '{"url": "https://www.bike-components.de/...", "categories": [...]}' ` returns extracted product data with a suggested category
+- [ ] **Checkpoint**: Manual verification — `curl -X POST http://localhost:8001/jobs/extract-url -d '{"url": "...", "categories": [...]}'` returns `jobId`; SSE stream shows progress; `GET /jobs/{jobId}` returns extracted product with `suggestedCategoryId`
 
-## Phase 3: Backend — Import URL Orchestration
+## Phase 3: Backend — Proxy Routes & Shop Detection
 
 - [ ] Create `backend/app/services/shop_detection.py` — `detect_shop_by_url(url, session)` extracts domain from URL, queries shops by `base_url`, returns matched shop or suggests a new shop name from the domain
-- [ ] Add `POST /api/admin/agent/import-url` route in `backend/app/api/routes/admin/agent.py`:
+- [ ] Add `POST /api/admin/agent/jobs/extract-url` proxy route in `backend/app/api/routes/admin/agent.py`:
   - Validate URL format
-  - Fetch category list from DB
-  - Call agent `POST /extract-url` with URL + categories
-  - Call `detect_shop_by_url()` for shop match
-  - Check for duplicate products by `affiliate_url`
-  - Return enriched response (product data + shop suggestion + category suggestion + duplicate info)
-- [ ] Add `POST /api/admin/agent/import-url/approve` route in `backend/app/api/routes/admin/agent.py`:
+  - Fetch category list from DB (id, name, slug)
+  - Forward `{ url, categories }` to agent `POST /jobs/extract-url`
+  - Return `{ jobId, status }`
+- [ ] Enrich `GET /api/admin/agent/jobs/{jobId}` proxy for extract-url jobs:
+  - After proxying the agent response, run `detect_shop_by_url()` for shop match
+  - Check for duplicate products by matching `affiliate_url` in DB
+  - Append `suggestedShop` and `duplicateOf` to the response
+- [ ] Add `POST /api/admin/agent/jobs/{jobId}/approve-url` route in `backend/app/api/routes/admin/agent.py`:
   - If `newShop` provided: create new Shop record (generate ID from name, set `base_url` from URL domain, no affiliate tag)
   - Generate product ID from URL + name
   - If shop has affiliate tag: inject it into the product URL
   - Create product record via existing product creation logic
-  - Return created product + `shopCreated` flag
-- [ ] Add request/response schemas for both endpoints in `backend/app/schemas/product.py`
+  - Return `{ product, shopCreated }`
+- [ ] Add request/response schemas for new endpoints in `backend/app/schemas/product.py`
 - [ ] Add backend tests for `detect_shop_by_url()` service function
-- [ ] **Checkpoint**: Manual verification — use `curl` or HTTPie to call `POST /api/admin/agent/import-url` with a real product URL; verify response contains extracted product + shop suggestion + category suggestion
+- [ ] **Checkpoint**: Manual verification — call `POST /api/admin/agent/jobs/extract-url` with a real product URL; stream progress via SSE; fetch completed job with shop suggestion; approve and verify product appears in DB
 
 ## Phase 4: Frontend — URL Import UI
 
-- [ ] Add `UrlImportForm` component in `frontend/src/components/admin/product-import/` — URL input field with "Extract" button, loading spinner, error display
+- [ ] Add API functions in `frontend/src/api/admin/agent.ts`: `startExtractUrlJob(url)`, `approveUrlImport(jobId, data)`
+- [ ] Add `UrlImportForm` component in `frontend/src/components/admin/product-import/` — URL input field with "Extract" button, validates URL format client-side
 - [ ] Add `UrlImportReview` component in `frontend/src/components/admin/product-import/` — editable product fields, shop selector (existing or create new), category dropdown with LLM suggestion pre-selected, duplicate warning, no-affiliate-tag notice, approve/cancel buttons
-- [ ] Add API functions in `frontend/src/api/admin/agent.ts`: `extractProductFromUrl(url)` and `approveUrlImport(data)`
-- [ ] Update `AdminProductImportPage.tsx` — add a tab or section for "Import by URL" alongside the existing import flow; wire up UrlImportForm → UrlImportReview → success message
+- [ ] Update `AdminProductImportPage.tsx` — add a tab or section for "Import by URL" alongside the existing import flow; wire up UrlImportForm → ImportProgress (reused, SSE stream) → UrlImportReview → success message
 - [ ] Add i18n translation keys for all new UI strings (DE + EN) in the relevant translation files
-- [ ] **Checkpoint**: Manual verification — full end-to-end walkthrough in the browser: paste a product URL → see extracted data → edit fields → select shop/category → approve → product appears in admin product list
+- [ ] **Checkpoint**: Manual verification — full end-to-end walkthrough in the browser: paste a product URL → see extraction progress (SSE) → review extracted data → edit fields → select shop/category → approve → product appears in admin product list
 
 ## Phase 5: Polish & Testing
 

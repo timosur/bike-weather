@@ -118,61 +118,62 @@ Allow admins to import a product by simply pasting its URL — from any shop, no
 ### Service Impact Map
 
 ```
-Agent:    1 new endpoint (POST /extract-url) — single-URL extraction + category suggestion
-Backend:  1 new admin route (POST /admin/agent/import-url) — orchestrates flow
+Agent:    1 new job type (POST /jobs/extract-url) — single-URL extraction + category suggestion via job system
+Backend:  2 new admin proxy routes + approval route
           Shop model gains `base_url` field + migration
           New service function: shop auto-detection by domain
 Frontend: New "Import by URL" tab/section on AdminProductImportPage
-          New single-product review/edit form component
+          Reuses existing progress (SSE) + review flow
 Database: 1 migration (add `base_url` column to `shops` table)
 ```
 
-### Data Flow
+### Data Flow (Job-Based)
 
 ```
 Admin pastes URL
        │
        ▼
-Frontend ──POST /api/admin/agent/import-url { url }──▶ Backend
+Frontend ──POST /api/admin/agent/jobs/extract-url { url, categories }──▶ Backend (proxy)
+       │                                                                       │
+       │                                              POST /jobs/extract-url ──▶ Agent
+       │                                                                       │
+       │                                              Agent creates job, spawns async task:
+       │                                              fetch page → LLM extract product + suggest category
        │
-       │  1. Backend extracts domain from URL
-       │  2. Backend queries shops table for matching base_url
-       │  3. Backend forwards URL + category list to agent
-       │
-       ▼
-Backend ──POST /extract-url { url, categories }──▶ Agent
-       │
-       │  Agent fetches page → LLM extracts product data + suggests category
-       │
-       ◀── { product: ProductData, suggestedCategoryId: str | null }
-       │
-       │  4. Backend enriches response with shop match info
-       │
-       ◀── Frontend receives: { product, suggestedShop, suggestedCategory, isNewShop }
+       ◀── { jobId, status: "pending" }
        │
        ▼
-Admin reviews/edits all fields (product data, shop, category)
+Frontend ──GET /api/admin/agent/jobs/{jobId}/stream──▶ SSE progress (scraping → extracting → completed)
+       │
+       ▼  (on "completed")
+Frontend ──GET /api/admin/agent/jobs/{jobId}──▶ Backend (proxy) ──▶ Agent
+       │
+       ◀── { job with products: [1 product], suggestedCategoryId }
+       │
+       │  Backend enriches: detect shop by URL domain, check duplicates
        │
        ▼
-Frontend ──POST /api/admin/agent/import-url/approve { product, shopId, categoryId, newShop? }──▶ Backend
+Admin reviews/edits (product data, shop selector, category dropdown)
        │
-       │  5. If newShop: create Shop record (no affiliate tag)
-       │  6. Generate product ID, apply affiliate tag if shop has one
-       │  7. Create single product via existing product creation logic
+       ▼
+Frontend ──POST /api/admin/agent/jobs/{jobId}/approve-url { product, shopId, categoryId, newShop? }──▶ Backend
+       │
+       │  1. If newShop: create Shop record (base_url from domain, no affiliate tag)
+       │  2. Generate product ID, apply affiliate tag if shop has one
+       │  3. Create product via existing product creation logic
        │
        ◀── { product: AdminProduct, shopCreated: bool }
 ```
 
-### Why a New Agent Endpoint (Not Reusing `/jobs/urls`)
+### Reusing the Job System
 
-The existing `/jobs/urls` endpoint is designed for batch processing with job lifecycle (pending → extracting → completed), SSE streaming, and requires a pre-configured shop + category. BIKE-20 needs:
+The existing job system (job lifecycle, SSE streaming, job manager) is reused for consistency. The new `POST /jobs/extract-url` job type differs from existing job types in:
 
-- **No job lifecycle** — single synchronous request/response (one URL = one product)
-- **No shop requirement** — works with any URL, shop resolved by backend
-- **Category suggestion** — agent needs the full category list to pick the best match
-- **Simpler response** — returns one product + suggested category, not a job ID
+- **No shop/category required upfront** — shop is resolved by the backend at review time; category is suggested by the LLM
+- **Single product output** — job always produces exactly 1 product (vs. batch jobs producing many)
+- **Category suggestion** — accepts a category list so the LLM can pick the best match; stored on the job result alongside the product
 
-A dedicated `POST /extract-url` endpoint keeps the agent simple and avoids overloading the job system for what is essentially a one-shot extraction.
+This keeps the admin experience consistent: start job → watch progress → review → approve.
 
 ### Component Structure (Frontend)
 
@@ -181,8 +182,9 @@ AdminProductImportPage (existing — add tab/section)
 ├── [Tab: "Category Import"] — existing ImportConfigForm flow
 └── [Tab: "Import by URL"]   — new
     ├── UrlImportForm
-    │   └── URL input + "Extract" button + loading state + error display
-    └── UrlImportReview (shown after extraction)
+    │   └── URL input + "Extract" button
+    ├── ImportProgress (reused) — SSE stream display
+    └── UrlImportReview (shown after job completes)
         ├── Product fields (name, price, image preview, description, weather metadata) — all editable
         ├── Shop selector (auto-detected or "Create new" with editable name)
         ├── Category dropdown (LLM suggestion pre-selected)
@@ -204,33 +206,42 @@ This enables matching incoming URLs to existing shops by domain. Existing shops 
 
 ### API Design
 
-**Agent — new endpoint:**
+**Agent — new job endpoint:**
 
 ```
-POST /extract-url
+POST /jobs/extract-url
   Request:  { url: string, categories: [{ id, name, slug }] }
-  Response: { product: ProductData, suggestedCategoryId: string | null }
-  Errors:   422 (invalid URL), 502 (page fetch failed), 500 (LLM error)
+  Response: { jobId: string, status: "pending" }
 ```
 
-The agent receives the category list so the LLM can pick the best match. No shop info needed — the agent just extracts product data.
-
-**Backend — two new admin endpoints:**
+The job runs asynchronously (same as existing jobs). On completion, the job result contains:
 
 ```
-POST /api/admin/agent/import-url
-  Request:  { url: string }
+GET /jobs/{jobId}
   Response: {
-    product: { name, description, imageUrl, affiliateUrl, matchesLabel,
-               weatherTempMin/Max, weatherPrecipitation, weatherWind, weatherSummary },
-    suggestedCategory: { id, name } | null,
-    suggestedShop: { id, name, isNew, hasAffiliateTag } | null,
-    duplicateOf: { id, name } | null
+    jobId, status, progress[],
+    products: [{ ...ProductData fields }],    ← exactly 1 product
+    suggestedCategoryId: string | null,       ← new field on job result
+    url: string                               ← the original URL (for shop detection)
   }
-  Auth: 🛡️ admin
-  Purpose: Orchestrate extraction — call agent, detect shop, check duplicates
+```
 
-POST /api/admin/agent/import-url/approve
+SSE streaming via `GET /jobs/{jobId}/stream` works identically to existing job types.
+
+**Backend — new admin proxy + approval routes:**
+
+```
+POST /api/admin/agent/jobs/extract-url        — proxy to agent (starts job)
+  Request: { url: string }
+  Auth: 🛡️ admin
+  Note: Backend fetches category list from DB, forwards to agent with URL
+
+GET  /api/admin/agent/jobs/{jobId}            — existing proxy (enriched)
+  Response enrichment for extract-url jobs:
+    + suggestedShop: { id, name, isNew, hasAffiliateTag } | null
+    + duplicateOf: { id, name } | null
+
+POST /api/admin/agent/jobs/{jobId}/approve-url — save approved product
   Request: {
     product: { name, description, imageUrl, affiliateUrl, matchesLabel,
                weatherTempMin/Max, weatherPrecipitation, weatherWind, weatherSummary },
@@ -240,20 +251,19 @@ POST /api/admin/agent/import-url/approve
   }
   Response: { product: AdminProduct, shopCreated: bool }
   Auth: 🛡️ admin
-  Purpose: Save approved product to database, optionally create shop
 ```
 
 ### Tech Decisions
 
-1. **Synchronous extraction (no jobs)** — A single URL extraction takes 5-15 seconds. This is short enough for a direct request/response with a loading spinner, avoiding the complexity of job management + SSE for a single product.
+1. **Job-based extraction** — Reuses the existing job system (job manager, SSE streaming, progress tracking) for a consistent admin experience. Even for a single URL, the admin sees the familiar progress → review → approve flow.
 
-2. **Backend orchestrates, agent extracts** — The backend handles shop detection and duplicate checking (it has database access). The agent stays a pure extraction service (aligned with BIKE-19 direction).
+2. **Backend orchestrates shop/category at review time** — The agent extracts product data and suggests a category. The backend enriches the result with shop detection (DB query by domain) and duplicate checking when the frontend fetches the job result. This keeps the agent stateless and shop-unaware.
 
 3. **Shop `base_url` field** — Matching by domain requires storing the domain on the Shop model. A simple `base_url` column + DB query is more reliable than string-matching against shop names or IDs.
 
-4. **Category suggestion via LLM prompt** — Pass the category list to the agent; the extraction prompt includes "suggest the best-matching category from this list." This reuses the existing LLM call (no extra API call).
+4. **Category suggestion via LLM prompt** — The category list is passed to the agent at job creation; the extraction prompt includes "suggest the best-matching category from this list." This reuses the existing LLM call (no extra API call).
 
-5. **Single-product creation (not bulk)** — One URL = one product. Use the existing `create_product` / upsert logic rather than the bulk import path, keeping the flow simple.
+5. **Single-product approval (not bulk)** — The `approve-url` endpoint creates one product (vs. the batch `approve` endpoint). This allows the simpler response shape with shop creation.
 
 ### Dependencies
 
