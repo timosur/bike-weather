@@ -30,6 +30,11 @@ class TokenResponse(BaseModel):
     token_type: str = "Bearer"
     expires_in: int
     scope: str
+    refresh_token: str | None = None
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 
 class ForgotPasswordRequest(BaseModel):

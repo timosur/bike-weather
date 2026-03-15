@@ -165,6 +165,28 @@ async def _exchange_tokens(client: httpx.AsyncClient) -> dict:
 # ── public API ────────────────────────────────────────────────────────
 
 
+async def headless_refresh_token(refresh_token: str) -> dict:
+    """Exchange a refresh token for new OIDC tokens via Authentik."""
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+        r = await client.post(
+            TOKEN_URL,
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "client_id": settings.AUTHENTIK_CLIENT_ID,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        if r.status_code == 400:
+            body = r.json()
+            detail = body.get(
+                "error_description", body.get("error", "Token refresh failed")
+            )
+            raise HeadlessAuthError(detail)
+        r.raise_for_status()
+        return r.json()
+
+
 async def headless_login(username: str, password: str) -> dict:
     """Authenticate *username* / *password* and return OIDC tokens."""
     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:

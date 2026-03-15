@@ -14,7 +14,7 @@ import { ContentPageSkeleton } from './components/skeleton'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './hooks/useToast'
 import { ToastContainer } from './components/common/ToastContainer'
-import { setAccessTokenProvider } from './api/client'
+import { setAccessTokenProvider, setTokenRefresher } from './api/client'
 
 const PlannerPage = lazy(() => import('./pages/PlannerPage'))
 const ReportPage = lazy(() => import('./pages/ReportPage'))
@@ -105,7 +105,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated, isAdmin, user, logout, getAccessToken } = useAuth()
+  const { isAuthenticated, isAdmin, user, logout, getAccessToken, refreshTokens } = useAuth()
   const { i18n } = useTranslation()
   const navigationItems = useNavigationItems()
   const footerSections = useFooterSections()
@@ -115,7 +115,8 @@ function AppContent() {
 
   useEffect(() => {
     setAccessTokenProvider(getAccessToken)
-  }, [getAccessToken])
+    setTokenRefresher(refreshTokens)
+  }, [getAccessToken, refreshTokens])
 
   useEffect(() => {
     window.scrollTo(0, 0)

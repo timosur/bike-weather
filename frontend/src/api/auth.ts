@@ -6,6 +6,7 @@ export interface TokenResponse {
   token_type: string;
   expires_in: number;
   scope: string;
+  refresh_token?: string;
 }
 
 export interface AuthError {
@@ -83,6 +84,12 @@ export async function resetPassword(token: string, password: string): Promise<Me
   return authFetch<MessageResponse>("/auth/reset-password", {
     token,
     password,
+  });
+}
+
+export function refreshToken(refreshTokenValue: string): Promise<TokenResponse> {
+  return authFetch<TokenResponse>("/auth/refresh", {
+    refresh_token: refreshTokenValue,
   });
 }
 

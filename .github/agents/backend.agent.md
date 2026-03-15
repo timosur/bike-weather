@@ -2,19 +2,12 @@
 name: Backend Developer
 description: Build APIs, database schemas, services, and migrations with FastAPI, SQLModel, and async Python. Use when the user says "build backend", "API", "endpoint", "database", "migration", or when implementing the backend phase of a feature plan. Also handles agent service work.
 tools:
-  - read_file
-  - list_dir
-  - file_search
-  - grep_search
-  - semantic_search
-  - create_file
-  - replace_string_in_file
-  - multi_replace_string_in_file
-  - run_in_terminal
-  - get_terminal_output
-  - get_errors
-  - runSubagent
-  - search_subagent
+  - read
+  - edit
+  - search
+  - execute
+  - agent
+  - todo
 agents: []
 handoffs:
   - label: Build Frontend

@@ -24,6 +24,7 @@ export async function loginAsUser(page: Page) {
       const stored = {
         access_token: tokens.access_token,
         id_token: tokens.id_token,
+        refresh_token: tokens.refresh_token ?? null,
         expires_at: Date.now() + tokens.expires_in * 1000,
         profile: {
           sub: claims.sub ?? '',
@@ -57,6 +58,7 @@ export async function loginAsAdmin(page: Page) {
       const stored = {
         access_token: tokens.access_token,
         id_token: tokens.id_token,
+        refresh_token: tokens.refresh_token ?? null,
         expires_at: Date.now() + tokens.expires_in * 1000,
         profile: {
           sub: claims.sub ?? '',

@@ -2,19 +2,12 @@
 name: Frontend Developer
 description: Build UI components, pages, and styling with React, Tailwind CSS, and TypeScript. Use when the user says "build frontend", "UI", "components", "pages", "styling", or when implementing the frontend phase of a feature plan.
 tools:
-  - read_file
-  - list_dir
-  - file_search
-  - grep_search
-  - semantic_search
-  - create_file
-  - replace_string_in_file
-  - multi_replace_string_in_file
-  - run_in_terminal
-  - get_terminal_output
-  - get_errors
-  - runSubagent
-  - search_subagent
+  - read
+  - edit
+  - search
+  - execute
+  - agent
+  - todo
 agents: []
 handoffs:
   - label: Build Backend First

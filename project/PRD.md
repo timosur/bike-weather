@@ -34,6 +34,7 @@ Bike Weather helps cyclists dress right for every ride. It combines real weather
 | P2       | Air quality in reports           | Include air conditions and pollutions in ride reports                                  |
 | P1       | Agent service refactor           | Refactor agent to pure FastAPI extraction service; remove CLI and publishing            |
 | P1       | URL-based product import         | Paste any product URL → LLM extracts data → admin reviews → saved to catalog           |
+| P1       | Refresh token mechanism          | Silent token refresh so users stay authenticated beyond access token expiry             |
 
 ## Success Metrics
 

@@ -15,7 +15,7 @@ Bike Weather is a web application that gives cyclists personalized clothing and 
 - **Styling:** Tailwind CSS with class-based dark mode
 - **Fonts:** Outfit (headings), Inter (body), IBM Plex Mono (mono)
 - **i18n:** i18next — German (default) and English
-- **Auth:** Custom `AuthContext` wrapping Authentik OIDC tokens stored in localStorage
+- **Auth:** Custom `AuthContext` wrapping Authentik OIDC tokens stored in localStorage, with proactive/reactive refresh token renewal
 - **Routing:** React Router v7 with lazy-loaded pages
 - **Dev server:** `http://localhost:5173`, proxied to backend
 
@@ -124,6 +124,7 @@ All endpoints are mounted under the `/api` prefix. Auth column: 🔓 public, �
 | POST | `/api/auth/change-password` | 🔒 | 5/min | Change password |
 | POST | `/api/auth/forgot-password` | 🔓 | 3/min | Initiate password recovery (always 200) |
 | POST | `/api/auth/reset-password` | 🔓 | 5/min | Complete password reset with token |
+| POST | `/api/auth/refresh` | 🔓 | 30/min | Exchange refresh token for new access + refresh tokens |
 
 ### Rides (`/api/rides`)
 

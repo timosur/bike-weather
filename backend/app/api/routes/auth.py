@@ -13,6 +13,7 @@ from app.schemas.auth import (
     ForgotPasswordRequest,
     LoginRequest,
     MessageResponse,
+    RefreshRequest,
     RegisterRequest,
     ResetPasswordRequest,
     TokenResponse,
@@ -25,6 +26,7 @@ from app.services.headless_auth import (
     headless_login,
     headless_recovery_complete,
     headless_recovery_start,
+    headless_refresh_token,
     headless_register,
 )
 from app.services.turnstile import verify_turnstile
@@ -71,6 +73,7 @@ async def login(
         token_type=tokens.get("token_type", "Bearer"),
         expires_in=tokens.get("expires_in", 3600),
         scope=tokens.get("scope", "openid profile email"),
+        refresh_token=tokens.get("refresh_token"),
     )
 
 
@@ -99,6 +102,33 @@ async def register(
         token_type=tokens.get("token_type", "Bearer"),
         expires_in=tokens.get("expires_in", 3600),
         scope=tokens.get("scope", "openid profile email"),
+        refresh_token=tokens.get("refresh_token"),
+    )
+
+
+@router.post("/refresh", response_model=TokenResponse)
+@limiter.limit("30/minute")
+async def refresh(
+    body: RefreshRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+) -> TokenResponse:
+    """Exchange a refresh token for new access and refresh tokens."""
+    try:
+        tokens = await headless_refresh_token(body.refresh_token)
+    except HeadlessAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+    await _ensure_local_user(tokens["id_token"], session)
+    return TokenResponse(
+        access_token=tokens["access_token"],
+        id_token=tokens["id_token"],
+        token_type=tokens.get("token_type", "Bearer"),
+        expires_in=tokens.get("expires_in", 3600),
+        scope=tokens.get("scope", "openid profile email"),
+        refresh_token=tokens.get("refresh_token"),
     )
 
 

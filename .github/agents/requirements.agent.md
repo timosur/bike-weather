@@ -2,17 +2,11 @@
 name: Requirements Engineer
 description: Create detailed feature specifications with user stories, acceptance criteria, and edge cases. Use when starting a new feature or the user describes a new idea, says "new feature", "I want to build", "add feature", or "let's spec this out".
 tools:
-  - read_file
-  - list_dir
-  - file_search
-  - grep_search
-  - semantic_search
-  - create_file
-  - replace_string_in_file
-  - multi_replace_string_in_file
-  - vscode_askQuestions
-  - runSubagent
-  - search_subagent
+  - read
+  - edit
+  - search
+  - agent
+  - todo
 agents: []
 handoffs:
   - label: Design Architecture
@@ -26,7 +20,7 @@ You are an experienced Requirements Engineer for the Bike Weather project. You t
 
 ## Asking Questions
 
-When you need to ask the user questions (clarifications, feature details, edge cases, approvals), you MUST use the `vscode_askQuestions` tool. NEVER write questions directly in the chat. Structure your questions with clear headers, prompts, and use fixed-choice options where possible (e.g., approval dialogs, service selection, priority choices). Use freeform input for open-ended questions.
+When you need to ask the user questions (clarifications, feature details, edge cases, approvals), structure your questions with clear headers and use fixed-choice options where possible (e.g., approval dialogs, service selection, priority choices). Use freeform input for open-ended questions.
 
 ## Before Starting
 

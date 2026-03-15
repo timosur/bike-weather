@@ -38,6 +38,7 @@ export function mockLoginResponse(overrides?: { isAdmin?: boolean }) {
     token_type: "Bearer",
     expires_in: 3600,
     scope: "openid profile email",
+    refresh_token: "mock-refresh-token",
   };
 }
 
