@@ -1,5 +1,24 @@
 # Changelog
 
+## frontend v0.1.0 — 2026-03-15
+
+- feat(bike): updated
+- feat(workflow): updated
+- feat(product): fixes
+
+## backend v0.1.0 — 2026-03-15
+
+- feat(bike): updated
+- feat(workflow): updated
+- feat(product): fixes
+
+## agent v0.1.0 — 2026-03-15
+
+- feat(product): fixes
+- feat(BIKE-19): implemented
+- feat(BIKE-19): refactor main.py to extract-only, inline zone map in server.py
+- feat(BIKE-19): delete publisher.py and its tests
+
 ## frontend v0.0.12 — 2026-03-13
 
 - feat: skeleton ride report
