@@ -206,9 +206,10 @@ class CategoryAdminResponse(BaseModel):
     description: str
     icon: str
     displayOrder: int
+    zone: str = ""
 
     @classmethod
-    def from_model(cls, obj: object) -> "CategoryAdminResponse":
+    def from_model(cls, obj: object, zone: str = "") -> "CategoryAdminResponse":
         return cls(
             id=getattr(obj, "id"),
             name=getattr(obj, "name"),
@@ -216,6 +217,7 @@ class CategoryAdminResponse(BaseModel):
             description=getattr(obj, "description"),
             icon=getattr(obj, "icon"),
             displayOrder=getattr(obj, "display_order"),
+            zone=zone,
         )
 
 

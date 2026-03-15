@@ -852,6 +852,10 @@
         "shopCreated": "Shop neu angelegt",
         "matchesItemIdLabel": "Kleidungsstück-ID",
         "matchesItemIdNone": "— Nicht zugewiesen —",
+        "matchesItemIdSearch": "Kleidungsstücke suchen…",
+        "matchesItemIdEmpty": "Keine passenden Einträge",
+        "categorySearch": "Kategorien suchen…",
+        "categoryEmpty": "Keine passenden Kategorien",
         "bikeTypesLabel": "Fahrradtypen",
         "bikeType": {
           "rennrad": "Rennrad",

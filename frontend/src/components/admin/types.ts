@@ -35,6 +35,7 @@ export interface AdminCategory {
   description: string;
   icon: string;
   displayOrder: number;
+  zone: string;
 }
 
 export interface AdminShop {

@@ -30,18 +30,18 @@ _Which sub-features and areas this spec covers._
 
 ---
 
-<!-- Appended by architecture skill -->
+<!-- Appended by /architecture agent -->
 
 ## Tech Design
 
-_To be filled by the architecture skill._
+_To be filled by the /architecture agent._
 
 ## Implementation Plan
 
-_See `project/plans/BIKE-X-plan.md` (created by the architecture skill)._
+_See `project/plans/BIKE-X-plan.md` (created by the /architecture agent)._
 
-<!-- Appended by QA skill -->
+<!-- Appended by /qa agent -->
 
 ## QA Results
 
-_To be filled by the QA skill._
+_To be filled by the /qa agent._

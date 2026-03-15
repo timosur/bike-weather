@@ -852,6 +852,10 @@
         "shopCreated": "New shop created",
         "matchesItemIdLabel": "Clothing Item ID",
         "matchesItemIdNone": "— Not assigned —",
+        "matchesItemIdSearch": "Search clothing items…",
+        "matchesItemIdEmpty": "No matching items",
+        "categorySearch": "Search categories\u2026",
+        "categoryEmpty": "No matching categories",
         "bikeTypesLabel": "Bike Types",
         "bikeType": {
           "rennrad": "Road",

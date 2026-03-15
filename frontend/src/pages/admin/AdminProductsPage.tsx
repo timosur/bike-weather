@@ -7,13 +7,17 @@ import { SlidePanel } from '@/components/admin/shared/SlidePanel'
 import { StatusBadge } from '@/components/admin/shared/StatusBadge'
 import { ConfirmDialog } from '@/components/admin/shared/ConfirmDialog'
 import { FormField, TextInput, TextArea, SelectInput, ToggleSwitch } from '@/components/admin/shared/FormComponents'
+import { SearchableGroupedSelect } from '@/components/admin/shared/SearchableGroupedSelect'
 import { useToast } from '@/hooks/useToast'
-import { fetchAdminProducts, createProduct, updateProduct, deleteProduct, fetchAdminCategories, fetchAdminShops } from '@/api/admin/products'
+import { fetchAdminProducts, createProduct, updateProduct, deleteProduct, fetchAdminCategories, fetchAdminShops, fetchClothingItems } from '@/api/admin/products'
+import type { ClothingItemOption } from '@/api/admin/products'
 import type { AdminProduct, AdminCategory, AdminShop, PaginatedResponse } from '@/components/admin/types'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function AdminProductsPage() {
   const { addToast } = useToast()
+  const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [loading, setLoading] = useState(true)
@@ -25,6 +29,7 @@ export default function AdminProductsPage() {
   const [filterShop, setFilterShop] = useState('')
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [shops, setShops] = useState<AdminShop[]>([])
+  const [clothingItems, setClothingItems] = useState<ClothingItemOption[]>([])
 
   // Panel state
   const [panelOpen, setPanelOpen] = useState(false)
@@ -61,10 +66,10 @@ export default function AdminProductsPage() {
   useEffect(() => { loadProducts() }, [loadProducts])
 
   useEffect(() => {
-    Promise.all([fetchAdminCategories(), fetchAdminShops()])
-      .then(([cats, shps]) => { setCategories(cats); setShops(shps) })
+    Promise.all([fetchAdminCategories(), fetchAdminShops(), fetchClothingItems(i18n.language)])
+      .then(([cats, shps, clItems]) => { setCategories(cats); setShops(shps); setClothingItems(clItems) })
       .catch(() => { })
-  }, [])
+  }, [i18n.language])
 
   const openCreate = () => {
     setEditingProduct(null)
@@ -231,7 +236,28 @@ export default function AdminProductsPage() {
           </FormField>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Category" required>
-              <SelectInput value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} options={categories.map(c => ({ value: c.id, label: c.name }))} />
+              <SearchableGroupedSelect
+                value={form.categoryId}
+                onChange={(v) => setForm({ ...form, categoryId: v })}
+                placeholder={t('admin.import.urlImport.categorySearch')}
+                emptyLabel={t('admin.import.urlImport.categoryEmpty')}
+                emptyOptionLabel=""
+                groupLabels={{
+                  head: t('products.zones.head'),
+                  eyes: t('products.zones.eyes'),
+                  neck: t('products.zones.neck'),
+                  upperBody: t('products.zones.upperBody'),
+                  lowerBody: t('products.zones.lowerBody'),
+                  hands: t('products.zones.hands'),
+                  feet: t('products.zones.feet'),
+                  equipment: t('products.zones.equipment'),
+                }}
+                options={categories.map(c => ({
+                  value: c.id,
+                  label: c.name,
+                  group: c.zone,
+                }))}
+              />
             </FormField>
             <FormField label="Shop" required>
               <SelectInput value={form.shopId} onChange={(e) => setForm({ ...form, shopId: e.target.value })} options={shops.map(s => ({ value: s.id, label: s.name }))} />
@@ -250,10 +276,39 @@ export default function AdminProductsPage() {
             <TextInput value={form.matchesLabel} onChange={(e) => setForm({ ...form, matchesLabel: e.target.value })} />
           </FormField>
           <FormField label="Matches Zone">
-            <TextInput value={form.matchesZone} onChange={(e) => setForm({ ...form, matchesZone: e.target.value })} />
+            <SelectInput value={form.matchesZone} onChange={(e) => setForm({ ...form, matchesZone: e.target.value })} options={[
+              { value: '', label: '— None —' },
+              { value: 'head', label: t('products.zones.head') },
+              { value: 'eyes', label: t('products.zones.eyes') },
+              { value: 'neck', label: t('products.zones.neck') },
+              { value: 'upperBody', label: t('products.zones.upperBody') },
+              { value: 'lowerBody', label: t('products.zones.lowerBody') },
+              { value: 'hands', label: t('products.zones.hands') },
+              { value: 'feet', label: t('products.zones.feet') },
+            ]} />
           </FormField>
           <FormField label="Matches Item ID">
-            <TextInput value={form.matchesItemId} onChange={(e) => setForm({ ...form, matchesItemId: e.target.value })} placeholder="e.g. cl-rain-jacket" />
+            <SearchableGroupedSelect
+              value={form.matchesItemId}
+              onChange={(v) => setForm({ ...form, matchesItemId: v })}
+              placeholder={t('admin.import.urlImport.matchesItemIdSearch')}
+              emptyOptionLabel={t('admin.import.urlImport.matchesItemIdNone')}
+              emptyLabel={t('admin.import.urlImport.matchesItemIdEmpty')}
+              groupLabels={{
+                head: t('products.zones.head'),
+                eyes: t('products.zones.eyes'),
+                neck: t('products.zones.neck'),
+                upperBody: t('products.zones.upperBody'),
+                lowerBody: t('products.zones.lowerBody'),
+                hands: t('products.zones.hands'),
+                feet: t('products.zones.feet'),
+              }}
+              options={clothingItems.map((ci) => ({
+                value: ci.id,
+                label: ci.name,
+                group: ci.zone,
+              }))}
+            />
           </FormField>
           <FormField label="Bike Types">
             <div className="flex flex-wrap gap-2">

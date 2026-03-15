@@ -66,6 +66,7 @@ async def test_report_endpoint_returns_valid_report(
             wind_speed=12.0,
             wind_direction="S",
             wind_gusts=18.0,
+            wind_direction_deg=180.0,
             humidity=55,
             weather_code=1,
             icon="sun",

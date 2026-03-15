@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, X, AlertTriangle, ExternalLink, Plus } from 'lucide-react'
 import { FormField, TextInput, TextArea, SelectInput } from '../shared/FormComponents'
+import { SearchableGroupedSelect } from '../shared/SearchableGroupedSelect'
 import { fetchAdminCategories, fetchAdminShops, fetchClothingItems } from '@/api/admin/products'
+import type { ClothingItemOption } from '@/api/admin/products'
 import type { AdminCategory, AdminShop, SuggestedShop, ExtractedUrlProduct } from '../types'
 
 interface UrlImportReviewProps {
@@ -61,7 +63,7 @@ export function UrlImportReview({
   // Category & shop
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [shops, setShops] = useState<AdminShop[]>([])
-  const [clothingItems, setClothingItems] = useState<{ id: string; name: string }[]>([])
+  const [clothingItems, setClothingItems] = useState<ClothingItemOption[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState(suggestedCategoryId || '')
   const [shopMode, setShopMode] = useState<'existing' | 'new'>(suggestedShop?.isNew ? 'new' : 'existing')
   const [selectedShopId, setSelectedShopId] = useState(suggestedShop?.isNew ? '' : (suggestedShop?.id || ''))
@@ -240,10 +242,27 @@ export function UrlImportReview({
         </div>
 
         <FormField label={t('admin.import.category')} required>
-          <SelectInput
+          <SearchableGroupedSelect
             value={selectedCategoryId}
-            onChange={(e) => setSelectedCategoryId(e.target.value)}
-            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            onChange={setSelectedCategoryId}
+            placeholder={t('admin.import.urlImport.categorySearch')}
+            emptyLabel={t('admin.import.urlImport.categoryEmpty')}
+            emptyOptionLabel=""
+            groupLabels={{
+              head: t('products.zones.head'),
+              eyes: t('products.zones.eyes'),
+              neck: t('products.zones.neck'),
+              upperBody: t('products.zones.upperBody'),
+              lowerBody: t('products.zones.lowerBody'),
+              hands: t('products.zones.hands'),
+              feet: t('products.zones.feet'),
+              equipment: t('products.zones.equipment'),
+            }}
+            options={categories.map((c) => ({
+              value: c.id,
+              label: c.name,
+              group: c.zone,
+            }))}
           />
         </FormField>
       </div>
@@ -266,13 +285,26 @@ export function UrlImportReview({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField label={t('admin.import.urlImport.matchesItemIdLabel')}>
-            <SelectInput
+            <SearchableGroupedSelect
               value={matchesItemId}
-              onChange={(e) => setMatchesItemId(e.target.value)}
-              options={[
-                { value: '', label: t('admin.import.urlImport.matchesItemIdNone') },
-                ...clothingItems.map((ci) => ({ value: ci.id, label: `${ci.name} (${ci.id})` })),
-              ]}
+              onChange={setMatchesItemId}
+              placeholder={t('admin.import.urlImport.matchesItemIdSearch')}
+              emptyOptionLabel={t('admin.import.urlImport.matchesItemIdNone')}
+              emptyLabel={t('admin.import.urlImport.matchesItemIdEmpty')}
+              groupLabels={{
+                head: t('products.zones.head'),
+                eyes: t('products.zones.eyes'),
+                neck: t('products.zones.neck'),
+                upperBody: t('products.zones.upperBody'),
+                lowerBody: t('products.zones.lowerBody'),
+                hands: t('products.zones.hands'),
+                feet: t('products.zones.feet'),
+              }}
+              options={clothingItems.map((ci) => ({
+                value: ci.id,
+                label: ci.name,
+                group: ci.zone,
+              }))}
             />
           </FormField>
 

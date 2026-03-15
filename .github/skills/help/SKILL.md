@@ -33,12 +33,12 @@ Check each feature's status and determine the overall project state:
 
 | State | Condition | Next Action |
 |-------|-----------|-------------|
-| **No PRD** | `project/PRD.md` doesn't exist or is empty | Run the `requirements` skill with a project description |
-| **No features** | `project/features/INDEX.md` is empty | Run the `requirements` skill to create feature specs |
-| **Feature is Planned** | Has spec but no tech design | Run the `architecture` skill for that feature |
-| **Feature has design** | Has tech design section in spec | Run the `implementation` skill to build it |
-| **Feature is In Progress** | Implementation underway | Continue with the `implementation` skill or run `qa` if done |
-| **Feature is In Review** | QA in progress or done | Check QA results; run `release` if ready, `implementation` if bugs found |
+| **No PRD** | `project/PRD.md` doesn't exist or is empty | Switch to the **Requirements Engineer** agent |
+| **No features** | `project/features/INDEX.md` is empty | Switch to the **Requirements Engineer** agent to create feature specs |
+| **Feature is Planned** | Has spec but no tech design | Switch to the **Solution Architect** agent for that feature |
+| **Feature has design** | Has tech design section in spec | Switch to **Backend Developer** and/or **Frontend Developer** agents to build it |
+| **Feature is In Progress** | Implementation underway | Continue with **Backend Developer** or **Frontend Developer** agent, or switch to **QA Engineer** if done |
+| **Feature is In Review** | QA in progress or done | Check QA results; use `/release` skill if ready, **Backend Developer** or **Frontend Developer** if bugs found |
 | **All Deployed** | Everything shipped | Consider new features or improvements |
 
 ### 4. Present Status
@@ -56,7 +56,7 @@ Output format:
 | ID | Feature | Status | Next Action |
 |----|---------|--------|-------------|
 | BIKE-1 | Name | Deployed | — |
-| BIKE-16 | Name | Planned | Run `architecture` skill |
+| BIKE-16 | Name | Planned | Switch to **Solution Architect** agent |
 
 ### Active Implementation Plans
 
@@ -73,15 +73,16 @@ If a checkpoint is pending user verification, highlight it:
 
 [Specific recommendation based on the state analysis]
 
-### Available Skills
+### Available Agents & Skills
 
-| Skill | When to use |
+| Agent / Skill | When to use |
 |-------|-------------|
-| `requirements` | Create a new feature spec |
-| `architecture` | Design technical approach for a feature |
-| `implementation` | Build a feature |
-| `qa` | Test a feature against acceptance criteria |
-| `release` | Tag, deploy, update changelog |
+| **Requirements Engineer** (agent) | Create a new feature spec |
+| **Solution Architect** (agent) | Design technical approach for a feature |
+| **Frontend Developer** (agent) | Build UI components, pages, styling |
+| **Backend Developer** (agent) | Build APIs, database schemas, services |
+| **QA Engineer** (agent) | Test a feature against acceptance criteria |
+| `/release` (skill) | Tag, deploy, update changelog |
 ```
 
 ## Tips

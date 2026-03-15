@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import Column
+from sqlalchemy import Column, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -24,5 +24,6 @@ class SavedRoute(SQLModel, table=True):
     )
     # Full RideInput JSON for edit/restore functionality
     ride_input: dict[str, Any] | None = Field(
-        default=None, sa_column=Column(JSONB, nullable=True)
+        default=None,
+        sa_column=Column(JSON().with_variant(JSONB(), "postgresql"), nullable=True),
     )

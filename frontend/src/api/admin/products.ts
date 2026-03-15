@@ -101,6 +101,12 @@ export function updateShop(id: string, data: Partial<AdminShop>): Promise<AdminS
 
 // --- Clothing Items ---
 
-export function fetchClothingItems(locale: string = "de"): Promise<{ id: string; name: string }[]> {
+export interface ClothingItemOption {
+  id: string
+  name: string
+  zone: string
+}
+
+export function fetchClothingItems(locale: string = "de"): Promise<ClothingItemOption[]> {
   return apiFetch(`/admin/clothing-items?locale=${encodeURIComponent(locale)}`);
 }
