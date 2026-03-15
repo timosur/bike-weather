@@ -3,7 +3,7 @@
 | Field            | Value                        |
 | ---------------- | ---------------------------- |
 | **ID**           | BIKE-21                      |
-| **Status**       | In Review                    |
+| **Status**       | Deployed                     |
 | **Created**      | 2026-03-15                   |
 | **Dependencies** | BIKE-6 (Authentication)      |
 
