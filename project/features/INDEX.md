@@ -23,3 +23,6 @@
 | BIKE-19 | Agent Service Refactor        | Deployed    | [BIKE-19](BIKE-19-agent-service-refactor.md) | 2026-03-13 |
 | BIKE-20 | URL-Based Product Import      | Deployed    | [BIKE-20](BIKE-20-url-product-import.md)     | 2026-03-14 |
 | BIKE-21 | Refresh Token Mechanism       | Deployed   | [BIKE-21](BIKE-21-refresh-token.md)          | 2026-03-15 |
+| BIKE-22 | Report & Routes UI Improvements | In Review  | [BIKE-22](BIKE-22-report-ui-improvements.md) | 2026-03-17 |
+| BIKE-23 | Reverse Route Direction          | Planned  | [BIKE-23](BIKE-23-reverse-route.md)          | 2026-03-17 |
+| BIKE-24 | Item-Level Product Matching      | Planned  | [BIKE-24](BIKE-24-item-level-product-matching.md) | 2026-03-17 |

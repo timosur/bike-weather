@@ -35,6 +35,9 @@ Bike Weather helps cyclists dress right for every ride. It combines real weather
 | P1       | Agent service refactor           | Refactor agent to pure FastAPI extraction service; remove CLI and publishing            |
 | P1       | URL-based product import         | Paste any product URL → LLM extracts data → admin reviews → saved to catalog           |
 | P1       | Refresh token mechanism          | Silent token refresh so users stay authenticated beyond access token expiry             |
+| P1       | Report & routes UI improvements  | Re-plan from routes, ride date in report header, clothing grouped by body zone          |
+| P1       | Reverse route direction          | Swap start ↔ destination with one tap; reverses waypoints and GPX geometry              |
+| P1       | Item-level product matching      | Fix product matching to use specific item IDs instead of zones; agent auto-assigns IDs  |
 
 ## Success Metrics
 
