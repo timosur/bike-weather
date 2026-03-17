@@ -104,6 +104,7 @@
     "heading": "What should I take with me?",
     "subheading": "Enter your ride details — we'll tell you what you need.",
     "addDestination": "Add destination",
+    "swapDirection": "Swap start and destination",
     "label": {
       "startLocation": "Start location",
       "destination": "Destination",
@@ -293,6 +294,19 @@
       "equipment": "Equipment Recommendation",
       "packingList": "Packing List for Entire Tour",
       "tips": "Tips & Safety"
+    },
+    "clothing": {
+      "zone": {
+        "head": "Head",
+        "eyes": "Eyes",
+        "neck": "Neck",
+        "upperBody": "Upper Body",
+        "lowerBody": "Lower Body",
+        "hands": "Hands",
+        "feet": "Feet",
+        "other": "Other"
+      },
+      "alternatives": "or:"
     },
     "windAnalysis": {
       "title": "Route Conditions",
@@ -498,22 +512,12 @@
       "weeksAgo": "{{count}} weeks ago",
       "shared": "Shared"
     },
-    "edit": {
-      "heading": "Edit route",
-      "routeName": "Route name",
-      "startLocation": "Start location",
-      "distance": "Distance ({{unit}})",
-      "ridingStyle": "Riding style",
-      "ridingStyleSporty": "Sporty",
-      "ridingStyleEasy": "Easy",
-      "ridingStyleTouring": "Touring"
-    },
     "delete": {
       "heading": "Really delete route?",
       "text": "will be permanently deleted and cannot be recovered."
     },
     "actions": {
-      "edit": "Edit",
+      "replan": "Re-plan",
       "delete": "Delete",
       "share": "Share",
       "copyLink": "Copy link",

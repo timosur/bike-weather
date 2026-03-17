@@ -104,6 +104,7 @@
     "heading": "Was soll ich mitnehmen?",
     "subheading": "Gib deine Fahrtdetails ein — wir sagen dir, was du brauchst.",
     "addDestination": "Zielort hinzufügen",
+    "swapDirection": "Start und Ziel tauschen",
     "label": {
       "startLocation": "Startort",
       "destination": "Zielort",
@@ -294,6 +295,19 @@
       "packingList": "Packliste für die gesamte Tour",
       "tips": "Hinweise & Sicherheit"
     },
+    "clothing": {
+      "zone": {
+        "head": "Kopf",
+        "eyes": "Augen",
+        "neck": "Hals",
+        "upperBody": "Oberkörper",
+        "lowerBody": "Unterkörper",
+        "hands": "Hände",
+        "feet": "Füße",
+        "other": "Sonstiges"
+      },
+      "alternatives": "oder:"
+    },
     "windAnalysis": {
       "title": "Streckenbedingungen",
       "headwind": "Gegenwind",
@@ -366,11 +380,6 @@
       "weatherTimeline": "Wetter-Zeitstrahl",
       "allDays": "Über {{count}} Tage",
       "worstCase": "Höchstwert über alle Tage"
-    },
-    "clothing": {
-      "alternativeAvailable": "Alternative verfügbar",
-      "swapFor": "Tauschen gegen",
-      "cancel": "Abbrechen"
     },
     "zone": {
       "head": "Kopf",
@@ -498,22 +507,12 @@
       "weeksAgo": "Vor {{count}} Wochen",
       "shared": "Geteilt"
     },
-    "edit": {
-      "heading": "Route bearbeiten",
-      "routeName": "Routenname",
-      "startLocation": "Startort",
-      "distance": "Distanz ({{unit}})",
-      "ridingStyle": "Fahrstil",
-      "ridingStyleSporty": "Sportlich",
-      "ridingStyleEasy": "Entspannt",
-      "ridingStyleTouring": "Touring"
-    },
     "delete": {
       "heading": "Route wirklich löschen?",
       "text": "wird dauerhaft gelöscht und kann nicht wiederhergestellt werden."
     },
     "actions": {
-      "edit": "Bearbeiten",
+      "replan": "Neu planen",
       "delete": "Löschen",
       "share": "Teilen",
       "copyLink": "Link kopieren",

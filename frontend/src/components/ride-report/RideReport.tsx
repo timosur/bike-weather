@@ -1,14 +1,13 @@
-import { useMemo, useRef, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Gauge, Route, Clock, Timer, Share2, Bookmark, BookmarkCheck, PenLine, Plus, Save, Check, Loader2 } from 'lucide-react'
-import type { RideReportProps, MatchedProduct } from './types'
+import { MapPin, Gauge, Route, Clock, Timer, Calendar, Share2, Bookmark, BookmarkCheck, PenLine, Plus, Save, Check, Loader2 } from 'lucide-react'
+import type { RideReportProps } from './types'
 import { ConditionBadge } from './ConditionBadge'
 import { WeatherPanel } from './WeatherPanel'
 import { MultiDayWeatherChart } from './MultiDayWeatherChart'
 import { EquipmentList } from './EquipmentList'
-import { ClothingItemCard } from './ClothingItemCard'
+import { ClothingList } from './ClothingList'
 import { TipsList } from './TipsList'
-import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 import { RouteMap, RouteMapLegend } from './RouteMap'
 import { StickyActionBar } from './StickyActionBar'
 import { DayTimeline } from './DayTimeline'
@@ -21,17 +20,13 @@ function formatDuration(minutes: number, t: (key: string, opts?: Record<string, 
 }
 
 export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSaving, routeSaved, onLoginToSave, onSaveChanges, saveChangesLoading, hasUnsavedChanges, onEditRide, onNewRide, onProductClick }: RideReportProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const chartScrollRef = useRef<HTMLDivElement | null>(null)
 
   const isMultiDay = report.days.length > 1
   const activeDay = report.days[0]
 
   const productRecs = report.productRecommendations
-  const shopMap = useMemo(
-    () => (productRecs ? new Map(productRecs.shops.map((s) => [s.id, s])) : new Map()),
-    [productRecs],
-  )
 
   // For multi-day: use merged items; for single-day: use active day items
   const clothingItems = isMultiDay
@@ -45,10 +40,6 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
   const tips = isMultiDay
     ? (report.tips ?? [])
     : (activeDay?.tips ?? [])
-
-  function findItemProduct(itemId: string): MatchedProduct | undefined {
-    return productRecs?.matched[itemId]
-  }
 
   const handleChartRef = useCallback((el: HTMLDivElement | null) => {
     chartScrollRef.current = el
@@ -78,6 +69,12 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
             <Gauge className="w-3.5 h-3.5" strokeWidth={1.5} />
             {report.ridingStyle}
           </span>
+          {activeDay?.date && (
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
+              {new Intl.DateTimeFormat(i18n.language === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(activeDay.date + 'T00:00:00'))}
+            </span>
+          )}
           {isMultiDay && (
             <span className="text-stone-400 dark:text-stone-500">
               {t('report.days', { count: report.days.length })}
@@ -280,28 +277,11 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
         >
           {isMultiDay ? t('report.section.packingList') : t('report.section.clothing')}
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {clothingItems.map((item) => {
-            const itemProduct = productRecs?.disclosure ? findItemProduct(item.id) : undefined
-            const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
-            return (
-              <ClothingItemCard
-                key={item.id}
-                item={item}
-                productLink={
-                  itemProduct && shop && productRecs?.disclosure ? (
-                    <InlineProductLink
-                      product={itemProduct}
-                      shop={shop}
-                      disclosure={productRecs.disclosure}
-                      onProductClick={onProductClick}
-                    />
-                  ) : undefined
-                }
-              />
-            )
-          })}
-        </div>
+        <ClothingList
+          items={clothingItems}
+          productRecommendations={productRecs}
+          onProductClick={onProductClick}
+        />
       </section>
 
       {/* ── 8. EQUIPMENT ── */}

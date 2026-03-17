@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { MyRoutes } from '../components/my-routes'
 import { SEO } from '../hooks/useSEO'
 import type { SavedRoute } from '../components/my-routes/types'
-import { fetchRoutes, updateRoute as apiUpdateRoute, deleteRoute as apiDeleteRoute } from '../api/routes'
+import { fetchRoutes, deleteRoute as apiDeleteRoute } from '../api/routes'
 import { shareRoute, unshareRoute, getShareUrl } from '../api/shared'
 import { useToast } from '../hooks/useToast'
+import type { RideInput } from '../components/ride-planner/types'
 
 export default function RoutesPage() {
   const navigate = useNavigate()
@@ -29,21 +30,36 @@ export default function RoutesPage() {
     [navigate],
   )
 
-  const handleRouteEdit = useCallback(
-    (routeId: string, updates: Partial<Pick<SavedRoute, 'name' | 'startLocation' | 'totalDistance' | 'ridingStyle'>>) => {
-      // Map camelCase frontend keys to snake_case API keys
-      const apiUpdates: Record<string, unknown> = {}
-      if (updates.name !== undefined) apiUpdates.start_location = updates.name
-      if (updates.startLocation !== undefined) apiUpdates.start_location = updates.startLocation
-      if (updates.totalDistance !== undefined) apiUpdates.total_distance = updates.totalDistance
-      if (updates.ridingStyle !== undefined) apiUpdates.riding_style = updates.ridingStyle
-      if (updates.name !== undefined) apiUpdates.name = updates.name
+  const handleRouteReplan = useCallback(
+    (routeId: string) => {
+      const route = routes.find((r) => r.id === routeId)
+      if (!route) return
 
-      apiUpdateRoute(routeId, apiUpdates)
-        .then(() => fetchRoutes().then(setRoutes))
-        .catch(() => {/* ignore */ })
+      const now = new Date()
+      const today = now.toISOString().slice(0, 10)
+      const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+      let editInput: RideInput
+      if (route.rideInput) {
+        // Override date/time to now
+        editInput = { ...route.rideInput, startDate: today, startTime }
+      } else {
+        // Legacy route: construct minimal RideInput
+        editInput = {
+          location: { address: route.startLocation },
+          startDate: today,
+          startTime,
+          bikeType: 'rennrad',
+          intensity: route.ridingStyle === 'Sporty' ? 'sportlich' : route.ridingStyle === 'Easy' ? 'gemuetlich' : 'moderat',
+          distanceKm: route.totalDistance,
+          waypoints: [],
+          destination: null,
+        }
+      }
+
+      navigate(`/planner/${routeId}`, { state: { editInput } })
     },
-    [],
+    [routes, navigate],
   )
 
   const handleRouteDelete = useCallback(
@@ -119,7 +135,7 @@ export default function RoutesPage() {
       <MyRoutes
         routes={routes}
         onRouteSelect={handleRouteSelect}
-        onRouteEdit={handleRouteEdit}
+        onRouteReplan={handleRouteReplan}
         onRouteDelete={handleRouteDelete}
         onRouteShare={handleRouteShare}
         onRouteUnshare={handleRouteUnshare}

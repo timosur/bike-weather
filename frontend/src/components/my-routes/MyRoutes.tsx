@@ -2,13 +2,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MyRoutesProps, SavedRoute } from './types'
 import { RouteCard } from './RouteCard'
-import { EditRouteModal } from './EditRouteModal'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { EmptyRoutes } from './EmptyRoutes'
 
-export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, onRouteShare, onRouteUnshare, onCopyShareLink, onNavigateToPlanner }: MyRoutesProps) {
+export function MyRoutes({ routes, onRouteSelect, onRouteReplan, onRouteDelete, onRouteShare, onRouteUnshare, onCopyShareLink, onNavigateToPlanner }: MyRoutesProps) {
   const { t } = useTranslation()
-  const [editingRoute, setEditingRoute] = useState<SavedRoute | null>(null)
   const [deletingRoute, setDeletingRoute] = useState<SavedRoute | null>(null)
 
   if (routes.length === 0) {
@@ -49,7 +47,7 @@ export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, on
             key={route.id}
             route={route}
             onSelect={() => onRouteSelect?.(route.id)}
-            onEdit={() => setEditingRoute(route)}
+            onReplan={() => onRouteReplan?.(route.id)}
             onDelete={() => setDeletingRoute(route)}
             onShare={() => onRouteShare?.(route.id)}
             onUnshare={() => onRouteUnshare?.(route.id)}
@@ -57,18 +55,6 @@ export function MyRoutes({ routes, onRouteSelect, onRouteEdit, onRouteDelete, on
           />
         ))}
       </div>
-
-      {/* Edit modal */}
-      {editingRoute && (
-        <EditRouteModal
-          route={editingRoute}
-          onSave={(routeId, updates) => {
-            onRouteEdit?.(routeId, updates)
-            setEditingRoute(null)
-          }}
-          onClose={() => setEditingRoute(null)}
-        />
-      )}
 
       {/* Delete confirmation */}
       {deletingRoute && (

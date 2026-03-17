@@ -31,11 +31,8 @@ export interface MyRoutesProps {
   /** Called when the user taps a route card to fetch a fresh Ride Report */
   onRouteSelect?: (routeId: string) => void;
 
-  /** Called when the user saves edits to a route's details */
-  onRouteEdit?: (
-    routeId: string,
-    updates: Partial<Pick<SavedRoute, "name" | "startLocation" | "totalDistance" | "ridingStyle">>,
-  ) => void;
+  /** Called when the user wants to re-plan a route with current date/time */
+  onRouteReplan?: (routeId: string) => void;
 
   /** Called when the user confirms deletion of a route */
   onRouteDelete?: (routeId: string) => void;

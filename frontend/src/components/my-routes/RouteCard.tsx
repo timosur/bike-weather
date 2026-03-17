@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Route, Gauge, MoreVertical, Pencil, Trash2, Share2, Link2Off, Copy } from 'lucide-react'
+import { MapPin, Route, Gauge, MoreVertical, RefreshCw, Trash2, Share2, Link2Off, Copy } from 'lucide-react'
 import type { SavedRoute, ConditionRating } from './types'
 
 function getConditionConfig(t: (key: string) => string): Record<ConditionRating, { label: string; bg: string; text: string; dot: string }> {
@@ -35,14 +35,14 @@ function getConditionConfig(t: (key: string) => string): Record<ConditionRating,
 interface RouteCardProps {
   route: SavedRoute
   onSelect?: () => void
-  onEdit?: () => void
+  onReplan?: () => void
   onDelete?: () => void
   onShare?: () => void
   onUnshare?: () => void
   onCopyShareLink?: () => void
 }
 
-export function RouteCard({ route, onSelect, onEdit, onDelete, onShare, onUnshare, onCopyShareLink }: RouteCardProps) {
+export function RouteCard({ route, onSelect, onReplan, onDelete, onShare, onUnshare, onCopyShareLink }: RouteCardProps) {
   const { t, i18n } = useTranslation()
   const conditionConfig = getConditionConfig(t)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -108,12 +108,12 @@ export function RouteCard({ route, onSelect, onEdit, onDelete, onShare, onUnshar
                   onClick={(e) => {
                     e.stopPropagation()
                     setMenuOpen(false)
-                    onEdit?.()
+                    onReplan?.()
                   }}
                   className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
                 >
-                  <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
-                  {t('routes.actions.edit')}
+                  <RefreshCw className="w-3.5 h-3.5" strokeWidth={2} />
+                  {t('routes.actions.replan')}
                 </button>
                 {route.shareToken ? (
                   <>
