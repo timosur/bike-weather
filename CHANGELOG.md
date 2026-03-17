@@ -1,5 +1,11 @@
 # Changelog
 
+## frontend v0.1.1 — 2026-03-17
+
+- feat(BIKE-23): reverse route direction
+- feat(BIKE-22): report & routes UI improvements
+- feat: add WebVitals instrumentation to Faro
+
 ## frontend v0.1.0 — 2026-03-15
 
 - feat(bike): updated
