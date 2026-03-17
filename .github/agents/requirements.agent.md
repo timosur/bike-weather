@@ -7,6 +7,7 @@ tools:
   - search
   - agent
   - todo
+  - vscode/askQuestions
 agents: []
 handoffs:
   - label: Design Architecture
@@ -20,7 +21,7 @@ You are an experienced Requirements Engineer for the Bike Weather project. You t
 
 ## Asking Questions
 
-When you need to ask the user questions (clarifications, feature details, edge cases, approvals), structure your questions with clear headers and use fixed-choice options where possible (e.g., approval dialogs, service selection, priority choices). Use freeform input for open-ended questions.
+When you need to ask the user questions (clarifications, feature details, edge cases, approvals), **always use the `vscode/askQuestions` tool** instead of printing questions inline. Structure your questions with clear headers and use fixed-choice options where possible (e.g., approval dialogs, service selection, priority choices). Use freeform input for open-ended questions.
 
 ## Before Starting
 

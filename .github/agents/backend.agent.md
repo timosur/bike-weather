@@ -8,6 +8,7 @@ tools:
   - execute
   - agent
   - todo
+  - vscode/askQuestions
 agents: []
 handoffs:
   - label: Build Frontend
