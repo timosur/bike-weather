@@ -3,6 +3,7 @@ import {
   ErrorsInstrumentation,
   SessionInstrumentation,
   ViewInstrumentation,
+  WebVitalsInstrumentation,
 } from '@grafana/faro-web-sdk'
 import { ReactIntegration, createReactRouterV6Options } from '@grafana/faro-react'
 import { createRoutesFromChildren, matchRoutes, Routes, useLocation, useNavigationType } from 'react-router-dom'
@@ -22,6 +23,7 @@ export let faro = initializeFaro({
     new ErrorsInstrumentation(),
     new SessionInstrumentation(),
     new ViewInstrumentation(),
+    new WebVitalsInstrumentation(),
     new ReactIntegration({
       router: createReactRouterV6Options({
         createRoutesFromChildren,
