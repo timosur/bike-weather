@@ -10,6 +10,7 @@ import {
   Trees,
   Building2,
   ArrowUpRight,
+  ArrowUpDown,
   Timer,
   Zap,
   RotateCcw,
@@ -205,6 +206,26 @@ export function RidePlanner({
     // We don't have onDestinationSelect prop yet, but onDestinationSearch handles query.
   }
 
+  const canSwapDirection = form.location !== null && form.destination !== null
+
+  const handleSwapDirection = () => {
+    if (!canSwapDirection) return
+    markDirty()
+    const reversedGeometry = form.importedGeometry?.slice().reverse()
+    setForm(f => ({
+      ...f,
+      location: f.destination,
+      destination: f.location,
+      waypoints: f.waypoints.slice().reverse(),
+      importedGeometry: reversedGeometry,
+      distanceKm: null,
+    }))
+    if (reversedGeometry) {
+      const totalKm = routePreview?.distanceKm ?? 0
+      setRoutePreview(prev => prev ? { ...prev, geometry: reversedGeometry as [number, number][], distanceKm: totalKm } : null)
+    }
+  }
+
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!form.location) errs.location = t('planner.validation.locationRequired')
@@ -306,6 +327,22 @@ export function RidePlanner({
                 placeholder={t('planner.placeholder.cityOrAddress')}
                 error={errors.location}
               />
+            </div>
+
+            {/* Swap direction button */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
+              <button
+                type="button"
+                onClick={handleSwapDirection}
+                disabled={!canSwapDirection}
+                title={t('planner.swapDirection')}
+                aria-label={t('planner.swapDirection')}
+                className="flex items-center justify-center w-8 h-8 rounded-full border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all disabled:opacity-30 disabled:pointer-events-none"
+              >
+                <ArrowUpDown className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+              <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
             </div>
 
             {/* Waypoints (between start and destination) */}
