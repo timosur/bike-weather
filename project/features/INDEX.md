@@ -25,6 +25,6 @@
 | BIKE-21 | Refresh Token Mechanism         | Deployed | [BIKE-21](BIKE-21-refresh-token.md)                | 2026-03-15 |
 | BIKE-22 | Report & Routes UI Improvements | Deployed | [BIKE-22](BIKE-22-report-ui-improvements.md)       | 2026-03-17 |
 | BIKE-23 | Reverse Route Direction         | Planned  | [BIKE-23](BIKE-23-reverse-route.md)                | 2026-03-17 |
-| BIKE-24 | Item-Level Product Matching     | Done     | [BIKE-24](BIKE-24-item-level-product-matching.md)  | 2026-03-17 |
+| BIKE-24 | Item-Level Product Matching     | Deployed | [BIKE-24](BIKE-24-item-level-product-matching.md)  | 2026-03-17 |
 | BIKE-25 | Protobuf Agent Communication    | Planned  | [BIKE-25](BIKE-25-protobuf-agent-communication.md) | 2026-03-18 |
-| BIKE-26 | Item IDs in Database            | Done     | [BIKE-26](BIKE-26-item-ids-database.md)            | 2026-03-18 |
+| BIKE-26 | Item IDs in Database            | Deployed | [BIKE-26](BIKE-26-item-ids-database.md)            | 2026-03-18 |
