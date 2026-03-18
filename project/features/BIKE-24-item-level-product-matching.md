@@ -3,7 +3,7 @@
 | Field            | Value                                          |
 | ---------------- | ---------------------------------------------- |
 | **ID**           | BIKE-24                                        |
-| **Status**       | Planned                                        |
+| **Status**       | Done                                           |
 | **Created**      | 2026-03-17                                     |
 | **Dependencies** | BIKE-4 (product catalog), BIKE-20 (URL import) |
 
@@ -159,49 +159,49 @@ _See `project/plans/BIKE-24-plan.md` (created by the Solution Architect agent)._
 
 ### Acceptance Criteria
 
-| # | Criterion | Status | Notes |
-|---|-----------|--------|-------|
-| AC-1 | Clothing items match by `matches_item_id` | PASS | `match_products_to_clothing()` groups products by `matches_item_id`, looks up `item.get("id")`. Test: `test_exact_match_by_item_id`. |
-| AC-2 | Different items in same zone get different products | PASS | Each item looks up its own `matches_item_id` — no zone grouping. Test: `test_different_items_same_zone_get_different_products`. |
-| AC-3 | No zone fallback when no match | PASS | `ICON_TO_ZONE` removed. Items with no matching product are skipped; returns `None` if nothing matched. Tests: `test_no_match_returns_nothing`, `test_product_without_item_id_ignored`. |
-| AC-4 | Weather scoring among candidates | PASS | `_pick_best()` scores all candidates for the same `matches_item_id`. Test: `test_weather_scoring_among_candidates`. |
-| AC-5 | Bike-type-specific items match correctly | PASS | `_make_item()` applies bike overrides (e.g. `cl-shorts` → `cl-shorts-rennrad`). Products tagged with the specific suffixed ID match via exact lookup. Agent `VALID_ITEM_IDS` includes all bike-type variants. |
-| AC-6 | Agent extraction includes `matches_item_id` | PASS | `ProductData.matches_item_id: str \| None = None`. Both `EXTRACTION_PROMPT` and `SINGLE_URL_EXTRACTION_PROMPT` include the field. Test: `test_matches_item_id`. |
-| AC-7 | LLM provided full list of valid item IDs | PASS | `VALID_ITEM_IDS` dict (~110 entries) with English names. `_format_item_ids_for_prompt()` formats them. Both prompts include `{item_ids}` placeholder, both `.format()` calls pass the parameter. Test: `TestValidItemIds` (4 tests). |
-| AC-8 | `matches_item_id` persisted via bulk API | PASS | `_products_to_bulk_payload()` passes `"matchesItemId": p.matches_item_id`. Admin route `bulk_import_products` writes `matches_item_id` on both create and update paths. `_run_extract_url_job()` also passes `product.matches_item_id`. |
-| AC-9 | Null when LLM can't determine | PASS | `ProductData.matches_item_id` defaults to `None`. LLM prompt says "Use null if unsure or no match". Products with `matches_item_id=None` filtered out by `WHERE matches_item_id IS NOT NULL`. |
-| AC-10 | Product edit form has `matchesItemId` field | PASS | `SearchableGroupedSelect` component in `AdminProductsPage.tsx` with grouped options by zone. |
-| AC-11 | Selectable list of valid IDs | PASS | `clothingItems` mapped to `{ value: ci.id, label: ci.name, group: ci.zone }` options. Includes "None" option to clear the field. |
-| AC-12 | Changes persisted on save | PASS | `ProductUpdate` schema includes `matchesItemId`. `update_product` route maps `matchesItemId` → `matches_item_id` via `field_map`. `ProductCreate` also includes it. |
+| #     | Criterion                                           | Status | Notes                                                                                                                                                                                                                                   |
+| ----- | --------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC-1  | Clothing items match by `matches_item_id`           | PASS   | `match_products_to_clothing()` groups products by `matches_item_id`, looks up `item.get("id")`. Test: `test_exact_match_by_item_id`.                                                                                                    |
+| AC-2  | Different items in same zone get different products | PASS   | Each item looks up its own `matches_item_id` — no zone grouping. Test: `test_different_items_same_zone_get_different_products`.                                                                                                         |
+| AC-3  | No zone fallback when no match                      | PASS   | `ICON_TO_ZONE` removed. Items with no matching product are skipped; returns `None` if nothing matched. Tests: `test_no_match_returns_nothing`, `test_product_without_item_id_ignored`.                                                  |
+| AC-4  | Weather scoring among candidates                    | PASS   | `_pick_best()` scores all candidates for the same `matches_item_id`. Test: `test_weather_scoring_among_candidates`.                                                                                                                     |
+| AC-5  | Bike-type-specific items match correctly            | PASS   | `_make_item()` applies bike overrides (e.g. `cl-shorts` → `cl-shorts-rennrad`). Products tagged with the specific suffixed ID match via exact lookup. Agent `VALID_ITEM_IDS` includes all bike-type variants.                           |
+| AC-6  | Agent extraction includes `matches_item_id`         | PASS   | `ProductData.matches_item_id: str \| None = None`. Both `EXTRACTION_PROMPT` and `SINGLE_URL_EXTRACTION_PROMPT` include the field. Test: `test_matches_item_id`.                                                                         |
+| AC-7  | LLM provided full list of valid item IDs            | PASS   | `VALID_ITEM_IDS` dict (~110 entries) with English names. `_format_item_ids_for_prompt()` formats them. Both prompts include `{item_ids}` placeholder, both `.format()` calls pass the parameter. Test: `TestValidItemIds` (4 tests).    |
+| AC-8  | `matches_item_id` persisted via bulk API            | PASS   | `_products_to_bulk_payload()` passes `"matchesItemId": p.matches_item_id`. Admin route `bulk_import_products` writes `matches_item_id` on both create and update paths. `_run_extract_url_job()` also passes `product.matches_item_id`. |
+| AC-9  | Null when LLM can't determine                       | PASS   | `ProductData.matches_item_id` defaults to `None`. LLM prompt says "Use null if unsure or no match". Products with `matches_item_id=None` filtered out by `WHERE matches_item_id IS NOT NULL`.                                           |
+| AC-10 | Product edit form has `matchesItemId` field         | PASS   | `SearchableGroupedSelect` component in `AdminProductsPage.tsx` with grouped options by zone.                                                                                                                                            |
+| AC-11 | Selectable list of valid IDs                        | PASS   | `clothingItems` mapped to `{ value: ci.id, label: ci.name, group: ci.zone }` options. Includes "None" option to clear the field.                                                                                                        |
+| AC-12 | Changes persisted on save                           | PASS   | `ProductUpdate` schema includes `matchesItemId`. `update_product` route maps `matchesItemId` → `matches_item_id` via `field_map`. `ProductCreate` also includes it.                                                                     |
 
 ### Edge Cases
 
-| # | Case | Status | Notes |
-|---|------|--------|-------|
-| EC-1 | Product with `matches_item_id = null` — not shown | PASS | Query filters `WHERE matches_item_id IS NOT NULL`. Test: `test_product_without_item_id_ignored`. |
-| EC-2 | Multiple products same item ID — weather scoring picks best | PASS | Grouping + `_pick_best()`. Test: `test_weather_scoring_among_candidates`. |
-| EC-3 | LLM assigns wrong ID — admin can override | PASS | `SearchableGroupedSelect` in edit form allows changing. `ProductUpdate.matchesItemId` persists the change. |
-| EC-4 | Bike-type-specific items use suffixed IDs | PASS | Agent `VALID_ITEM_IDS` includes all variants (`cl-shorts-rennrad`, `cl-rain-jacket-mtb`, etc.). Prompt instructs LLM to use specific ID when product is bike-type-specific. |
-| EC-5 | Equipment prefix matching (`eq-lights` → `eq-lights-*`) | PASS | `item_id.startswith(product_item_id + "-")` in equipment matching. Tests: `test_prefix_matching_lights`, `test_prefix_matching_multiple_variants`. |
-| EC-6 | Unknown item ID — agent sets null, backend ignores | PASS | Agent prompt says "Use ONLY IDs from the list above. Use null if no item matches." Backend filters `IS NOT NULL` so unknown strings that slip through would simply not match any clothing item and be harmless. |
+| #    | Case                                                        | Status | Notes                                                                                                                                                                                                           |
+| ---- | ----------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EC-1 | Product with `matches_item_id = null` — not shown           | PASS   | Query filters `WHERE matches_item_id IS NOT NULL`. Test: `test_product_without_item_id_ignored`.                                                                                                                |
+| EC-2 | Multiple products same item ID — weather scoring picks best | PASS   | Grouping + `_pick_best()`. Test: `test_weather_scoring_among_candidates`.                                                                                                                                       |
+| EC-3 | LLM assigns wrong ID — admin can override                   | PASS   | `SearchableGroupedSelect` in edit form allows changing. `ProductUpdate.matchesItemId` persists the change.                                                                                                      |
+| EC-4 | Bike-type-specific items use suffixed IDs                   | PASS   | Agent `VALID_ITEM_IDS` includes all variants (`cl-shorts-rennrad`, `cl-rain-jacket-mtb`, etc.). Prompt instructs LLM to use specific ID when product is bike-type-specific.                                     |
+| EC-5 | Equipment prefix matching (`eq-lights` → `eq-lights-*`)     | PASS   | `item_id.startswith(product_item_id + "-")` in equipment matching. Tests: `test_prefix_matching_lights`, `test_prefix_matching_multiple_variants`.                                                              |
+| EC-6 | Unknown item ID — agent sets null, backend ignores          | PASS   | Agent prompt says "Use ONLY IDs from the list above. Use null if no item matches." Backend filters `IS NOT NULL` so unknown strings that slip through would simply not match any clothing item and be harmless. |
 
 ### Security Audit
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Auth bypass | PASS | All admin product routes use `Depends(require_admin)` (15 occurrences verified). Matching logic runs server-side only via `recommendations.py`. |
-| Authorization | PASS | Product CRUD is admin-only. Report generation is per-user; matching logic reads products but doesn't expose admin data. |
-| Input injection (SQL) | PASS | All DB queries use SQLAlchemy ORM (`select(Product).where(...)`) — fully parameterized. No raw SQL. |
-| Input injection (XSS) | PASS | `matches_item_id` is serialized via Pydantic schemas to JSON. No raw HTML rendering of this field. |
-| Rate limiting | N/A | No new public endpoints added. Existing rate limits unchanged. |
-| Data exposure | PASS | `MatchedProductSchema` exposes only product display fields (name, image, affiliate URL). No internal IDs or admin data leaked. |
-| Secrets | PASS | No hardcoded credentials. LLM API keys loaded via `settings` (pydantic-settings from `.env`). |
+| Check                 | Status | Notes                                                                                                                                           |
+| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth bypass           | PASS   | All admin product routes use `Depends(require_admin)` (15 occurrences verified). Matching logic runs server-side only via `recommendations.py`. |
+| Authorization         | PASS   | Product CRUD is admin-only. Report generation is per-user; matching logic reads products but doesn't expose admin data.                         |
+| Input injection (SQL) | PASS   | All DB queries use SQLAlchemy ORM (`select(Product).where(...)`) — fully parameterized. No raw SQL.                                             |
+| Input injection (XSS) | PASS   | `matches_item_id` is serialized via Pydantic schemas to JSON. No raw HTML rendering of this field.                                              |
+| Rate limiting         | N/A    | No new public endpoints added. Existing rate limits unchanged.                                                                                  |
+| Data exposure         | PASS   | `MatchedProductSchema` exposes only product display fields (name, image, affiliate URL). No internal IDs or admin data leaked.                  |
+| Secrets               | PASS   | No hardcoded credentials. LLM API keys loaded via `settings` (pydantic-settings from `.env`).                                                   |
 
 ### Bugs Found
 
-| # | Severity | Description | Steps to Reproduce | Priority |
-|---|----------|-------------|-------------------|----------|
-| 1 | Low | Stale comment in `recommendations.py` line 1027: "by zone + weather" should say "by item ID + weather" | Read the comment | Low |
+| #   | Severity | Description                                                                                            | Steps to Reproduce | Priority |
+| --- | -------- | ------------------------------------------------------------------------------------------------------ | ------------------ | -------- |
+| 1   | Low      | Stale comment in `recommendations.py` line 1027: "by zone + weather" should say "by item ID + weather" | Read the comment   | Low      |
 
 ### Test Execution Note
 

@@ -3,7 +3,7 @@
 | Field            | Value                                                        |
 | ---------------- | ------------------------------------------------------------ |
 | **ID**           | BIKE-23                                                      |
-| **Status**       | Planned                                                      |
+| **Status**       | Deployed                                                     |
 | **Created**      | 2026-03-17                                                   |
 | **Dependencies** | BIKE-1 (Ride Planning), BIKE-3 (GPX Import), BIKE-5 (Routes) |
 
@@ -112,8 +112,8 @@ The button sits between the start location section and the waypoints section, re
 
 Two new keys added to the `planner` namespace:
 
-| Key | EN | DE |
-|-----|----|----|
+| Key                     | EN                           | DE                        |
+| ----------------------- | ---------------------------- | ------------------------- |
 | `planner.swapDirection` | "Swap start and destination" | "Start und Ziel tauschen" |
 
 ### Dependencies
