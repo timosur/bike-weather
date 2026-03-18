@@ -3,7 +3,7 @@
 | Field            | Value                                 |
 | ---------------- | ------------------------------------- |
 | **ID**           | BIKE-26                               |
-| **Status**       | Planned                               |
+| **Status**       | Done                                  |
 | **Created**      | 2026-03-18                            |
 | **Dependencies** | BIKE-24 (Item-Level Product Matching) |
 

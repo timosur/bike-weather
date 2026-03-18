@@ -11,7 +11,6 @@ from app.models.product_bike_type import ProductBikeType
 from app.models.product_category import ProductCategory
 from app.models.shop import Shop
 from app.models.user import User
-from app.rules.translations import CLOTHING_TRANSLATIONS
 from app.schemas.product import (
     BulkProductItem,
     BulkProductResponse,
@@ -529,61 +528,6 @@ async def update_shop(
 
 # --- Clothing Items ---
 
-# Bike-type suffixes to filter out (we only want generic items)
-_BIKE_SUFFIXES = ("-rennrad", "-gravel", "-mtb", "-city")
-
-# Clothing item ID → body zone mapping
-_ITEM_ZONE: dict[str, str] = {
-    # Head
-    "cl-helmet-cover": "head",
-    "cl-headband": "head",
-    "cl-cycling-cap": "head",
-    # Eyes
-    "cl-sunglasses": "eyes",
-    "cl-glasses": "eyes",
-    "cl-glasses-wind": "eyes",
-    # Neck / Face
-    "cl-neck-gaiter": "neck",
-    "cl-face-mask": "neck",
-    # Upper body (base layer, jersey, outer layer)
-    "cl-base-merino": "upperBody",
-    "cl-base-wicking": "upperBody",
-    "cl-thermal-jersey": "upperBody",
-    "cl-jersey-long": "upperBody",
-    "cl-jersey-arm": "upperBody",
-    "cl-jersey-long-light": "upperBody",
-    "cl-jersey-short-alt": "upperBody",
-    "cl-jersey-short": "upperBody",
-    "cl-jersey-sleeveless": "upperBody",
-    "cl-rain-jacket": "upperBody",
-    "cl-packable-rain": "upperBody",
-    "cl-vest-alt": "upperBody",
-    "cl-wind-jacket": "upperBody",
-    "cl-wind-vest": "upperBody",
-    "cl-jacket-alt": "upperBody",
-    "cl-insulated-jacket": "upperBody",
-    "cl-windstopper-jacket": "upperBody",
-    # Lower body
-    "cl-thermal-tights": "lowerBody",
-    "cl-thermal-undershorts": "lowerBody",
-    "cl-tights-warmers": "lowerBody",
-    "cl-padded-tights": "lowerBody",
-    "cl-shorts-warmers": "lowerBody",
-    "cl-shorts": "lowerBody",
-    "cl-overpants": "lowerBody",
-    # Hands
-    "cl-gloves-waterproof": "hands",
-    "cl-gloves-wp": "hands",
-    "cl-gloves-warm": "hands",
-    "cl-gloves-light": "hands",
-    # Feet
-    "cl-shoe-covers": "feet",
-    "cl-shoes": "feet",
-    "cl-socks-warm": "feet",
-    "cl-socks-mid": "feet",
-    "cl-socks-thin": "feet",
-}
-
 
 @router.get("/clothing-items")
 async def list_clothing_items(
@@ -591,17 +535,17 @@ async def list_clothing_items(
     locale: str = Query("de", pattern="^(de|en)$"),
 ) -> list[dict[str, str]]:
     """Return generic clothing item IDs with translated names and zone for the given locale."""
-    seen: set[str] = set()
+    from app.services.item_cache import item_cache
+
     items: list[dict[str, str]] = []
-    for (item_id, loc), trans in CLOTHING_TRANSLATIONS.items():
-        if loc != locale:
+    for entry in item_cache.get_all_items():
+        if entry["type"] != "clothing":
             continue
-        if any(item_id.endswith(s) for s in _BIKE_SUFFIXES):
+        # Skip bike-type variants
+        if entry["parent_id"] is not None:
             continue
-        if item_id in seen:
-            continue
-        seen.add(item_id)
-        items.append(
-            {"id": item_id, "name": trans["name"], "zone": _ITEM_ZONE.get(item_id, "")}
+        name = (
+            entry[f"name_{locale}"] if f"name_{locale}" in entry else entry["name_en"]
         )
+        items.append({"id": entry["id"], "name": name, "zone": entry["zone"]})
     return items

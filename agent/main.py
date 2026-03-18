@@ -141,6 +141,7 @@ async def run_category(
     *,
     max_products: int = DEFAULT_MAX_PRODUCTS,
     progress: ProgressCallback | None = None,
+    item_ids: dict[str, str] | None = None,
 ) -> list[ProductData]:
     """Run the scrape → extract pipeline for a single category.
 
@@ -183,7 +184,7 @@ async def run_category(
 
     # 3. Send to LLM for product extraction
     on_progress("extracting", "Sending to LLM for product extraction…")
-    products = await extract_products(text, category, shop.name)
+    products = await extract_products(text, category, shop.name, item_ids=item_ids)
 
     if not products:
         on_progress("extracting", "No products extracted. Skipping.")
@@ -215,6 +216,7 @@ async def run_urls(
     shop_name: str,
     *,
     progress: ProgressCallback | None = None,
+    item_ids: dict[str, str] | None = None,
 ) -> list[ProductData]:
     """Fetch specific product URLs, extract text, and send to LLM for extraction.
 
@@ -254,7 +256,7 @@ async def run_urls(
             continue
 
         on_progress("extracting", f"Extracting product data from URL {i + 1}...")
-        products = await extract_products(text, category, shop.name)
+        products = await extract_products(text, category, shop.name, item_ids=item_ids)
 
         if products:
             # Inject affiliate tags and take first product per page (usually one product per URL)
@@ -283,6 +285,7 @@ async def extract_single_url(
     categories: list[dict[str, str]],
     *,
     progress: ProgressCallback | None = None,
+    item_ids: dict[str, str] | None = None,
 ) -> tuple[ProductData | None, str | None]:
     """Fetch a single URL, extract product data, and suggest a category.
 
@@ -320,7 +323,7 @@ async def extract_single_url(
         "extracting", "Sending to LLM for product extraction + category suggestion…"
     )
     product, suggested_category_id = await extract_product_with_category(
-        text, url, categories
+        text, url, categories, item_ids=item_ids
     )
 
     if not product:

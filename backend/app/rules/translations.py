@@ -1293,11 +1293,31 @@ def get_tip_translation(tip_id: str, locale: str) -> str:
 
 
 def get_clothing_translation(item_id: str, locale: str) -> ItemTranslation | None:
-    """Get clothing item translation for the given locale."""
+    """Get clothing item translation for the given locale.
+
+    Reads from the in-memory item cache (backed by DB). Falls back to
+    the hardcoded dict if cache is empty (e.g. during tests without DB).
+    """
+    from app.services.item_cache import item_cache
+
+    cached = item_cache.get_clothing_translation(item_id, locale)
+    if cached is not None:
+        return cached
     return CLOTHING_TRANSLATIONS.get((item_id, locale))
 
 
 def get_equipment_translation(item_id: str, locale: str) -> ItemTranslation | None:
+    """Get equipment item translation for the given locale.
+
+    Reads from the in-memory item cache (backed by DB). Falls back to
+    the hardcoded dict if cache is empty (e.g. during tests without DB).
+    """
+    from app.services.item_cache import item_cache
+
+    cached = item_cache.get_equipment_translation(item_id, locale)
+    if cached is not None:
+        return cached
+    return EQUIPMENT_TRANSLATIONS.get((item_id, locale))
     """Get equipment item translation for the given locale."""
     return EQUIPMENT_TRANSLATIONS.get((item_id, locale))
 

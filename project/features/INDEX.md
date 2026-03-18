@@ -27,4 +27,4 @@
 | BIKE-23 | Reverse Route Direction         | Planned  | [BIKE-23](BIKE-23-reverse-route.md)                | 2026-03-17 |
 | BIKE-24 | Item-Level Product Matching     | Done     | [BIKE-24](BIKE-24-item-level-product-matching.md)  | 2026-03-17 |
 | BIKE-25 | Protobuf Agent Communication    | Planned  | [BIKE-25](BIKE-25-protobuf-agent-communication.md) | 2026-03-18 |
-| BIKE-26 | Item IDs in Database            | Planned  | [BIKE-26](BIKE-26-item-ids-database.md)            | 2026-03-18 |
+| BIKE-26 | Item IDs in Database            | Done     | [BIKE-26](BIKE-26-item-ids-database.md)            | 2026-03-18 |

@@ -32,12 +32,14 @@ class StartJobRequest(BaseModel):
     shop: str
     category: str
     maxProducts: int = Field(default=5, ge=1, le=50)
+    itemIds: dict[str, str] | None = Field(default=None)
 
 
 class StartUrlJobRequest(BaseModel):
     shop: str
     category: str
     urls: list[str] = Field(..., min_length=1, max_length=20)
+    itemIds: dict[str, str] | None = Field(default=None)
 
 
 class ExtractUrlCategory(BaseModel):
@@ -49,6 +51,7 @@ class ExtractUrlCategory(BaseModel):
 class StartExtractUrlRequest(BaseModel):
     url: str
     categories: list[ExtractUrlCategory] = Field(default_factory=list)
+    itemIds: dict[str, str] | None = Field(default=None)
 
 
 class StartJobResponse(BaseModel):
@@ -130,7 +133,7 @@ def _products_to_bulk_payload(
     return items
 
 
-async def _run_job(job: Job) -> None:
+async def _run_job(job: Job, item_ids: dict[str, str] | None = None) -> None:
     """Execute the scrape/extract pipeline in the background and update the job."""
     try:
         job.status = JobStatus.SCRAPING
@@ -155,6 +158,7 @@ async def _run_job(job: Job) -> None:
             job.shop,
             max_products=job.max_products,
             progress=progress_callback,
+            item_ids=item_ids,
         )
 
         if result:
@@ -178,7 +182,9 @@ async def _run_job(job: Job) -> None:
         job.notify_done()
 
 
-async def _run_url_job(job: Job, urls: list[str]) -> None:
+async def _run_url_job(
+    job: Job, urls: list[str], item_ids: dict[str, str] | None = None
+) -> None:
     """Execute the URL-based extract pipeline in the background."""
     try:
         job.status = JobStatus.SCRAPING
@@ -203,6 +209,7 @@ async def _run_url_job(job: Job, urls: list[str]) -> None:
             job.category,
             job.shop,
             progress=progress_callback,
+            item_ids=item_ids,
         )
 
         if products:
@@ -229,7 +236,10 @@ async def _run_url_job(job: Job, urls: list[str]) -> None:
 
 
 async def _run_extract_url_job(
-    job: Job, url: str, categories: list[dict[str, str]]
+    job: Job,
+    url: str,
+    categories: list[dict[str, str]],
+    item_ids: dict[str, str] | None = None,
 ) -> None:
     """Execute the single-URL extraction pipeline in the background."""
     try:
@@ -247,7 +257,7 @@ async def _run_extract_url_job(
             job.add_progress(stage, message, data)
 
         product, suggested_category_id = await extract_single_url(
-            url, categories, progress=progress_callback
+            url, categories, progress=progress_callback, item_ids=item_ids
         )
 
         if product:
@@ -368,7 +378,7 @@ async def start_job(request: StartJobRequest) -> StartJobResponse:
     job = await job_manager.create_job(
         request.shop, request.category, request.maxProducts
     )
-    asyncio.create_task(_run_job(job))
+    asyncio.create_task(_run_job(job, item_ids=request.itemIds))
     return StartJobResponse(jobId=job.id, status=job.status.value)
 
 
@@ -395,7 +405,7 @@ async def start_url_job(request: StartUrlJobRequest) -> StartJobResponse:
         raise HTTPException(status_code=400, detail="No valid URLs provided")
 
     job = await job_manager.create_job(request.shop, request.category, len(valid_urls))
-    asyncio.create_task(_run_url_job(job, valid_urls))
+    asyncio.create_task(_run_url_job(job, valid_urls, item_ids=request.itemIds))
     return StartJobResponse(jobId=job.id, status=job.status.value)
 
 
@@ -414,7 +424,9 @@ async def start_extract_url_job(request: StartExtractUrlRequest) -> StartJobResp
 
     # Create job with placeholder shop/category (resolved later by backend)
     job = await job_manager.create_job("_url_import", "_auto", 1)
-    asyncio.create_task(_run_extract_url_job(job, url, categories))
+    asyncio.create_task(
+        _run_extract_url_job(job, url, categories, item_ids=request.itemIds)
+    )
     return StartJobResponse(jobId=job.id, status=job.status.value)
 
 

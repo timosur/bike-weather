@@ -40,6 +40,7 @@ const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage')
 const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'))
 const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'))
 const AdminShopsPage = lazy(() => import('./pages/admin/AdminShopsPage'))
+const AdminItemsPage = lazy(() => import('./pages/admin/AdminItemsPage'))
 const AdminFaqPage = lazy(() => import('./pages/admin/AdminFaqPage'))
 const AdminAboutPage = lazy(() => import('./pages/admin/AdminAboutPage'))
 const AdminContactsPage = lazy(() => import('./pages/admin/AdminContactsPage'))
@@ -192,6 +193,7 @@ function AppContent() {
           <Route path="products" element={<Suspense fallback={null}><AdminProductsPage /></Suspense>} />
           <Route path="categories" element={<Suspense fallback={null}><AdminCategoriesPage /></Suspense>} />
           <Route path="shops" element={<Suspense fallback={null}><AdminShopsPage /></Suspense>} />
+          <Route path="items" element={<Suspense fallback={null}><AdminItemsPage /></Suspense>} />
           <Route path="faq" element={<Suspense fallback={null}><AdminFaqPage /></Suspense>} />
           <Route path="about" element={<Suspense fallback={null}><AdminAboutPage /></Suspense>} />
           <Route path="contacts" element={<Suspense fallback={null}><AdminContactsPage /></Suspense>} />

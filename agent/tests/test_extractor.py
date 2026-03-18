@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from agent.extractor import (
-    VALID_ITEM_IDS,
     ProductData,
     _generate_product_id,
     _parse_llm_response,
@@ -264,23 +263,3 @@ class TestExtractProductWithCategory:
 
             assert product is not None
             assert category_id is None
-
-
-class TestValidItemIds:
-    def test_contains_clothing_items(self):
-        assert "cl-rain-jacket" in VALID_ITEM_IDS
-        assert "cl-helmet-cover" in VALID_ITEM_IDS
-        assert "cl-shorts" in VALID_ITEM_IDS
-
-    def test_contains_equipment_items(self):
-        assert "eq-lights" in VALID_ITEM_IDS
-        assert "eq-repair-kit" in VALID_ITEM_IDS
-        assert "eq-mudguards" in VALID_ITEM_IDS
-
-    def test_contains_bike_type_variants(self):
-        assert "cl-shorts-rennrad" in VALID_ITEM_IDS
-        assert "cl-rain-jacket-mtb" in VALID_ITEM_IDS
-
-    def test_all_ids_have_names(self):
-        for item_id, name in VALID_ITEM_IDS.items():
-            assert name, f"{item_id} has empty name"

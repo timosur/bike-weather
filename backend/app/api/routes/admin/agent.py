@@ -27,6 +27,7 @@ from app.schemas.product import (
     ShopAdminResponse,
 )
 from app.services.auth import AuthenticationError, auth_service
+from app.services.item_cache import item_cache
 from app.services.shop_detection import detect_shop_by_url, check_duplicate_product
 
 # Re-use the bulk import logic from the products route inline
@@ -110,12 +111,19 @@ async def list_agent_jobs(
     return await _agent_get("/jobs")
 
 
+def _get_item_ids_dict() -> dict[str, str]:
+    """Get item IDs with English names from cache for the agent."""
+    return {i["id"]: i["name"] for i in item_cache.get_items_for_agent()}
+
+
 @router.post("/jobs")
 async def start_agent_job(
     request: StartJobRequest,
     _admin: User = Depends(require_admin),
 ) -> dict:
-    return await _agent_post("/jobs", request.model_dump())
+    payload = request.model_dump()
+    payload["itemIds"] = _get_item_ids_dict()
+    return await _agent_post("/jobs", payload)
 
 
 @router.post("/jobs/urls")
@@ -123,7 +131,9 @@ async def start_agent_url_job(
     request: StartUrlJobRequest,
     _admin: User = Depends(require_admin),
 ) -> dict:
-    return await _agent_post("/jobs/urls", request.model_dump())
+    payload = request.model_dump()
+    payload["itemIds"] = _get_item_ids_dict()
+    return await _agent_post("/jobs/urls", payload)
 
 
 class StartExtractUrlRequest(BaseModel):
@@ -156,7 +166,7 @@ async def start_extract_url_job(
 
     return await _agent_post(
         "/jobs/extract-url",
-        {"url": url, "categories": categories},
+        {"url": url, "categories": categories, "itemIds": _get_item_ids_dict()},
     )
 
 

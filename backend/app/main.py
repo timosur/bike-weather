@@ -13,6 +13,7 @@ from app.database import async_session, engine
 from app.middleware.locale import LocaleMiddleware
 from app.rate_limit import limiter
 from app.seed import run_seed
+from app.services.item_cache import item_cache
 from app.telemetry import init_telemetry
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         async with async_session() as session:
             await run_seed(session)
+            await item_cache.load(session)
             logger.info("Seed data loaded successfully.")
     except Exception:
         logger.exception("Failed to run seed on startup — database may not be ready.")

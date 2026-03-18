@@ -5,8 +5,10 @@ from app.models import (
     AboutContent,
     AffiliateDisclosure,
     AppInfoContent,
+    ContactMessage,
     FaqItem,
     ProductCategory,
+    RecommendationItem,
     Shop,
 )
 from app.models.content_translation import ContentTranslation
@@ -1061,6 +1063,254 @@ async def _seed_translations(session: AsyncSession) -> None:
             session.add(ContentTranslation(**t))
 
 
+async def _seed_recommendation_items(session: AsyncSession) -> None:
+    """Seed the recommendation_items table from existing hardcoded translations.
+
+    Idempotent: updates existing rows, creates missing ones.
+    """
+    from app.rules.translations import CLOTHING_TRANSLATIONS, EQUIPMENT_TRANSLATIONS
+
+    _BIKE_SUFFIXES = ("-rennrad", "-gravel", "-mtb", "-city")
+
+    # Item ID → body zone mapping (clothing only)
+    _ITEM_ZONE: dict[str, str] = {
+        "cl-helmet-cover": "head",
+        "cl-headband": "head",
+        "cl-cycling-cap": "head",
+        "cl-sunglasses": "eyes",
+        "cl-glasses": "eyes",
+        "cl-glasses-wind": "eyes",
+        "cl-neck-gaiter": "neck",
+        "cl-face-mask": "neck",
+        "cl-base-merino": "upperBody",
+        "cl-base-wicking": "upperBody",
+        "cl-thermal-jersey": "upperBody",
+        "cl-jersey-long": "upperBody",
+        "cl-jersey-arm": "upperBody",
+        "cl-jersey-long-light": "upperBody",
+        "cl-jersey-short-alt": "upperBody",
+        "cl-jersey-short": "upperBody",
+        "cl-jersey-sleeveless": "upperBody",
+        "cl-rain-jacket": "upperBody",
+        "cl-packable-rain": "upperBody",
+        "cl-vest-alt": "upperBody",
+        "cl-wind-jacket": "upperBody",
+        "cl-wind-vest": "upperBody",
+        "cl-jacket-alt": "upperBody",
+        "cl-insulated-jacket": "upperBody",
+        "cl-windstopper-jacket": "upperBody",
+        "cl-thermal-tights": "lowerBody",
+        "cl-thermal-undershorts": "lowerBody",
+        "cl-tights-warmers": "lowerBody",
+        "cl-padded-tights": "lowerBody",
+        "cl-shorts-warmers": "lowerBody",
+        "cl-shorts": "lowerBody",
+        "cl-overpants": "lowerBody",
+        "cl-gloves-waterproof": "hands",
+        "cl-gloves-wp": "hands",
+        "cl-gloves-warm": "hands",
+        "cl-gloves-light": "hands",
+        "cl-shoe-covers": "feet",
+        "cl-shoes": "feet",
+        "cl-socks-warm": "feet",
+        "cl-socks-mid": "feet",
+        "cl-socks-thin": "feet",
+    }
+
+    # Icon mapping (generic item ID → icon used in clothing_rules.py _make_item calls)
+    _ITEM_ICON: dict[str, str] = {
+        "cl-helmet-cover": "helmet-cover",
+        "cl-headband": "headband",
+        "cl-cycling-cap": "headband",
+        "cl-sunglasses": "sunglasses",
+        "cl-glasses": "glasses",
+        "cl-glasses-wind": "glasses",
+        "cl-neck-gaiter": "neck-gaiter",
+        "cl-face-mask": "face-mask",
+        "cl-base-merino": "base-layer",
+        "cl-base-wicking": "base-layer",
+        "cl-thermal-jersey": "jersey-long",
+        "cl-jersey-long": "jersey-long",
+        "cl-jersey-arm": "arm-warmers",
+        "cl-jersey-long-light": "jersey-long",
+        "cl-jersey-short-alt": "arm-warmers",
+        "cl-jersey-short": "jersey",
+        "cl-jersey-sleeveless": "jersey",
+        "cl-rain-jacket": "rain-jacket",
+        "cl-packable-rain": "jacket",
+        "cl-vest-alt": "vest",
+        "cl-wind-jacket": "jacket",
+        "cl-wind-vest": "vest",
+        "cl-jacket-alt": "jacket",
+        "cl-insulated-jacket": "jacket",
+        "cl-windstopper-jacket": "jacket",
+        "cl-thermal-tights": "pants-long",
+        "cl-thermal-undershorts": "pants-short",
+        "cl-tights-warmers": "leg-warmers",
+        "cl-padded-tights": "pants-long",
+        "cl-shorts-warmers": "leg-warmers",
+        "cl-shorts": "pants-short",
+        "cl-overpants": "overpants",
+        "cl-gloves-waterproof": "gloves-waterproof",
+        "cl-gloves-wp": "gloves-waterproof",
+        "cl-gloves-warm": "gloves-warm",
+        "cl-gloves-light": "gloves-light",
+        "cl-shoe-covers": "shoe-covers",
+        "cl-shoes": "shoes",
+        "cl-socks-warm": "socks",
+        "cl-socks-mid": "socks",
+        "cl-socks-thin": "socks",
+        # Equipment icons
+        "eq-warm-drink": "hydration",
+        "eq-water": "hydration",
+        "eq-sunscreen": "sunscreen",
+        "eq-face-mask-air": "face-mask",
+        "eq-lights-before-sunrise": "light",
+        "eq-lights-after-sunset": "light",
+        "eq-lights-both": "light",
+        "eq-mudguards": "mudguards",
+        "eq-dry-bag": "dry-bag",
+        "eq-repair-kit": "tools",
+        "eq-energy": "nutrition",
+        "eq-helmet-rennrad": "helmet",
+        "eq-helmet-gravel": "helmet",
+        "eq-helmet-mtb": "helmet",
+        "eq-helmet-city": "helmet",
+        "eq-reflective-vest": "vest",
+        "eq-protectors-mtb": "protectors",
+        "eq-protectors-gravel": "protectors",
+        "eq-first-aid": "first-aid",
+        "eq-lock-city": "lock",
+        "eq-lock": "lock",
+        "eq-bell-city": "bell",
+        "eq-bell-gravel": "bell",
+    }
+
+    def _detect_parent_id(item_id: str) -> str | None:
+        """Detect parent item from bike-type suffix, only if parent exists in the data."""
+        for suffix in _BIKE_SUFFIXES:
+            if item_id.endswith(suffix):
+                candidate = item_id[: -len(suffix)]
+                if candidate in all_item_ids:
+                    return candidate
+        return None
+
+    def _get_zone_for_item(item_id: str) -> str:
+        """Get zone for an item, inheriting from parent for variants."""
+        zone = _ITEM_ZONE.get(item_id, "")
+        if not zone:
+            parent_id = _detect_parent_id(item_id)
+            if parent_id:
+                zone = _ITEM_ZONE.get(parent_id, "")
+        return zone
+
+    # Collect all unique item IDs from both translation dicts
+    all_item_ids: set[str] = set()
+    clothing_ids: set[str] = set()
+    equipment_ids: set[str] = set()
+
+    for item_id, _locale in CLOTHING_TRANSLATIONS:
+        all_item_ids.add(item_id)
+        clothing_ids.add(item_id)
+
+    for item_id, _locale in EQUIPMENT_TRANSLATIONS:
+        all_item_ids.add(item_id)
+        equipment_ids.add(item_id)
+
+    # Build display_order: generic items first (sorted), then variants
+    generic_clothing = sorted([i for i in clothing_ids if not _detect_parent_id(i)])
+    variant_clothing = sorted([i for i in clothing_ids if _detect_parent_id(i)])
+    generic_equipment = sorted([i for i in equipment_ids if not _detect_parent_id(i)])
+    variant_equipment = sorted([i for i in equipment_ids if _detect_parent_id(i)])
+
+    ordered = (
+        generic_clothing + variant_clothing + generic_equipment + variant_equipment
+    )
+    order_map = {item_id: idx for idx, item_id in enumerate(ordered)}
+
+    # Upsert each item — generics first (no parent_id), then variants
+    generics = [i for i in all_item_ids if not _detect_parent_id(i)]
+    variants = [i for i in all_item_ids if _detect_parent_id(i)]
+
+    for item_id in generics:
+        item_type = "clothing" if item_id in clothing_ids else "equipment"
+
+        de_trans = CLOTHING_TRANSLATIONS.get(
+            (item_id, "de")
+        ) or EQUIPMENT_TRANSLATIONS.get((item_id, "de"))
+        en_trans = CLOTHING_TRANSLATIONS.get(
+            (item_id, "en")
+        ) or EQUIPMENT_TRANSLATIONS.get((item_id, "en"))
+
+        existing = await session.get(RecommendationItem, item_id)
+        if existing:
+            existing.type = item_type
+            existing.zone = _get_zone_for_item(item_id)
+            existing.icon = _ITEM_ICON.get(item_id, "")
+            existing.name_de = de_trans["name"] if de_trans else ""
+            existing.name_en = en_trans["name"] if en_trans else ""
+            existing.reason_de = de_trans["reason"] if de_trans else ""
+            existing.reason_en = en_trans["reason"] if en_trans else ""
+            existing.parent_id = None
+            existing.display_order = order_map.get(item_id, 0)
+        else:
+            session.add(
+                RecommendationItem(
+                    id=item_id,
+                    type=item_type,
+                    zone=_get_zone_for_item(item_id),
+                    icon=_ITEM_ICON.get(item_id, ""),
+                    name_de=de_trans["name"] if de_trans else "",
+                    name_en=en_trans["name"] if en_trans else "",
+                    reason_de=de_trans["reason"] if de_trans else "",
+                    reason_en=en_trans["reason"] if en_trans else "",
+                    parent_id=None,
+                    display_order=order_map.get(item_id, 0),
+                )
+            )
+
+    # Flush generics so FK references are valid for variants
+    await session.flush()
+
+    for item_id in variants:
+        item_type = "clothing" if item_id in clothing_ids else "equipment"
+        parent_id = _detect_parent_id(item_id)
+
+        de_trans = CLOTHING_TRANSLATIONS.get(
+            (item_id, "de")
+        ) or EQUIPMENT_TRANSLATIONS.get((item_id, "de"))
+        en_trans = CLOTHING_TRANSLATIONS.get(
+            (item_id, "en")
+        ) or EQUIPMENT_TRANSLATIONS.get((item_id, "en"))
+
+        existing = await session.get(RecommendationItem, item_id)
+        if existing:
+            existing.type = item_type
+            existing.zone = _get_zone_for_item(item_id)
+            existing.icon = _ITEM_ICON.get(item_id, _ITEM_ICON.get(parent_id or "", ""))
+            existing.name_de = de_trans["name"] if de_trans else ""
+            existing.name_en = en_trans["name"] if en_trans else ""
+            existing.reason_de = de_trans["reason"] if de_trans else ""
+            existing.reason_en = en_trans["reason"] if en_trans else ""
+            existing.parent_id = parent_id
+            existing.display_order = order_map.get(item_id, 0)
+        else:
+            session.add(
+                RecommendationItem(
+                    id=item_id,
+                    type=item_type,
+                    zone=_get_zone_for_item(item_id),
+                    icon=_ITEM_ICON.get(item_id, _ITEM_ICON.get(parent_id or "", "")),
+                    name_de=de_trans["name"] if de_trans else "",
+                    name_en=en_trans["name"] if en_trans else "",
+                    reason_de=de_trans["reason"] if de_trans else "",
+                    reason_en=en_trans["reason"] if en_trans else "",
+                    parent_id=parent_id,
+                    display_order=order_map.get(item_id, 0),
+                )
+            )
+
+
 async def run_seed(session: AsyncSession) -> None:
     await _seed_admin_user(session)
     await _seed_shops(session)
@@ -1070,4 +1320,5 @@ async def run_seed(session: AsyncSession) -> None:
     await _seed_about(session)
     await _seed_app_info(session)
     await _seed_translations(session)
+    await _seed_recommendation_items(session)
     await session.commit()

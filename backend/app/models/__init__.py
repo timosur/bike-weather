@@ -7,6 +7,7 @@ from .faq_item import FaqItem
 from .product import Product
 from .product_bike_type import ProductBikeType
 from .product_category import ProductCategory
+from .recommendation_item import RecommendationItem
 from .saved_route import SavedRoute
 from .shop import Shop
 from .user import User
@@ -21,6 +22,7 @@ __all__ = [
     "Product",
     "ProductBikeType",
     "ProductCategory",
+    "RecommendationItem",
     "SavedRoute",
     "Shop",
     "User",

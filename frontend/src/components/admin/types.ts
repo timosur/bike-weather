@@ -132,6 +132,31 @@ export interface AgentBulkProduct {
   isPublished: boolean;
 }
 
+// --- Recommendation Item types ---
+
+export interface AdminRecommendationItem {
+  id: string;
+  type: string;
+  zone: string;
+  icon: string;
+  nameDe: string;
+  nameEn: string;
+  reasonDe: string;
+  reasonEn: string;
+  parentId: string | null;
+  displayOrder: number;
+  variants?: AdminRecommendationItem[];
+}
+
+export interface AdminRecommendationItemUpdate {
+  nameDe?: string;
+  nameEn?: string;
+  reasonDe?: string;
+  reasonEn?: string;
+  zone?: string;
+  icon?: string;
+}
+
 export interface AgentJob {
   jobId: string;
   shop: string;

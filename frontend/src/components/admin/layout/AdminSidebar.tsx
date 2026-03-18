@@ -10,6 +10,7 @@ import {
   Download,
   ChevronLeft,
   Bike,
+  Tags,
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -23,6 +24,7 @@ const sidebarItems: SidebarItem[] = [
   { label: 'Products', href: '/admin/products', icon: <Package className="w-5 h-5" /> },
   { label: 'Categories', href: '/admin/categories', icon: <Grid3X3 className="w-5 h-5" /> },
   { label: 'Shops', href: '/admin/shops', icon: <Store className="w-5 h-5" /> },
+  { label: 'Items', href: '/admin/items', icon: <Tags className="w-5 h-5" /> },
   { label: 'FAQ', href: '/admin/faq', icon: <HelpCircle className="w-5 h-5" /> },
   { label: 'About', href: '/admin/about', icon: <FileText className="w-5 h-5" /> },
   { label: 'Messages', href: '/admin/contacts', icon: <MessageSquare className="w-5 h-5" /> },
