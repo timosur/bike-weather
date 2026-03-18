@@ -276,32 +276,6 @@ def _merge_tips_across_days(
     return merged
 
 
-# Clothing icon severity: higher = more protection. Used for merging multi-day items.
-_CLOTHING_SEVERITY: dict[str, int] = {
-    "jersey": 0,
-    "jersey-long": 1,
-    "base-layer": 1,
-    "arm-warmers": 1,
-    "pants-short": 0,
-    "pants-long": 1,
-    "leg-warmers": 1,
-    "vest": 1,
-    "jacket": 2,
-    "rain-jacket": 3,
-    "overpants": 2,
-    "gloves-light": 0,
-    "gloves-warm": 1,
-    "gloves-waterproof": 2,
-    "sunglasses": 1,
-    "glasses": 1,
-    "headband": 1,
-    "helmet-cover": 2,
-    "shoes": 1,
-    "shoe-covers": 2,
-    "socks": 1,
-}
-
-
 def _merge_clothing_across_days(
     per_day_clothing: list[list[ClothingItemSchema]],
     day_labels: list[str],

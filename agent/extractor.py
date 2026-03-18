@@ -11,6 +11,140 @@ from agent.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Valid clothing/equipment item IDs that products can be matched to.
+# Sourced from backend/app/rules/translations.py — English names for LLM reference.
+VALID_ITEM_IDS: dict[str, str] = {
+    # Head
+    "cl-helmet-cover": "Waterproof Helmet Cover",
+    "cl-headband": "Light Headband",
+    "cl-cycling-cap": "Cycling Cap",
+    # Eyes
+    "cl-sunglasses": "Sports Sunglasses",
+    "cl-glasses": "Clear Cycling Glasses",
+    "cl-glasses-wind": "Cycling Glasses (Wind Protection)",
+    # Neck / Face
+    "cl-neck-gaiter": "Neck Gaiter",
+    "cl-face-mask": "Face Mask",
+    # Base Layer
+    "cl-base-merino": "Merino Base Layer",
+    "cl-base-wicking": "Moisture-wicking Base Layer",
+    # Mid / Jersey
+    "cl-thermal-jersey": "Thermal Long-sleeve Jersey",
+    "cl-jersey-long": "Long-sleeve Cycling Jersey",
+    "cl-jersey-arm": "Short-sleeve Jersey + Arm Warmers",
+    "cl-jersey-long-light": "Light Long-sleeve Cycling Jersey",
+    "cl-jersey-short-alt": "Short-sleeve Jersey + Arm Warmers",
+    "cl-jersey-short": "Short-sleeve Cycling Jersey",
+    "cl-jersey-sleeveless": "Sleeveless Cycling Jersey",
+    # Outer Layer
+    "cl-rain-jacket": "Waterproof Cycling Jacket",
+    "cl-packable-rain": "Packable Rain Jacket",
+    "cl-vest-alt": "Light Wind Vest",
+    "cl-wind-jacket": "Wind Jacket",
+    "cl-wind-vest": "Light Wind Vest",
+    "cl-jacket-alt": "Packable Wind Jacket",
+    "cl-insulated-jacket": "Insulated Cycling Jacket",
+    "cl-windstopper-jacket": "Windproof Cycling Jacket",
+    # Legs
+    "cl-thermal-tights": "Thermal Cycling Tights",
+    "cl-thermal-undershorts": "Thermal Undershorts",
+    "cl-tights-warmers": "Cycling Tights + Leg Warmers",
+    "cl-padded-tights": "Long Padded Cycling Tights",
+    "cl-shorts-warmers": "Short Bib Shorts + Leg Warmers",
+    "cl-shorts": "Padded Cycling Shorts",
+    "cl-overpants": "Waterproof Overpants",
+    # Hands
+    "cl-gloves-waterproof": "Waterproof Winter Gloves",
+    "cl-gloves-wp": "Waterproof Winter Gloves",
+    "cl-gloves-warm": "Warm Cycling Gloves",
+    "cl-gloves-light": "Light Cycling Gloves",
+    # Feet
+    "cl-shoe-covers": "Waterproof Overshoes",
+    "cl-shoes": "Cycling Shoes",
+    "cl-socks-warm": "Warm Merino Socks",
+    "cl-socks-mid": "Mid-weight Socks",
+    "cl-socks-thin": "Thin Merino Socks",
+    # Bike-type-specific variants
+    "cl-shorts-rennrad": "Bib Shorts (aerodynamic)",
+    "cl-shorts-gravel": "Gravel Shorts (relaxed fit)",
+    "cl-shorts-mtb": "MTB Baggy Shorts",
+    "cl-shorts-city": "Casual Shorts",
+    "cl-padded-tights-rennrad": "Bib Tights (tight fit)",
+    "cl-padded-tights-gravel": "Gravel Cycling Pants (robust)",
+    "cl-padded-tights-mtb": "MTB Pants (abrasion-resistant)",
+    "cl-padded-tights-city": "Casual Pants (warm, comfortable)",
+    "cl-thermal-tights-rennrad": "Thermal Bib Tights",
+    "cl-thermal-tights-gravel": "Gravel Thermal Pants (robust)",
+    "cl-thermal-tights-mtb": "MTB Thermal Pants (loose, abrasion-resistant)",
+    "cl-thermal-tights-city": "Warm Casual Pants",
+    "cl-jersey-short-rennrad": "Aero Cycling Jersey (tight)",
+    "cl-jersey-short-gravel": "Gravel Jersey (relaxed fit)",
+    "cl-jersey-short-mtb": "MTB Jersey (loose, rugged)",
+    "cl-jersey-short-city": "Casual Performance Shirt",
+    "cl-jersey-long-rennrad": "Long-sleeve Cycling Jersey (tight)",
+    "cl-jersey-long-gravel": "Long-sleeve Gravel Jersey",
+    "cl-jersey-long-mtb": "Long-sleeve MTB Jersey (loose)",
+    "cl-jersey-long-city": "Long-sleeve Performance Shirt",
+    "cl-jersey-long-light-rennrad": "Light Long-sleeve Jersey (tight)",
+    "cl-jersey-long-light-gravel": "Light Long-sleeve Gravel Jersey",
+    "cl-jersey-long-light-mtb": "Light Long-sleeve MTB Jersey",
+    "cl-jersey-long-light-city": "Light Long-sleeve Performance Shirt",
+    "cl-base-merino-rennrad": "Merino Base Layer (tight, compression)",
+    "cl-base-merino-gravel": "Merino Base Layer (merino wool)",
+    "cl-base-merino-mtb": "Merino Base Layer (loose)",
+    "cl-base-merino-city": "Warm Functional Undershirt",
+    "cl-base-wicking-rennrad": "Light Base Layer (tight, compression)",
+    "cl-base-wicking-gravel": "Moisture-wicking Base Layer",
+    "cl-base-wicking-mtb": "Loose Functional Base Layer",
+    "cl-base-wicking-city": "Light Casual Undershirt",
+    "cl-shoes-rennrad": "Road Clip-in Shoes",
+    "cl-shoes-gravel": "Gravel Clip-in Shoes (tread sole)",
+    "cl-shoes-mtb": "MTB Shoes (flat pedal or SPD)",
+    "cl-shoes-city": "Sturdy Everyday Shoes",
+    "cl-gloves-light-rennrad": "Light Road Cycling Gloves",
+    "cl-gloves-light-gravel": "Gravel Gloves (extra grip)",
+    "cl-gloves-light-mtb": "MTB Gloves (padding + grip)",
+    "cl-gloves-light-city": "Optional Casual Gloves",
+    "cl-gloves-warm-rennrad": "Warm Road Cycling Gloves",
+    "cl-gloves-warm-gravel": "Warm Gravel Gloves",
+    "cl-gloves-warm-mtb": "Warm MTB Gloves",
+    "cl-gloves-warm-city": "Warm Casual Gloves",
+    "cl-rain-jacket-rennrad": "Waterproof Road Jacket (tight)",
+    "cl-rain-jacket-gravel": "Waterproof Gravel Jacket",
+    "cl-rain-jacket-mtb": "Waterproof MTB Jacket (rugged)",
+    "cl-rain-jacket-city": "Everyday Rain Jacket",
+    # Equipment
+    "eq-warm-drink": "Insulated Bottle with Warm Drink",
+    "eq-water": "Water Bottle",
+    "eq-sunscreen": "Sunscreen SPF 30+",
+    "eq-lights": "Bike Lights (front + rear)",
+    "eq-mudguards": "Mudguards",
+    "eq-dry-bag": "Dry Bag for Valuables",
+    "eq-repair-kit": "Repair Kit",
+    "eq-energy": "Energy Bars",
+    "eq-helmet-rennrad": "Road Helmet (aero)",
+    "eq-helmet-gravel": "All-round Cycling Helmet",
+    "eq-helmet-mtb": "MTB Helmet (enduro/full-face)",
+    "eq-helmet-city": "Urban Cycling Helmet",
+    "eq-reflective-vest": "Reflective Safety Vest",
+    "eq-protectors-mtb": "Knee & Elbow Pads",
+    "eq-protectors-gravel": "Light Knee Pads (optional)",
+    "eq-first-aid": "First Aid Kit (compact)",
+    "eq-lock-city": "Bike Lock",
+    "eq-lock": "Light Cable Lock",
+    "eq-bell-city": "Bike Bell",
+    "eq-bell-gravel": "Bike Bell",
+}
+
+
+def _format_item_ids_for_prompt() -> str:
+    """Format the valid item IDs as a reference list for LLM prompts."""
+    lines = []
+    for item_id, name in VALID_ITEM_IDS.items():
+        lines.append(f"- {item_id}: {name}")
+    return "\n".join(lines)
+
+
 EXTRACTION_PROMPT = """\
 You are a product data extraction assistant. Given text from a cycling product \
 listing page, extract structured product information.
@@ -24,11 +158,15 @@ Extract ALL products you can find from the following text. For each product retu
 - image_url: Product image URL if available, otherwise empty string
 - affiliate_url: Product page URL / link
 - matches_label: A short product-type description (e.g. "Waterproof Cycling Jacket", "Thermal Cycling Tights", "Light Cycling Gloves"). Describe what kind of product it is.
+- matches_item_id: The ID of the clothing/equipment item this product matches from the list below. Pick the single best match. Use null if unsure or no match.
 - temp_min: Minimum temperature (°C) this product is suitable for (integer). Infer from product features (e.g. thermal/winter → low, lightweight/summer → higher). null if unknown.
 - temp_max: Maximum temperature (°C) this product is suitable for (integer). Infer from product features. null if unknown.
 - precipitation: Rain/weather protection level. One of: "none", "light-rain", "heavy-rain", "snow". Infer from waterproof/water-resistant features.
 - wind: Wind protection level. One of: "none", "light-wind", "strong-wind". Infer from windproof/windbreaker features.
 - weather_summary: A 1-sentence summary of what weather conditions this product is best for.
+
+Valid clothing/equipment item IDs:
+{item_ids}
 
 Return a JSON array of objects. Example:
 [
@@ -38,6 +176,7 @@ Return a JSON array of objects. Example:
     "image_url": "https://example.com/image.jpg",
     "affiliate_url": "https://example.com/product/123",
     "matches_label": "Waterproof Cycling Jacket",
+    "matches_item_id": "cl-rain-jacket",
     "temp_min": -5,
     "temp_max": 10,
     "precipitation": "heavy-rain",
@@ -51,6 +190,7 @@ IMPORTANT:
 - If no products are found, return an empty array: []
 - Do not invent products. Only extract what is present in the text.
 - For weather fields, make reasonable inferences from product names, descriptions, and features (e.g. "Gore-Tex" → heavy-rain, "Windproof" → strong-wind, "Thermal" → low temp_min).
+- For matches_item_id, use ONLY IDs from the list above. Use the generic ID (e.g. "cl-rain-jacket") unless the product is clearly bike-type-specific (e.g. a road-specific jacket → "cl-rain-jacket-rennrad"). Use null if no item matches.
 
 Text to extract from:
 ---
@@ -72,6 +212,7 @@ class ProductData(BaseModel):
     precipitation: str = "none"
     wind: str = "none"
     weather_summary: str = ""
+    matches_item_id: str | None = None
 
     @field_validator("name")
     @classmethod
@@ -147,7 +288,12 @@ async def extract_products(
     Returns a list of validated ProductData objects. Products with missing
     required fields are logged and skipped.
     """
-    prompt = EXTRACTION_PROMPT.format(category=category, shop=shop, text=text[:15000])
+    prompt = EXTRACTION_PROMPT.format(
+        category=category,
+        shop=shop,
+        text=text[:15000],
+        item_ids=_format_item_ids_for_prompt(),
+    )
 
     raw = await _call_llm(prompt)
     logger.debug("LLM raw response: %s", raw[:500])
@@ -198,12 +344,16 @@ Extract the product and return:
 - image_url: Product image URL if available, otherwise empty string
 - affiliate_url: Product page URL / link (use the URL above if not found in text)
 - matches_label: A short product-type description (e.g. "Waterproof Cycling Jacket", "Thermal Cycling Tights"). Describe what kind of product it is.
+- matches_item_id: The ID of the clothing/equipment item this product matches from the list below. Pick the single best match. Use null if unsure or no match.
 - temp_min: Minimum temperature (°C) this product is suitable for (integer). Infer from product features. null if unknown.
 - temp_max: Maximum temperature (°C) this product is suitable for (integer). Infer from product features. null if unknown.
 - precipitation: Rain/weather protection level. One of: "none", "light-rain", "heavy-rain", "snow".
 - wind: Wind protection level. One of: "none", "light-wind", "strong-wind".
 - weather_summary: A 1-sentence summary of what weather conditions this product is best for.
 - suggested_category_id: The ID of the best-matching category from the list below. null if none match.
+
+Valid clothing/equipment item IDs:
+{item_ids}
 
 Available categories:
 {categories}
@@ -215,6 +365,7 @@ Return a JSON object (NOT an array). Example:
   "image_url": "https://example.com/image.jpg",
   "affiliate_url": "https://example.com/product/123",
   "matches_label": "Waterproof Cycling Jacket",
+  "matches_item_id": "cl-rain-jacket",
   "temp_min": -5,
   "temp_max": 10,
   "precipitation": "heavy-rain",
@@ -229,6 +380,7 @@ IMPORTANT:
 - Do not invent data. Only extract what is present in the text.
 - For weather fields, make reasonable inferences from product features.
 - For suggested_category_id, pick the single best-matching category from the list. Use null if unsure.
+- For matches_item_id, use ONLY IDs from the valid item ID list above. Use the generic ID (e.g. "cl-rain-jacket") unless the product is clearly bike-type-specific. Use null if no item matches.
 
 Text to extract from:
 ---
@@ -248,7 +400,10 @@ async def extract_product_with_category(
     """
     cat_lines = "\n".join(f"- {c['id']}: {c['name']}" for c in categories)
     prompt = SINGLE_URL_EXTRACTION_PROMPT.format(
-        url=url, categories=cat_lines, text=text[:15000]
+        url=url,
+        categories=cat_lines,
+        text=text[:15000],
+        item_ids=_format_item_ids_for_prompt(),
     )
 
     raw = await _call_llm(prompt)

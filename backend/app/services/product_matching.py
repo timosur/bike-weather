@@ -1,4 +1,4 @@
-"""Match published products to clothing/equipment items by body zone and weather fit."""
+"""Match published products to clothing/equipment items by item ID and weather fit."""
 
 import logging
 
@@ -11,49 +11,6 @@ from app.schemas.report import MatchedProductSchema, ProductRecommendationsSchem
 from app.services.weather import WeatherForecast
 
 logger = logging.getLogger(__name__)
-
-# Clothing icon → product zone mapping.
-ICON_TO_ZONE: dict[str, str] = {
-    # Head
-    "headband": "head",
-    "helmet-cover": "head",
-    # Eyes
-    "sunglasses": "eyes",
-    "glasses": "eyes",
-    # Neck / Face
-    "neck-gaiter": "neck",
-    "face-mask": "neck",
-    # Upper body
-    "base-layer": "upperBody",
-    "jersey": "upperBody",
-    "jersey-long": "upperBody",
-    "vest": "upperBody",
-    "jacket": "upperBody",
-    "rain-jacket": "upperBody",
-    "arm-warmers": "upperBody",
-    # Lower body
-    "pants-short": "lowerBody",
-    "pants-long": "lowerBody",
-    "leg-warmers": "lowerBody",
-    "overpants": "lowerBody",
-    # Hands
-    "gloves-light": "hands",
-    "gloves-warm": "hands",
-    "gloves-waterproof": "hands",
-    # Feet
-    "shoes": "feet",
-    "shoe-covers": "feet",
-    "socks": "feet",
-}
-
-# Equipment item ID prefix → product category mapping.
-EQUIPMENT_TO_CATEGORY: dict[str, str] = {
-    "eq-lights": "cat-lights",
-    "eq-mudguards": "cat-accessories",
-    "eq-dry-bag": "cat-accessories",
-    "eq-sunscreen": "cat-accessories",
-    "eq-repair-kit": "cat-accessories",
-}
 
 # Precipitation severity ordering for scoring.
 _PRECIP_LEVELS = {"none": 0, "light-rain": 1, "heavy-rain": 2, "snow": 3}
@@ -115,35 +72,53 @@ def _weather_score(product: Product, weather: WeatherForecast) -> float:
     return score
 
 
+def _pick_best(candidates: list[Product], weather: WeatherForecast) -> Product | None:
+    """Pick the best weather-scored product from a list of candidates."""
+    best_product: Product | None = None
+    best_score = -1.0
+    for p in candidates:
+        s = _weather_score(p, weather)
+        if s > best_score:
+            best_score = s
+            best_product = p
+    return best_product
+
+
 async def match_products_to_clothing(
     session: AsyncSession,
     clothing_items: list[dict],
     weather: WeatherForecast,
 ) -> ProductRecommendationsSchema | None:
-    """Match the best product to each clothing item by zone + weather fit.
+    """Match the best product to each clothing item by ``matches_item_id`` + weather fit.
+
+    Products are matched directly to clothing items via their ``matches_item_id`` field.
+    When multiple products share the same item ID, weather scoring picks the best fit.
+    Items with no matching product are skipped (no zone fallback).
 
     Args:
         session: DB session.
-        clothing_items: List of clothing item dicts with at least ``id`` and ``icon`` keys.
+        clothing_items: List of clothing item dicts with at least ``id`` key.
         weather: Current weather conditions for scoring.
 
     Returns:
         A ``ProductRecommendationsSchema`` with matched products keyed by clothing item ID,
-        or ``None`` if no products are available.
+        or ``None`` if no products match.
     """
-    # Fetch all published products
+    # Fetch published products that have a matches_item_id assigned
     result = await session.execute(
-        select(Product).where(Product.is_published == True)  # noqa: E712
+        select(Product).where(
+            Product.is_published == True,  # noqa: E712
+            Product.matches_item_id.isnot(None),
+        )
     )
     products = list(result.scalars().all())
     if not products:
         return None
 
-    # Group products by zone
-    zone_products: dict[str, list[Product]] = {}
+    # Group products by matches_item_id
+    item_products: dict[str, list[Product]] = {}
     for p in products:
-        if p.matches_zone:
-            zone_products.setdefault(p.matches_zone, []).append(p)
+        item_products.setdefault(p.matches_item_id, []).append(p)
 
     # Fetch shops for lookup
     shop_ids = {p.shop_id for p in products}
@@ -158,31 +133,21 @@ async def match_products_to_clothing(
     if not disc:
         return None
 
-    # Match products to clothing items
+    # Match products to clothing items by item ID
     matched: dict[str, MatchedProductSchema] = {}
     used_shop_ids: set[str] = set()
 
     for item in clothing_items:
-        icon = item.get("icon", "")
-        zone = ICON_TO_ZONE.get(icon)
-        if not zone:
-            continue
-
-        candidates = zone_products.get(zone, [])
+        item_id = item.get("id", "")
+        candidates = item_products.get(item_id, [])
         if not candidates:
             continue
 
         # Score and pick best
-        best_product: Product | None = None
-        best_score = -1.0
-        for p in candidates:
-            s = _weather_score(p, weather)
-            if s > best_score:
-                best_score = s
-                best_product = p
+        best_product = _pick_best(candidates, weather)
 
         if best_product and best_product.shop_id in shop_map:
-            matched[item["id"]] = MatchedProductSchema(
+            matched[item_id] = MatchedProductSchema(
                 id=best_product.id,
                 name=best_product.name,
                 imageUrl=best_product.image_url,
@@ -225,7 +190,10 @@ async def match_products_to_equipment(
     equipment_items: list[dict],
     weather: WeatherForecast,
 ) -> dict[str, MatchedProductSchema] | None:
-    """Match the best product to each equipment item by category + weather fit.
+    """Match the best product to each equipment item by ``matches_item_id`` + weather fit.
+
+    Uses prefix matching: a product with ``matches_item_id="eq-lights"`` matches
+    equipment items ``eq-lights-before-sunrise``, ``eq-lights-after-sunset``, etc.
 
     Args:
         session: DB session.
@@ -235,22 +203,22 @@ async def match_products_to_equipment(
     Returns:
         A dict of equipment item ID → MatchedProductSchema, or None if no matches.
     """
-    # Fetch all published products in equipment categories
-    equipment_cat_ids = list(set(EQUIPMENT_TO_CATEGORY.values()))
+    # Fetch published products with an eq-* matches_item_id
     result = await session.execute(
         select(Product).where(
             Product.is_published == True,  # noqa: E712
-            Product.category_id.in_(equipment_cat_ids),
+            Product.matches_item_id.isnot(None),
+            Product.matches_item_id.startswith("eq-"),
         )
     )
     products = list(result.scalars().all())
     if not products:
         return None
 
-    # Group products by category
-    cat_products: dict[str, list[Product]] = {}
+    # Group products by matches_item_id
+    item_products: dict[str, list[Product]] = {}
     for p in products:
-        cat_products.setdefault(p.category_id, []).append(p)
+        item_products.setdefault(p.matches_item_id, []).append(p)
 
     # Fetch shops for lookup
     shop_ids = {p.shop_id for p in products}
@@ -261,27 +229,24 @@ async def match_products_to_equipment(
 
     for item in equipment_items:
         item_id = item.get("id", "")
-        # Find the matching category by prefix
-        target_cat = None
-        for prefix, cat_id in EQUIPMENT_TO_CATEGORY.items():
-            if item_id.startswith(prefix):
-                target_cat = cat_id
-                break
-        if not target_cat:
-            continue
 
-        candidates = cat_products.get(target_cat, [])
+        # Try exact match first, then prefix match (eq-lights matches eq-lights-*)
+        candidates: list[Product] = []
+        if item_id in item_products:
+            candidates = item_products[item_id]
+        else:
+            # Prefix match: find products whose matches_item_id is a prefix of item_id
+            for product_item_id, prods in item_products.items():
+                if (
+                    item_id.startswith(product_item_id + "-")
+                    or item_id == product_item_id
+                ):
+                    candidates.extend(prods)
+
         if not candidates:
             continue
 
-        # Score and pick best
-        best_product: Product | None = None
-        best_score = -1.0
-        for p in candidates:
-            s = _weather_score(p, weather)
-            if s > best_score:
-                best_score = s
-                best_product = p
+        best_product = _pick_best(candidates, weather)
 
         if best_product and best_product.shop_id in shop_map:
             matched[item_id] = MatchedProductSchema(

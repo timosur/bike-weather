@@ -1,10 +1,10 @@
 # BIKE-22: Report & Routes UI Improvements
 
-| Field            | Value                          |
-| ---------------- | ------------------------------ |
-| **ID**           | BIKE-22                        |
-| **Status**       | In Review                      |
-| **Created**      | 2026-03-17                     |
+| Field            | Value                                             |
+| ---------------- | ------------------------------------------------- |
+| **ID**           | BIKE-22                                           |
+| **Status**       | Deployed                                          |
+| **Created**      | 2026-03-17                                        |
 | **Dependencies** | BIKE-1 (Ride Planning), BIKE-5 (Routes & Sharing) |
 
 ## Description
@@ -209,19 +209,19 @@ report.clothing.zone.other → "Other"
 
 ### Files Changed (Summary)
 
-| File | Action |
-|------|--------|
-| `frontend/src/pages/RoutesPage.tsx` | Replace `handleRouteEdit` with `handleRouteReplan` navigation |
-| `frontend/src/components/my-routes/types.ts` | Rename `onRouteEdit` → `onRouteReplan` (simplified signature) |
-| `frontend/src/components/my-routes/MyRoutes.tsx` | Remove `EditRouteModal`, wire `onReplan` |
-| `frontend/src/components/my-routes/RouteCard.tsx` | Rename edit → replan, update i18n key + icon |
-| `frontend/src/components/my-routes/EditRouteModal.tsx` | **Delete** |
-| `frontend/src/components/ride-report/RideReport.tsx` | Add date/time to header, replace clothing grid with `ClothingList` |
-| `frontend/src/components/ride-report/ClothingList.tsx` | **New** — grouped list component |
-| `frontend/src/components/ride-report/ClothingItemCard.tsx` | **Delete** (replaced by ClothingList) |
-| `frontend/src/components/ride-report/index.ts` | Update exports |
-| `frontend/src/i18n/locales/de.json` | Add zone keys, rename edit → replan |
-| `frontend/src/i18n/locales/en.json` | Add zone keys, rename edit → replan |
+| File                                                       | Action                                                             |
+| ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| `frontend/src/pages/RoutesPage.tsx`                        | Replace `handleRouteEdit` with `handleRouteReplan` navigation      |
+| `frontend/src/components/my-routes/types.ts`               | Rename `onRouteEdit` → `onRouteReplan` (simplified signature)      |
+| `frontend/src/components/my-routes/MyRoutes.tsx`           | Remove `EditRouteModal`, wire `onReplan`                           |
+| `frontend/src/components/my-routes/RouteCard.tsx`          | Rename edit → replan, update i18n key + icon                       |
+| `frontend/src/components/my-routes/EditRouteModal.tsx`     | **Delete**                                                         |
+| `frontend/src/components/ride-report/RideReport.tsx`       | Add date/time to header, replace clothing grid with `ClothingList` |
+| `frontend/src/components/ride-report/ClothingList.tsx`     | **New** — grouped list component                                   |
+| `frontend/src/components/ride-report/ClothingItemCard.tsx` | **Delete** (replaced by ClothingList)                              |
+| `frontend/src/components/ride-report/index.ts`             | Update exports                                                     |
+| `frontend/src/i18n/locales/de.json`                        | Add zone keys, rename edit → replan                                |
+| `frontend/src/i18n/locales/en.json`                        | Add zone keys, rename edit → replan                                |
 
 ## Implementation Plan
 
@@ -235,45 +235,45 @@ See [`project/plans/BIKE-22-plan.md`](../plans/BIKE-22-plan.md).
 
 ### Acceptance Criteria
 
-| # | Criterion | Status | Notes |
-|---|-----------|--------|-------|
-| AC-1 | Route card menu shows "Re-plan" instead of "Edit" | PASS | `RefreshCw` icon + `t('routes.actions.replan')` in RouteCard.tsx |
-| AC-2 | "Re-plan" navigates to `/planner/<routeId>` with date/time overridden to now | PASS | `handleRouteReplan` in RoutesPage.tsx constructs `editInput` with `new Date()` |
-| AC-3 | `EditRouteModal` no longer rendered from My Routes page | PASS | File deleted, zero references in codebase |
-| AC-4 | Report sub-header displays planned ride date and start time | PASS | Date moved to first meta row, gated only on `activeDay?.date` — renders for all reports |
-| AC-5 | Date/time appears on shared/public reports | PASS | Same `RideReport` component, now shows date unconditionally |
-| AC-6 | Clothing items grouped by body zone with translated headers (DE + EN) | PASS | `ITEM_ZONE` mapping + `ZONE_ORDER` + i18n keys in both locales |
-| AC-7 | Compact list layout similar to Equipment (no icon boxes) | PASS | `<ul>/<li>` list, old `ClothingItemCard` with 56px icons deleted |
-| AC-8 | Each item shows name, reason, and alternatives | PASS | Name (semibold), reason (muted), alternatives with "oder:"/"or:" label + pills |
-| AC-9 | Product recommendation links render correctly | PASS | `InlineProductLink` rendered when product match + shop + disclosure present |
-| AC-10 | All new UI text translated in DE and EN | PASS | `replan`, 8 zone keys, `alternatives` key — all present in both locales |
+| #     | Criterion                                                                    | Status | Notes                                                                                   |
+| ----- | ---------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------- |
+| AC-1  | Route card menu shows "Re-plan" instead of "Edit"                            | PASS   | `RefreshCw` icon + `t('routes.actions.replan')` in RouteCard.tsx                        |
+| AC-2  | "Re-plan" navigates to `/planner/<routeId>` with date/time overridden to now | PASS   | `handleRouteReplan` in RoutesPage.tsx constructs `editInput` with `new Date()`          |
+| AC-3  | `EditRouteModal` no longer rendered from My Routes page                      | PASS   | File deleted, zero references in codebase                                               |
+| AC-4  | Report sub-header displays planned ride date and start time                  | PASS   | Date moved to first meta row, gated only on `activeDay?.date` — renders for all reports |
+| AC-5  | Date/time appears on shared/public reports                                   | PASS   | Same `RideReport` component, now shows date unconditionally                             |
+| AC-6  | Clothing items grouped by body zone with translated headers (DE + EN)        | PASS   | `ITEM_ZONE` mapping + `ZONE_ORDER` + i18n keys in both locales                          |
+| AC-7  | Compact list layout similar to Equipment (no icon boxes)                     | PASS   | `<ul>/<li>` list, old `ClothingItemCard` with 56px icons deleted                        |
+| AC-8  | Each item shows name, reason, and alternatives                               | PASS   | Name (semibold), reason (muted), alternatives with "oder:"/"or:" label + pills          |
+| AC-9  | Product recommendation links render correctly                                | PASS   | `InlineProductLink` rendered when product match + shop + disclosure present             |
+| AC-10 | All new UI text translated in DE and EN                                      | PASS   | `replan`, 8 zone keys, `alternatives` key — all present in both locales                 |
 
 ### Edge Cases
 
-| # | Case | Status | Notes |
-|---|------|--------|-------|
-| EC-1 | Legacy route (no `rideInput`) — Re-plan with basic fields | PASS | Constructs minimal `RideInput` from location/distance/style + current date/time |
-| EC-2 | Unknown clothing item ID — fallback to "other" zone | PASS | `getBodyZone()` returns `'other'` after checking direct + suffix-stripped lookup |
-| EC-3 | Empty zone group not rendered | PASS | `ZONE_ORDER.filter((z) => grouped.has(z))` skips empty zones |
-| EC-4 | Multi-day merged packing list uses grouped layout | PASS | Uses `report.mergedClothingItems` → same `<ClothingList>` component |
-| EC-5 | Report via URL (no nav state) — date from API data | PASS | Uses `activeDay.date` from API response, not navigation state (though subject to AC-4 bug for multi-day) |
+| #    | Case                                                      | Status | Notes                                                                                                    |
+| ---- | --------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------- |
+| EC-1 | Legacy route (no `rideInput`) — Re-plan with basic fields | PASS   | Constructs minimal `RideInput` from location/distance/style + current date/time                          |
+| EC-2 | Unknown clothing item ID — fallback to "other" zone       | PASS   | `getBodyZone()` returns `'other'` after checking direct + suffix-stripped lookup                         |
+| EC-3 | Empty zone group not rendered                             | PASS   | `ZONE_ORDER.filter((z) => grouped.has(z))` skips empty zones                                             |
+| EC-4 | Multi-day merged packing list uses grouped layout         | PASS   | Uses `report.mergedClothingItems` → same `<ClothingList>` component                                      |
+| EC-5 | Report via URL (no nav state) — date from API data        | PASS   | Uses `activeDay.date` from API response, not navigation state (though subject to AC-4 bug for multi-day) |
 
 ### Security Audit
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Auth bypass | N/A | No new endpoints or backend changes |
-| Authorization | N/A | Route replan uses already-fetched user routes — no new data access |
-| Input injection (XSS) | PASS | All user-facing strings rendered as React children (auto-escaped); `Intl.DateTimeFormat` for dates; no `dangerouslySetInnerHTML` |
-| Rate limiting | N/A | No new API calls introduced |
-| Data exposure | N/A | No new fields exposed |
-| Secrets | PASS | No hardcoded credentials or keys |
+| Check                 | Status | Notes                                                                                                                            |
+| --------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Auth bypass           | N/A    | No new endpoints or backend changes                                                                                              |
+| Authorization         | N/A    | Route replan uses already-fetched user routes — no new data access                                                               |
+| Input injection (XSS) | PASS   | All user-facing strings rendered as React children (auto-escaped); `Intl.DateTimeFormat` for dates; no `dangerouslySetInnerHTML` |
+| Rate limiting         | N/A    | No new API calls introduced                                                                                                      |
+| Data exposure         | N/A    | No new fields exposed                                                                                                            |
+| Secrets               | PASS   | No hardcoded credentials or keys                                                                                                 |
 
 ### Bugs Found
 
-| # | Severity | Description | Steps to Reproduce | Priority |
-|---|----------|-------------|-------------------|----------|
-| BUG-1 | Medium | Date/time display missing on multi-day reports and single-day reports without `rideEndTime` | 1. Create a multi-day ride plan 2. View the report → No date shown in sub-header. OR: View a report where `rideEndTime` is null → No date shown. | **FIXED** |
+| #     | Severity | Description                                                                                 | Steps to Reproduce                                                                                                                               | Priority  |
+| ----- | -------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| BUG-1 | Medium   | Date/time display missing on multi-day reports and single-day reports without `rideEndTime` | 1. Create a multi-day ride plan 2. View the report → No date shown in sub-header. OR: View a report where `rideEndTime` is null → No date shown. | **FIXED** |
 
 **BUG-1 fix:** Moved Calendar + date `<span>` from the ride-window conditional to the first meta row, gated only on `activeDay?.date`. Date now renders for all reports (single-day, multi-day, shared). Ride-window row (time/duration/speed) remains single-day only.
 

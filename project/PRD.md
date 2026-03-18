@@ -15,29 +15,31 @@ Bike Weather helps cyclists dress right for every ride. It combines real weather
 
 ## Core Features (Roadmap)
 
-| Priority | Feature                          | Description                                                                            |
-| -------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| P0 (MVP) | Ride planner & report            | Enter ride details → get weather-based clothing/gear recommendations                   |
-| P0       | Rule-based recommendation engine | Deterministic rules for clothing (by body zone & temperature), equipment, safety, tips |
-| P0       | Authentication                   | Login, registration, password recovery via Authentik OIDC                              |
-| P0       | Weather service                  | Fetch and process weather forecasts for ride planning                                  |
-| P1       | Saved routes                     | Save, edit, delete, share favorite routes; quick re-check with current weather         |
-| P1       | Product catalog & matching       | Browse products by category; inline product links in ride reports                      |
-| P1       | GPX import                       | Upload GPX files from Komoot/Strava to pre-fill planner                                |
-| P1       | Admin panel                      | CRUD for products, categories, shops, FAQ, content pages, contact messages             |
-| P1       | LLM product scraper (agent)      | Automated product extraction from shop websites using OpenAI + Anthropic               |
-| P1       | i18n (DE/EN)                     | Full German + English support across frontend and backend content                      |
-| P1       | Observability                    | Grafana Faro (frontend), OpenTelemetry (backend), distributed tracing                  |
-| P2       | Search-based product import      | Replace category scraping with search-term-driven import and direct item matching      |
-| P2       | Test contracts & CI hardening    | CI test gating, OpenAPI contract tests, generated TypeScript types                     |
-| P2       | shadcn/ui component migration    | Replace self-built primitives with shadcn/ui; upgrade Tailwind v3 → v4                 |
-| P2       | Air quality in reports           | Include air conditions and pollutions in ride reports                                  |
-| P1       | Agent service refactor           | Refactor agent to pure FastAPI extraction service; remove CLI and publishing            |
-| P1       | URL-based product import         | Paste any product URL → LLM extracts data → admin reviews → saved to catalog           |
-| P1       | Refresh token mechanism          | Silent token refresh so users stay authenticated beyond access token expiry             |
-| P1       | Report & routes UI improvements  | Re-plan from routes, ride date in report header, clothing grouped by body zone          |
-| P1       | Reverse route direction          | Swap start ↔ destination with one tap; reverses waypoints and GPX geometry              |
-| P1       | Item-level product matching      | Fix product matching to use specific item IDs instead of zones; agent auto-assigns IDs  |
+| Priority | Feature                          | Description                                                                                     |
+| -------- | -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| P0 (MVP) | Ride planner & report            | Enter ride details → get weather-based clothing/gear recommendations                            |
+| P0       | Rule-based recommendation engine | Deterministic rules for clothing (by body zone & temperature), equipment, safety, tips          |
+| P0       | Authentication                   | Login, registration, password recovery via Authentik OIDC                                       |
+| P0       | Weather service                  | Fetch and process weather forecasts for ride planning                                           |
+| P1       | Saved routes                     | Save, edit, delete, share favorite routes; quick re-check with current weather                  |
+| P1       | Product catalog & matching       | Browse products by category; inline product links in ride reports                               |
+| P1       | GPX import                       | Upload GPX files from Komoot/Strava to pre-fill planner                                         |
+| P1       | Admin panel                      | CRUD for products, categories, shops, FAQ, content pages, contact messages                      |
+| P1       | LLM product scraper (agent)      | Automated product extraction from shop websites using OpenAI + Anthropic                        |
+| P1       | i18n (DE/EN)                     | Full German + English support across frontend and backend content                               |
+| P1       | Observability                    | Grafana Faro (frontend), OpenTelemetry (backend), distributed tracing                           |
+| P2       | Search-based product import      | Replace category scraping with search-term-driven import and direct item matching               |
+| P2       | Test contracts & CI hardening    | CI test gating, OpenAPI contract tests, generated TypeScript types                              |
+| P2       | shadcn/ui component migration    | Replace self-built primitives with shadcn/ui; upgrade Tailwind v3 → v4                          |
+| P2       | Air quality in reports           | Include air conditions and pollutions in ride reports                                           |
+| P1       | Agent service refactor           | Refactor agent to pure FastAPI extraction service; remove CLI and publishing                    |
+| P1       | URL-based product import         | Paste any product URL → LLM extracts data → admin reviews → saved to catalog                    |
+| P1       | Refresh token mechanism          | Silent token refresh so users stay authenticated beyond access token expiry                     |
+| P1       | Report & routes UI improvements  | Re-plan from routes, ride date in report header, clothing grouped by body zone                  |
+| P1       | Reverse route direction          | Swap start ↔ destination with one tap; reverses waypoints and GPX geometry                      |
+| P1       | Item-level product matching      | Fix product matching to use specific item IDs instead of zones; agent auto-assigns IDs          |
+| P2       | Protobuf agent communication     | Replace HTTP/JSON backend→agent transport with gRPC + Protobuf for type safety & performance    |
+| P1       | Item IDs in database             | Move hardcoded item IDs to DB; admin can edit names, translations, zones; agent fetches via API |
 
 ## Success Metrics
 
