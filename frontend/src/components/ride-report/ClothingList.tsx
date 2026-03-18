@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { HardHat, Eye, Shirt, CircleDashed, Hand, Footprints, Layers, type LucideIcon } from 'lucide-react'
 import type { ClothingItem, MatchedProduct, ProductRecommendations } from './types'
 import { InlineProductLink } from '../product-recommendations/InlineProductLink'
 
@@ -75,15 +76,26 @@ function getBodyZone(itemId: string): BodyZone {
   return 'other'
 }
 
-const zoneColors: Record<BodyZone, string> = {
-  head: 'text-violet-500 dark:text-violet-400',
-  eyes: 'text-sky-500 dark:text-sky-400',
-  neck: 'text-teal-500 dark:text-teal-400',
-  upperBody: 'text-emerald-500 dark:text-emerald-400',
-  lowerBody: 'text-blue-500 dark:text-blue-400',
-  hands: 'text-amber-500 dark:text-amber-400',
-  feet: 'text-orange-500 dark:text-orange-400',
-  other: 'text-stone-500 dark:text-stone-400',
+const zoneIcons: Record<BodyZone, LucideIcon> = {
+  head: HardHat,
+  eyes: Eye,
+  neck: CircleDashed,
+  upperBody: Shirt,
+  lowerBody: Layers,
+  hands: Hand,
+  feet: Footprints,
+  other: Layers,
+}
+
+const zoneIconColors: Record<BodyZone, string> = {
+  head: 'text-violet-400 dark:text-violet-500',
+  eyes: 'text-sky-400 dark:text-sky-500',
+  neck: 'text-teal-400 dark:text-teal-500',
+  upperBody: 'text-emerald-400 dark:text-emerald-500',
+  lowerBody: 'text-blue-400 dark:text-blue-500',
+  hands: 'text-amber-400 dark:text-amber-500',
+  feet: 'text-orange-400 dark:text-orange-500',
+  other: 'text-stone-400 dark:text-stone-500',
 }
 
 interface ClothingListProps {
@@ -117,21 +129,28 @@ export function ClothingList({ items, productRecommendations, onProductClick }: 
   const sortedZones = ZONE_ORDER.filter((z) => grouped.has(z))
 
   return (
-    <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden divide-y divide-stone-200 dark:divide-stone-800">
       {sortedZones.map((zone) => (
-        <div key={zone}>
-          <div className="px-5 pt-3 pb-1">
-            <span className={`text-xs font-semibold uppercase tracking-wider ${zoneColors[zone]}`}>
+        <div key={zone} className="py-1">
+          <div className="px-5 pt-3 pb-1 flex items-center gap-2">
+            <span className="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-600 shrink-0" />
+            <span
+              className="text-[11px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-500"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
               {t(`report.clothing.zone.${zone}`)}
             </span>
           </div>
-          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+          <ul>
             {grouped.get(zone)!.map((item) => {
               const itemProduct = productRecommendations?.disclosure ? findItemProduct(item.id) : undefined
               const shop = itemProduct ? shopMap.get(itemProduct.shopId) : undefined
 
+              const ZoneIcon = zoneIcons[zone]
+
               return (
-                <li key={item.id} className="px-5 py-3">
+                <li key={item.id} className="flex items-start gap-3 px-5 py-2.5">
+                  <ZoneIcon className={`w-4 h-4 mt-0.5 shrink-0 ${zoneIconColors[zone]}`} strokeWidth={1.5} />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{item.name}</p>
                     {item.reason && (

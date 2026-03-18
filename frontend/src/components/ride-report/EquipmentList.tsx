@@ -44,28 +44,32 @@ export function EquipmentList({ items }: EquipmentListProps) {
   )
 
   const categoryColors: Record<string, string> = {
-    safety: 'text-amber-500 dark:text-amber-400',
-    hydration: 'text-blue-500 dark:text-blue-400',
-    tools: 'text-stone-500 dark:text-stone-400',
-    nutrition: 'text-orange-500 dark:text-orange-400',
-    gear: 'text-emerald-500 dark:text-emerald-400',
+    safety: 'text-amber-400 dark:text-amber-500',
+    hydration: 'text-blue-400 dark:text-blue-500',
+    tools: 'text-stone-400 dark:text-stone-500',
+    nutrition: 'text-orange-400 dark:text-orange-500',
+    gear: 'text-emerald-400 dark:text-emerald-500',
   }
 
   return (
-    <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden divide-y divide-stone-200 dark:divide-stone-800">
       {sortedCategories.map((cat) => (
-        <div key={cat}>
-          <div className="px-5 pt-3 pb-1">
-            <span className={`text-xs font-semibold uppercase tracking-wider ${categoryColors[cat] ?? 'text-stone-400'}`}>
+        <div key={cat} className="py-1">
+          <div className="px-5 pt-3 pb-1 flex items-center gap-2">
+            <span className="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-600 shrink-0" />
+            <span
+              className="text-[11px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-500"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
               {t(`report.equipment.category.${cat}`)}
             </span>
           </div>
-          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+          <ul>
             {grouped.get(cat)!.map((item) => (
-              <li key={item.id} className="flex items-start gap-3 px-5 py-3">
+              <li key={item.id} className="flex items-start gap-3 px-5 py-2.5">
                 <CategoryIcon
                   category={cat}
-                  className={`w-4 h-4 mt-0.5 shrink-0 ${categoryColors[cat] ?? 'text-emerald-500'}`}
+                  className={`w-4 h-4 mt-0.5 shrink-0 ${categoryColors[cat] ?? 'text-stone-400'}`}
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{item.name}</p>
