@@ -1,5 +1,20 @@
 # Changelog
 
+## frontend v0.1.2 — 2026-03-18
+
+- style: redesign clothing & equipment list section headings and icons
+- feat(BIKE-26): implemented
+
+## backend v0.1.1 — 2026-03-18
+
+- feat(BIKE-26): implemented
+- feat(BIKE-24): implement item-level product matching and add specs for BIKE-25, BIKE-26
+
+## agent v0.1.1 — 2026-03-18
+
+- feat(BIKE-26): implemented
+- feat(BIKE-24): implement item-level product matching and add specs for BIKE-25, BIKE-26
+
 ## frontend v0.1.1 — 2026-03-17
 
 - feat(BIKE-23): reverse route direction
