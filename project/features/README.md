@@ -13,6 +13,7 @@ Features use sequential IDs: `BIKE-1`, `BIKE-2`, etc. Check this directory for t
 | **Planned**     | Spec written, not yet started       |
 | **In Progress** | Active development                  |
 | **In Review**   | Implementation done, QA in progress |
+| **Done**        | QA passed, awaiting release         |
 | **Deployed**    | Live in production                  |
 
 ## Feature Spec Format

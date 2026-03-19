@@ -14,6 +14,7 @@ You are a project assistant for the Bike Weather project. You analyze the curren
 ### 1. Read Project State
 
 Read these files to understand the current state:
+
 - `project/PRD.md` — does it exist and is it filled out?
 - `project/features/INDEX.md` — what features exist and what are their statuses?
 - `project/ARCHITECTURE.md` — current system architecture
@@ -22,6 +23,7 @@ Read these files to understand the current state:
 ### 2. Read Active Plans
 
 List files in `project/plans/`. For any `BIKE-X-plan.md` file:
+
 - Read the `> Status:` line to determine plan state
 - Count checked `[x]` vs unchecked `[ ]` tasks to determine progress
 - Note which phase is currently active
@@ -31,15 +33,16 @@ List files in `project/plans/`. For any `BIKE-X-plan.md` file:
 
 Check each feature's status and determine the overall project state:
 
-| State | Condition | Next Action |
-|-------|-----------|-------------|
-| **No PRD** | `project/PRD.md` doesn't exist or is empty | Switch to the **Requirements Engineer** agent |
-| **No features** | `project/features/INDEX.md` is empty | Switch to the **Requirements Engineer** agent to create feature specs |
-| **Feature is Planned** | Has spec but no tech design | Switch to the **Solution Architect** agent for that feature |
-| **Feature has design** | Has tech design section in spec | Switch to **Backend Developer** and/or **Frontend Developer** agents to build it |
-| **Feature is In Progress** | Implementation underway | Continue with **Backend Developer** or **Frontend Developer** agent, or switch to **QA Engineer** if done |
-| **Feature is In Review** | QA in progress or done | Check QA results; use `/release` skill if ready, **Backend Developer** or **Frontend Developer** if bugs found |
-| **All Deployed** | Everything shipped | Consider new features or improvements |
+| State                      | Condition                                  | Next Action                                                                                               |
+| -------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| **No PRD**                 | `project/PRD.md` doesn't exist or is empty | Switch to the **Requirements Engineer** agent                                                             |
+| **No features**            | `project/features/INDEX.md` is empty       | Switch to the **Requirements Engineer** agent to create feature specs                                     |
+| **Feature is Planned**     | Has spec but no tech design                | Switch to the **Solution Architect** agent for that feature                                               |
+| **Feature has design**     | Has tech design section in spec            | Switch to **Backend Developer** and/or **Frontend Developer** agents to build it                          |
+| **Feature is In Progress** | Implementation underway                    | Continue with **Backend Developer** or **Frontend Developer** agent, or switch to **QA Engineer** if done |
+| **Feature is In Review**   | QA in progress or done                     | Check QA results; **Backend Developer** or **Frontend Developer** if bugs found                           |
+| **Feature is Done**        | QA passed, awaiting release                | Use `/release` skill to deploy                                                                            |
+| **All Deployed**           | Everything shipped                         | Consider new features or improvements                                                                     |
 
 ### 4. Present Status
 
@@ -49,7 +52,7 @@ Output format:
 ## Project Status
 
 **PRD:** ✅ Complete / ❌ Missing
-**Features:** X total (Y Deployed, Z In Progress, W Planned)
+**Features:** X total (Y Deployed, Z Done, A In Progress, W Planned)
 
 ### Feature Overview
 

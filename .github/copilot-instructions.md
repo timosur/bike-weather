@@ -39,6 +39,7 @@ Three independent services in one repo, each with its own dependency management:
 - **`agent/`** — LLM-powered product scraper (OpenAI + Anthropic). `uv` + `pyproject.toml`. Standalone CLI.
 
 Service-specific conventions and patterns are in `.github/instructions/`:
+
 - `backend.instructions.md` — route/service/model patterns, migrations, auth
 - `frontend.instructions.md` — React patterns, Tailwind, i18n, API client
 - `agent.instructions.md` — LLM extraction, shop config, publisher architecture
@@ -58,14 +59,16 @@ All features are tracked in `project/features/INDEX.md` with specs in `project/f
 **Implementation plans** live in `project/plans/BIKE-X-plan.md` — phased task checklists with manual verification checkpoints. Created by the **Solution Architect** agent, executed by **Backend Developer** and **Frontend Developer** agents.
 
 **Before starting any work:**
+
 1. Read `project/features/INDEX.md` to understand current feature landscape
 2. If the work relates to an existing feature, read its spec
 3. Check `project/plans/` for an existing implementation plan
 4. If it's a new feature not yet tracked, create a spec first (switch to the **Requirements Engineer** agent)
 
 **After completing work:**
+
 1. Update the feature spec with what was built and any deviations
-2. Update `project/features/INDEX.md` status if applicable (Planned → In Progress → In Review → Deployed)
+2. Update `project/features/INDEX.md` status if applicable (Planned → In Progress → In Review → Done → Deployed)
 3. Update `project/plans/BIKE-X-plan.md` — check off completed tasks and update the status line
 4. Actually edit the files — don't just describe changes. Re-read after editing to verify.
 
@@ -84,20 +87,20 @@ Use specialized agents for structured feature development. Agents are selected f
 Requirements Engineer → Solution Architect → Backend Developer ⟷ Frontend Developer → QA Engineer
 ```
 
-| Agent | Purpose |
-|-------|---------|
-| **Requirements Engineer** | Create feature specs with user stories and acceptance criteria |
-| **Solution Architect** | Design tech architecture + create implementation plan (`project/plans/BIKE-X-plan.md`) |
-| **Frontend Developer** | Build UI components, pages, styling (React, Tailwind, TypeScript) |
-| **Backend Developer** | Build APIs, database schemas, services, migrations (FastAPI, SQLModel, async Python). Also handles agent service work. |
-| **QA Engineer** | Test against acceptance criteria + security audit. Never fixes bugs — only documents them. |
+| Agent                     | Purpose                                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Requirements Engineer** | Create feature specs with user stories and acceptance criteria                                                         |
+| **Solution Architect**    | Design tech architecture + create implementation plan (`project/plans/BIKE-X-plan.md`)                                 |
+| **Frontend Developer**    | Build UI components, pages, styling (React, Tailwind, TypeScript)                                                      |
+| **Backend Developer**     | Build APIs, database schemas, services, migrations (FastAPI, SQLModel, async Python). Also handles agent service work. |
+| **QA Engineer**           | Test against acceptance criteria + security audit. Never fixes bugs — only documents them.                             |
 
 Supporting skills (invoked via `/skill` slash commands):
 
-| Skill | Purpose |
-|-------|---------|
-| `/release` | Tag, deploy, update changelog (shipping is always separate) |
-| `/help` | Check project status, plan progress, and get next-step guidance |
+| Skill      | Purpose                                                         |
+| ---------- | --------------------------------------------------------------- |
+| `/release` | Tag, deploy, update changelog (shipping is always separate)     |
+| `/help`    | Check project status, plan progress, and get next-step guidance |
 
 Each agent reads `project/features/INDEX.md` at start and suggests the next agent on completion via handoff buttons. Handoffs are user-initiated — an agent never auto-proceeds to the next phase.
 
@@ -106,6 +109,7 @@ Each agent reads `project/features/INDEX.md` at start and suggests the next agen
 ### Workflow
 
 For non-trivial changes, follow this sequence:
+
 1. **Research** — read relevant files, search for existing patterns and reusable utilities before writing code.
 2. **Plan** — decompose into small, self-contained tasks with clear acceptance criteria.
 3. **Implement** — execute each task with surgical precision. Make minimal changes.

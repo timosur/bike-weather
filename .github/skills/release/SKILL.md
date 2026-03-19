@@ -19,17 +19,17 @@ The skill auto-detects which services have unreleased changes and handles the fu
 
 ## Repositories
 
-| Repo | Path | Purpose |
-|------|------|---------|
+| Repo         | Path                  | Purpose                                                                  |
+| ------------ | --------------------- | ------------------------------------------------------------------------ |
 | bike-weather | `~/code/bike-weather` | Source repo. Git tags = released versions. CI builds images on tag push. |
-| homelab | `~/code/homelab` | Kubernetes manifests. ArgoCD syncs from here. |
+| homelab      | `~/code/homelab`      | Kubernetes manifests. ArgoCD syncs from here.                            |
 
 ## Environments
 
-| Environment | Homelab path | Tag pattern | Namespace |
-|-------------|-------------|-------------|-----------|
-| **Production** | `apps/bike-weather/` | `<service>/v1.2.3` (no suffix) | `bike-weather` |
-| **Preview** | `apps/bike-weather-preview/` | `<service>/v1.2.3-preview.N` | `bike-weather-preview` |
+| Environment    | Homelab path                 | Tag pattern                    | Namespace              |
+| -------------- | ---------------------------- | ------------------------------ | ---------------------- |
+| **Production** | `apps/bike-weather/`         | `<service>/v1.2.3` (no suffix) | `bike-weather`         |
+| **Preview**    | `apps/bike-weather-preview/` | `<service>/v1.2.3-preview.N`   | `bike-weather-preview` |
 
 ## Container Images
 
@@ -77,6 +77,7 @@ Prepend a new section for each released service **below** the `# Changelog` head
 ```
 
 Rules:
+
 - Use the current date for the release heading.
 - List each commit as a bullet point using the short commit message (the `--oneline` subject).
 - Group by service when multiple services are released at the same time.
@@ -122,13 +123,14 @@ Tags follow semver: `<service>/v<major>.<minor>.<patch>` with optional `-preview
 
 To compute the next version from the current latest stable tag:
 
-| Bump type | Example |
-|-----------|---------|
-| `patch` | `1.2.3` → `1.2.4` |
-| `minor` | `1.2.3` → `1.3.0` |
-| `major` | `1.2.3` → `2.0.0` |
+| Bump type | Example           |
+| --------- | ----------------- |
+| `patch`   | `1.2.3` → `1.2.4` |
+| `minor`   | `1.2.3` → `1.3.0` |
+| `major`   | `1.2.3` → `2.0.0` |
 
 For preview tags, append `-preview.N` to the next version, auto-incrementing N:
+
 ```bash
 # Count existing preview tags for the target version
 PREVIEW_COUNT=$(git tag -l "<service>/v<next_version>-preview.*" | wc -l | tr -d ' ')
@@ -148,6 +150,7 @@ git push origin "<service>/v<version>"
 This triggers GitHub Actions to build the container image. **Do not wait for CI to finish** — proceed directly to the deploy phase.
 
 The workflow files are:
+
 - `.github/workflows/frontend.yml` — triggers on `frontend/v*` tags
 - `.github/workflows/backend.yml` — triggers on `backend/v*` tags
 - `.github/workflows/agent.yml` — triggers on `agent/v*` tags
@@ -161,6 +164,7 @@ If stable release: CI checks for an existing preview image with the same base ve
 For each service (`frontend`, `backend`):
 
 1. **Get the latest git tag** from the bike-weather repo:
+
    ```bash
    cd ~/code/bike-weather
    # Latest stable tag (production)
@@ -170,6 +174,7 @@ For each service (`frontend`, `backend`):
    ```
 
 2. **Get the currently deployed version** from homelab:
+
    ```bash
    grep "image: ghcr.io/timosur/bike-weather/<service>:" ~/code/homelab/apps/bike-weather/<service>-deployment.yaml
    grep "image: ghcr.io/timosur/bike-weather/<service>:" ~/code/homelab/apps/bike-weather-preview/<service>-deployment.yaml
@@ -212,6 +217,7 @@ git push
 ```
 
 Example commit message:
+
 ```
 chore(bike-weather): deploy frontend 0.0.7, backend 0.0.3-preview.1
 ```
@@ -222,23 +228,23 @@ Tell the user the push is done and ArgoCD will pick up the changes. Note that CI
 
 ## User Intent Handling
 
-| User says | Action |
-|-----------|--------|
-| "release" / "ship it" / "deploy" | Full flow: detect → changelog → tag → deploy |
-| "tag frontend patch" / "bump backend minor" | Phase 1 + 2: changelog + create tag, push |
-| "deploy to prod" / "update preview" | Phase 3 only: update homelab manifests for that environment |
-| "what's deployed?" / "release status" | Show comparison table only, no changes |
-| "release frontend 0.1.0" | Use the specified version, skip auto-detection for that service |
-| "preview release" | Tag with `-preview.N` suffix, deploy to preview environment |
+| User says                                   | Action                                                          |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| "release" / "ship it" / "deploy"            | Full flow: detect → changelog → tag → deploy                    |
+| "tag frontend patch" / "bump backend minor" | Phase 1 + 2: changelog + create tag, push                       |
+| "deploy to prod" / "update preview"         | Phase 3 only: update homelab manifests for that environment     |
+| "what's deployed?" / "release status"       | Show comparison table only, no changes                          |
+| "release frontend 0.1.0"                    | Use the specified version, skip auto-detection for that service |
+| "preview release"                           | Tag with `-preview.N` suffix, deploy to preview environment     |
 
 ## Feature Tracking
 
 After a successful release, update feature tracking if the release includes work on a tracked feature:
 
-1. Read `project/features/INDEX.md` to check if any features are "In Review"
+1. Read `project/features/INDEX.md` to check if any features are "Done"
 2. For features included in this release, update their spec file:
    - Append or update the "## Deployment" section with version, date, and environment
-3. Update `project/features/INDEX.md` status from "In Review" → "Deployed"
+3. Update `project/features/INDEX.md` status from "Done" → "Deployed"
 4. After making non-trivial changes, update `project/ARCHITECTURE.md` if APIs, models, or auth changed
 
 ## Edge Cases
