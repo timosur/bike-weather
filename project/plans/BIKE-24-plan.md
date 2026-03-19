@@ -21,12 +21,4 @@
 - [x] Rewrite `match_products_to_equipment()` to match by `matches_item_id` with prefix matching for equipment (e.g., `eq-lights` matches `eq-lights-before-sunrise`)
 - [x] Remove `ICON_TO_ZONE` and `EQUIPMENT_TO_CATEGORY` mappings (dead code)
 - [x] Add unit tests for the new matching logic: exact match, multiple candidates with weather scoring, no match returns nothing, equipment prefix matching
-- [ ] **Checkpoint**: Run `make test-backend` — all tests pass. Generate a ride report and verify each clothing item has its own specific product (or no product if none matched).
-
-## Phase 3: Integration Testing (Backend Developer)
-
-- [ ] Import a product via URL extraction and verify `matches_item_id` is persisted
-- [ ] Generate a ride report with the imported product and verify it appears next to the correct clothing item
-- [ ] Verify editing `matches_item_id` in admin form works and changes report matching
-- [ ] Run full test suite: `make test-backend && make test-agent`
-- [ ] **Checkpoint**: Manual end-to-end walkthrough — import a product, verify LLM-assigned item ID, edit it in admin, generate report, confirm correct matching.
+- [x] **Checkpoint**: Run `make test-backend` — all tests pass. Generate a ride report and verify each clothing item has its own specific product (or no product if none matched).

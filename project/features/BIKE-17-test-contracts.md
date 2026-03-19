@@ -140,11 +140,3 @@ Three defense layers to harden the test suite and prevent agentic "cheating" (mo
 ## Tech Design
 
 _See `project/plans/test-contracts.md` for the full 3-phase implementation plan with verification steps._
-
-## QA Results
-
-_Not yet tested._
-
-## Deployment
-
-_Not yet deployed._

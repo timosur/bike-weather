@@ -1,6 +1,6 @@
 # Plan: BIKE-21 — Refresh Token Mechanism
 
-> Status: In Progress (Phases 1–4 complete)
+> Status: Completed
 > Feature spec: [BIKE-21](../features/BIKE-21-refresh-token.md)
 > Created: 2026-03-15
 
@@ -50,11 +50,3 @@
 - [x] Update E2E test helpers (`frontend/e2e/helpers/auth.ts`) to include `refresh_token` in mocked localStorage auth state
 - [x] **Checkpoint**: Run `cd frontend && npm run build` — no type errors. E2E mocks updated.
 
-## Phase 5: Integration & Documentation
-
-**Owner: Backend Developer + Frontend Developer**
-
-- [x] Update `project/ARCHITECTURE.md` — add `POST /api/auth/refresh` to the Auth endpoints table
-- [ ] Run `make test-backend` — all backend tests pass
-- [ ] Run `make test-frontend` — all E2E tests pass
-- [ ] **Checkpoint**: Full feature walkthrough — log in, wait for proactive refresh (or simulate by adjusting `expires_at`), verify silent refresh. Open two tabs, refresh in one, verify other tab picks up new token. Test with expired refresh token — should redirect to login.

@@ -191,7 +191,3 @@ No new packages needed — this uses existing SQLModel, Alembic, FastAPI pattern
 _See `project/plans/BIKE-26-plan.md` (created by the /architecture agent)._
 
 <!-- Appended by /qa agent -->
-
-## QA Results
-
-_To be filled by the /qa agent._

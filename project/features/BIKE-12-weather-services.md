@@ -42,11 +42,3 @@ Sub-features and areas covered:
 ## Tech Design
 
 _Retroactive — see `project/ARCHITECTURE.md`._
-
-## QA Results
-
-_No formal QA tracking for retroactive features._
-
-## Deployment
-
-_Deployed to production via ArgoCD. See release skill for version history._

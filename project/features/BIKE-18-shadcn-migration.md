@@ -347,7 +347,3 @@ Step 5: Cleanup
 | Build size increase from Radix packages              | Low — minor bundle growth                  | Radix packages are small and tree-shakeable; monitor with `vite-plugin-visualizer` if concerned |
 
 <!-- Appended by QA skill -->
-
-## QA Results
-
-_To be filled by the QA skill._

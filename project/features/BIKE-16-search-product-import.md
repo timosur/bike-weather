@@ -110,11 +110,3 @@ Replace category-based product scraping with a search-based import flow. Each cl
 ## Tech Design
 
 _See `project/plans/search-based-product-import.md` for the full 6-phase implementation plan._
-
-## QA Results
-
-_Not yet tested._
-
-## Deployment
-
-_Not yet deployed._

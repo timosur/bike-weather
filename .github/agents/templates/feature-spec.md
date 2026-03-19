@@ -1,11 +1,4 @@
-# BIKE-X: Feature Name
-
-| Field            | Value         |
-| ---------------- | ------------- |
-| **ID**           | BIKE-X        |
-| **Status**       | Planned       |
-| **Created**      | YYYY-MM-DD    |
-| **Dependencies** | None / BIKE-Y |
+# {PREFIX}-X: Feature Name
 
 ## Description
 
@@ -30,18 +23,12 @@ _Which sub-features and areas this spec covers._
 
 ---
 
-<!-- Appended by /architecture agent -->
+<!-- Appended by Solution Architect agent -->
 
 ## Tech Design
 
-_To be filled by the /architecture agent._
+_To be filled by the Solution Architect agent._
 
 ## Implementation Plan
 
-_See `project/plans/BIKE-X-plan.md` (created by the /architecture agent)._
-
-<!-- Appended by /qa agent -->
-
-## QA Results
-
-_To be filled by the /qa agent._
+_See `project/plans/{PREFIX}-X-plan.md` (created by the Solution Architect agent)._

@@ -192,7 +192,3 @@ Both `generated/` directories are committed to the repo (no build-time dependenc
 See `project/plans/BIKE-25-plan.md`.
 
 <!-- Appended by /qa agent -->
-
-## QA Results
-
-_To be filled by the QA agent._

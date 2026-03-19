@@ -275,7 +275,3 @@ POST /api/admin/agent/jobs/{jobId}/approve-url — save approved product
 _See `project/plans/BIKE-20-plan.md` (created by the architecture skill)._
 
 <!-- Appended by QA skill -->
-
-## QA Results
-
-_To be filled by the QA skill._

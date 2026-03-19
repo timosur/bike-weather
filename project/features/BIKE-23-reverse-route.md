@@ -133,7 +133,3 @@ No new packages. `ArrowUpDown` is available from `lucide-react` (already install
 _See `project/plans/BIKE-23-plan.md` (created by the Solution Architect agent)._
 
 <!-- Appended by /qa agent -->
-
-## QA Results
-
-_To be filled by the QA agent._
