@@ -1,0 +1,137 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "timezone": "Europe/Berlin",
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "assignees": [
+    "timosur"
+  ],
+  "reviewers": [
+    "timosur"
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "packageRules": [
+    {
+      "description": "Group GitHub Actions updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "github-actions"
+    },
+    {
+      "description": "Group frontend npm updates",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "frontend/package.json"
+      ],
+      "groupName": "frontend npm dependencies"
+    },
+    {
+      "description": "Group backend Python updates",
+      "matchManagers": [
+        "pep621",
+        "pip_requirements"
+      ],
+      "matchFileNames": [
+        "backend/pyproject.toml"
+      ],
+      "groupName": "backend Python dependencies"
+    },
+    {
+      "description": "Group agent Python updates",
+      "matchManagers": [
+        "pep621",
+        "pip_requirements"
+      ],
+      "matchFileNames": [
+        "agent/pyproject.toml"
+      ],
+      "groupName": "agent Python dependencies"
+    },
+    {
+      "description": "Auto-merge patch and pin updates for GitHub Actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Auto-merge patch and pin updates for frontend npm dependencies",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "frontend/package.json"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Auto-merge patch and pin updates for Python dependencies",
+      "matchManagers": [
+        "pep621",
+        "pip_requirements"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group Docker image updates",
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "groupName": "docker images"
+    },
+    {
+      "description": "Keep major updates separate for manual review",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "separateMajorMinor": true
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "frontend/playwright-report/**",
+    "frontend/test-results/**",
+    "**/*.egg-info/**"
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "semanticCommits": "enabled",
+  "branchPrefix": "renovate/",
+  "baseBranchPatterns": [
+    "main"
+  ]
+}
