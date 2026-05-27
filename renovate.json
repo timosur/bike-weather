@@ -20,6 +20,7 @@
   ],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
+  "separateMajorMinor": true,
   "packageRules": [
     {
       "description": "Group GitHub Actions updates",
@@ -110,13 +111,6 @@
         "docker-compose"
       ],
       "groupName": "docker images"
-    },
-    {
-      "description": "Keep major updates separate for manual review",
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "separateMajorMinor": true
     }
   ],
   "ignorePaths": [
