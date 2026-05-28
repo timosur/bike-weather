@@ -1,5 +1,15 @@
 # Changelog
 
+## frontend v0.1.3 — 2026-05-28
+
+- chore: update app
+- fix(deps): update frontend npm dependencies
+- feat: update deps
+
+## backend v0.1.2 — 2026-05-28
+
+- chore(deps): update dependency pyjwt to v2.12.0 [security]
+
 ## frontend v0.1.2 — 2026-03-18
 
 - style: redesign clothing & equipment list section headings and icons
