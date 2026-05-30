@@ -1,5 +1,17 @@
 # Changelog
 
+## frontend v0.1.4 — 2026-05-30
+
+- chore: license project under AGPL-3.0-or-later
+
+## backend v0.1.3 — 2026-05-30
+
+- chore: license project under AGPL-3.0-or-later
+
+## agent v0.1.2 — 2026-05-30
+
+- chore: license project under AGPL-3.0-or-later
+
 ## frontend v0.1.3 — 2026-05-28
 
 - chore: update app
