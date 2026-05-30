@@ -77,4 +77,6 @@ make test-frontend   # Playwright E2E (frontend)
 
 ## License
 
-All rights reserved.
+This project is licensed under the **GNU Affero General Public License v3.0 or later** (AGPL-3.0-or-later). See [LICENSE](LICENSE) for the full text.
+
+In short: you are free to use, modify, and self-host this software, but any modified version — including one offered as a network service — must be made available under the same license. Closed-source forks and proprietary SaaS offerings are not permitted.

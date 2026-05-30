@@ -309,6 +309,14 @@ export function AppShell({
                 >
                   {t('shell.footer.privacy')}
                 </a>
+                <a
+                  href="https://github.com/timosur/bike-weather"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+                >
+                  {t('shell.footerLinks.sourceCode')}
+                </a>
               </div>
             </div>
           </div>

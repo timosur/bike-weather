@@ -93,7 +93,8 @@
       "giveFeedback": "Feedback geben",
       "signIn": "Anmelden",
       "imprint": "Impressum",
-      "privacyPolicy": "Datenschutz"
+      "privacyPolicy": "Datenschutz",
+      "sourceCode": "Quellcode (AGPL-3.0)"
     },
     "langSwitch": {
       "toEn": "Switch to English",
