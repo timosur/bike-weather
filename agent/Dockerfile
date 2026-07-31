@@ -1,5 +1,5 @@
 # Build stage — install Python dependencies
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /app
 COPY pyproject.toml .
@@ -7,7 +7,7 @@ COPY . .
 RUN pip install --no-cache-dir .
 
 # Runtime stage — minimal image with Playwright Chromium
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 # Playwright system dependencies for Chromium
 RUN apt-get update && \
