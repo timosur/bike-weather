@@ -1,5 +1,5 @@
 # Build stage — compile C extensions (asyncpg, greenlet, etc.)
-FROM python:3.14-slim AS builder
+FROM python:3.15-slim AS builder
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libpq-dev gcc && \
@@ -10,7 +10,7 @@ COPY . .
 RUN pip install --no-cache-dir .
 
 # Runtime stage — minimal image without build tools
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 ARG APP_VERSION=0.0.0
 ENV APP_VERSION=${APP_VERSION}
