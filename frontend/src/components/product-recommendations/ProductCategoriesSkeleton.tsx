@@ -18,7 +18,7 @@ export function ProductCategoriesSkeleton() {
               <SkeletonBlock className="h-4 w-28" />
               <SkeletonLine className="h-3 w-20" />
             </div>
-            <SkeletonBlock className="h-4 w-4 rounded shrink-0" />
+            <SkeletonBlock className="h-4 w-4 rounded-sm shrink-0" />
           </SkeletonCard>
         ))}
       </div>

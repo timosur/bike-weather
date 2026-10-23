@@ -11,7 +11,7 @@ export function RidePlannerSkeleton() {
         </div>
 
         {/* Form card */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs">
           <div className="p-6 space-y-5">
             {/* Location field */}
             <div className="space-y-1.5">

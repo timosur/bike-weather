@@ -242,7 +242,7 @@ export function RidePlanner({
   }
 
   const inputBase =
-    'w-full rounded-xl text-sm bg-stone-50 dark:bg-stone-800 border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-2.5'
+    'w-full rounded-xl text-sm bg-stone-50 dark:bg-stone-800 border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-2.5'
   const inputError = 'border-red-400 dark:border-red-500 focus:ring-red-100 dark:focus:ring-red-900/30'
   const inputNormal = 'border-stone-200 dark:border-stone-700'
 
@@ -280,7 +280,7 @@ export function RidePlanner({
         {/* Restored from session banner */}
         {formSource && !bannerDismissed && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-800/40">
-            <Info className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" strokeWidth={2} />
+            <Info className="w-3.5 h-3.5 text-sky-500 shrink-0" strokeWidth={2} />
             <span className="flex-1 text-xs text-sky-700 dark:text-sky-400">
               {t(`planner.formSource.${formSource}`)}
             </span>
@@ -307,7 +307,7 @@ export function RidePlanner({
         {/* Form card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm"
+          className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs"
         >
           <div className="p-6 space-y-5">
 
@@ -393,14 +393,14 @@ export function RidePlanner({
               </div>
             )}
             {!isPreviewLoading && routePreview && form.location?.lat && form.location?.lon && form.destination?.lat && form.destination?.lon && (
-              <div className="h-48 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-sm relative">
+              <div className="h-48 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-xs relative">
                 <RouteMap
                   startLocation={{ lat: form.location.lat, lon: form.location.lon, label: 'Start' }}
                   destinationLocation={{ lat: form.destination.lat, lon: form.destination.lon, label: 'Dest' }}
                   routeGeometry={routePreview.geometry}
                   className="w-full h-full"
                 />
-                <div className="absolute bottom-2 right-2 bg-white/90 dark:bg-stone-900/90 backdrop-blur px-2 py-1 rounded text-xs font-medium shadow-sm z-[1000] border border-stone-200 dark:border-stone-700">
+                <div className="absolute bottom-2 right-2 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm px-2 py-1 rounded-sm text-xs font-medium shadow-xs z-1000 border border-stone-200 dark:border-stone-700">
                   {routePreview.distanceKm.toFixed(1)} km • {Math.round(routePreview.durationMinutes)} min
                 </div>
               </div>
@@ -748,7 +748,7 @@ export function RidePlanner({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm text-sm"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-xs text-sm"
             >
               {isLoading ? (
                 <>

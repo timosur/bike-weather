@@ -365,7 +365,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
                     y={PADDING.top}
                     width={meta.sunriseX - dayStartX}
                     height={PLOT_H}
-                    className="fill-stone-900/[0.06] dark:fill-stone-400/[0.06]"
+                    className="fill-stone-900/6 dark:fill-stone-400/6"
                   />
                 )}
                 {/* Post-sunset shading */}
@@ -375,7 +375,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
                     y={PADDING.top}
                     width={dayEndX - meta.sunsetX}
                     height={PLOT_H}
-                    className="fill-stone-900/[0.06] dark:fill-stone-400/[0.06]"
+                    className="fill-stone-900/6 dark:fill-stone-400/6"
                   />
                 )}
               </g>
@@ -701,7 +701,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.feelsLike')}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-blue-300/50 dark:bg-blue-500/30 rounded-sm" />
+            <span className="w-2.5 h-2.5 bg-blue-300/50 dark:bg-blue-500/30 rounded-xs" />
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.precip')}</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -717,7 +717,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.airQuality')}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-emerald-500/20 border border-dashed border-emerald-500 rounded-sm" />
+            <span className="w-2.5 h-2.5 bg-emerald-500/20 border border-dashed border-emerald-500 rounded-xs" />
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.rideWindow')}</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -725,7 +725,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.sunrise')} / {t('report.weather.sunset')}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-stone-900/[0.06] dark:bg-stone-400/[0.06] rounded-sm" />
+            <span className="w-2.5 h-2.5 bg-stone-900/6 dark:bg-stone-400/6 rounded-xs" />
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.chart.twilight')}</span>
           </div>
         </div>

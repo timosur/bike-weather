@@ -322,7 +322,7 @@ export function UrlImportReview({
                         setBikeTypes(bikeTypes.filter((t) => t !== bt))
                       }
                     }}
-                    className="rounded border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
+                    className="rounded-sm border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
                   />
                   <span className="text-stone-700 dark:text-stone-300">{t(`admin.import.urlImport.bikeType.${bt}`)}</span>
                 </label>

@@ -77,7 +77,7 @@ export function RouteCard({ route, onSelect, onReplan, onDelete, onShare, onUnsh
       onClick={() => onSelect?.()}
     >
       {/* Top accent bar */}
-      <div className="h-1 rounded-t-xl bg-gradient-to-r from-emerald-400 to-emerald-600 dark:from-emerald-500 dark:to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div className="h-1 rounded-t-xl bg-linear-to-r from-emerald-400 to-emerald-600 dark:from-emerald-500 dark:to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
       <div className="p-4">
         {/* Header row: name + menu */}

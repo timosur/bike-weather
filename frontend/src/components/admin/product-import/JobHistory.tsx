@@ -76,7 +76,7 @@ export function JobHistory({ onSelectJob, currentJobId }: JobHistoryProps) {
         <div className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
           <History className="w-4 h-4" />
           {t('admin.import.jobHistory')}
-          <span className="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-700 rounded text-xs">
+          <span className="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-700 rounded-sm text-xs">
             {completedJobsWithProducts.length}
           </span>
         </div>

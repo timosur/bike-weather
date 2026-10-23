@@ -141,7 +141,7 @@ export function LocationPicker({
                 error
                   ? 'border-red-400 dark:border-red-500 focus:ring-red-100 dark:focus:ring-red-900/30'
                   : 'border-stone-200 dark:border-stone-700'
-              } text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all ${py} pl-9 pr-10`}
+              } text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all ${py} pl-9 pr-10`}
             />
             <button
               type="button"

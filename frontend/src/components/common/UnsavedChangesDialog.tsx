@@ -22,7 +22,7 @@ export function UnsavedChangesDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-xs" onClick={onCancel} />
 
       {/* Dialog */}
       <div className="relative w-full max-w-sm rounded-2xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 shadow-2xl p-6 text-center">

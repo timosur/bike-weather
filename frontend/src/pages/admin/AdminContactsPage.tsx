@@ -65,7 +65,7 @@ export default function AdminContactsPage() {
               { value: 'feature', label: 'Feature' },
               { value: 'sonstiges', label: 'Sonstiges' },
             ]}
-            className="!w-auto"
+            className="w-auto!"
           />
         }
       />

@@ -28,7 +28,7 @@ export function EmptyRoutes({ onNavigateToPlanner }: EmptyRoutesProps) {
 
       <button
         onClick={() => onNavigateToPlanner?.()}
-        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-sm transition-colors"
+        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-xs transition-colors"
       >
         {t('routes.empty.cta')}
         <ArrowRight className="w-4 h-4" strokeWidth={2} />

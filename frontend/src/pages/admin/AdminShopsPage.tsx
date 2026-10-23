@@ -68,7 +68,7 @@ export default function AdminShopsPage() {
     { key: 'name', header: 'Name', render: (s) => <span className="font-medium">{s.name}</span> },
     {
       key: 'logo', header: 'Logo', render: (s) =>
-        s.logoUrl ? <img src={s.logoUrl} alt={s.name} className="w-8 h-8 object-contain rounded" /> : <span className="text-stone-400">—</span>,
+        s.logoUrl ? <img src={s.logoUrl} alt={s.name} className="w-8 h-8 object-contain rounded-sm" /> : <span className="text-stone-400">—</span>,
     },
     { key: 'tag', header: 'Affiliate Tag', render: (s) => s.affiliateTag ?? <span className="text-stone-400">—</span> },
   ]

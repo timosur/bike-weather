@@ -26,7 +26,7 @@ export function SegmentedToggle({ options, value, onChange, className = '' }: Se
             onClick={() => onChange(option.value)}
             aria-label={option.ariaLabel}
             className={`relative z-10 flex items-center justify-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${isActive
-                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
               }`}
           >

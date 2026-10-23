@@ -49,7 +49,7 @@ export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHo
   return (
     <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
       {/* Hero section */}
-      <div className="px-5 py-5 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-800/50 dark:to-stone-900 border-b border-stone-200 dark:border-stone-800">
+      <div className="px-5 py-5 bg-linear-to-br from-stone-50 to-stone-100 dark:from-stone-800/50 dark:to-stone-900 border-b border-stone-200 dark:border-stone-800">
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="flex items-baseline gap-2">
@@ -70,7 +70,7 @@ export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHo
               {weather.description}
             </p>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-800 shadow-sm flex items-center justify-center text-amber-500">
+          <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-800 shadow-xs flex items-center justify-center text-amber-500">
             <WeatherIcon icon={weather.icon} className="w-8 h-8" />
           </div>
         </div>

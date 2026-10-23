@@ -51,7 +51,7 @@ export function AboutApp({ sections }: AboutAppProps) {
         </div>
 
         {/* Content card */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs overflow-hidden">
           <div className="p-6 sm:p-8 space-y-8">
             {sections?.map((section) => {
               const { icon, bg } = sectionIcons[section.section_key] ?? defaultIcon

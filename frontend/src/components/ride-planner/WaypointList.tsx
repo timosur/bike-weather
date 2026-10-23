@@ -136,7 +136,7 @@ export function WaypointList({
                 value={wp.name ?? ''}
                 onChange={e => handleNameChange(index, e.target.value)}
                 placeholder={t('waypoints.waypointName')}
-                className="flex-1 min-w-[100px] rounded-lg text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-1.5 px-2"
+                className="flex-1 min-w-[100px] rounded-lg text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-1.5 px-2"
               />
             </div>
 
@@ -163,7 +163,7 @@ export function WaypointList({
                       type="time"
                       value={wp.startTime ?? '08:00'}
                       onChange={e => handleStartTimeChange(index, e.target.value)}
-                      className="w-[110px] rounded-lg text-xs bg-white dark:bg-stone-800 border border-indigo-200 dark:border-indigo-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 focus:border-indigo-400 dark:focus:border-indigo-600 transition-all py-1.5 pl-7 pr-2"
+                      className="w-[110px] rounded-lg text-xs bg-white dark:bg-stone-800 border border-indigo-200 dark:border-indigo-700 text-stone-900 dark:text-stone-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 focus:border-indigo-400 dark:focus:border-indigo-600 transition-all py-1.5 pl-7 pr-2"
                     />
                   </div>
                 </div>

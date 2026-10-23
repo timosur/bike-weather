@@ -247,7 +247,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
       {/* ── 6. ROUTE MAP + WIND ANALYSIS ── */}
       {report.routeGeometry && report.destinationLocation && (
         <section className="space-y-4">
-          <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm relative z-0">
+          <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-xs relative z-0">
             <RouteMap
               startLocation={{
                 lat: report.routeGeometry[0][0],

@@ -36,12 +36,12 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
       className="group relative flex flex-col rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:shadow-md transition-all duration-200"
     >
       {shop.affiliateTag && (
-        <span className="absolute top-2.5 left-2.5 z-10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
+        <span className="absolute top-2.5 left-2.5 z-10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
           {disclosure.badgeLabel}
         </span>
       )}
 
-      <div className="aspect-[4/3] bg-stone-100 dark:bg-stone-800 flex items-center justify-center overflow-hidden">
+      <div className="aspect-4/3 bg-stone-100 dark:bg-stone-800 flex items-center justify-center overflow-hidden">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -54,7 +54,7 @@ export function ProductCard({ product, shop, disclosure, onProductClick }: Produ
             }}
           />
         ) : null}
-        <div className={`w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-400 dark:text-stone-500${product.imageUrl ? ' hidden' : ''}`}>
+        <div className={`w-full h-full bg-linear-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-400 dark:text-stone-500${product.imageUrl ? ' hidden' : ''}`}>
           <Store className="w-10 h-10" strokeWidth={1} />
         </div>
       </div>

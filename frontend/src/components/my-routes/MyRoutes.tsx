@@ -35,7 +35,7 @@ export function MyRoutes({ routes, onRouteSelect, onRouteReplan, onRouteDelete, 
         >
           {t('routes.heading')}
         </h1>
-        <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] px-2 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
+        <span className="inline-flex items-center justify-center h-6 min-w-6 px-2 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
           {routes.length}
         </span>
       </div>

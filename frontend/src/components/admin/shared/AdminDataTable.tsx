@@ -59,7 +59,7 @@ export function AdminDataTable<T>({
                 >
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3">
-                      <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded animate-pulse w-3/4" />
+                      <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded-sm animate-pulse w-3/4" />
                     </td>
                   ))}
                 </tr>
@@ -83,7 +83,7 @@ export function AdminDataTable<T>({
     <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="sticky top-0 bg-stone-50 dark:bg-stone-900/80 backdrop-blur">
+          <thead className="sticky top-0 bg-stone-50 dark:bg-stone-900/80 backdrop-blur-sm">
             <tr className="border-b border-stone-200 dark:border-stone-800">
               {columns.map((col) => (
                 <th

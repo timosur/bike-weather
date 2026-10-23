@@ -119,7 +119,7 @@ export default function AdminItemsPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              className="px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40"
             >
               <option value="">{t('admin.items.allTypes')}</option>
               <option value="clothing">{t('admin.items.typeClothing')}</option>
@@ -128,7 +128,7 @@ export default function AdminItemsPage() {
             <select
               value={zoneFilter}
               onChange={(e) => setZoneFilter(e.target.value)}
-              className="px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              className="px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40"
             >
               <option value="">{t('admin.items.allZones')}</option>
               {ZONE_OPTIONS.map((z) => (

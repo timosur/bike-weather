@@ -10,7 +10,7 @@ export function ContentPageSkeleton({ sections = 4, maxWidth = 'max-w-[640px]' }
     <div className="flex items-start justify-center py-12 px-4">
       <div className={`w-full ${maxWidth} space-y-8`}>
         <SkeletonBlock className="h-7 w-48" />
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-6 sm:p-8 space-y-8">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs p-6 sm:p-8 space-y-8">
           {Array.from({ length: sections }, (_, i) => (
             <div key={i} className="space-y-3">
               <SkeletonBlock className="h-5 w-36" />

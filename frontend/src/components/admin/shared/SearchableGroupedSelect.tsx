@@ -89,7 +89,7 @@ export function SearchableGroupedSelect({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-colors text-left"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-colors text-left"
       >
         <span className={selectedOption ? '' : 'text-stone-400 dark:text-stone-500'}>
           {selectedOption ? selectedOption.label : emptyOptionLabel}
@@ -111,7 +111,7 @@ export function SearchableGroupedSelect({
                   setSearch('')
                 }
               }}
-              className="p-0.5 hover:bg-stone-200 dark:hover:bg-stone-700 rounded"
+              className="p-0.5 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-sm"
             >
               <X className="w-3.5 h-3.5 text-stone-400" />
             </span>
@@ -133,7 +133,7 @@ export function SearchableGroupedSelect({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={placeholder}
-                className="w-full pl-8 pr-3 py-1.5 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/40"
+                className="w-full pl-8 pr-3 py-1.5 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-hidden focus:ring-1 focus:ring-emerald-500/40"
               />
             </div>
           </div>

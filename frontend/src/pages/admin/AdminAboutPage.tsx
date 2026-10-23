@@ -79,7 +79,7 @@ export default function AdminAboutPage() {
   }
 
   const columns: Column<AdminAboutContent>[] = [
-    { key: 'sectionKey', header: 'Key', render: (i) => <code className="text-xs bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded">{i.sectionKey}</code> },
+    { key: 'sectionKey', header: 'Key', render: (i) => <code className="text-xs bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded-sm">{i.sectionKey}</code> },
     { key: 'title', header: 'Title', render: (i) => <span className="font-medium">{i.title}</span> },
     { key: 'published', header: 'Published', render: (i) => <StatusBadge variant={i.isPublished ? 'success' : 'warning'}>{i.isPublished ? 'Published' : 'Draft'}</StatusBadge> },
     { key: 'order', header: 'Order', render: (i) => String(i.displayOrder) },

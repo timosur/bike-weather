@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
               {stat.count !== null ? (
                 <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">{stat.count}</p>
               ) : (
-                <div className="h-8 w-12 bg-stone-200 dark:bg-stone-700 rounded animate-pulse mt-1" />
+                <div className="h-8 w-12 bg-stone-200 dark:bg-stone-700 rounded-sm animate-pulse mt-1" />
               )}
             </div>
           </button>

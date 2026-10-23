@@ -57,7 +57,7 @@ export function AuthPage({
   }
 
   const inputBase =
-    'w-full rounded-xl text-sm bg-stone-50 dark:bg-stone-800 border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-2.5'
+    'w-full rounded-xl text-sm bg-stone-50 dark:bg-stone-800 border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/40 focus:border-emerald-400 dark:focus:border-emerald-600 transition-all py-2.5'
 
   return (
     <div className=" flex items-center justify-center py-12 px-4">
@@ -78,7 +78,7 @@ export function AuthPage({
         </div>
 
         {/* Card */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs">
           {/* Tab toggle */}
           <div className="flex border-b border-stone-100 dark:border-stone-800">
             {(['login', 'register'] as const).map(tabKey => (
@@ -155,7 +155,7 @@ export function AuthPage({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm text-sm"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-xs text-sm"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {t('auth.login.submit')}
@@ -236,7 +236,7 @@ export function AuthPage({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm text-sm"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-xs text-sm"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {t('auth.register.submit')}

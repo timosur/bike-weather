@@ -133,7 +133,7 @@ export default function ProductZonePage() {
                         onClick={() =>
                           navigate(`/products/${bikeType}/${zone.id}/${cat.id}`)
                         }
-                        className="group flex items-center gap-3 rounded-lg bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-3 text-left hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:shadow-sm transition-all duration-200"
+                        className="group flex items-center gap-3 rounded-lg bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-3 text-left hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:shadow-xs transition-all duration-200"
                       >
                         <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/40 transition-colors">
                           <CategoryIcon icon={cat.icon as CategoryIconType} className="w-4 h-4" />

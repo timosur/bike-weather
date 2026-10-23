@@ -271,7 +271,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
                     y={PADDING.top}
                     width={lz.morningTwilightX0! - chartLeft}
                     height={PLOT_H}
-                    className="fill-stone-900/10 dark:fill-stone-400/[0.08]"
+                    className="fill-stone-900/10 dark:fill-stone-400/8"
                   />
                 )}
                 {/* Morning twilight transition (night → twilight) */}
@@ -327,7 +327,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
                     y={PADDING.top}
                     width={chartRight - lz.eveningTwilightX1!}
                     height={PLOT_H}
-                    className="fill-stone-900/10 dark:fill-stone-400/[0.08]"
+                    className="fill-stone-900/10 dark:fill-stone-400/8"
                   />
                 )}
               </>
@@ -715,7 +715,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.feelsLike')}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-blue-300/50 dark:bg-blue-500/30 rounded-sm" />
+            <span className="w-2.5 h-2.5 bg-blue-300/50 dark:bg-blue-500/30 rounded-xs" />
             <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.precip')}</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -732,13 +732,13 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
           </div>
           {(rideX0 != null) && (
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-emerald-500/20 border border-dashed border-emerald-500 rounded-sm" />
+              <span className="w-2.5 h-2.5 bg-emerald-500/20 border border-dashed border-emerald-500 rounded-xs" />
               <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.legend.rideWindow')}</span>
             </div>
           )}
           {lightZones.sunriseX != null && (
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-stone-900/10 dark:bg-stone-400/[0.08] rounded-sm" />
+              <span className="w-2.5 h-2.5 bg-stone-900/10 dark:bg-stone-400/8 rounded-xs" />
               <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('report.weather.chart.twilight')}</span>
             </div>
           )}

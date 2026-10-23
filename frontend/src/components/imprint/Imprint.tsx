@@ -13,7 +13,7 @@ export function Imprint() {
           {t('imprint.heading')}
         </h1>
 
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-6 sm:p-8 space-y-8">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs p-6 sm:p-8 space-y-8">
           <section className="space-y-2">
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
               {t('imprint.infoHeading')}

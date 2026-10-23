@@ -74,7 +74,7 @@ export function RideReportSkeleton() {
         <div className="bg-white dark:bg-stone-900 rounded-2xl ring-1 ring-stone-200 dark:ring-stone-800 p-5 space-y-3">
           {Array.from({ length: 4 }, (_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <SkeletonBlock className="h-5 w-5 rounded" />
+              <SkeletonBlock className="h-5 w-5 rounded-sm" />
               <SkeletonLine className="h-3 w-40" />
             </div>
           ))}

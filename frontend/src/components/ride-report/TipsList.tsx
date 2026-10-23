@@ -61,7 +61,7 @@ export function TipsList({ tips }: TipsListProps) {
             <Icon className={`w-4.5 h-4.5 mt-0.5 shrink-0 ${config.iconColor}`} strokeWidth={1.5} />
             <div className="flex-1 min-w-0">
               <span
-                className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider mb-1 ${catColor}`}
+                className={`inline-block px-1.5 py-0.5 rounded-sm text-[10px] font-semibold uppercase tracking-wider mb-1 ${catColor}`}
               >
                 {tip.category}
               </span>

@@ -93,7 +93,7 @@ export function ProductCategoryDetail({
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 ${isActive
-                  ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white shadow-xs'
                   : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 ring-1 ring-stone-200 dark:ring-stone-700 hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:text-emerald-700 dark:hover:text-emerald-400'
                 }`}
             >

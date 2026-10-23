@@ -66,7 +66,7 @@ export default function AdminCategoriesPage() {
 
   const columns: Column<AdminCategory>[] = [
     { key: 'name', header: 'Name', render: (c) => <span className="font-medium">{c.name}</span> },
-    { key: 'slug', header: 'Slug', render: (c) => <code className="text-xs bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded">{c.slug}</code> },
+    { key: 'slug', header: 'Slug', render: (c) => <code className="text-xs bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded-sm">{c.slug}</code> },
     { key: 'icon', header: 'Icon', render: (c) => c.icon },
     { key: 'order', header: 'Order', render: (c) => String(c.displayOrder) },
   ]

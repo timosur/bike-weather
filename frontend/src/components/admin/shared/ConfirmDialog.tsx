@@ -20,7 +20,7 @@ export function ConfirmDialog({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-60 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 dark:bg-black/50" onClick={onCancel} />
       <div className="relative bg-white dark:bg-stone-900 rounded-xl shadow-xl max-w-sm w-full mx-4 p-6">
         <div className="flex items-start gap-3">

@@ -29,7 +29,7 @@ export function DayTabs({ days, activeDayId, onDaySelect }: DayTabsProps) {
             key={day.id}
             onClick={() => onDaySelect?.(day.id)}
             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all shrink-0 ${isActive
-                ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700'
+                ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-xs ring-1 ring-stone-200 dark:ring-stone-700'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800/50'
               }`}
           >

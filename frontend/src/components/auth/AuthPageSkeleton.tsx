@@ -11,7 +11,7 @@ export function AuthPageSkeleton() {
         </div>
 
         {/* Card */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs">
           {/* Tab toggle */}
           <div className="flex border-b border-stone-100 dark:border-stone-800">
             <div className="flex-1 flex justify-center py-3">

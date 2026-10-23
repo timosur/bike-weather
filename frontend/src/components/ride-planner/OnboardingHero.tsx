@@ -24,7 +24,7 @@ export function OnboardingHero() {
   ]
 
   return (
-    <div className="relative rounded-2xl border border-emerald-200/60 dark:border-emerald-800/30 bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-emerald-950/20 dark:to-sky-950/20 p-5 overflow-hidden">
+    <div className="relative rounded-2xl border border-emerald-200/60 dark:border-emerald-800/30 bg-linear-to-br from-emerald-50 to-sky-50 dark:from-emerald-950/20 dark:to-sky-950/20 p-5 overflow-hidden">
       {/* Dismiss button */}
       <button
         type="button"
@@ -46,7 +46,7 @@ export function OnboardingHero() {
         {steps.map((step, i) => (
           <div key={i} className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 text-left sm:text-center">
             <div className="flex items-center gap-2 sm:flex-col sm:gap-2">
-              <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+              <div className="shrink-0 w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
                 <step.icon className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
               </div>
               {i < steps.length - 1 && (

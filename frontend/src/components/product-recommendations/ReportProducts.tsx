@@ -24,7 +24,7 @@ function CompactProductCard({ product, shop, badgeLabel, onProductClick }: {
       target="_blank"
       rel="noopener noreferrer sponsored"
       onClick={() => onProductClick?.(product.id)}
-      className="group flex items-center gap-3 rounded-lg bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-3 hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:shadow-sm transition-all duration-200"
+      className="group flex items-center gap-3 rounded-lg bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 p-3 hover:ring-emerald-300 dark:hover:ring-emerald-700 hover:shadow-xs transition-all duration-200"
     >
       <div className="w-12 h-12 rounded-md bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0 overflow-hidden">
         {product.imageUrl ? (
@@ -39,7 +39,7 @@ function CompactProductCard({ product, shop, badgeLabel, onProductClick }: {
             {product.name}
           </p>
           {shop?.affiliateTag && (
-            <span className="px-1 py-px text-[8px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 shrink-0">
+            <span className="px-1 py-px text-[8px] font-semibold uppercase tracking-wider rounded-sm bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 shrink-0">
               {badgeLabel}
             </span>
           )}

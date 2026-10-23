@@ -13,7 +13,7 @@ export function PrivacyPolicy() {
           {t('privacy.heading')}
         </h1>
 
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-6 sm:p-8 space-y-8">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs p-6 sm:p-8 space-y-8">
           {/* Table of contents */}
           <nav className="space-y-1.5">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">

@@ -52,7 +52,7 @@ export function InlineProductLink({ product, shop, disclosure, onProductClick }:
 
       <div className="flex items-center gap-1.5 shrink-0">
         {shop.affiliateTag && (
-          <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
+          <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded-sm bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/60 dark:ring-amber-700/40">
             {disclosure.badgeLabel}
           </span>
         )}

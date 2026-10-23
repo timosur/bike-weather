@@ -93,7 +93,7 @@ export function ImportConfigForm({ onStart, onStartUrls, disabled }: ImportConfi
           type="button"
           onClick={() => setMode('search')}
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${mode === 'search'
-              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
         >
@@ -104,7 +104,7 @@ export function ImportConfigForm({ onStart, onStartUrls, disabled }: ImportConfi
           type="button"
           onClick={() => setMode('urls')}
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${mode === 'urls'
-              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
             }`}
         >

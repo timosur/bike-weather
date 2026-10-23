@@ -68,7 +68,7 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                     type="checkbox"
                     checked={selected.size === products.length}
                     onChange={toggleAll}
-                    className="rounded border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
+                    className="rounded-sm border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
                   />
                 </th>
                 <th className="px-3 py-2.5 text-left font-medium text-stone-600 dark:text-stone-400 w-14">{t('admin.import.colImage')}</th>
@@ -89,7 +89,7 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                       type="checkbox"
                       checked={selected.has(idx)}
                       onChange={() => toggleOne(idx)}
-                      className="rounded border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
+                      className="rounded-sm border-stone-300 dark:border-stone-600 text-emerald-600 focus:ring-emerald-500"
                     />
                   </td>
                   <td className="px-3 py-2.5">
@@ -99,10 +99,10 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                           <img
                             src={product.imageUrl}
                             alt=""
-                            className="w-10 h-10 object-cover rounded border border-stone-200 dark:border-stone-700"
+                            className="w-10 h-10 object-cover rounded-sm border border-stone-200 dark:border-stone-700"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700" />
+                          <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded-sm border border-stone-200 dark:border-stone-700" />
                         )}
                         <TextInput
                           value={product.imageUrl || ''}
@@ -116,10 +116,10 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                         <img
                           src={product.imageUrl}
                           alt=""
-                          className="w-10 h-10 object-cover rounded border border-stone-200 dark:border-stone-700"
+                          className="w-10 h-10 object-cover rounded-sm border border-stone-200 dark:border-stone-700"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700" />
+                        <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded-sm border border-stone-200 dark:border-stone-700" />
                       )
                     )}
                   </td>
@@ -150,12 +150,12 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                       )}
                       <div className="flex gap-1 flex-wrap">
                         {product.weatherPrecipitation !== 'none' && (
-                          <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-[10px]">
+                          <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-sm text-[10px]">
                             {product.weatherPrecipitation}
                           </span>
                         )}
                         {product.weatherWind !== 'none' && (
-                          <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded text-[10px]">
+                          <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-sm text-[10px]">
                             {product.weatherWind}
                           </span>
                         )}
@@ -169,7 +169,7 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                           href={product.affiliateUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          className="p-1 rounded-sm hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                           title={t('admin.import.viewProduct')}
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -177,7 +177,7 @@ export function ImportReviewTable({ products, onApprove, onDiscard, approving }:
                       )}
                       <button
                         onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
-                        className="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+                        className="p-1 rounded-sm hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                         title={editingIdx === idx ? t('admin.import.doneEditing') : t('admin.import.edit')}
                       >
                         {editingIdx === idx ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}

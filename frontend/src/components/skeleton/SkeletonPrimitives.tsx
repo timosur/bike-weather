@@ -11,7 +11,7 @@ export function SkeletonCircle({ className = 'w-10 h-10' }: SkeletonProps) {
 }
 
 export function SkeletonLine({ className = 'h-3 w-full' }: SkeletonProps) {
-  return <div className={`animate-pulse rounded bg-stone-200 dark:bg-stone-700 ${className}`} />
+  return <div className={`animate-pulse rounded-sm bg-stone-200 dark:bg-stone-700 ${className}`} />
 }
 
 export function SkeletonButton({ className = 'h-11 w-full' }: SkeletonProps) {

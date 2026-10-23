@@ -66,7 +66,7 @@ export function FaqPage({ items, initialSection }: FaqPageProps) {
               <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                 {category}
               </h2>
-              <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden divide-y divide-stone-100 dark:divide-stone-800">
+              <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs overflow-hidden divide-y divide-stone-100 dark:divide-stone-800">
                 {items
                   .filter(i => i.category === category)
                   .map(item => {
@@ -104,7 +104,7 @@ export function FaqPage({ items, initialSection }: FaqPageProps) {
         </div>
 
         {/* CTA */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5 flex items-center gap-4">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs p-5 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center shrink-0">
             <MessageCircle className="w-5 h-5 text-emerald-500" strokeWidth={1.5} />
           </div>

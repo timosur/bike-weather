@@ -85,7 +85,7 @@ export function MultiDayWeatherSummary({ days }: MultiDayWeatherSummaryProps) {
   return (
     <div className="rounded-xl bg-white dark:bg-stone-900 ring-1 ring-stone-200 dark:ring-stone-800 overflow-hidden">
       {/* Hero section — aggregated temp range */}
-      <div className="px-5 py-5 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-800/50 dark:to-stone-900 border-b border-stone-200 dark:border-stone-800">
+      <div className="px-5 py-5 bg-linear-to-br from-stone-50 to-stone-100 dark:from-stone-800/50 dark:to-stone-900 border-b border-stone-200 dark:border-stone-800">
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -109,7 +109,7 @@ export function MultiDayWeatherSummary({ days }: MultiDayWeatherSummaryProps) {
               {summary.worstDescription}
             </p>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-800 shadow-sm flex items-center justify-center text-amber-500">
+          <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-800 shadow-xs flex items-center justify-center text-amber-500">
             <WeatherIcon icon={summary.worstIcon} className="w-8 h-8" />
           </div>
         </div>

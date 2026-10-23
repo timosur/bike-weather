@@ -35,12 +35,12 @@ function RideCard({
   return (
     <div
       onClick={() => onSelect(entry)}
-      className="group bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm p-3 cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors"
+      className="group bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs p-3 cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <MapPin className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 flex-shrink-0" strokeWidth={1.5} />
+            <MapPin className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 shrink-0" strokeWidth={1.5} />
             <span className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
               {entry.report.startLocation || entry.rideInput.location?.address || '—'}
             </span>
@@ -59,7 +59,7 @@ function RideCard({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${conditionColors[condition]}`}>
             {t(`report.condition.${condition === 'not-recommended' ? 'notRecommended' : condition}`)}
           </span>

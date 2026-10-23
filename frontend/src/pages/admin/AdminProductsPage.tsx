@@ -178,13 +178,13 @@ export default function AdminProductsPage() {
               value={filterCategory}
               onChange={(e) => { setFilterCategory(e.target.value); setPage(1) }}
               options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
-              className="!w-auto"
+              className="w-auto!"
             />
             <SelectInput
               value={filterShop}
               onChange={(e) => { setFilterShop(e.target.value); setPage(1) }}
               options={[{ value: '', label: 'All Shops' }, ...shops.map(s => ({ value: s.id, label: s.name }))]}
-              className="!w-auto"
+              className="w-auto!"
             />
           </>
         }
@@ -323,7 +323,7 @@ export default function AdminProductsPage() {
                         : form.bikeTypes.filter((b) => b !== bt)
                       setForm({ ...form, bikeTypes: next })
                     }}
-                    className="rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                    className="rounded-sm border-stone-300 text-emerald-600 focus:ring-emerald-500"
                   />
                   {bt}
                 </label>

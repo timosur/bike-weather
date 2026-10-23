@@ -212,7 +212,7 @@ export default function AdminProductImportPage() {
             type="button"
             onClick={() => { setTab('category'); handleReset() }}
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${tab === 'category'
-              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
           >
@@ -223,7 +223,7 @@ export default function AdminProductImportPage() {
             type="button"
             onClick={() => { setTab('url'); handleReset() }}
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${tab === 'url'
-              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
               }`}
           >

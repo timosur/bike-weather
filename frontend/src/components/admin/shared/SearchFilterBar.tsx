@@ -24,7 +24,7 @@ export function SearchFilterBar({
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-colors"
+          className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-colors"
         />
       </div>
       {filters && <div className="flex items-center gap-2">{filters}</div>}

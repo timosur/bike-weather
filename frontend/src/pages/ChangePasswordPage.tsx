@@ -101,7 +101,7 @@ export default function ChangePasswordPage() {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder={t('auth.changePassword.currentPassword')}
-                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-hidden transition-colors"
                         autoFocus
                         required
                       />
@@ -126,7 +126,7 @@ export default function ChangePasswordPage() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder={t('auth.register.passwordPlaceholder')}
-                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-hidden transition-colors"
                         required
                       />
                       <button
@@ -150,7 +150,7 @@ export default function ChangePasswordPage() {
                         value={newPasswordConfirm}
                         onChange={(e) => setNewPasswordConfirm(e.target.value)}
                         placeholder={t('auth.register.confirmPassword')}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-hidden transition-colors"
                         required
                       />
                     </div>
