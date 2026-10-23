@@ -1,5 +1,13 @@
 # Changelog
 
+## frontend v0.1.6 — 2026-10-23
+
+- fix: frontend after upgrades
+
+## backend v0.1.5 — 2026-10-23
+
+- fix: copy python packages independent of python version in Docker builds
+
 ## frontend v0.1.5 — 2026-10-23
 
 - feat: added map api key
