@@ -1,5 +1,26 @@
 # Changelog
 
+## frontend v0.1.5 — 2026-10-23
+
+- feat: added map api key
+- fix(deps): update frontend npm dependencies
+- chore(deps): update frontend npm dependencies
+- chore(deps): update dependency postcss to v8.5.23 [security]
+- chore(deps): update dependency vite to v6.4.4 [security]
+- chore(deps): update frontend npm dependencies
+- chore(deps): update dependency postcss to v8.5.18 [security]
+- chore(deps): update dependency vite to v6.4.3 [security]
+
+## backend v0.1.4 — 2026-10-23
+
+- chore(deps): update dependency pytest to v9.0.3 [security]
+- chore(deps): update dependency opentelemetry-api to v1.45.1 [security]
+- chore(deps): update docker images
+- chore(deps): update dependency pyjwt to v2.15.0 [security]
+- chore(deps): update dependency python-multipart to v0.0.31 [security]
+- chore(deps): update docker images
+- chore(deps): update dependency pydantic-settings to v2.14.2 [security]
+
 ## frontend v0.1.4 — 2026-05-30
 
 - chore: license project under AGPL-3.0-or-later
