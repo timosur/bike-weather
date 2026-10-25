@@ -1053,6 +1053,22 @@ INTENSITY_LABELS: dict[tuple[str, str], str] = {
 DAY_LABELS: dict[str, dict[str, str]] = {
     "today": {"de": "Heute", "en": "Today"},
     "day": {"de": "Tag {n}", "en": "Day {n}"},
+    "leg": {"de": "Etappe {n} · {time}", "en": "Leg {n} · {time}"},
+}
+
+LEG_TIPS: dict[str, dict[str, str]] = {
+    "pack_cooler": {
+        "de": "Pack noch {items} ein – auf {leg} wird es kühler (gefühlt {temp} °C).",
+        "en": "Pack {items} – it gets cooler on {leg} (feels like {temp} °C).",
+    },
+    "pack": {
+        "de": "Pack noch {items} für {leg} ein (gefühlt {temp} °C).",
+        "en": "Pack {items} for {leg} (feels like {temp} °C).",
+    },
+    "early_departure": {
+        "de": "Abfahrt in {place} liegt vor der geschätzten Ankunft um {arrival}.",
+        "en": "Departure from {place} is before the estimated arrival at {arrival}.",
+    },
 }
 
 RIDE_NAME_TEMPLATE: dict[str, str] = {

@@ -194,3 +194,79 @@ def test_schema_location_address_optional():
     loc = RideLocationSchema(lat=48.14, lon=11.58)
     assert loc.address is None
     assert loc.lat == 48.14
+
+
+def _ride_with_waypoints(waypoints: list[dict], start_time: str = "09:00") -> dict:
+    return {**VALID_RIDE_INPUT, "startTime": start_time, "waypoints": waypoints}
+
+
+def _wp(type_: str, start_time: str | None = None, name: str | None = None) -> dict:
+    wp: dict = {"location": {"lat": 47.65, "lon": 9.48}, "type": type_}
+    if start_time is not None:
+        wp["startTime"] = start_time
+    if name is not None:
+        wp["name"] = name
+    return wp
+
+
+def test_schema_pause_waypoint_accepted():
+    from app.schemas.ride import RideInputSchema
+
+    schema = RideInputSchema(**_ride_with_waypoints([_wp("pause", "17:00")]))
+    assert schema.waypoints[0].type == "pause"
+    assert schema.waypoints[0].startTime == "17:00"
+
+
+def test_schema_two_ordered_pauses_accepted():
+    from app.schemas.ride import RideInputSchema
+
+    schema = RideInputSchema(
+        **_ride_with_waypoints(
+            [_wp("pause", "12:00"), _wp("pause", "17:00")], start_time="08:00"
+        )
+    )
+    assert [wp.startTime for wp in schema.waypoints] == ["12:00", "17:00"]
+
+
+def test_schema_pause_after_sleep_compares_to_sleep_departure():
+    from app.schemas.ride import RideInputSchema
+
+    # Ride starts 18:00; next day starts 08:00, so a 14:00 pause is valid
+    schema = RideInputSchema(
+        **_ride_with_waypoints(
+            [_wp("sleep", "08:00"), _wp("pause", "14:00")], start_time="18:00"
+        )
+    )
+    assert schema.waypoints[1].type == "pause"
+
+
+async def test_report_unknown_waypoint_type_returns_422(async_client: AsyncClient):
+    response = await async_client.post(
+        "/api/rides/report", json=_ride_with_waypoints([_wp("lunch", "12:00")])
+    )
+    assert response.status_code == 422
+
+
+async def test_report_pause_without_start_time_returns_422(async_client: AsyncClient):
+    response = await async_client.post(
+        "/api/rides/report", json=_ride_with_waypoints([_wp("pause")])
+    )
+    assert response.status_code == 422
+
+
+async def test_report_pause_malformed_start_time_returns_422(
+    async_client: AsyncClient,
+):
+    response = await async_client.post(
+        "/api/rides/report", json=_ride_with_waypoints([_wp("pause", "5pm")])
+    )
+    assert response.status_code == 422
+
+
+async def test_report_pause_before_leg_start_returns_422(async_client: AsyncClient):
+    response = await async_client.post(
+        "/api/rides/report",
+        json=_ride_with_waypoints([_wp("pause", "08:30", name="Café")]),
+    )
+    assert response.status_code == 422
+    assert "Café" in response.text

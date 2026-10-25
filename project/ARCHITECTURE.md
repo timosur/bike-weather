@@ -85,6 +85,37 @@ Volumes: `pgdata_dev`, `authentik_pgdata`, `authentik_redis`, `authentik_media`.
 - **Rule engine:** `app/rules/` contains deterministic rule modules for clothing, equipment, safety, repair kits, and tips — all driven by weather conditions.
 - **Translation service:** `app/services/translation.py` fetches per-field translations from the `content_translations` table. German is the base language stored on models; English translations are in the translations table.
 
+## Ride Report: Waypoints and Legs
+
+`POST /api/rides/report` (`app/services/recommendations.py::build_report`) splits a ride into **legs** at split waypoints (`app/services/ride_legs.py`).
+
+| Waypoint `type` | Splits? | Next leg date  | `startTime` (HH:MM)            |
+| --------------- | ------- | -------------- | ------------------------------ |
+| `stop`          | no      | —              | ignored                        |
+| `pause`         | yes     | same day       | required, > current leg start  |
+| `sleep`         | yes     | previous + 1   | optional, default `08:00`      |
+
+Pause validation lives in `RideInputSchema` (`app/schemas/ride.py`); violations return 422.
+
+```
+route geometry ──▶ split_route_km()      km mark per split waypoint (forward snap)
+                         │
+ride input ──────▶ build_legs()          Leg(date, start_time, duration, start_km, end_km)
+                         │                duration = plannedKm  |  total × leg km / total km
+          ┌──────────────┼───────────────────────────┐
+          ▼              ▼                           ▼
+  map route weather   per-leg forecast           leg tips
+  leg_time_at(km)     sample points in           pack-leg-n (clothing leg 1 lacks)
+  → hour per point    [start_km, end_km]          early-departure-n (pause < arrival)
+                      + leg start window
+                      → chart, worst case,
+                        clothing, equipment, tips
+```
+
+- **Labels:** `Etappe n · HH:MM` / `Leg n · HH:MM` when any pause exists, else `Tag n` / `Day n`, or `Heute` / `Today` for a single leg.
+- **Merged packing list:** for more than one leg, clothing/equipment/tips are merged and partial items get the leg label appended.
+- **Weather calls:** each sample point is fetched once for its leg's date, plus one start-location forecast per leg.
+
 ## Observability
 
 ### Frontend (Grafana Faro)

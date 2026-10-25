@@ -254,7 +254,7 @@
       "elevation": "Optional — higher elevation means colder temps. Helps refine gear advice.",
       "averageSpeed": "Auto-estimated from bike type and intensity. Set manually for more precise duration.",
       "duration": "Auto-estimated from distance and speed. Longer rides may span changing weather.",
-      "waypoints": "Add intermediate stops or overnight stays for multi-day tours."
+      "waypoints": "Add intermediate stops, pauses with a fixed departure later the same day (e.g. an evening return), or overnight stays for multi-day tours."
     }
   },
   "location": {
@@ -266,13 +266,15 @@
   "waypoints": {
     "addWaypoint": "Add waypoint",
     "waypointStop": "Stop",
+    "waypointPause": "Pause",
     "waypointSleep": "Overnight",
     "waypointName": "Waypoint name",
     "removeWaypoint": "Remove waypoint",
     "dayLabel": "Day {{n}}",
     "ridingDays": "{{count}} riding days · Weather calculated along the route for each stage",
     "overnightDivider": "Overnight stay",
-    "departureNextDay": "Departure next day at"
+    "departureNextDay": "Departure next day at",
+    "departureSameDay": "Departure at"
   },
   "report": {
     "share": "Share",

@@ -1,6 +1,9 @@
+import re
 from typing import Literal
 
 from pydantic import BaseModel, model_validator
+
+_HHMM = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 
 
 class RideLocationSchema(BaseModel):
@@ -11,10 +14,10 @@ class RideLocationSchema(BaseModel):
 
 class WaypointSchema(BaseModel):
     location: RideLocationSchema
-    type: Literal["stop", "sleep"] = "stop"
+    type: Literal["stop", "pause", "sleep"] = "stop"
     name: str | None = None
     plannedKm: float | None = None
-    startTime: str | None = None  # HH:MM — departure time after sleep
+    startTime: str | None = None  # HH:MM — departure after pause (same day) or sleep (next day)
 
 
 class DayStopSchema(BaseModel):
@@ -65,6 +68,27 @@ class RideInputSchema(BaseModel):
         self.dayStops = None
         self.isMultiDay = None
         self.endDate = None
+        return self
+
+    @model_validator(mode="after")
+    def _validate_pause_departures(self) -> "RideInputSchema":
+        """A pause must depart later than the start of the leg it ends."""
+        leg_start = self.startTime
+        for i, wp in enumerate(self.waypoints):
+            if wp.type == "sleep":
+                leg_start = wp.startTime or "08:00"
+            elif wp.type == "pause":
+                label = wp.name or wp.location.address or f"#{i + 1}"
+                if not wp.startTime or not _HHMM.match(wp.startTime):
+                    raise ValueError(
+                        f"Pause waypoint {label} needs a departure time (HH:MM)"
+                    )
+                # Zero-padded HH:MM compares correctly as strings
+                if wp.startTime <= leg_start:
+                    raise ValueError(
+                        f"Pause waypoint {label} must depart after {leg_start}"
+                    )
+                leg_start = wp.startTime
         return self
 
 

@@ -15,6 +15,7 @@ from app.rules.tips_rules import get_tips
 from app.rules.translations import (
     BIKE_LABELS,
     DAY_LABELS,
+    LEG_TIPS,
     INTENSITY_LABELS,
     RIDE_NAME_TEMPLATE,
     RIDE_NAME_TEMPLATE_NO_DEST,
@@ -40,7 +41,9 @@ from app.schemas.report import (
 from app.schemas.ride import RideInputSchema
 from app.services.geocoding import geocoding_service
 from app.services.routing import routing_service
+from app.services.ride_legs import Leg, build_legs, leg_for_km, leg_time_at
 from app.services.route_waypoints import (
+    RouteWaypoint,
     sample_waypoints_by_direction,
     sample_weather_points,
 )
@@ -251,6 +254,45 @@ def _tips_to_schemas(tips: list[dict]) -> list[TipSchema]:
     return [TipSchema(**t) for t in tips]
 
 
+def _leg_tips(
+    legs: list[Leg], days: list[DayForecastSchema], locale: str
+) -> list[TipSchema]:
+    """Packing tips for later legs and warnings for pauses ending too early."""
+    tips: list[TipSchema] = []
+    first_ids = {c.id for c in days[0].clothingItems}
+    first_feels = days[0].weather.tempFeelsLike
+    for leg, day in zip(legs[1:], days[1:]):
+        extra = [c.name for c in day.clothingItems if c.id not in first_ids]
+        if extra:
+            feels = day.weather.tempFeelsLike
+            key = "pack_cooler" if feels < first_feels else "pack"
+            tips.append(
+                TipSchema(
+                    id=f"pack-leg-{leg.index + 1}",
+                    category="comfort",
+                    severity="info",
+                    message=LEG_TIPS[key][locale].format(
+                        items=", ".join(extra), leg=day.dayLabel, temp=f"{feels:.0f}"
+                    ),
+                )
+            )
+    for prev, leg in zip(legs, legs[1:]):
+        if leg.split_type == "pause" and leg.start_dt < prev.end_dt:
+            wp = leg.split_waypoint
+            tips.append(
+                TipSchema(
+                    id=f"early-departure-{leg.index}",
+                    category="safety",
+                    severity="warning",
+                    message=LEG_TIPS["early_departure"][locale].format(
+                        place=(wp.name or wp.location.address) if wp else "",
+                        arrival=prev.end_dt.strftime("%H:%M"),
+                    ),
+                )
+            )
+    return tips
+
+
 def _merge_tips_across_days(
     per_day_tips: list[list[TipSchema]],
     day_labels: list[str],
@@ -420,6 +462,7 @@ async def build_report(
     route_geometry = None
     waypoints_schema = None
     route_segments_schema = None
+    raw_waypoints = None
     destination_addr = None
 
     if ride_input.destination:
@@ -468,144 +511,12 @@ async def build_report(
 
                 route_geometry = route_result.geometry
 
-                # 2. Sample Waypoints
+                # 2. Sample Waypoints (weather fetched below, once legs are known)
                 raw_waypoints = sample_waypoints_by_direction(route_result.geometry)
-
-                # 3. Calculate timing & fetch weather
-                # Estimate average speed if not provided
-                avg_speed = ride_input.averageSpeedKmh or 20.0
-                if ride_input.durationMinutes and ride_input.distanceKm:
-                    avg_speed = ride_input.distanceKm / (
-                        ride_input.durationMinutes / 60
-                    )
-
-                start_dt = datetime.strptime(
-                    f"{ride_input.startDate}T{ride_input.startTime}", "%Y-%m-%dT%H:%M"
-                )
-
-                sem = asyncio.Semaphore(5)
-
-                async def _process_waypoint(wp):
-                    async with sem:
-                        hours_travel = wp.distance_from_start_km / avg_speed
-                        arrival_time = start_dt + timedelta(hours=hours_travel)
-                        try:
-                            window = await ws.fetch_hourly_forecast(
-                                wp.lat,
-                                wp.lon,
-                                arrival_time.strftime("%Y-%m-%d"),
-                                arrival_time.hour,
-                                arrival_time.hour,
-                                locale,
-                            )
-                        except Exception:
-                            logger.warning(
-                                "Weather fetch failed for waypoint %d", wp.index
-                            )
-                            return None
-
-                        if not window.hours:
-                            return None
-
-                        weather = window.hours[0]
-                        wind_result = analyze_wind(
-                            bearing_deg=wp.bearing,
-                            wind_speed_kmh=weather.wind_speed,
-                            wind_direction_deg=weather.wind_direction_deg,
-                        )
-                        return {"wp": wp, "weather": weather, "wind": wind_result}
-
-                wp_results = await asyncio.gather(
-                    *[_process_waypoint(wp) for wp in raw_waypoints]
-                )
-                wp_results = [r for r in wp_results if r is not None]
-
-                # 4. Build Schemas
-                waypoints_schema = []
-                route_segments_schema = []
-
-                for i, res in enumerate(wp_results):
-                    wp = res["wp"]
-                    w = res["weather"]
-                    wind = res["wind"]
-
-                    waypoints_schema.append(
-                        RouteWaypointWeather(
-                            index=wp.index,
-                            lat=wp.lat,
-                            lon=wp.lon,
-                            distanceKm=wp.distance_from_start_km,
-                            bearing=wp.bearing,
-                            temp=w.temp,
-                            icon=w.icon,
-                            windSpeed=w.wind_speed,
-                            windDirection=w.wind_direction,
-                            headwindComponent=wind.headwind_component,
-                            segmentStartKm=wp.segment_start_km,
-                            segmentEndKm=wp.segment_end_km,
-                            segmentDurationMinutes=(
-                                round(
-                                    (wp.segment_end_km - wp.segment_start_km)
-                                    / avg_speed
-                                    * 60,
-                                    1,
-                                )
-                                if wp.segment_start_km is not None
-                                and wp.segment_end_km is not None
-                                and avg_speed > 0
-                                else None
-                            ),
-                        )
-                    )
-
-                    # Create segment using the segment's boundary geometry indices
-                    start_idx = (
-                        wp.segment_start_geom_idx
-                        if wp.segment_start_geom_idx is not None
-                        else wp.geometry_index
-                    )
-                    end_idx = (
-                        wp.segment_end_geom_idx
-                        if wp.segment_end_geom_idx is not None
-                        else (
-                            wp_results[i + 1]["wp"].geometry_index
-                            if i < len(wp_results) - 1
-                            else len(route_geometry) - 1
-                        )
-                    )
-                    segment_geom = [
-                        list(pt) for pt in route_geometry[start_idx : end_idx + 1]
-                    ]
-
-                    color_map = {
-                        "headwind": "#ef4444",
-                        "tailwind": "#22c55e",
-                        "crosswind": "#eab308",
-                        "calm": "#3b82f6",
-                    }
-                    route_segments_schema.append(
-                        RouteSegment(
-                            startLat=wp.lat,
-                            startLon=wp.lon,
-                            endLat=segment_geom[-1][0] if segment_geom else wp.lat,
-                            endLon=segment_geom[-1][1] if segment_geom else wp.lon,
-                            geometry=segment_geom if len(segment_geom) >= 2 else None,
-                            color=color_map.get(wind.wind_effect, "#94a3b8"),
-                            windEffect=wind.wind_effect,
-                        )
-                    )
 
             except Exception as e:
                 logger.error("Routing failed: %s", e)
                 # Continue without routing (soft failure)
-
-    # Pre-compute route weather sample points (used for route-aware forecasts)
-    route_sample_points = None
-    if route_geometry and ride_input.distanceKm and ride_input.distanceKm > 0:
-        route_sample_points = sample_weather_points(
-            [(pt[0], pt[1]) for pt in route_geometry],
-            ride_input.distanceKm,
-        )
 
     # Resolve ride duration (explicit > avg speed + distance > auto-estimated > default 2h)
     duration_minutes = resolve_duration_minutes(
@@ -626,134 +537,198 @@ async def build_report(
         )
     )
 
-    # Parse start hour from startTime
-    try:
-        start_hour = int(ride_input.startTime.split(":")[0])
-    except (ValueError, IndexError):
-        start_hour = 8
+    # Split into legs at pause (same day) and sleep (next day) waypoints
+    legs = build_legs(ride_input, lat, lon, route_geometry, duration_minutes)
+    is_multi_day = len(legs) > 1
+    has_pause = any(wp.type == "pause" for wp in ride_input.waypoints)
 
-    # Determine days to forecast
-    start_date = datetime.strptime(ride_input.startDate, "%Y-%m-%d")
-    # (location_name, lat, lon, date, ride_start_hour, ride_end_hour)
-    day_locations: list[tuple[str, float, float, str, int, int]] = []
-    # Per-day duration (minutes) and speed (km/h) parallel to day_locations
-    day_durations: list[int] = []
-    day_speeds: list[float] = []
-    day_start_times: list[str] = []  # actual HH:MM start times
+    # 3. Map route weather at the time the rider passes each point
+    if raw_waypoints and route_geometry:
+        sem = asyncio.Semaphore(5)
 
-    is_multi_day = any(wp.type == "sleep" for wp in ride_input.waypoints)
+        async def _process_waypoint(wp):
+            async with sem:
+                arrival_time = leg_time_at(legs, wp.distance_from_start_km)
+                try:
+                    window = await ws.fetch_hourly_forecast(
+                        wp.lat,
+                        wp.lon,
+                        arrival_time.strftime("%Y-%m-%d"),
+                        arrival_time.hour,
+                        arrival_time.hour,
+                        locale,
+                    )
+                except Exception:
+                    logger.warning("Weather fetch failed for waypoint %d", wp.index)
+                    return None
 
-    if is_multi_day and ride_input.waypoints:
-        sleep_waypoints = [wp for wp in ride_input.waypoints if wp.type == "sleep"]
-        # Day 1: start location
-        end_hour_day1 = min(start_hour + math.ceil(duration_minutes / 60), 23)
-        day_locations.append(
-            (
-                ride_input.location.address or "",
-                lat,
-                lon,
-                ride_input.startDate,
-                start_hour,
-                end_hour_day1,
-            )
-        )
-        day_durations.append(duration_minutes)
-        day_speeds.append(avg_speed)
-        day_start_times.append(ride_input.startTime or f"{start_hour:02d}:00")
-        # Subsequent days: sleep waypoints
-        for i, wp in enumerate(sleep_waypoints):
-            stop_date = (start_date + timedelta(days=i + 1)).strftime("%Y-%m-%d")
-            try:
-                day_start_hour = int(wp.startTime.split(":")[0]) if wp.startTime else 8
-            except (ValueError, IndexError):
-                day_start_hour = 8
-            stop_lat = wp.location.lat or lat
-            stop_lon = wp.location.lon or lon
-            if wp.plannedKm and wp.plannedKm > 0:
-                day_duration = resolve_duration_minutes(
-                    None,
-                    wp.plannedKm,
-                    ride_input.bikeType,
-                    ride_input.intensity,
-                    ride_input.averageSpeedKmh,
-                    gravel_style=ride_input.gravelStyle,
+                if not window.hours:
+                    return None
+
+                weather = window.hours[0]
+                wind_result = analyze_wind(
+                    bearing_deg=wp.bearing,
+                    wind_speed_kmh=weather.wind_speed,
+                    wind_direction_deg=weather.wind_direction_deg,
                 )
-            else:
-                day_duration = duration_minutes
-            day_end_hour = min(day_start_hour + math.ceil(day_duration / 60), 23)
-            day_locations.append(
-                (
-                    wp.location.address or wp.name or "",
-                    stop_lat,
-                    stop_lon,
-                    stop_date,
-                    day_start_hour,
-                    day_end_hour,
+                return {"wp": wp, "weather": weather, "wind": wind_result}
+
+        wp_results = await asyncio.gather(
+            *[_process_waypoint(wp) for wp in raw_waypoints]
+        )
+        wp_results = [r for r in wp_results if r is not None]
+
+        # 4. Build Schemas
+        waypoints_schema = []
+        route_segments_schema = []
+
+        for i, res in enumerate(wp_results):
+            wp = res["wp"]
+            w = res["weather"]
+            wind = res["wind"]
+            # Riding pace of the leg this segment belongs to
+            seg_leg = leg_for_km(legs, wp.distance_from_start_km)
+            seg_speed = (
+                seg_leg.km / (seg_leg.duration_min / 60)
+                if seg_leg.km > 0 and seg_leg.duration_min > 0
+                else avg_speed
+            )
+
+            waypoints_schema.append(
+                RouteWaypointWeather(
+                    index=wp.index,
+                    lat=wp.lat,
+                    lon=wp.lon,
+                    distanceKm=wp.distance_from_start_km,
+                    bearing=wp.bearing,
+                    temp=w.temp,
+                    icon=w.icon,
+                    windSpeed=w.wind_speed,
+                    windDirection=w.wind_direction,
+                    headwindComponent=wind.headwind_component,
+                    segmentStartKm=wp.segment_start_km,
+                    segmentEndKm=wp.segment_end_km,
+                    segmentDurationMinutes=(
+                        round(
+                            (wp.segment_end_km - wp.segment_start_km)
+                            / seg_speed
+                            * 60,
+                            1,
+                        )
+                        if wp.segment_start_km is not None
+                        and wp.segment_end_km is not None
+                        and seg_speed > 0
+                        else None
+                    ),
                 )
             )
-            day_durations.append(day_duration)
-            day_speeds.append(avg_speed)
-            day_start_times.append(wp.startTime or f"{day_start_hour:02d}:00")
-    else:
-        # Single-day ride (allow >23 for overnight rides crossing midnight)
-        end_hour = start_hour + math.ceil(duration_minutes / 60)
-        day_locations.append(
-            (
-                ride_input.location.address or "",
-                lat,
-                lon,
-                ride_input.startDate,
-                start_hour,
-                end_hour,
-            )
-        )
-        day_durations.append(duration_minutes)
-        day_speeds.append(avg_speed)
-        day_start_times.append(ride_input.startTime or f"{start_hour:02d}:00")
 
-    # Fetch weather and build days
+            # Create segment using the segment's boundary geometry indices
+            start_idx = (
+                wp.segment_start_geom_idx
+                if wp.segment_start_geom_idx is not None
+                else wp.geometry_index
+            )
+            end_idx = (
+                wp.segment_end_geom_idx
+                if wp.segment_end_geom_idx is not None
+                else (
+                    wp_results[i + 1]["wp"].geometry_index
+                    if i < len(wp_results) - 1
+                    else len(route_geometry) - 1
+                )
+            )
+            segment_geom = [list(pt) for pt in route_geometry[start_idx : end_idx + 1]]
+
+            color_map = {
+                "headwind": "#ef4444",
+                "tailwind": "#22c55e",
+                "crosswind": "#eab308",
+                "calm": "#3b82f6",
+            }
+            route_segments_schema.append(
+                RouteSegment(
+                    startLat=wp.lat,
+                    startLon=wp.lon,
+                    endLat=segment_geom[-1][0] if segment_geom else wp.lat,
+                    endLon=segment_geom[-1][1] if segment_geom else wp.lon,
+                    geometry=segment_geom if len(segment_geom) >= 2 else None,
+                    color=color_map.get(wind.wind_effect, "#94a3b8"),
+                    windEffect=wind.wind_effect,
+                )
+            )
+
+    # Pre-compute route weather sample points (used for route-aware forecasts)
+    route_sample_points = None
+    if route_geometry and ride_input.distanceKm and ride_input.distanceKm > 0:
+        route_sample_points = sample_weather_points(
+            [(pt[0], pt[1]) for pt in route_geometry],
+            ride_input.distanceKm,
+        )
+
+    # Fetch weather and build one report entry per leg
     day_forecasts: list[DayForecastSchema] = []
     conditions: list[str] = []
     all_condition_reasons: list[list] = []  # raw ConditionReason per day
     per_day_tips: list[list[TipSchema]] = []
+    sem_route = asyncio.Semaphore(5)
 
-    for day_idx, (
-        location_name,
-        day_lat,
-        day_lon,
-        date_str,
-        ride_start_h,
-        ride_end_h,
-    ) in enumerate(day_locations):
-        # Fetch full day (0-23) at start/stop location (always needed for sunrise/sunset/UV)
+    async def _fetch_point_weather(pt, date_str):
+        async with sem_route:
+            try:
+                window = await ws.fetch_hourly_forecast(
+                    pt.lat, pt.lon, date_str, 0, 23, locale=locale
+                )
+                return (pt, window)
+            except Exception:
+                logger.warning(
+                    "Route weather fetch failed at (%.2f, %.2f)", pt.lat, pt.lon
+                )
+                return None
+
+    for leg in legs:
+        day_idx = leg.index
+        date_str = leg.date
+        try:
+            ride_start_h = int(leg.start_time.split(":")[0])
+        except (ValueError, IndexError):
+            ride_start_h = 8
+        if is_multi_day:
+            ride_end_h = min(ride_start_h + math.ceil(leg.duration_min / 60), 23)
+        else:
+            # Single-day ride (allow >23 for overnight rides crossing midnight)
+            ride_end_h = ride_start_h + math.ceil(leg.duration_min / 60)
+
+        # Fetch full day (0-23) at leg start (always needed for sunrise/sunset/UV)
         full_day_window = await ws.fetch_hourly_forecast(
-            day_lat, day_lon, date_str, 0, 23, locale=locale
+            leg.lat, leg.lon, date_str, 0, 23, locale=locale
         )
 
-        # Route-aware weather: fetch at sample points along route (day 0 only)
+        # Route-aware weather: this leg's sample points, distances rebased to
+        # the leg start. The leg start itself reuses full_day_window.
         route_weather_data: list[tuple] | None = None
-        if route_sample_points and day_idx == 0:
-            sem_route = asyncio.Semaphore(5)
-
-            async def _fetch_point_weather(pt, _date=date_str, _locale=locale):
-                async with sem_route:
-                    try:
-                        window = await ws.fetch_hourly_forecast(
-                            pt.lat, pt.lon, _date, 0, 23, locale=_locale
-                        )
-                        return (pt, window)
-                    except Exception:
-                        logger.warning(
-                            "Route weather fetch failed at (%.2f, %.2f)", pt.lat, pt.lon
-                        )
-                        return None
-
+        if route_sample_points:
+            is_last = leg is legs[-1]
+            leg_points = [
+                dc_replace(pt, distance_from_start_km=pt.distance_from_start_km - leg.start_km)
+                for pt in route_sample_points
+                if pt.distance_from_start_km > leg.start_km
+                and (is_last or pt.distance_from_start_km <= leg.end_km)
+            ]
             results = await asyncio.gather(
-                *[_fetch_point_weather(pt) for pt in route_sample_points]
+                *[_fetch_point_weather(pt, date_str) for pt in leg_points]
             )
-            route_weather_data = [r for r in results if r is not None]
-            if not route_weather_data:
-                route_weather_data = None
+            start_point = RouteWaypoint(
+                index=-1,
+                lat=leg.lat,
+                lon=leg.lon,
+                distance_from_start_km=0.0,
+                bearing=0.0,
+                geometry_index=0,
+            )
+            route_weather_data = [(start_point, full_day_window)] + [
+                r for r in results if r is not None
+            ]
 
         # Extract ride-window hours for rules aggregation
         # For overnight rides (ride_end_h > 23), collect current-day portion first;
@@ -771,8 +746,7 @@ async def build_report(
             ]
 
         # Compute chart display window
-        is_multi_day_chart = is_multi_day
-        if is_multi_day_chart:
+        if is_multi_day:
             # Multi-day: fixed 6:00–22:00 window for consistent chart width per day
             chart_start = 6
             chart_end = 22
@@ -782,11 +756,13 @@ async def build_report(
             chart_end = ride_end_h + 3
 
         # Build chart hours: route-aware or start-location
-        if route_weather_data and ride_input.distanceKm and avg_speed > 0:
+        leg_km = leg.km if leg.km > 0 else (ride_input.distanceKm or 0)
+        leg_speed = leg_km / (leg.duration_min / 60) if leg.duration_min > 0 else 0
+        if route_weather_data and leg_km > 0 and leg_speed > 0:
             chart_hours = _build_route_chart_hours(
                 route_weather_data,
-                ride_input.distanceKm,
-                avg_speed,
+                leg_km,
+                leg_speed,
                 ride_start_h,
                 chart_start,
                 chart_end,
@@ -804,12 +780,11 @@ async def build_report(
                 datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)
             ).strftime("%Y-%m-%d")
             next_day_end = chart_end - 24  # e.g. 25 → 1
-            # For past-midnight hours, use destination (last route point) or start location
-            ext_lat = route_sample_points[-1].lat if route_sample_points else day_lat
-            ext_lon = route_sample_points[-1].lon if route_sample_points else day_lon
+            # For past-midnight hours, use the leg's last route point or its start
+            ext_point = route_weather_data[-1][0] if route_weather_data else leg
             try:
                 next_day_window = await ws.fetch_hourly_forecast(
-                    ext_lat, ext_lon, next_date, 0, next_day_end, locale=locale
+                    ext_point.lat, ext_point.lon, next_date, 0, next_day_end, locale=locale
                 )
                 relabeled = [
                     dc_replace(h, hour=f"{int(h.hour.split(':')[0]) + 24}:00")
@@ -838,13 +813,10 @@ async def build_report(
             peak_wind_hour = max(ride_hours, key=lambda h: h.wind_speed)
             wind_dir = peak_wind_hour.wind_direction
 
-            # Compute wind exposure factor for this day's ride segment
+            # Compute wind exposure factor for this leg
             day_duration = (ride_end_h - ride_start_h) * 60
-            day_distance = ride_input.distanceKm
-            if is_multi_day and day_idx > 0:
-                sleep_wps = [wp for wp in ride_input.waypoints if wp.type == "sleep"]
-                if day_idx - 1 < len(sleep_wps) and sleep_wps[day_idx - 1].plannedKm:
-                    day_distance = sleep_wps[day_idx - 1].plannedKm
+            planned_km = leg.split_waypoint.plannedKm if leg.split_waypoint else None
+            day_distance = planned_km or leg_km or ride_input.distanceKm
             exposure = wind_exposure_factor(day_duration, day_distance)
             effective_wind = round(worst_wind * exposure, 1)
 
@@ -873,6 +845,11 @@ async def build_report(
         conditions.append(condition)
         all_condition_reasons.append(reasons)
 
+        # Compute actual start/end time strings (HH:MM) from start time + duration
+        actual_start_time = leg.start_time
+        actual_end_time = leg.end_dt.strftime("%H:%M")
+        leg_distance = leg_km or ride_input.distanceKm
+
         clothing = get_clothing_items(
             forecast,
             ride_input.bikeType,
@@ -882,8 +859,8 @@ async def build_report(
         )
         equipment = get_equipment_items(
             forecast,
-            distance_km=ride_input.distanceKm,
-            ride_start_time=ride_input.startTime,
+            distance_km=leg_distance,
+            ride_start_time=actual_start_time,
             ride_end_time=f"{ride_end_h % 24:02d}:00",
             bike_type=ride_input.bikeType,
             intensity=ride_input.intensity,
@@ -894,8 +871,8 @@ async def build_report(
         tips = get_tips(
             forecast,
             locale,
-            duration_minutes=duration_minutes,
-            distance_km=ride_input.distanceKm,
+            duration_minutes=leg.duration_min,
+            distance_km=leg_distance,
         )
         day_tip_schemas = _tips_to_schemas(tips)
         per_day_tips.append(day_tip_schemas)
@@ -905,31 +882,21 @@ async def build_report(
         display_weather.windSpeed = raw_wind_speed
 
         day_label: str
-        if len(day_locations) == 1:
+        if len(legs) == 1:
             day_label = DAY_LABELS["today"][locale]
+        elif has_pause:
+            day_label = DAY_LABELS["leg"][locale].format(
+                n=day_idx + 1, time=actual_start_time
+            )
         else:
             day_label = DAY_LABELS["day"][locale].format(n=day_idx + 1)
-
-        # Compute actual start/end time strings (HH:MM) from start time + duration
-        actual_start_time = day_start_times[day_idx]
-        try:
-            st_parts = actual_start_time.split(":")
-            st_total_min = int(st_parts[0]) * 60 + int(st_parts[1])
-        except (ValueError, IndexError):
-            st_total_min = ride_start_h * 60
-        et_total_min = st_total_min + day_durations[day_idx]
-        et_h = et_total_min // 60
-        et_m = et_total_min % 60
-        if et_h >= 24:
-            et_h -= 24
-        actual_end_time = f"{et_h:02d}:{et_m:02d}"
 
         day_forecasts.append(
             DayForecastSchema(
                 id=f"day-{day_idx + 1:03d}",
                 date=date_str,
                 dayLabel=day_label,
-                location=location_name,
+                location=leg.location_name,
                 condition=condition,
                 conditionReasons=_format_condition_reasons(reasons, locale),
                 weather=display_weather,
@@ -938,8 +905,8 @@ async def build_report(
                 rideEndHour=ride_end_h,
                 rideStartTime=actual_start_time,
                 rideEndTime=actual_end_time,
-                estimatedDurationMinutes=day_durations[day_idx],
-                averageSpeedKmh=round(day_speeds[day_idx], 1),
+                estimatedDurationMinutes=leg.duration_min,
+                averageSpeedKmh=round(avg_speed, 1),
                 weatherSummary=_build_weather_summary(forecast, locale),
                 clothingItems=_clothing_dicts_to_schemas(clothing),
                 equipment=_equipment_dicts_to_schemas(equipment),
@@ -965,6 +932,7 @@ async def build_report(
             per_day_equipment, day_labels_list
         )
         merged_tips = _merge_tips_across_days(per_day_tips, day_labels_list)
+        merged_tips.extend(_leg_tips(legs, day_forecasts, locale))
 
     # Determine overall condition reasons (use worst day's reasons)
     overall_condition = _worst_condition(conditions)
