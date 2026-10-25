@@ -106,6 +106,12 @@
     "subheading": "Gib deine Fahrtdetails ein — wir sagen dir, was du brauchst.",
     "addDestination": "Zielort hinzufügen",
     "swapDirection": "Start und Ziel tauschen",
+    "backToStart": "Zurück zum Start",
+    "timeline": {
+      "title": "Zeitplan",
+      "earlyDeparture": "Weiterfahrt liegt vor der geschätzten Ankunft",
+      "hint": "~ geschätzt aus Strecke und Fahrtdauer"
+    },
     "label": {
       "startLocation": "Startort",
       "destination": "Zielort",
@@ -254,11 +260,12 @@
       "elevation": "Optional — mehr Höhenmeter = kältere Temperaturen. Verfeinert die Empfehlung.",
       "averageSpeed": "Automatisch geschätzt aus Fahrradtyp und Intensität. Manuell anpassbar.",
       "duration": "Automatisch aus Distanz und Geschwindigkeit geschätzt. Längere Fahrten können wechselndes Wetter umfassen.",
-      "waypoints": "Füge Zwischenstopps oder Übernachtungen für Mehrtagestouren hinzu."
+      "waypoints": "Füge Zwischenstopps, Pausen mit fester Weiterfahrt am selben Tag (z. B. Rückfahrt am Abend) oder Übernachtungen für Mehrtagestouren hinzu."
     }
   },
   "location": {
     "searchLocation": "Ort suchen",
+    "clearLocation": "Ort entfernen",
     "detectLocation": "Standort erkennen",
     "detecting": "Erkennung…",
     "currentLocation": "Aktueller Standort"
@@ -266,13 +273,17 @@
   "waypoints": {
     "addWaypoint": "Wegpunkt hinzufügen",
     "waypointStop": "Stopp",
+    "waypointPause": "Pause",
     "waypointSleep": "Übernachtung",
     "waypointName": "Wegpunkt-Name",
     "removeWaypoint": "Wegpunkt entfernen",
     "dayLabel": "Tag {{n}}",
     "ridingDays": "{{count}} Fahrtage · Wetter wird pro Etappe entlang der Route berechnet",
-    "overnightDivider": "Übernachtung",
-    "departureNextDay": "Weiterfahrt am nächsten Tag um"
+    "departureNextDay": "Weiterfahrt am nächsten Tag um",
+    "departureSameDay": "Weiterfahrt um",
+    "until": "bis",
+    "nextDay": "nächster Tag",
+    "addName": "Name hinzufügen"
   },
   "report": {
     "share": "Teilen",

@@ -17,6 +17,7 @@ import {
   Info,
   X,
   Import,
+  Undo2,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type {
@@ -26,9 +27,12 @@ import type {
   RidingIntensity,
   GravelStyle,
   LocationSuggestion,
+  RideLocation,
   Waypoint,
 } from './types'
 import { WaypointList } from './WaypointList'
+import { RideTimelinePreview } from './RideTimelinePreview'
+import { buildLegs, departureAfter, haversineKm } from '../../lib/rideLegs'
 import { LocationPicker } from './LocationPicker'
 import { OnboardingHero } from './OnboardingHero'
 import { InfoTooltip } from '../common/InfoTooltip'
@@ -225,6 +229,42 @@ export function RidePlanner({
     }
   }
 
+  // Estimated legs for the timeline preview; null until a route preview exists
+  const timelineLegs = routePreview && form.location && form.destination
+    ? buildLegs({
+      startTime: form.startTime,
+      start: form.location,
+      waypoints: form.waypoints,
+      geometry: routePreview.geometry,
+      totalDurationMin: form.durationMinutes ?? autoEstimatedDuration ?? Math.round(routePreview.durationMinutes),
+    })
+    : null
+
+  // "Back to start": only for one-way routes; an imported GPX track can't be extended
+  const [focusWaypoint, setFocusWaypoint] = useState<number | null>(null)
+  const isSameSpot = (a: RideLocation, b: RideLocation) =>
+    a.lat != null && a.lon != null && b.lat != null && b.lon != null
+      ? haversineKm(a.lat, a.lon, b.lat, b.lon) <= 0.5
+      : a.address === b.address
+  const canGoBackToStart = !!form.location && !!form.destination && !form.importedGeometry
+    && !isSameSpot(form.location, form.destination)
+
+  const handleBackToStart = () => {
+    if (!canGoBackToStart) return
+    markDirty()
+    const arrival = timelineLegs?.[timelineLegs.length - 1].endMin
+    const startTime = arrival != null ? departureAfter(arrival) : '17:00'
+    setForm(f => ({
+      ...f,
+      waypoints: [...f.waypoints, { location: f.destination!, type: 'pause', startTime }],
+      destination: f.location,
+      distanceKm: null,
+      // A manual duration described the way there; the return doubles it (auto-estimates follow the new distance)
+      durationMinutes: durationManuallySet && f.durationMinutes ? f.durationMinutes * 2 : f.durationMinutes,
+    }))
+    setFocusWaypoint(form.waypoints.length)
+  }
+
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!form.location) errs.location = t('planner.validation.locationRequired')
@@ -342,20 +382,38 @@ export function RidePlanner({
               />
             </div>
 
-            {/* Swap direction button */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
-              <button
-                type="button"
-                onClick={handleSwapDirection}
-                disabled={!canSwapDirection}
-                title={t('planner.swapDirection')}
-                aria-label={t('planner.swapDirection')}
-                className="flex items-center justify-center w-8 h-8 rounded-full border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all disabled:opacity-30 disabled:pointer-events-none"
-              >
-                <ArrowUpDown className="w-4 h-4" strokeWidth={1.5} />
-              </button>
-              <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
+            {/* Date + Time — right after the start, so the form reads in time order */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                {t('planner.label.departure')}
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="relative">
+                  <Calendar
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                    strokeWidth={1.5}
+                  />
+                  <input
+                    type="date"
+                    value={form.startDate}
+                    min={today}
+                    onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
+                    className={`${inputBase} appearance-none pl-9 pr-3 ${errors.startDate ? inputError : inputNormal}`}
+                  />
+                </div>
+                <div className="relative">
+                  <Clock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
+                    strokeWidth={1.5}
+                  />
+                  <input
+                    type="time"
+                    value={form.startTime}
+                    onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))}
+                    className={`${inputBase} appearance-none pl-9 pr-3 ${errors.startTime ? inputError : inputNormal}`}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Waypoints (between start and destination) */}
@@ -365,15 +423,38 @@ export function RidePlanner({
                 suggestions={waypointLocationSuggestions}
                 onWaypointSearch={onWaypointLocationSearch}
                 onChange={(waypoints: Waypoint[]) => setForm(f => ({ ...f, waypoints }))}
+                focusIndex={focusWaypoint}
               />
             </div>
 
             {/* Destination Picker — always visible (required) */}
             <div className="space-y-3">
-              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                {t('planner.label.destination')}
-                <InfoTooltip content={t('planner.tooltip.destination')} />
-              </label>
+              <div className="flex items-center justify-between gap-2">
+                <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                  {t('planner.label.destination')}
+                  <InfoTooltip content={t('planner.tooltip.destination')} />
+                </label>
+                {canGoBackToStart && (
+                  <button
+                    type="button"
+                    onClick={handleBackToStart}
+                    className="ml-auto flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                  >
+                    <Undo2 className="w-3 h-3" strokeWidth={2} />
+                    {t('planner.backToStart')}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSwapDirection}
+                  disabled={!canSwapDirection}
+                  title={t('planner.swapDirection')}
+                  aria-label={t('planner.swapDirection')}
+                  className="flex items-center justify-center w-7 h-7 rounded-full border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <ArrowUpDown className="w-3.5 h-3.5" strokeWidth={1.5} />
+                </button>
+              </div>
               <LocationPicker
                 value={form.destination ?? null}
                 suggestions={destinationSuggestions}
@@ -419,39 +500,15 @@ export function RidePlanner({
               </div>
             )}
 
-            {/* Date + Time */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                {t('planner.label.departure')}
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="relative">
-                  <Calendar
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
-                    strokeWidth={1.5}
-                  />
-                  <input
-                    type="date"
-                    value={form.startDate}
-                    min={today}
-                    onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
-                    className={`${inputBase} appearance-none pl-9 pr-3 ${errors.startDate ? inputError : inputNormal}`}
-                  />
-                </div>
-                <div className="relative">
-                  <Clock
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none"
-                    strokeWidth={1.5}
-                  />
-                  <input
-                    type="time"
-                    value={form.startTime}
-                    onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))}
-                    className={`${inputBase} appearance-none pl-9 pr-3 ${errors.startTime ? inputError : inputNormal}`}
-                  />
-                </div>
-              </div>
-            </div>
+            {/* Estimated ride timeline */}
+            {!isPreviewLoading && timelineLegs && (
+              <RideTimelinePreview
+                legs={timelineLegs}
+                waypoints={form.waypoints}
+                startLabel={form.location?.address ?? ''}
+                destinationLabel={form.destination?.address ?? ''}
+              />
+            )}
 
             {/* Bike Type */}
             <div className="space-y-1.5">

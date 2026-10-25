@@ -20,6 +20,9 @@ cd agent && uv run pytest tests/test_file.py  # single agent test file
 
 make test-frontend                         # Playwright E2E (all)
 cd frontend && npx playwright test e2e/auth.spec.ts  # single E2E spec
+
+make test-frontend-unit                    # Vitest unit tests (src/**/*.test.ts)
+cd frontend && npx vitest run src/lib/rideLegs.test.ts  # single unit test file
 ```
 
 ### Build

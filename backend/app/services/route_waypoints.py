@@ -30,6 +30,60 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     return R * c
 
 
+def split_route_km(
+    route_geometry: list[tuple[float, float]],
+    split_points: list[tuple[float, float]],
+    snap_tolerance_km: float = 0.5,
+) -> list[float]:
+    """Cumulative km at start, each split point (in order) and route end.
+
+    Each split snaps to the earliest geometry point after the previous split
+    that lies within `snap_tolerance_km` of the closest one, so a location
+    visited twice (out-and-back) maps to the right pass.
+    """
+    if not route_geometry:
+        return []
+
+    cum = [0.0]
+    for (lat1, lon1), (lat2, lon2) in zip(route_geometry, route_geometry[1:]):
+        cum.append(cum[-1] + haversine_distance(lat1, lon1, lat2, lon2))
+
+    result = [0.0]
+    prev_idx = 0
+    prev_point: tuple[float, float] | None = None
+    for lat, lon in split_points:
+        start = prev_idx
+        same_spot = (
+            prev_point is not None
+            and haversine_distance(*prev_point, lat, lon) <= snap_tolerance_km
+        )
+        if same_spot:
+            # Leave the previous split's vicinity so a revisit maps to a later pass
+            while start + 1 < len(route_geometry) and haversine_distance(
+                lat, lon, *route_geometry[start]
+            ) <= snap_tolerance_km:
+                start += 1
+        dists = [
+            haversine_distance(lat, lon, p_lat, p_lon)
+            for p_lat, p_lon in route_geometry[start:]
+        ]
+        best = min(dists)
+        if same_spot and best > snap_tolerance_km:
+            # Same spot as the previous split and never revisited: zero-length leg
+            result.append(cum[prev_idx])
+            prev_point = (lat, lon)
+            continue
+        i = next(i for i, d in enumerate(dists) if d <= best + snap_tolerance_km)
+        # Walk to the closest point of this pass
+        while i + 1 < len(dists) and dists[i + 1] < dists[i]:
+            i += 1
+        prev_idx = start + i
+        prev_point = (lat, lon)
+        result.append(cum[prev_idx])
+    result.append(cum[-1])
+    return result
+
+
 def calculate_bearing(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     # Convert to radians
     lat1_rad = math.radians(lat1)

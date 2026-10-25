@@ -8,8 +8,14 @@ import type { RouteSegment } from './types'
 interface UserWaypoint {
   lat: number
   lon: number
-  type: string  // "stop" | "sleep"
+  type: string  // "stop" | "pause" | "sleep"
   name?: string | null
+}
+
+const WAYPOINT_LABEL: Record<string, { icon: string; key: string }> = {
+  stop: { icon: '🚩', key: 'waypoints.waypointStop' },
+  pause: { icon: '☕', key: 'waypoints.waypointPause' },
+  sleep: { icon: '🛏️', key: 'waypoints.waypointSleep' },
 }
 
 interface RouteMapProps {
@@ -37,6 +43,7 @@ export function RouteMap({
   userWaypoints,
   className,
 }: RouteMapProps) {
+  const { t } = useTranslation()
   const bounds = useMemo(() => {
     if (!routeGeometry || routeGeometry.length === 0) {
       if (startLocation.lat && startLocation.lon) {
@@ -86,14 +93,18 @@ export function RouteMap({
         </Marker>
 
         {/* User Waypoint Markers */}
-        {userWaypoints && userWaypoints.map((wp, i) => (
-          <Marker key={`wp-${i}`} position={[wp.lat, wp.lon]}>
-            <Popup>
-              <div className="font-semibold">{wp.name || (wp.type === 'sleep' ? '🛏️ Overnight' : '🚩 Stop')}</div>
-              <div className="text-xs text-stone-500">{wp.type === 'sleep' ? 'Overnight stop' : 'Waypoint'}</div>
-            </Popup>
-          </Marker>
-        ))}
+        {userWaypoints && userWaypoints.map((wp, i) => {
+          const label = WAYPOINT_LABEL[wp.type] ?? WAYPOINT_LABEL.stop
+          const typeText = `${label.icon} ${t(label.key)}`
+          return (
+            <Marker key={`wp-${i}`} position={[wp.lat, wp.lon]}>
+              <Popup>
+                <div className="font-semibold">{wp.name || typeText}</div>
+                <div className="text-xs text-stone-500">{typeText}</div>
+              </Popup>
+            </Marker>
+          )
+        })}
 
         {/* Destination Marker */}
         {destinationLocation && (

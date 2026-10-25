@@ -4,7 +4,7 @@ export
 
 COMPOSE_DEV := docker compose -f docker-compose.yml
 
-.PHONY: help setup dev dev-stop db-up db-stop db-migrate db-reset db-shell test-backend test-agent build-frontend clean
+.PHONY: help setup dev dev-stop db-up db-stop db-migrate db-reset db-shell test-backend test-agent test-frontend-unit build-frontend clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -70,6 +70,9 @@ test-agent: ## Run agent tests with pytest
 
 test-frontend: ## Run frontend E2E tests with Playwright
 	cd frontend && npx playwright test
+
+test-frontend-unit: ## Run frontend unit tests with Vitest
+	cd frontend && npm run test:unit
 
 build-frontend: ## Build frontend for production
 	cd frontend && npm run build

@@ -4,7 +4,7 @@ export type RidingIntensity = "gemuetlich" | "moderat" | "sportlich";
 
 export type GravelStyle = "road" | "offroad";
 
-export type WaypointType = "stop" | "sleep";
+export type WaypointType = "stop" | "pause" | "sleep";
 
 export interface RideLocation {
   address?: string;
@@ -35,7 +35,7 @@ export interface RideInput {
   averageSpeedKmh?: number | null;
   /** Gravel riding style — only relevant when bikeType is "gravel" */
   gravelStyle?: GravelStyle | null;
-  /** Waypoints between start and destination (stop = pass-through, sleep = overnight) */
+  /** Waypoints between start and destination (stop = pass-through, pause = break until startTime same day, sleep = overnight) */
   waypoints: Waypoint[];
   /** Destination for route planning (required) */
   destination: RideLocation | null;

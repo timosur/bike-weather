@@ -1,5 +1,6 @@
 import { Clock, Timer, Gauge } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { formatHour } from '../../lib/timeFormat'
 
 interface RideWindowInfoProps {
   rideStartHour: number
@@ -18,8 +19,8 @@ function formatDuration(minutes: number, t: (key: string, opts?: Record<string, 
 export function RideWindowInfo({ rideStartHour, rideEndHour, estimatedDurationMinutes, averageSpeedKmh }: RideWindowInfoProps) {
   const { t } = useTranslation()
 
-  const startTime = `${rideStartHour.toString().padStart(2, '0')}:00`
-  const endTime = `${rideEndHour.toString().padStart(2, '0')}:00`
+  const startTime = formatHour(rideStartHour)
+  const endTime = formatHour(rideEndHour)
 
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-200 dark:ring-emerald-800/50">

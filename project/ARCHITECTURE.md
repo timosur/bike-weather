@@ -17,6 +17,8 @@ Bike Weather is a web application that gives cyclists personalized clothing and 
 - **i18n:** i18next — German (default) and English
 - **Auth:** Custom `AuthContext` wrapping Authentik OIDC tokens stored in localStorage, with proactive/reactive refresh token renewal
 - **Routing:** React Router v7 with lazy-loaded pages
+- **Tests:** Playwright E2E (`e2e/`), Vitest unit tests for pure logic (`src/**/*.test.ts`, `npm run test:unit`)
+- **Planner timeline:** `src/lib/rideLegs.ts` mirrors the backend leg rules (`ride_legs.py`, `split_route_km`) to estimate the ride timeline client-side; the report stays authoritative
 - **Dev server:** `http://localhost:5173`, proxied to backend
 
 ### Backend (`backend/`)
@@ -84,6 +86,40 @@ Volumes: `pgdata_dev`, `authentik_pgdata`, `authentik_redis`, `authentik_media`.
 - **Route → Service → Model:** Route handlers in `app/api/routes/` call services in `app/services/`, which operate on models in `app/models/`.
 - **Rule engine:** `app/rules/` contains deterministic rule modules for clothing, equipment, safety, repair kits, and tips — all driven by weather conditions.
 - **Translation service:** `app/services/translation.py` fetches per-field translations from the `content_translations` table. German is the base language stored on models; English translations are in the translations table.
+
+## Ride Report: Waypoints and Legs
+
+`POST /api/rides/report` (`app/services/recommendations.py::build_report`) splits a ride into **legs** at split waypoints (`app/services/ride_legs.py`).
+
+| Waypoint `type` | Splits? | Next leg date  | `startTime` (HH:MM)            |
+| --------------- | ------- | -------------- | ------------------------------ |
+| `stop`          | no      | —              | ignored                        |
+| `pause`         | yes     | same day       | required, > current leg start  |
+| `sleep`         | yes     | previous + 1   | optional, default `08:00`      |
+
+Pause validation lives in `RideInputSchema` (`app/schemas/ride.py`); violations return 422.
+
+**Time display:** all time values are `HH:MM` (24 h) in the form, API and report fields. Display follows the browser locale's hour cycle (`frontend/src/lib/timeFormat.ts`, `Intl`), not the app language. The frontend sends `hour12` (bool, default `false`) with each report request. The backend uses it only for times inside generated text: leg labels, the early-departure tip and light reasons (`format_time` in `app/rules/translations.py`).
+
+```
+route geometry ──▶ split_route_km()      km mark per split waypoint (forward snap)
+                         │
+ride input ──────▶ build_legs()          Leg(date, start_time, duration, start_km, end_km)
+                         │                duration = plannedKm  |  total × leg km / total km
+          ┌──────────────┼───────────────────────────┐
+          ▼              ▼                           ▼
+  map route weather   per-leg forecast           leg tips
+  leg_time_at(km)     sample points in           pack-leg-n (clothing leg 1 lacks)
+  → hour per point    [start_km, end_km]          early-departure-n (pause < arrival)
+                      + leg start window
+                      → chart, worst case,
+                        clothing, equipment, tips
+```
+
+- **Labels:** `Etappe n · HH:MM` / `Leg n · HH:MM` when any pause exists, else `Tag n` / `Day n`, or `Heute` / `Today` for a single leg.
+- **Weather Timeline:** each date spans 06:00–22:00 (widened to fit its rides); legs on the same date split it at the pause midpoint, so the timeline is one continuous day.
+- **Merged packing list:** for more than one leg, clothing/equipment/tips are merged and partial items get the leg label appended.
+- **Weather calls:** each sample point is fetched once for its leg's date, plus one start-location forecast per leg.
 
 ## Observability
 

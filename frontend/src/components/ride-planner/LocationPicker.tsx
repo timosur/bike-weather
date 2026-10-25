@@ -111,6 +111,8 @@ export function LocationPicker({
           <button
             type="button"
             onClick={handleClear}
+            aria-label={t('location.clearLocation')}
+            title={t('location.clearLocation')}
             className="p-1 rounded-lg text-emerald-400 dark:text-emerald-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0"
           >
             <X className="w-3.5 h-3.5" strokeWidth={2} />
