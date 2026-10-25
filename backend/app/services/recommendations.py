@@ -20,6 +20,7 @@ from app.rules.translations import (
     RIDE_NAME_TEMPLATE,
     RIDE_NAME_TEMPLATE_NO_DEST,
     RIDING_STYLE_TEMPLATE,
+    format_time,
     get_condition_reason_translation,
     get_wmo_description,
 )
@@ -290,7 +291,7 @@ def _leg_chart_windows(
 
 
 def _leg_tips(
-    legs: list[Leg], days: list[DayForecastSchema], locale: str
+    legs: list[Leg], days: list[DayForecastSchema], locale: str, hour12: bool = False
 ) -> list[TipSchema]:
     """Packing tips for later legs and warnings for pauses ending too early."""
     tips: list[TipSchema] = []
@@ -321,7 +322,7 @@ def _leg_tips(
                     severity="warning",
                     message=LEG_TIPS["early_departure"][locale].format(
                         place=(wp.name or wp.location.address) if wp else "",
-                        arrival=prev.end_dt.strftime("%H:%M"),
+                        arrival=format_time(prev.end_dt.strftime("%H:%M"), hour12),
                     ),
                 )
             )
@@ -894,6 +895,7 @@ async def build_report(
             intensity=ride_input.intensity,
             locale=locale,
             gravel_style=ride_input.gravelStyle,
+            hour12=ride_input.hour12,
         )
 
         tips = get_tips(
@@ -914,7 +916,7 @@ async def build_report(
             day_label = DAY_LABELS["today"][locale]
         elif has_pause:
             day_label = DAY_LABELS["leg"][locale].format(
-                n=day_idx + 1, time=actual_start_time
+                n=day_idx + 1, time=format_time(actual_start_time, ride_input.hour12)
             )
         else:
             day_label = DAY_LABELS["day"][locale].format(n=day_idx + 1)
@@ -960,7 +962,7 @@ async def build_report(
             per_day_equipment, day_labels_list
         )
         merged_tips = _merge_tips_across_days(per_day_tips, day_labels_list)
-        merged_tips.extend(_leg_tips(legs, day_forecasts, locale))
+        merged_tips.extend(_leg_tips(legs, day_forecasts, locale, ride_input.hour12))
 
     # Determine overall condition reasons (use worst day's reasons)
     overall_condition = _worst_condition(conditions)

@@ -106,6 +106,12 @@
     "subheading": "Gib deine Fahrtdetails ein — wir sagen dir, was du brauchst.",
     "addDestination": "Zielort hinzufügen",
     "swapDirection": "Start und Ziel tauschen",
+    "backToStart": "Zurück zum Start",
+    "timeline": {
+      "title": "Zeitplan",
+      "earlyDeparture": "Weiterfahrt liegt vor der geschätzten Ankunft",
+      "hint": "~ geschätzt aus Strecke und Fahrtdauer"
+    },
     "label": {
       "startLocation": "Startort",
       "destination": "Zielort",
@@ -259,6 +265,7 @@
   },
   "location": {
     "searchLocation": "Ort suchen",
+    "clearLocation": "Ort entfernen",
     "detectLocation": "Standort erkennen",
     "detecting": "Erkennung…",
     "currentLocation": "Aktueller Standort"
@@ -272,9 +279,11 @@
     "removeWaypoint": "Wegpunkt entfernen",
     "dayLabel": "Tag {{n}}",
     "ridingDays": "{{count}} Fahrtage · Wetter wird pro Etappe entlang der Route berechnet",
-    "overnightDivider": "Übernachtung",
     "departureNextDay": "Weiterfahrt am nächsten Tag um",
-    "departureSameDay": "Weiterfahrt um"
+    "departureSameDay": "Weiterfahrt um",
+    "until": "bis",
+    "nextDay": "nächster Tag",
+    "addName": "Name hinzufügen"
   },
   "report": {
     "share": "Teilen",

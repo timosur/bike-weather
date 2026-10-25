@@ -11,6 +11,7 @@ import { TipsList } from './TipsList'
 import { RouteMap, RouteMapLegend } from './RouteMap'
 import { StickyActionBar } from './StickyActionBar'
 import { DayTimeline } from './DayTimeline'
+import { formatTime } from '../../lib/timeFormat'
 
 function formatDuration(minutes: number, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const h = Math.floor(minutes / 60)
@@ -86,7 +87,7 @@ export function RideReport({ report, onShare, shareLoading, onSaveRoute, routeSa
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-1.5 text-sm text-stone-500 dark:text-stone-400">
             <span className="inline-flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {activeDay.rideStartTime} – {activeDay.rideEndTime}
+              {formatTime(activeDay.rideStartTime)} – {formatTime(activeDay.rideEndTime)}
             </span>
             {activeDay.estimatedDurationMinutes != null && activeDay.estimatedDurationMinutes > 0 && (
               <span className="inline-flex items-center gap-1.5">

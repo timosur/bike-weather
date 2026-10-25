@@ -2,7 +2,11 @@
 
 from app.rules.repair_kit_rules import get_repair_kit_contents
 from app.rules.safety_rules import get_safety_items
-from app.rules.translations import get_equipment_translation, temp_range_str
+from app.rules.translations import (
+    format_time,
+    get_equipment_translation,
+    temp_range_str,
+)
 from app.services.weather import WeatherForecast
 
 
@@ -25,6 +29,7 @@ def get_equipment_items(
     intensity: str = "moderat",
     locale: str = "de",
     gravel_style: str | None = None,
+    hour12: bool = False,
 ) -> list[dict]:
     """Return a list of equipment item dicts."""
     items: list[dict] = []
@@ -45,10 +50,11 @@ def get_equipment_items(
         "precip": precip,
         "uv_index": weather.uv_index,
         "air_quality_index": weather.air_quality_index,
-        "sunrise": weather.sunrise,
-        "sunset": weather.sunset,
-        "ride_start": ride_start_time or "",
-        "ride_end": ride_end_time or "",
+        # Display copies; comparisons below use the raw HH:MM values
+        "sunrise": format_time(weather.sunrise, hour12),
+        "sunset": format_time(weather.sunset, hour12),
+        "ride_start": format_time(ride_start_time or "", hour12),
+        "ride_end": format_time(ride_end_time or "", hour12),
         "dist": dist,
         "dist_suffix": dist_suffix,
     }

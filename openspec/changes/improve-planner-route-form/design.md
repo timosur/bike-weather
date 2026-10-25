@@ -34,10 +34,11 @@ The frontend has no unit test runner, only Playwright. Add **Vitest** (confirmed
 Move the existing date/time block to below the start `LocationPicker`. Move the swap button into the destination label row (right-aligned icon button, same handler and aria-label). No component split beyond the new `RideTimelinePreview`.
 
 ### D4: Compact rows in `WaypointList`
-- The row is `[icon] [LocationPicker compact, flex-1] [type toggle] [× button]`, wrapping on narrow screens (`flex-wrap`).
-- The pause/overnight departure goes inline after the toggle: prefix text ("until" / "next day") + time input. Its width is `w-[7.5rem]` (fits "05:00 PM" plus the icon), and the native picker icon is kept.
-- The colored panels and the "Overnight stay" divider are removed. Row tint stays (amber/indigo left border).
-- Name: local `showName` state per row, initialised from `!!wp.name`. Clearing the name doesn't hide the input until the row remounts.
+- Two lines, because the form card is ~430 px wide even on desktop: `[icon] [LocationPicker compact, flex-1] [×]`, then `[type toggle] [inline departure] [+ Add name | name input]` (`flex-wrap`).
+- The pause/overnight departure is inline after the toggle: prefix text ("until" / "next day") + time input. Its width is `w-[7.5rem]` (fits "05:00 PM" plus the icon), and the native picker icon is kept.
+- The colored panels and the "Overnight stay" divider are removed. A colored left border shows the type (emerald/amber/indigo).
+- Name: no extra state. "Add name" sets `name: ''`, and the input shows whenever `name !== undefined`, so clearing the text keeps it open and loaded names show it. `autoFocus` only when `name === ''`.
+- The waypoint search placeholder uses "city or address" instead of "Waypoint name", to avoid two fields with the same label.
 
 ### D5: `RideTimelinePreview`
 Props: `legs` from `buildLegs`, `waypoints`, start label and destination label. It renders an ordered list:
@@ -55,7 +56,7 @@ The handler lives in `RidePlanner`, next to the swap handler:
 3. `setForm`: append `{ location: destination, type: 'pause', startTime }`, set `destination = location`, mark dirty.
 4. Focus: `WaypointList` takes an optional `focusIndex` prop and focuses that row's time input after render.
 
-It's shown only when both are set and differ by more than 0.5 km (haversine). The existing preview effect refetches the route because the destination and waypoints changed.
+It also resets `distanceKm` and doubles a manually set `durationMinutes`, since that described the way there; an auto-estimated duration follows the new preview distance. It's shown only when both are set, differ by more than 0.5 km (haversine), and no GPX track is imported. The existing preview effect refetches the route because the destination and waypoints changed.
 
 ## Risks / Trade-offs
 

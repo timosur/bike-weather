@@ -1,6 +1,7 @@
 import { apiFetch } from "./client";
 import type { RideReport } from "../components/ride-report/types";
 import type { RideInput } from "../components/ride-planner/types";
+import { uses12h } from "../lib/timeFormat";
 
 export interface RoutePreview {
   distanceKm: number;
@@ -37,6 +38,8 @@ export async function fetchReport(
     method: "POST",
     body: JSON.stringify({
       ...rideFields,
+      // Display-only: times inside generated report text follow the browser hour cycle
+      hour12: uses12h(),
       ...(captchaToken ? { captcha_token: captchaToken } : {}),
     }),
   });

@@ -2,6 +2,7 @@ import { MapPin, Clock, Timer, Gauge } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { DayForecast, ConditionRating } from './types'
 import { WeatherIcon } from './WeatherIcon'
+import { formatHour, formatTime } from '../../lib/timeFormat'
 
 const conditionDot: Record<ConditionRating, string> = {
   ideal: 'bg-emerald-500',
@@ -34,8 +35,8 @@ export function DayTimeline({ days }: DayTimelineProps) {
   return (
     <div className="space-y-3">
       {days.map((day) => {
-        const startTime = day.rideStartTime || (day.rideStartHour != null ? `${day.rideStartHour.toString().padStart(2, '0')}:00` : null)
-        const endTime = day.rideEndTime || (day.rideEndHour != null ? `${day.rideEndHour.toString().padStart(2, '0')}:00` : null)
+        const startTime = day.rideStartTime ? formatTime(day.rideStartTime) : (day.rideStartHour != null ? formatHour(day.rideStartHour) : null)
+        const endTime = day.rideEndTime ? formatTime(day.rideEndTime) : (day.rideEndHour != null ? formatHour(day.rideEndHour) : null)
 
         return (
           <div

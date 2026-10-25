@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WeatherData, HourlyWeather } from './types'
+import { formatTime } from '../../lib/timeFormat'
 import { WeatherIcon } from './WeatherIcon'
 import { WeatherChart } from './WeatherChart'
 
@@ -139,7 +140,7 @@ export function WeatherPanel({ weather, hourlyForecast, rideStartHour, rideEndHo
         <WeatherStat
           icon={<SunDim className="w-4 h-4" />}
           label={`${t('report.weather.sunrise')} / ${t('report.weather.sunset')}`}
-          value={`${weather.sunrise} / ${weather.sunset}`}
+          value={`${formatTime(weather.sunrise)} / ${formatTime(weather.sunset)}`}
         />
       </div>
     </div>

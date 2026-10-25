@@ -17,6 +17,8 @@ Bike Weather is a web application that gives cyclists personalized clothing and 
 - **i18n:** i18next — German (default) and English
 - **Auth:** Custom `AuthContext` wrapping Authentik OIDC tokens stored in localStorage, with proactive/reactive refresh token renewal
 - **Routing:** React Router v7 with lazy-loaded pages
+- **Tests:** Playwright E2E (`e2e/`), Vitest unit tests for pure logic (`src/**/*.test.ts`, `npm run test:unit`)
+- **Planner timeline:** `src/lib/rideLegs.ts` mirrors the backend leg rules (`ride_legs.py`, `split_route_km`) to estimate the ride timeline client-side; the report stays authoritative
 - **Dev server:** `http://localhost:5173`, proxied to backend
 
 ### Backend (`backend/`)
@@ -96,6 +98,8 @@ Volumes: `pgdata_dev`, `authentik_pgdata`, `authentik_redis`, `authentik_media`.
 | `sleep`         | yes     | previous + 1   | optional, default `08:00`      |
 
 Pause validation lives in `RideInputSchema` (`app/schemas/ride.py`); violations return 422.
+
+**Time display:** all time values are `HH:MM` (24 h) in the form, API and report fields. Display follows the browser locale's hour cycle (`frontend/src/lib/timeFormat.ts`, `Intl`), not the app language. The frontend sends `hour12` (bool, default `false`) with each report request. The backend uses it only for times inside generated text: leg labels, the early-departure tip and light reasons (`format_time` in `app/rules/translations.py`).
 
 ```
 route geometry ──▶ split_route_km()      km mark per split waypoint (forward snap)

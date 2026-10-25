@@ -43,6 +43,8 @@ class RideInputSchema(BaseModel):
     destination: RideLocationSchema | None = None
     importedGeometry: list[list[float]] | None = None
     captcha_token: str | None = None
+    # Display-only: client's hour cycle for times inside generated text
+    hour12: bool = False
 
     # Legacy fields accepted for backward compatibility
     isMultiDay: bool | None = None

@@ -21,11 +21,11 @@ Waypoint departure time inputs SHALL show the full time in both 24-hour and 12-h
 - **THEN** the input shows "05:00 PM" without truncation
 
 ### Requirement: Compact waypoint rows
-Each waypoint SHALL be one row with its location, a Stop / Pause / Overnight toggle and a remove button labelled "Remove waypoint" for assistive technology. Pause and overnight rows SHALL show their departure time inline in the same row ("until" for pause, "next day" for overnight); on narrow screens the time MAY wrap to a second line.
+Each waypoint SHALL be a compact block of two lines: the location with an icon-only remove button (labelled "Remove waypoint" for assistive technology), then a Stop / Pause / Overnight toggle. Pause and overnight SHALL show their departure time inline on the toggle line ("until" for pause, "next day" for overnight); on narrow screens that line MAY wrap.
 
 #### Scenario: Pause row
 - **WHEN** a waypoint is set to Pause
-- **THEN** its row shows a departure time input labelled "Departure at", defaulting to 17:00, with no separate panel below the row
+- **THEN** the toggle line shows a departure time input labelled "Departure at", defaulting to 17:00, with no separate panel below
 
 #### Scenario: Remove
 - **WHEN** the user activates a waypoint's remove button
@@ -78,6 +78,10 @@ When start and destination are set and differ, the planner SHALL offer "Back to 
 #### Scenario: Already a round trip
 - **WHEN** destination equals start
 - **THEN** "Back to start" is not offered
+
+#### Scenario: Imported GPX track
+- **WHEN** the route comes from an imported GPX file
+- **THEN** "Back to start" is not offered, because the fixed track can't be extended
 
 #### Scenario: Arrival unknown
 - **WHEN** no route preview is available yet

@@ -106,6 +106,12 @@
     "subheading": "Enter your ride details — we'll tell you what you need.",
     "addDestination": "Add destination",
     "swapDirection": "Swap start and destination",
+    "backToStart": "Back to start",
+    "timeline": {
+      "title": "Ride timeline",
+      "earlyDeparture": "Departure is before the estimated arrival",
+      "hint": "~ estimated from route distance and ride duration"
+    },
     "label": {
       "startLocation": "Start location",
       "destination": "Destination",
@@ -259,6 +265,7 @@
   },
   "location": {
     "searchLocation": "Search location",
+    "clearLocation": "Clear location",
     "detectLocation": "Detect location",
     "detecting": "Detecting…",
     "currentLocation": "Current location"
@@ -272,9 +279,11 @@
     "removeWaypoint": "Remove waypoint",
     "dayLabel": "Day {{n}}",
     "ridingDays": "{{count}} riding days · Weather calculated along the route for each stage",
-    "overnightDivider": "Overnight stay",
     "departureNextDay": "Departure next day at",
-    "departureSameDay": "Departure at"
+    "departureSameDay": "Departure at",
+    "until": "until",
+    "nextDay": "next day",
+    "addName": "Add name"
   },
   "report": {
     "share": "Share",

@@ -4,7 +4,7 @@ import { mockGeocodingAPIs, mockRoutesAPIs } from "./helpers/api-mocks";
 import { fillBasicRide, submitPlannerForm } from "./helpers/planner";
 import { mockMultiDayRideReport } from "./fixtures/api-responses";
 
-type Payload = { waypoints: { type: string; startTime?: string }[] };
+type Payload = { waypoints: { type: string; startTime?: string }[]; hour12?: boolean };
 
 /** Mock the report API with two same-day legs and capture the request body. */
 async function mockLegReport(page: Page) {
@@ -51,6 +51,8 @@ test.describe("Pause waypoint", () => {
     expect(captured[0].waypoints).toEqual([
       expect.objectContaining({ type: "pause", startTime: "17:00" }),
     ]);
+    // Chromium runs en-US → generated report text should use 12-hour times
+    expect(captured[0].hour12).toBe(true);
 
     // Report shows both legs as tabs
     await expect(page.getByText("Leg 1 · 09:00").first()).toBeVisible();

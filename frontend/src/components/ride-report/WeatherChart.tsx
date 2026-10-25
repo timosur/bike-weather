@@ -4,6 +4,7 @@ import { Sunrise, Sunset } from 'lucide-react'
 import type { HourlyWeather } from './types'
 import { WeatherIcon } from './WeatherIcon'
 import type { WeatherIconType } from './types'
+import { formatHour, formatTime } from '../../lib/timeFormat'
 
 interface WeatherChartProps {
   hourlyForecast: HourlyWeather[]
@@ -380,7 +381,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
               <div className="flex flex-col items-center">
                 <Sunrise className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 <span className="text-[7px] font-medium text-amber-500 dark:text-amber-400 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                  {sunrise}
+                  {formatTime(sunrise)}
                 </span>
               </div>
             </foreignObject>
@@ -397,7 +398,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
               <div className="flex flex-col items-center">
                 <Sunset className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 <span className="text-[7px] font-medium text-amber-500 dark:text-amber-400 whitespace-nowrap" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
-                  {sunset}
+                  {formatTime(sunset)}
                 </span>
               </div>
             </foreignObject>
@@ -552,7 +553,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
               className="fill-stone-400 dark:fill-stone-500"
               style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
             >
-              {h >= 24 ? `${h - 24}:00` : `${h}:00`}
+              {formatHour(h)}
             </text>
           ))}
 
@@ -596,7 +597,7 @@ export function WeatherChart({ hourlyForecast, rideStartHour, rideEndHour, sunri
           {hoverIdx != null && (() => {
             const hx = data.xScale(data.hours[hoverIdx])
             const hour = data.hours[hoverIdx]
-            const displayHour = hour >= 24 ? `${hour - 24}:00` : `${hour}:00`
+            const displayHour = formatHour(hour)
             const temp = data.temps[hoverIdx]
             const feels = data.feelsLike[hoverIdx]
             const prec = data.precip[hoverIdx]

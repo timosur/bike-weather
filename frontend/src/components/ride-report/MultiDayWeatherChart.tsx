@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sunrise, Sunset } from 'lucide-react'
 import type { DayForecast, HourlyWeather } from './types'
+import { formatHour } from '../../lib/timeFormat'
 
 interface MultiDayWeatherChartProps {
   days: DayForecast[]
@@ -580,7 +581,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
                 className="fill-stone-400 dark:fill-stone-500"
                 style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace' }}
               >
-                {fh.hour}:00
+                {formatHour(fh.hour)}
               </text>
             )
           })}
@@ -609,7 +610,7 @@ export function MultiDayWeatherChart({ days, onChartRef }: MultiDayWeatherChartP
           {hoverIdx != null && (() => {
             const hx = xScale(hoverIdx)
             const fh = flatHours[hoverIdx]
-            const displayHour = `${fh.hour}:00`
+            const displayHour = formatHour(fh.hour)
             const dayLabel = days[fh.dayIdx]?.dayLabel ?? ''
             const temp = fh.data.temp
             const feels = fh.data.tempFeelsLike

@@ -443,3 +443,40 @@ async def test_overnight_days_keep_full_day_window() -> None:
 
     for day in report.days:
         assert _hours(day)[0] == 6 and _hours(day)[-1] == 22
+
+
+# --- 12-hour display (hour12) ---------------------------------------------
+
+
+async def test_hour12_formats_generated_text_but_not_fields() -> None:
+    ws, _ = _weather_by(MILD)
+    report = await build_report(_ride([PAUSE_AT_B], hour12=True), ws=ws, locale="en")
+
+    assert [d.dayLabel for d in report.days] == ["Leg 1 · 9:00 AM", "Leg 2 · 5:00 PM"]
+    assert report.days[1].rideStartTime == "17:00"
+    assert report.days[1].hourlyForecast[0].hour.endswith(":00")
+    assert len(report.days[1].hourlyForecast[0].hour) == 5  # HH:MM
+
+
+async def test_hour12_early_departure_tip() -> None:
+    ws, _ = _weather_by(MILD)
+    early = {**PAUSE_AT_B, "startTime": "09:30"}
+    report = await build_report(_ride([early], hour12=True), ws=ws, locale="en")
+
+    (tip,) = _tips(report, "early-departure-")
+    assert "10:00 AM" in tip.message
+
+
+async def test_hour12_lights_reason() -> None:
+    # Leg 2 rides 17:00–18:00, sunset at 18:00 → lights reason mentions both times
+    ws, _ = _weather_by(MILD)
+    report = await build_report(_ride([PAUSE_AT_B], hour12=True), ws=ws, locale="en")
+
+    lights = [e for e in report.days[1].equipment if e.id.startswith("eq-lights")]
+    assert lights and "6:00 PM" in lights[0].reason
+
+
+async def test_hour12_defaults_to_24h() -> None:
+    ws, _ = _weather_by(MILD)
+    report = await build_report(_ride([PAUSE_AT_B]), ws=ws, locale="en")
+    assert report.days[1].dayLabel == "Leg 2 · 17:00"

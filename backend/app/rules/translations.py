@@ -1056,6 +1056,17 @@ DAY_LABELS: dict[str, dict[str, str]] = {
     "leg": {"de": "Etappe {n} · {time}", "en": "Leg {n} · {time}"},
 }
 
+def format_time(hhmm: str, hour12: bool) -> str:
+    """Format an HH:MM time for display; 12-hour clients get e.g. '5:05 PM'."""
+    if not hour12:
+        return hhmm
+    try:
+        h, m = (int(p) for p in hhmm.split(":"))
+    except ValueError:
+        return hhmm
+    return f"{(h % 12) or 12}:{m:02d} {'AM' if h % 24 < 12 else 'PM'}"
+
+
 LEG_TIPS: dict[str, dict[str, str]] = {
     "pack_cooler": {
         "de": "Pack noch {items} ein – auf {leg} wird es kühler (gefühlt {temp} °C).",
