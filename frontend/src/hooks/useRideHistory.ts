@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { RideInput } from "../components/ride-planner/types";
+import type { RideInput, RideLocation } from "../components/ride-planner/types";
 import type { RideReport } from "../components/ride-report/types";
 
 const STORAGE_KEY = "bike-weather:ride-history";
@@ -26,6 +26,21 @@ function trimReport(report: RideReport): RideReport {
       hourlyForecast: undefined,
     })),
   };
+}
+
+function locKey(loc: RideLocation | null): string {
+  if (!loc) return "";
+  return loc.lat != null && loc.lon != null ? `${loc.lat},${loc.lon}` : (loc.address ?? "");
+}
+
+/** Same route (start, destination, waypoints) + bike type = same ride */
+function rideKey(input: RideInput): string {
+  return JSON.stringify([
+    locKey(input.location),
+    locKey(input.destination),
+    (input.waypoints ?? []).map((w) => [locKey(w.location), w.type]),
+    input.bikeType,
+  ]);
 }
 
 function loadHistory(): RideHistoryEntry[] {
@@ -65,8 +80,9 @@ export function useRideHistory() {
         rideInput,
         report: trimReport(report),
       };
-      // Prepend new entry, cap at MAX_ENTRIES
-      const next = [entry, ...prev].slice(0, MAX_ENTRIES);
+      // Replace an identical older ride, prepend new entry, cap at MAX_ENTRIES
+      const key = rideKey(rideInput);
+      const next = [entry, ...prev.filter((e) => rideKey(e.rideInput) !== key)].slice(0, MAX_ENTRIES);
       saveHistory(next);
       return next;
     });

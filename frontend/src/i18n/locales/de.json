@@ -188,7 +188,9 @@
     "formSource": {
       "restored": "Aus deiner letzten Sitzung wiederhergestellt.",
       "route": "Aus einer gespeicherten Route vorausgefüllt.",
-      "history": "Aus dem Fahrtverlauf geladen."
+      "history": "Aus dem Fahrtverlauf geladen.",
+      "useOriginalDate": "Ursprüngliches Datum",
+      "useNow": "Jetzt verwenden"
     },
     "recentRides": {
       "title": "Letzte Fahrten",

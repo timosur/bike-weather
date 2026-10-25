@@ -100,6 +100,8 @@ export interface RidePlannerProps {
   isLoading?: boolean;
   /** Source of the initial form values — shown as an info banner */
   formSource?: "restored" | "route" | "history" | null;
+  /** Original date/time of a history entry whose past date/time was replaced with now — enables the date toggle */
+  historyOriginalDateTime?: { startDate: string; startTime: string } | null;
   /** Called when the user wants to reset the form to defaults */
   onReset?: () => void;
   /** Called when the user types in the location field */

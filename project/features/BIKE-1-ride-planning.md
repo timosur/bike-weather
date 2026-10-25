@@ -49,6 +49,7 @@ Sub-features and areas covered:
 - Bike type selection affects clothing variants (e.g., aero vs. relaxed fit)
 - Equipment, safety, and tip sections render based on weather conditions
 - Report displays weather forecast data (temperature, wind, precipitation, UV)
+- Recent rides (localStorage, max 10, deduplicated by route + bike type) load into the planner form instead of submitting; a past date/time defaults to now, with a toggle back to the original — see `openspec/specs/ride-history/spec.md`
 
 ---
 
