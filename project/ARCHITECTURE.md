@@ -113,6 +113,7 @@ ride input ──────▶ build_legs()          Leg(date, start_time, dur
 ```
 
 - **Labels:** `Etappe n · HH:MM` / `Leg n · HH:MM` when any pause exists, else `Tag n` / `Day n`, or `Heute` / `Today` for a single leg.
+- **Weather Timeline:** each date spans 06:00–22:00 (widened to fit its rides); legs on the same date split it at the pause midpoint, so the timeline is one continuous day.
 - **Merged packing list:** for more than one leg, clothing/equipment/tips are merged and partial items get the leg label appended.
 - **Weather calls:** each sample point is fetched once for its leg's date, plus one start-location forecast per leg.
 

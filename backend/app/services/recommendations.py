@@ -254,6 +254,41 @@ def _tips_to_schemas(tips: list[dict]) -> list[TipSchema]:
     return [TipSchema(**t) for t in tips]
 
 
+def _leg_ride_hours(leg: Leg, clamp: bool) -> tuple[int, int]:
+    """(start_hour, end_hour) of a leg's ride window; unclamped end may exceed 23."""
+    try:
+        start_h = int(leg.start_time.split(":")[0])
+    except (ValueError, IndexError):
+        start_h = 8
+    end_h = start_h + math.ceil(leg.duration_min / 60)
+    return start_h, min(end_h, 23) if clamp else end_h
+
+
+def _leg_chart_windows(
+    legs: list[Leg], ride_windows: list[tuple[int, int]]
+) -> list[tuple[int, int]]:
+    """Chart hours per leg for multi-leg rides.
+
+    Each date shows 06:00–22:00 (widened to fit its rides). Legs sharing a date
+    split that window in the middle of the pause, so the timeline reads as one
+    continuous day instead of repeating it per leg.
+    """
+    windows: list[tuple[int, int]] = []
+    for i, (start_h, end_h) in enumerate(ride_windows):
+        same_as_prev = i > 0 and legs[i - 1].date == legs[i].date
+        same_as_next = i + 1 < len(legs) and legs[i + 1].date == legs[i].date
+        chart_start = (
+            windows[-1][1] + 1 if same_as_prev else min(6, start_h)
+        )
+        chart_end = (
+            max((end_h + ride_windows[i + 1][0]) // 2, chart_start)
+            if same_as_next
+            else max(22, end_h)
+        )
+        windows.append((chart_start, min(chart_end, 23)))
+    return windows
+
+
 def _leg_tips(
     legs: list[Leg], days: list[DayForecastSchema], locale: str
 ) -> list[TipSchema]:
@@ -686,18 +721,13 @@ async def build_report(
                 )
                 return None
 
+    ride_windows = [_leg_ride_hours(leg, clamp=is_multi_day) for leg in legs]
+    chart_windows = _leg_chart_windows(legs, ride_windows)
+
     for leg in legs:
         day_idx = leg.index
         date_str = leg.date
-        try:
-            ride_start_h = int(leg.start_time.split(":")[0])
-        except (ValueError, IndexError):
-            ride_start_h = 8
-        if is_multi_day:
-            ride_end_h = min(ride_start_h + math.ceil(leg.duration_min / 60), 23)
-        else:
-            # Single-day ride (allow >23 for overnight rides crossing midnight)
-            ride_end_h = ride_start_h + math.ceil(leg.duration_min / 60)
+        ride_start_h, ride_end_h = ride_windows[day_idx]
 
         # Fetch full day (0-23) at leg start (always needed for sunrise/sunset/UV)
         full_day_window = await ws.fetch_hourly_forecast(
@@ -747,9 +777,7 @@ async def build_report(
 
         # Compute chart display window
         if is_multi_day:
-            # Multi-day: fixed 6:00–22:00 window for consistent chart width per day
-            chart_start = 6
-            chart_end = 22
+            chart_start, chart_end = chart_windows[day_idx]
         else:
             # Single-day: ride window ± 3 hours buffer (allow >23 for overnight)
             chart_start = max(0, ride_start_h - 3)

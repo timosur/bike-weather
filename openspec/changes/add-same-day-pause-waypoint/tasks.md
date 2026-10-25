@@ -28,6 +28,10 @@
 - [x] 5.1 Manual check in `make dev`: plan A → B (pause 17:00) → A for tomorrow. Confirm two leg tabs on the same date, the evening chart following the return route, return-half map colours reflecting evening weather, and the packing tip if the evening is cooler. Also confirm an existing overnight saved route still loads and reports. _(Partly done: not run in `make dev` (Postgres/Authentik stack). Instead, a backend smoke test against the real Open-Meteo API for Konstanz → Friedrichshafen (pause 18:00) → Konstanz on 2026-10-26 gave 2 same-date legs ("Etappe 1 · 09:00", "Etappe 2 · 18:00") and a return-half map point fetched for the evening; no packing tip, because both legs needed the same clothing. UI parts are covered by `e2e/pause-waypoint.spec.ts`; legacy overnight input by `test_schema_backward_compat_day_stops_to_waypoints`. A real saved overnight route was not loaded.)_
 - [x] 5.2 Update `project/ARCHITECTURE.md` (waypoint types, leg model, per-leg route weather). Re-read the file to verify. _(Feature tracking now lives in OpenSpec only; no `project/features/` entry.)_
 
+## 6. Review fixes
+
+- [x] 6.1 Weather Timeline showed 06–22 for each same-day leg (the date repeated). Write failing tests (same-day legs form one continuous 06–22 timeline; overnight days keep 06–22) and split the window per date at the pause midpoint (`_leg_chart_windows`). Verify tests pass. _(Real-forecast smoke: leg 1 06–14, leg 2 15–22.)_
+
 ## Workflow follow-up
 
 - Run `/opsx:archive` after review to merge `ride-waypoints` and `ride-legs` into `openspec/specs/`.

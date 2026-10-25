@@ -56,6 +56,7 @@ In `app/rules/translations.py` add `DAY_LABELS["leg"] = {"de": "Etappe {n} · {t
 - A leg with no sample points (very short leg) still has its start-location point.
 - Equipment rules and tips get the leg's start time, distance and duration (previously the ride's start time and total values for every day).
 - The past-midnight extension (`chart_end > 23`) keeps using the leg's last point.
+- Chart window (`_leg_chart_windows`): the old multi-day rule gave every leg a fixed 06–22 window, so `MultiDayWeatherChart` repeated the same date for same-day legs. Each date now spans `min(6, first ride start)`–`max(22, last ride end)`. Legs sharing a date split it at the pause midpoint (`(prev ride end + next ride start) // 2`). Pause hours before the split show the end of leg 1's route (at B); hours after it show the start of leg 2 (also B).
 
 ### D7: Map arrival times from legs
 Replace `start_dt + distance / speed` with `leg_time_at(km)`: find the leg containing `km`, then `datetime(leg.date, leg.start_time) + (km - leg.start_km) / avg_speed`. The fetch uses that date and hour. `segmentDurationMinutes` is unchanged.

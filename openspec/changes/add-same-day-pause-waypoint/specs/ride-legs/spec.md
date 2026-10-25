@@ -46,6 +46,17 @@ When route geometry exists, a leg's hourly chart SHALL show, for each hour, the 
 - **WHEN** a ride has no route geometry
 - **THEN** each leg uses the weather at its start location
 
+### Requirement: Continuous timeline per date
+For rides with more than one leg, each date's chart SHALL cover 06:00–22:00 (widened to include its ride windows). Legs on the same date SHALL split that range in the middle of the pause, with no repeated or missing hours between them.
+
+#### Scenario: Same-day return trip timeline
+- **WHEN** leg 1 rides 09:00–10:00 and leg 2 rides 17:00–18:00 on the same date
+- **THEN** leg 1's chart starts at 06:00, leg 2's chart ends at 22:00, and leg 2's first hour directly follows leg 1's last hour
+
+#### Scenario: Overnight days
+- **WHEN** legs are separated by a `sleep` waypoint
+- **THEN** each leg's chart covers 06:00–22:00
+
 ### Requirement: Map arrival times include breaks
 Route weather shown on the map SHALL use the estimated time the rider passes each point. That time includes pause and overnight departures (date and time). It is not computed only from the ride start.
 

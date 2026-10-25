@@ -418,3 +418,28 @@ async def test_no_early_departure_warning_when_after_arrival() -> None:
     ws, _ = _weather_by(MILD)
     report = await build_report(_ride([PAUSE_AT_B]), ws=ws, locale="en")
     assert _tips(report, "early-departure-") == []
+
+
+def _hours(day) -> list[int]:
+    return [int(h.hour.split(":")[0]) for h in day.hourlyForecast]
+
+
+async def test_same_day_legs_split_one_continuous_timeline() -> None:
+    # Leg 1 rides 09–10, leg 2 rides 17–18 → one 06–22 day split mid-pause
+    ws, _ = _weather_by(MILD)
+    report = await build_report(_ride([PAUSE_AT_B]), ws=ws, locale="en")
+
+    leg1, leg2 = (_hours(d) for d in report.days)
+    assert leg1[0] == 6 and leg2[-1] == 22
+    assert leg2[0] == leg1[-1] + 1, "no gap or duplicate hours between legs"
+    assert 9 <= leg1[-1] < 17
+    assert leg1 == list(range(leg1[0], leg1[-1] + 1))
+
+
+async def test_overnight_days_keep_full_day_window() -> None:
+    ws, _ = _weather_by(MILD)
+    sleep_at_b = {"location": B, "type": "sleep", "startTime": "09:00"}
+    report = await build_report(_ride([sleep_at_b]), ws=ws, locale="en")
+
+    for day in report.days:
+        assert _hours(day)[0] == 6 and _hours(day)[-1] == 22
