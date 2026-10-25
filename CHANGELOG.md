@@ -1,5 +1,25 @@
 # Changelog
 
+## frontend v0.1.7 — 2026-10-25
+
+- feat: improve planner route form and use browser time format
+- feat: add same-day pause waypoint with per-leg ride reports
+- feat(BIKE-1): load recent rides into planner form
+
+## backend v0.1.6 — 2026-10-25
+
+- feat: improve planner route form and use browser time format
+- fix: split same-day legs into one continuous weather timeline
+- feat: add same-day pause waypoint with per-leg ride reports
+
+## agent v0.1.3 — 2026-10-25
+
+- fix: copy python packages independent of python version in Docker builds
+- chore(deps): update dependency pytest to v9.0.3 [security]
+- chore(deps): update docker images
+- chore(deps): update docker images
+- chore(deps): update dependency pydantic-settings to v2.14.2 [security]
+
 ## frontend v0.1.6 — 2026-10-23
 
 - fix: frontend after upgrades
