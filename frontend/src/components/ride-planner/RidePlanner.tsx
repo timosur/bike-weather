@@ -34,16 +34,13 @@ import { OnboardingHero } from './OnboardingHero'
 import { InfoTooltip } from '../common/InfoTooltip'
 import { fetchRoutePreview, type RoutePreview } from '../../api/rides'
 import { RouteMap } from '../ride-report/RouteMap'
+import { nowDateTime } from '../../lib/rideDateTime'
 
 const bikeIconMap: Record<string, React.ReactNode> = {
   gauge: <Gauge className="w-4 h-4" strokeWidth={1.5} />,
   mountain: <Mountain className="w-4 h-4" strokeWidth={1.5} />,
   trees: <Trees className="w-4 h-4" strokeWidth={1.5} />,
   'building-2': <Building2 className="w-4 h-4" strokeWidth={1.5} />,
-}
-
-function formatTimeHHMM(date: Date): string {
-  return date.toTimeString().slice(0, 5)
 }
 
 export function RidePlanner({
@@ -54,6 +51,7 @@ export function RidePlanner({
   intensityOptions,
   isLoading = false,
   formSource = null,
+  historyOriginalDateTime = null,
   onReset,
   onLocationSearch,
   onUseCurrentLocation,
@@ -67,13 +65,14 @@ export function RidePlanner({
   onDirtyChange,
   children,
 }: RidePlannerProps) {
-  const today = new Date().toISOString().split('T')[0]
+  const now = nowDateTime()
+  const today = now.startDate
   const { t } = useTranslation()
 
   const [form, setForm] = useState<RideInput>({
     location: initialValues?.location ?? null,
     startDate: initialValues?.startDate ?? today,
-    startTime: initialValues?.startTime ?? formatTimeHHMM(new Date()),
+    startTime: initialValues?.startTime ?? now.startTime,
     bikeType: initialValues?.bikeType ?? 'gravel',
     intensity: initialValues?.intensity ?? 'moderat',
     distanceKm: initialValues?.distanceKm ?? null,
@@ -284,6 +283,20 @@ export function RidePlanner({
             <span className="flex-1 text-xs text-sky-700 dark:text-sky-400">
               {t(`planner.formSource.${formSource}`)}
             </span>
+            {historyOriginalDateTime && (() => {
+              const showsOriginal = form.startDate === historyOriginalDateTime.startDate
+                && form.startTime === historyOriginalDateTime.startTime
+              return (
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, ...(showsOriginal ? nowDateTime() : historyOriginalDateTime) }))}
+                  className="text-xs font-medium text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 transition-colors whitespace-nowrap flex items-center gap-1"
+                >
+                  <Calendar className="w-3 h-3" strokeWidth={2} />
+                  {t(showsOriginal ? 'planner.formSource.useNow' : 'planner.formSource.useOriginalDate')}
+                </button>
+              )
+            })()}
             {onReset && (
               <button
                 type="button"
@@ -453,6 +466,7 @@ export function RidePlanner({
                     <button
                       key={option.value}
                       type="button"
+                      aria-pressed={active}
                       onClick={() => {
                         markDirty()
                         const newBikeType = option.value as BikeType

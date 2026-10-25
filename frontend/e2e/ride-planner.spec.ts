@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { setLanguageEN, loginAsUser } from "./helpers/auth";
 import {
   mockGeocodingAPIs,
@@ -202,14 +202,6 @@ test.describe("Ride Planner", () => {
     await expect(distanceInput).toHaveValue("35");
   });
 
-  test("recent rides are shown if available", async ({ page }) => {
-    await page.goto("/planner");
-
-    // Look for recent rides section (may or may not be present depending on localStorage)
-    const recentSection = page.getByText(/recent|letzte/i);
-    // Just assert the page loaded without errors
-    await expect(page.getByRole("button", { name: /get weather/i })).toBeVisible();
-  });
 
   test("multi-day ride report works end to end", async ({ page }) => {
     await mockMultiDayRideReportAPI(page);
@@ -228,5 +220,140 @@ test.describe("Ride Planner", () => {
 
     // Should show multi-day report with day tabs
     await expect(page.getByText(/day 1|tag 1/i).first()).toBeVisible({ timeout: 10000 });
+  });
+});
+
+const HISTORY_KEY = "bike-weather:ride-history";
+
+function localDate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function historyEntry(id: string, startDate: string, startTime: string, address = "Berlin Mitte") {
+  return {
+    id,
+    timestamp: Date.now(),
+    rideInput: {
+      location: { address, lat: 52.521, lon: 13.411 },
+      destination: { address: "Potsdam", lat: 52.39, lon: 13.06 },
+      startDate,
+      startTime,
+      bikeType: "gravel",
+      intensity: "moderat",
+      waypoints: [],
+    },
+    report: {
+      startLocation: address,
+      totalDistance: 42,
+      distanceUnit: "km",
+      overallCondition: "good",
+      days: [],
+    },
+  };
+}
+
+/** Seed history once per test (init scripts re-run on every navigation). */
+async function seedHistory(page: Page, entries: object[]) {
+  await page.addInitScript(
+    ([key, value]) => {
+      if (sessionStorage.getItem("history-seeded")) return;
+      sessionStorage.setItem("history-seeded", "1");
+      localStorage.setItem(key, value);
+    },
+    [HISTORY_KEY, JSON.stringify(entries)] as const,
+  );
+}
+
+test.describe("Recent rides", () => {
+  test.beforeEach(async ({ page }) => {
+    await setLanguageEN(page);
+    await loginAsUser(page);
+    await mockGeocodingAPIs(page);
+    await mockRideReportAPI(page);
+    await mockRoutesAPIs(page);
+  });
+
+  test("selecting a past ride loads the form with now, without submitting", async ({ page }) => {
+    await seedHistory(page, [historyEntry("past", "2020-01-01", "08:00")]);
+    let reportRequests = 0;
+    page.on("request", (r) => {
+      if (r.url().includes("/api/rides/report")) reportRequests++;
+    });
+
+    await page.goto("/planner");
+    await page.getByRole("button", { name: /Berlin Mitte/ }).click();
+
+    await expect(page).toHaveURL(/\/planner$/);
+    await expect(page.getByText(/loaded from recent ride history/i)).toBeVisible();
+    await expect(page.locator('input[type="date"]')).toHaveValue(localDate(new Date()));
+    await expect(page.locator('input[type="time"]')).not.toHaveValue("08:00");
+    expect(reportRequests).toBe(0);
+  });
+
+  test("date toggle switches between original and now, keeping other edits", async ({ page }) => {
+    await seedHistory(page, [historyEntry("past", "2020-01-01", "08:00")]);
+    await page.goto("/planner");
+    await page.getByRole("button", { name: /Berlin Mitte/ }).click();
+
+    await page.getByRole("button", { name: /^Road bike/ }).click();
+    await page.getByRole("button", { name: /use original date/i }).click();
+    await expect(page.locator('input[type="date"]')).toHaveValue("2020-01-01");
+    await expect(page.locator('input[type="time"]')).toHaveValue("08:00");
+
+    await page.getByRole("button", { name: /use now/i }).click();
+    await expect(page.locator('input[type="date"]')).toHaveValue(localDate(new Date()));
+    await expect(page.getByRole("button", { name: /^Road bike/ })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("selecting a future ride keeps its date and shows no toggle", async ({ page }) => {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await seedHistory(page, [historyEntry("future", localDate(tomorrow), "09:30")]);
+    await page.goto("/planner");
+    await page.getByRole("button", { name: /Berlin Mitte/ }).click();
+
+    await expect(page.locator('input[type="date"]')).toHaveValue(localDate(tomorrow));
+    await expect(page.locator('input[type="time"]')).toHaveValue("09:30");
+    await expect(page.getByRole("button", { name: /use original date|use now/i })).toHaveCount(0);
+  });
+
+  test("shows 3 rides, more on demand, without condition badge", async ({ page }) => {
+    await seedHistory(
+      page,
+      ["A", "B", "C", "D", "E"].map((n) => historyEntry(n, "2020-01-01", "08:00", `Start ${n}`)),
+    );
+    await page.goto("/planner");
+
+    const cards = page.getByRole("button", { name: /Start [A-E]/ });
+    await expect(cards).toHaveCount(3);
+    await expect(cards.first()).toContainText("Potsdam");
+    await expect(cards.first()).not.toContainText(/good|ideal|caution/i);
+
+    await page.getByRole("button", { name: /show 2 more/i }).click();
+    await expect(cards).toHaveCount(5);
+  });
+
+  test("submitting the same ride again does not duplicate history", async ({ page }) => {
+    const historyLength = () =>
+      page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "[]").length, HISTORY_KEY);
+    const latestTimestamp = () =>
+      page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "[]")[0]?.timestamp ?? 0, HISTORY_KEY);
+
+    await page.goto("/planner");
+    await fillBasicRide(page);
+    await submitPlannerForm(page);
+    await expect.poll(historyLength).toBe(1);
+    const first = await latestTimestamp();
+
+    await page.goto("/planner");
+    await fillBasicRide(page);
+    await submitPlannerForm(page);
+    await expect.poll(latestTimestamp).toBeGreaterThan(first);
+    expect(await historyLength()).toBe(1);
+
+    await page.goto("/planner");
+    await fillBasicRide(page);
+    await page.getByRole("button", { name: /^Road bike/ }).click();
+    await submitPlannerForm(page);
+    await expect.poll(historyLength).toBe(2);
   });
 });

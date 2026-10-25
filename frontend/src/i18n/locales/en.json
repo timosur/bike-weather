@@ -188,7 +188,9 @@
     "formSource": {
       "restored": "Restored from your last session.",
       "route": "Pre-filled from a saved route.",
-      "history": "Loaded from recent ride history."
+      "history": "Loaded from recent ride history.",
+      "useOriginalDate": "Use original date",
+      "useNow": "Use now"
     },
     "recentRides": {
       "title": "Recent Rides",

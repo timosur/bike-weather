@@ -1,21 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Calendar, Bike, Trash2, ChevronDown, History } from 'lucide-react'
+import { MapPin, Calendar, Bike, Trash2, ChevronDown, History, ArrowRight } from 'lucide-react'
 import type { RideHistoryEntry } from '../../hooks/useRideHistory'
-import type { ConditionRating } from '../ride-report/types'
 
 interface RecentRidesProps {
   history: RideHistoryEntry[]
   onSelect: (entry: RideHistoryEntry) => void
   onRemove: (id: string) => void
   onClear: () => void
-}
-
-const conditionColors: Record<ConditionRating, string> = {
-  ideal: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
-  good: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400',
-  caution: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
-  'not-recommended': 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
 }
 
 function RideCard({
@@ -31,10 +23,19 @@ function RideCard({
   formatDate: (ts: number) => string
   t: (key: string) => string
 }) {
-  const condition = entry.report.overallCondition
+  const destination = entry.rideInput.destination?.address
+  const distance = entry.report.totalDistance || entry.rideInput.distanceKm
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelect(entry)}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault()
+          onSelect(entry)
+        }
+      }}
       className="group bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs p-3 cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
@@ -44,6 +45,12 @@ function RideCard({
             <span className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
               {entry.report.startLocation || entry.rideInput.location?.address || '—'}
             </span>
+            {destination && (
+              <>
+                <ArrowRight className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 shrink-0" strokeWidth={1.5} />
+                <span className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{destination}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
             <span className="flex items-center gap-1">
@@ -52,17 +59,14 @@ function RideCard({
             </span>
             <span className="flex items-center gap-1">
               <Bike className="w-3 h-3" strokeWidth={1.5} />
-              {entry.rideInput.bikeType}
+              {t(`planner.bikeType.${entry.rideInput.bikeType}`)}
             </span>
-            {entry.report.totalDistance > 0 && (
-              <span>{entry.report.totalDistance} {entry.report.distanceUnit}</span>
+            {!!distance && (
+              <span>{distance} {entry.report.distanceUnit || 'km'}</span>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${conditionColors[condition]}`}>
-            {t(`report.condition.${condition === 'not-recommended' ? 'notRecommended' : condition}`)}
-          </span>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onRemove(entry.id) }}
@@ -92,8 +96,9 @@ export function RecentRides({ history, onSelect, onRemove, onClear }: RecentRide
     })
   }
 
-  const hasMore = history.length > 1
-  const visibleEntries = showAll ? history : history.slice(0, 1)
+  const VISIBLE_COUNT = 3
+  const hasMore = history.length > VISIBLE_COUNT
+  const visibleEntries = showAll ? history : history.slice(0, VISIBLE_COUNT)
 
   return (
     <div className="w-full space-y-3">
@@ -117,7 +122,7 @@ export function RecentRides({ history, onSelect, onRemove, onClear }: RecentRide
         </button>
       </div>
 
-      {/* Always show the latest ride */}
+      {/* Always show the latest rides */}
       <div className="space-y-2">
         {visibleEntries.map(entry => (
           <RideCard
@@ -140,7 +145,7 @@ export function RecentRides({ history, onSelect, onRemove, onClear }: RecentRide
         >
           {showAll
             ? t('planner.recentRides.showLess')
-            : t('planner.recentRides.showMore', { count: history.length - 1 })}
+            : t('planner.recentRides.showMore', { count: history.length - VISIBLE_COUNT })}
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${showAll ? 'rotate-180' : ''}`}
             strokeWidth={2}

@@ -11,6 +11,7 @@ import { usePlannerFormPersistence } from '../hooks/usePlannerFormPersistence'
 import { SEO } from '../hooks/useSEO'
 import { JsonLd } from '../components/seo'
 import { fetchRoute } from '../api/routes'
+import { nowDateTime, isPastDateTime } from '../lib/rideDateTime'
 
 import { TurnstileWidget, useTurnstile } from '../components/common/TurnstileWidget'
 import type { BikeTypeOption, RidingIntensityOption, RideInput } from '../components/ride-planner/types'
@@ -52,6 +53,12 @@ export default function PlannerPage() {
   // GPX import modal state
   const [gpxModalOpen, setGpxModalOpen] = useState(false)
   const [gpxImportInput, setGpxImportInput] = useState<Partial<RideInput> | null>(null)
+
+  // Recent ride loaded into the form; original date/time kept only if it was replaced with now
+  const [historyPrefill, setHistoryPrefill] = useState<{
+    input: RideInput
+    originalDateTime: { startDate: string; startTime: string } | null
+  } | null>(null)
 
   // Throttle-triggered CAPTCHA: show after THROTTLE_THRESHOLD submits in THROTTLE_WINDOW_MS
   const THROTTLE_THRESHOLD = 3
@@ -221,9 +228,20 @@ export default function PlannerPage() {
       })
   }, [urlRouteId, incomingEditInput, doSubmit, navigate])
 
-  // Recent rides: select an entry → navigate to report
+  // Recent rides: select an entry → pre-fill the form (past date/time becomes now)
   const handleHistorySelect = (entry: RideHistoryEntry) => {
-    doSubmit(entry.rideInput)
+    const { startDate, startTime } = entry.rideInput
+    const isPast = isPastDateTime(startDate, startTime)
+    setEditRouteId(null)
+    setEditOriginalInput(null)
+    setGpxImportInput(null)
+    setHistoryPrefill({
+      input: isPast ? { ...entry.rideInput, ...nowDateTime() } : entry.rideInput,
+      originalDateTime: isPast ? { startDate, startTime } : null,
+    })
+    navigate('/planner', { replace: true })
+    setResetKey(k => k + 1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Determine initial values for the planner
@@ -255,6 +273,7 @@ export default function PlannerPage() {
     setEditRouteId(null)
     setEditOriginalInput(null)
     setGpxImportInput(null)
+    setHistoryPrefill(null)
     // Navigate to clean planner URL (removes routeId from path)
     navigate('/planner', { replace: true, state: { reset: true } })
     // Increment reset key to force RidePlanner remount with fresh defaults
@@ -263,10 +282,6 @@ export default function PlannerPage() {
 
   // GPX import: pre-fill the form with imported route data
   const handleGpxImport = (data: GpxImportData) => {
-    const today = new Date().toISOString().slice(0, 10)
-    const now = new Date()
-    const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-
     const importedInput: Partial<RideInput> = {
       location: data.startLocation.address
         ? { address: data.startLocation.address, lat: data.startLocation.lat, lon: data.startLocation.lon }
@@ -276,13 +291,13 @@ export default function PlannerPage() {
         : { address: `${data.endLocation.lat.toFixed(4)}, ${data.endLocation.lon.toFixed(4)}`, lat: data.endLocation.lat, lon: data.endLocation.lon },
       distanceKm: Math.round(data.distanceKm * 10) / 10,
       importedGeometry: data.geometry,
-      startDate: today,
-      startTime,
+      ...nowDateTime(),
     }
 
     // Clear edit mode, set imported values, remount form
     setEditRouteId(null)
     setEditOriginalInput(null)
+    setHistoryPrefill(null)
     setGpxImportInput(importedInput)
     navigate('/planner', { replace: true })
     setResetKey(k => k + 1)
@@ -323,15 +338,16 @@ export default function PlannerPage() {
       {/* Planner form with recent rides inside */}
       <RidePlanner
         key={`form-${resetKey}-${editRouteId ?? ''}`}
-        initialValues={gpxImportInput ?? (resetKey > 0 ? undefined : getInitialValues())}
+        initialValues={gpxImportInput ?? historyPrefill?.input ?? (resetKey > 0 ? undefined : getInitialValues())}
         detectedLocation={detectedLocation}
         locationSuggestions={suggestions}
         waypointLocationSuggestions={waypointSuggestions}
         bikeTypeOptions={bikeTypeOptions}
         intensityOptions={intensityOptions}
         isLoading={isLocating || isSubmitting}
-        formSource={resetKey > 0 ? null : getFormSource()}
-        onReset={getFormSource() && resetKey === 0 ? handleReset : undefined}
+        formSource={historyPrefill ? 'history' : resetKey > 0 ? null : getFormSource()}
+        historyOriginalDateTime={historyPrefill?.originalDateTime}
+        onReset={historyPrefill || (getFormSource() && resetKey === 0) ? handleReset : undefined}
         onLocationSearch={searchLocation}
         onUseCurrentLocation={useCurrentLocation}
         onLocationSelect={() => { }}
